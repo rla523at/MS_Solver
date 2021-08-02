@@ -10,7 +10,7 @@ GTEST_TEST(ReferenceGeometry, nodes_1) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
-	const std::vector<EuclideanVector<space_dimension>> ref = { { -1,0 }, { 1,0 } };
+	const std::vector<Euclidean_Vector<space_dimension>> ref = { { -1,0 }, { 1,0 } };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, nodes_2) {
@@ -21,7 +21,7 @@ GTEST_TEST(ReferenceGeometry, nodes_2) {
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
-	const std::vector<EuclideanVector<space_dimension>> ref = { { -1, -1 }, { 1, -1 }, { -1, 1 } };
+	const std::vector<Euclidean_Vector<space_dimension>> ref = { { -1, -1 }, { 1, -1 }, { -1, 1 } };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, nodes_3) {
@@ -32,7 +32,7 @@ GTEST_TEST(ReferenceGeometry, nodes_3) {
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
-	const std::vector<EuclideanVector<space_dimension>> ref = { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
+	const std::vector<Euclidean_Vector<space_dimension>> ref = { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 	EXPECT_EQ(ref, result);
 }
 
@@ -216,15 +216,15 @@ GTEST_TEST(ReferenceGeometry, mapping_function_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	EuclideanVector p1 = { 1,2 };
-	EuclideanVector p2 = { 4,2 };
-	std::vector<EuclideanVector<space_dimension>> pv = { p1,p2 };
+	Euclidean_Vector p1 = { 1,2 };
+	Euclidean_Vector p2 = { 4,2 };
+	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2 };
 
-	const auto result = ref_geometry.mapping_function(pv);
+	const auto result = ref_geometry.mapping_vector_function(pv);
 	//std::cout << "\n" << result << "\n";
 
-	EuclideanVector rp1 = { -1,0 };
-	EuclideanVector rp2 = { 1,0 };
+	Euclidean_Vector rp1 = { -1,0 };
+	Euclidean_Vector rp2 = { 1,0 };
 
 	EXPECT_EQ(p1, result(rp1));
 	EXPECT_EQ(p2, result(rp2));
@@ -236,17 +236,17 @@ GTEST_TEST(ReferenceGeometry, mapping_function_2) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	EuclideanVector p1 = { 1,2 };
-	EuclideanVector p2 = { 4,2 };
-	EuclideanVector p3 = { 2,3 };
-	std::vector<EuclideanVector<space_dimension>> pv = { p1,p2,p3 };
+	Euclidean_Vector p1 = { 1,2 };
+	Euclidean_Vector p2 = { 4,2 };
+	Euclidean_Vector p3 = { 2,3 };
+	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3 };
 
-	const auto result = ref_geometry.mapping_function(pv);
+	const auto result = ref_geometry.mapping_vector_function(pv);
 	//std::cout << "\n" << result << "\n";
 
-	EuclideanVector rp1 = { -1,-1 };
-	EuclideanVector rp2 = { 1,-1 };
-	EuclideanVector rp3 = { -1,1 };
+	Euclidean_Vector rp1 = { -1,-1 };
+	Euclidean_Vector rp2 = { 1,-1 };
+	Euclidean_Vector rp3 = { -1,1 };
 
 	EXPECT_EQ(p1, result(rp1));
 	EXPECT_EQ(p2, result(rp2));
@@ -259,18 +259,18 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	EuclideanVector p1 = { 1,2 };
-	EuclideanVector p2 = { 3,1 };
-	EuclideanVector p3 = { 4,1 };
-	EuclideanVector p4 = { 1,3 };
-	std::vector<EuclideanVector<space_dimension>> pv = { p1,p2,p3,p4 };
+	Euclidean_Vector p1 = { 1,2 };
+	Euclidean_Vector p2 = { 3,1 };
+	Euclidean_Vector p3 = { 4,1 };
+	Euclidean_Vector p4 = { 1,3 };
+	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3,p4 };
 
-	const auto result = ref_geometry.mapping_function(pv);
+	const auto result = ref_geometry.mapping_vector_function(pv);
 
-	EuclideanVector rp1 = { -1,-1 };
-	EuclideanVector rp2 = { 1,-1 };
-	EuclideanVector rp3 = { 1,1 };
-	EuclideanVector rp4 = { -1,1 };
+	Euclidean_Vector rp1 = { -1,-1 };
+	Euclidean_Vector rp2 = { 1,-1 };
+	Euclidean_Vector rp3 = { 1,1 };
+	Euclidean_Vector rp4 = { -1,1 };
 
 	EXPECT_EQ(p1, result(rp1));
 	EXPECT_EQ(p2, result(rp2));
@@ -285,11 +285,11 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 1,2 };
-//	const EuclideanVector n3 = { 2,2 };
-//	const EuclideanVector n4 = { 2,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 1,2 };
+//	const Euclidean_Vector n3 = { 2,2 };
+//	const Euclidean_Vector n4 = { 2,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //	const auto result = geometry.volume();
@@ -304,11 +304,11 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 2,1 };
-//	const EuclideanVector n3 = { 4,2 };
-//	const EuclideanVector n4 = { 1,2 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 2,1 };
+//	const Euclidean_Vector n3 = { 4,2 };
+//	const Euclidean_Vector n4 = { 1,2 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 //
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
@@ -324,11 +324,11 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 2,1 };
-//	const EuclideanVector n3 = { 4,2 };
-//	const EuclideanVector n4 = { -100,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 2,1 };
+//	const Euclidean_Vector n3 = { 4,2 };
+//	const Euclidean_Vector n4 = { -100,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //	const auto result = geometry.volume();
@@ -343,10 +343,10 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 2,1 };
-//	const EuclideanVector n3 = { 4,2 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 2,1 };
+//	const Euclidean_Vector n3 = { 4,2 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
 //
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
@@ -362,11 +362,11 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1.524,1 };
-//	const EuclideanVector n2 = { 2,1.154 };
-//	const EuclideanVector n3 = { 4.47411,2 };
+//	const Euclidean_Vector n1 = { 1.524,1 };
+//	const Euclidean_Vector n2 = { 2,1.154 };
+//	const Euclidean_Vector n3 = { 4.47411,2 };
 //
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
 //
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
@@ -385,17 +385,17 @@ GTEST_TEST(Geometry, faces_nodes_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1.524,1 };
-	const EuclideanVector n2 = { 2,1.154 };
-	const EuclideanVector n3 = { 4.47411,2 };
+	const Euclidean_Vector n1 = { 1.524,1 };
+	const Euclidean_Vector n2 = { 2,1.154 };
+	const Euclidean_Vector n3 = { 4.47411,2 };
 
-	std::vector<EuclideanVector<space_dimension>> nodes = { n1,n2,n3 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes = { n1,n2,n3 };
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.calculate_faces_nodes();
 
-	const std::vector<std::vector<EuclideanVector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n1} };
+	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n1} };
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(Geometry, faces_nodes_2) {
@@ -406,18 +406,18 @@ GTEST_TEST(Geometry, faces_nodes_2) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 
-	EuclideanVector n1 = { 1,1 };
-	EuclideanVector n2 = { 2,1 };
-	EuclideanVector n3 = { 4,2 };
-	EuclideanVector n4 = { 1,2 };
+	Euclidean_Vector n1 = { 1,1 };
+	Euclidean_Vector n2 = { 2,1 };
+	Euclidean_Vector n3 = { 4,2 };
+	Euclidean_Vector n4 = { 1,2 };
 
-	std::vector<EuclideanVector<space_dimension>> nodes = { n1,n2,n3,n4 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes = { n1,n2,n3,n4 };
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.calculate_faces_nodes();
 
-	const std::vector<std::vector<EuclideanVector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n4}, {n4,n1} };
+	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n4}, {n4,n1} };
 	EXPECT_EQ(result, ref);
 }
 
@@ -428,10 +428,10 @@ GTEST_TEST(Geometry, coordinate_projected_volume_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1.524,1 };
-	const EuclideanVector n2 = { 2,1.154 };
-	const EuclideanVector n3 = { 4.47411,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3 };
+	const Euclidean_Vector n1 = { 1.524,1 };
+	const Euclidean_Vector n2 = { 2,1.154 };
+	const Euclidean_Vector n3 = { 4.47411,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
@@ -448,11 +448,11 @@ GTEST_TEST(Geometry, coordinate_projected_volume_2) {
 	const order fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1,1 };
-	const EuclideanVector n2 = { 2,1 };
-	const EuclideanVector n3 = { 4,2 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
@@ -469,17 +469,17 @@ GTEST_TEST(Geometry, center_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1,1 };
-	const EuclideanVector n2 = { 2,1 };
-	const EuclideanVector n3 = { 4,2 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.center_node();
 
-	const EuclideanVector ref = { 2,1.5 };
+	const Euclidean_Vector ref = { 2,1.5 };
 	EXPECT_EQ(result, ref);
 }
 
@@ -490,14 +490,14 @@ GTEST_TEST(Geometry, center_1) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 3,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 3,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
 //
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //
-//	const EuclideanVector cell_center = { 2,0 };
+//	const Euclidean_Vector cell_center = { 2,0 };
 //
 //	const auto normal = geometry.normal_vector(cell_center);
 //
@@ -522,14 +522,14 @@ GTEST_TEST(Geometry, center_1) {
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 3,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 3,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
 //
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //
-//	EuclideanVector cell_center = { 2,2 };
+//	Euclidean_Vector cell_center = { 2,2 };
 //
 //	const auto normal = geometry.normal_vector(cell_center);
 //
@@ -556,14 +556,14 @@ GTEST_TEST(Geometry, is_axis_parallel_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 0,0 };
-	const EuclideanVector n2 = { 0,1 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2 };
+	const Euclidean_Vector n1 = { 0,0 };
+	const Euclidean_Vector n2 = { 0,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	const EuclideanVector n3 = { 1,1 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes2 = { n3,n4 };
+	const Euclidean_Vector n3 = { 1,1 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes2 = { n3,n4 };
 	Geometry geometry2(ref_geometry, std::move(nodes2));
 
 	constexpr size_t axis_tag = 0;
@@ -578,11 +578,11 @@ GTEST_TEST(Element, vertex_node_indexes_1) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1,1 };
-	const EuclideanVector n2 = { 2,1 };
-	const EuclideanVector n3 = { 4,2 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
 	ElementType element_type = ElementType::cell;
@@ -603,11 +603,11 @@ GTEST_TEST(Element, face_node_indexes_set) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1,1 };
-	const EuclideanVector n2 = { 2,1 };
-	const EuclideanVector n3 = { 4,2 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
@@ -629,11 +629,11 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 	const order fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	const EuclideanVector n1 = { 1,1 };
-	const EuclideanVector n2 = { 2,1 };
-	const EuclideanVector n3 = { 4,2 };
-	const EuclideanVector n4 = { 1,2 };
-	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
@@ -652,16 +652,16 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 //	const order_t fig_order = 1;
 //	const ReferenceGeometryspace_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,0 };
-//	const EuclideanVector n2 = { 3,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2 };
+//	const Euclidean_Vector n1 = { 1,0 };
+//	const Euclidean_Vector n2 = { 3,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
 //	
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //
-//	const EuclideanVector n3 = { 8,0 };
-//	const EuclideanVector n4 = { 10,1 };
-//	std::vector<EuclideanVector<2>> nodes2 = { n3,n4 };
+//	const Euclidean_Vector n3 = { 8,0 };
+//	const Euclidean_Vector n4 = { 10,1 };
+//	std::vector<Euclidean_Vector<2>> nodes2 = { n3,n4 };
 //	
 //
 //	Geometry geometry2(ref_geometry, std::move(nodes2));
@@ -674,16 +674,16 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 //	const order_t fig_order = 1;
 //	const ReferenceGeometryspace_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,0 };
-//	const EuclideanVector n2 = { 3,1 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2 };
+//	const Euclidean_Vector n1 = { 1,0 };
+//	const Euclidean_Vector n2 = { 3,1 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
 //	
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
 //
-//	const EuclideanVector n3 = { 1,5 };
-//	const EuclideanVector n4 = { 3,6 };
-//	std::vector<EuclideanVector<2>> nodes2 = { n3,n4 };
+//	const Euclidean_Vector n3 = { 1,5 };
+//	const Euclidean_Vector n4 = { 3,6 };
+//	std::vector<Euclidean_Vector<2>> nodes2 = { n3,n4 };
 //	
 //
 //	Geometry geometry2(ref_geometry, std::move(nodes2));
@@ -697,10 +697,10 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 //	const order_t fig_order = 1;
 //	const ReferenceGeometryspace_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 2,1 };
-//	const EuclideanVector n3 = { 4,2 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 2,1 };
+//	const Euclidean_Vector n3 = { 4,2 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
 //	
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));
@@ -708,21 +708,21 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 //
 //	const Figure f_fig = Figure::line;
 //
-//	const EuclideanVector f1_n1 = { 1,1 };
-//	const EuclideanVector f1_n2 = { 2,1 };
-//	std::vector<EuclideanVector<2>> f1_nodes = { f1_n1,f1_n2 };
+//	const Euclidean_Vector f1_n1 = { 1,1 };
+//	const Euclidean_Vector f1_n2 = { 2,1 };
+//	std::vector<Euclidean_Vector<2>> f1_nodes = { f1_n1,f1_n2 };
 //	std::vector<size_t> f1_indexes = { 1,2 };
 //	Geometry f1_geometry(f_fig, fig_order, std::move(f1_nodes), std::move(f1_indexes));
 //
-//	const EuclideanVector f2_n1 = { 2,1 };
-//	const EuclideanVector f2_n2 = { 4,2 };
-//	std::vector<EuclideanVector<2>> f2_nodes = { f2_n1,f2_n2 };
+//	const Euclidean_Vector f2_n1 = { 2,1 };
+//	const Euclidean_Vector f2_n2 = { 4,2 };
+//	std::vector<Euclidean_Vector<2>> f2_nodes = { f2_n1,f2_n2 };
 //	std::vector<size_t> f2_indexes = { 1,2 };
 //	Geometry f2_geometry(f_fig, fig_order, std::move(f2_nodes), std::move(f2_indexes));
 //
-//	const EuclideanVector f3_n1 = { 4,2 };
-//	const EuclideanVector f3_n2 = { 1,1 };
-//	std::vector<EuclideanVector<2>> f3_nodes = { f3_n1,f3_n2 };
+//	const Euclidean_Vector f3_n1 = { 4,2 };
+//	const Euclidean_Vector f3_n2 = { 1,1 };
+//	std::vector<Euclidean_Vector<2>> f3_nodes = { f3_n1,f3_n2 };
 //	std::vector<size_t> f3_indexes = { 1,2 };
 //	Geometry f3_geometry(f_fig, fig_order, std::move(f3_nodes), std::move(f3_indexes));
 //
@@ -736,11 +736,11 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 //	const order_t fig_order = 1;
 //	const ReferenceGeometryspace_dimension> ref_geometry(fig, fig_order);
 //
-//	const EuclideanVector n1 = { 1,1 };
-//	const EuclideanVector n2 = { 2,1 };
-//	const EuclideanVector n3 = { 4,2 };
-//	const EuclideanVector n4 = { 1,2 };
-//	std::vector<EuclideanVector<2>> nodes = { n1,n2,n3,n4 };
+//	const Euclidean_Vector n1 = { 1,1 };
+//	const Euclidean_Vector n2 = { 2,1 };
+//	const Euclidean_Vector n3 = { 4,2 };
+//	const Euclidean_Vector n4 = { 1,2 };
+//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
 //	
 //
 //	Geometry geometry(ref_geometry, std::move(nodes));

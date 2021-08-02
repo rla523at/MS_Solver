@@ -18,7 +18,7 @@
 //
 //			const auto result = cell_centers[i * 10 + j];
 //
-//			EuclideanVector<2> ref_ceter = { x_coord, y_coord };
+//			Euclidean_Vector<2> ref_ceter = { x_coord, y_coord };
 //			for (size_t i = 0; i < 2; ++i)
 //				EXPECT_DOUBLE_EQ(result[i], ref_ceter[i]);
 //		}

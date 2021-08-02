@@ -1,11 +1,13 @@
 #pragma once
 #include <array>
 #include <iomanip>
+#include <initializer_list>
 #include <string>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
+
 
 #define static_require static_assert
 #define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
@@ -17,50 +19,73 @@ namespace ms {
 
 // CLASS TEMPLATE euclidean_vector
 template <size_t dim>
-class EuclideanVector
+class Euclidean_Vector
 {
-public:
-	EuclideanVector(void) = default;
-	EuclideanVector(const std::array<double, dim>& other) : small_buffer_(other) {};
-	template <typename... Args>
-	EuclideanVector(Args... args);
+private:
+	std::array<double, dim> vals_ = { 0 };
 
-	EuclideanVector& operator+=(const EuclideanVector& y);
-	EuclideanVector& operator-=(const EuclideanVector& y);
-	EuclideanVector& operator*=(const double scalar);
-	EuclideanVector operator+(const EuclideanVector& y) const;	
-	EuclideanVector operator-(const EuclideanVector& y) const;
-	EuclideanVector operator*(const double scalar) const;
-	//bool operator<(const EuclideanVector& y) const;
-	bool operator==(const EuclideanVector& y) const;
+public:
+	Euclidean_Vector(void) = default;
+	Euclidean_Vector(const std::array<double, dim>& other) : vals_(other) {};
+	template <typename... Args>
+	Euclidean_Vector(Args... args);
+
+	Euclidean_Vector& operator+=(const Euclidean_Vector& y);
+	Euclidean_Vector& operator-=(const Euclidean_Vector& y);
+	Euclidean_Vector& operator*=(const double scalar);
+	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
+	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
+	Euclidean_Vector operator*(const double scalar) const;
+	//bool operator<(const Euclidean_Vector& y) const;
+	bool operator==(const Euclidean_Vector& y) const;
+	bool operator==(const Euclidean_Vector<0>& y) const;
 	double operator[](const size_t position) const;
 
 	double at(const size_t position) const;
-	EuclideanVector& be_normalize(void);
+	Euclidean_Vector& be_normalize(void);
 	static constexpr size_t dimension(void);
 	const double* data(void) const;
-	double inner_product(const EuclideanVector& y) const;
+	double inner_product(const Euclidean_Vector& y) const;
 	double L1_norm(void) const;
 	double norm(void) const;
-	bool is_axis_translation(const EuclideanVector& other, const size_t axis_tag) const;
+	bool is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const;
 	std::string to_string(void) const;
-
-private:
-	std::array<double, dim> small_buffer_ = { 0 };
 };
 
 
 //user-defined deduction guides
 template <typename... Args>
-EuclideanVector(Args... args)->EuclideanVector<sizeof...(Args)>;
-EuclideanVector(const std::vector<double>& vec)->EuclideanVector<0>;
-
+Euclidean_Vector(Args... args)->Euclidean_Vector<sizeof...(Args)>;
 
 template <size_t dim> 
-std::ostream& operator<<(std::ostream& os, const EuclideanVector<dim>& x);
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector<dim>& x);
 
 template <size_t dim>
-EuclideanVector<dim> operator*(const double constant, const EuclideanVector<dim>& x);
+Euclidean_Vector<dim> operator*(const double constant, const Euclidean_Vector<dim>& x);
+
+
+using Dynamic_Euclidean_Vector_ = Euclidean_Vector<0>;
+
+template <>
+class Euclidean_Vector<0>
+{
+private:
+	template <size_t dim>
+	friend class Euclidean_Vector;
+
+private:
+	std::vector<double> vals_;
+
+public:
+	Euclidean_Vector(const size_t dimension) : vals_(dimension) {};
+	Euclidean_Vector(const std::initializer_list<double> list) : vals_(list) {};
+
+	double& operator[](const size_t position);
+
+	double at(const size_t position) const;
+	size_t dimension(void) const;
+	std::string to_string(void) const;
+};
 
 
 namespace ms {
@@ -83,121 +108,133 @@ namespace ms {
 // Template Definition Part
 template <size_t dim>
 template <typename... Args>
-EuclideanVector<dim>::EuclideanVector(Args... args) : small_buffer_{ static_cast<double>(args)... } {
+Euclidean_Vector<dim>::Euclidean_Vector(Args... args) : vals_{ static_cast<double>(args)... } {
 	static_require(sizeof...(Args) <= dim, "Number of arguments can not exceed dimension");
 	static_require(ms::are_arithmetics<Args...>, "every arguments should be arithmetics");
 };
 
 
 template <size_t dim>
-EuclideanVector<dim>& EuclideanVector<dim>::operator+=(const EuclideanVector& y) {
+Euclidean_Vector<dim>& Euclidean_Vector<dim>::operator+=(const Euclidean_Vector& y) {
 	for (size_t i = 0; i < dim; ++i)
-		this->small_buffer_[i] += y.small_buffer_[i];
+		this->vals_[i] += y.vals_[i];
 	return *this;
 }
 
 template <size_t dim>
-EuclideanVector<dim>& EuclideanVector<dim>::operator-=(const EuclideanVector& y) {
+Euclidean_Vector<dim>& Euclidean_Vector<dim>::operator-=(const Euclidean_Vector& y) {
 	for (size_t i = 0; i < dim; ++i)
-		this->small_buffer_[i] -= y.small_buffer_[i];
+		this->vals_[i] -= y.vals_[i];
 	return *this;
 }
 
 template <size_t dim>
-EuclideanVector<dim>& EuclideanVector<dim>::operator*=(const double scalar) {
+Euclidean_Vector<dim>& Euclidean_Vector<dim>::operator*=(const double scalar) {
 	for (size_t i = 0; i < dim; ++i)
-		this->small_buffer_[i] *= scalar;
+		this->vals_[i] *= scalar;
 	return *this;
 }
 
 template <size_t dim> 
-EuclideanVector<dim> EuclideanVector<dim>::operator+(const EuclideanVector& y) const {
+Euclidean_Vector<dim> Euclidean_Vector<dim>::operator+(const Euclidean_Vector& y) const {
 	auto result = *this;
 	return result += y;
 }
 
-template <size_t dim> EuclideanVector<dim> EuclideanVector<dim>::operator-(const EuclideanVector& y) const {
+template <size_t dim> Euclidean_Vector<dim> Euclidean_Vector<dim>::operator-(const Euclidean_Vector& y) const {
 	auto result = *this;
 	return result -= y;
 }
 
-template <size_t dim> EuclideanVector<dim> EuclideanVector<dim>::operator*(const double scalar) const {
+template <size_t dim> Euclidean_Vector<dim> Euclidean_Vector<dim>::operator*(const double scalar) const {
 	auto result = *this;
 	return result *= scalar;
 }
 
 //template <size_t dim>
-//bool EuclideanVector<dim>::operator<(const EuclideanVector& y) const {
+//bool Euclidean_Vector<dim>::operator<(const Euclidean_Vector& y) const {
 //	for (size_t i = 0; i < dim; ++i) {
-//		if (this->small_buffer_[i] == y.small_buffer_[i])
+//		if (this->vals_[i] == y.vals_[i])
 //			continue;
-//		return this->small_buffer_[i] < y.small_buffer_[i];
+//		return this->vals_[i] < y.vals_[i];
 //	}
 //	return false;
 //}
 
 template <size_t dim> 
-bool EuclideanVector<dim>::operator==(const EuclideanVector& y) const {
+bool Euclidean_Vector<dim>::operator==(const Euclidean_Vector& y) const {
 	for (size_t i = 0; i < dim; ++i) {
-		if (this->small_buffer_[i] != y.small_buffer_[i])
+		if (this->vals_[i] != y.vals_[i])
+			return false;
+	}
+	return true;
+}
+
+template <size_t dim>
+bool Euclidean_Vector<dim>::operator==(const Euclidean_Vector<0>& y) const {
+	if (dim != y.dimension())
+		return false;
+	
+	for (size_t i = 0; i < dim; ++i) {
+		if (this->vals_[i] != y.vals_[i])
 			return false;
 	}
 	return true;
 }
 
 template <size_t dim> 
-double EuclideanVector<dim>::operator[](const size_t position) const {
+double Euclidean_Vector<dim>::operator[](const size_t position) const {
 	dynamic_require(position <= dim, "Position should be less than dimension");
-	return this->small_buffer_[position];
+	return this->vals_[position];
 }
 
 template <size_t dim>
-double EuclideanVector<dim>::at(const size_t position) const {
+double Euclidean_Vector<dim>::at(const size_t position) const {
 	dynamic_require(position <= dim, "Position should be less than dimension");
-	return this->small_buffer_[position];
+	return this->vals_[position];
 }
 
 template <size_t dim>
-EuclideanVector<dim>& EuclideanVector<dim>::be_normalize(void) {
+Euclidean_Vector<dim>& Euclidean_Vector<dim>::be_normalize(void) {
 	const auto scale_factor = 1.0 / this->norm();
 	return (*this) *= scale_factor;
 }
 
 template <size_t dim>
-constexpr size_t EuclideanVector<dim>::dimension(void) {
+constexpr size_t Euclidean_Vector<dim>::dimension(void) {
 	return dim;
 }
 
 
 template <size_t dim>
-const double* EuclideanVector<dim>::data(void) const {
+const double* Euclidean_Vector<dim>::data(void) const {
 	if constexpr (dim != 0)
-		return this->small_buffer_.data();
+		return this->vals_.data();
 }
 
 template <size_t dim>
-double EuclideanVector<dim>::inner_product(const EuclideanVector& y) const {
+double Euclidean_Vector<dim>::inner_product(const Euclidean_Vector& y) const {
 	double result = 0;
 	for (size_t i = 0; i < dim; ++i)
-		result += this->small_buffer_[i] * y.small_buffer_[i];
+		result += this->vals_[i] * y.vals_[i];
 	return result;
 }
 
 template <size_t dim>
-double EuclideanVector<dim>::L1_norm(void) const {
+double Euclidean_Vector<dim>::L1_norm(void) const {
 	double L1_norm = 0.0;
 	for (size_t i = 0; i < dim; ++i)
-		L1_norm += std::abs(this->small_buffer_[i]);
+		L1_norm += std::abs(this->vals_[i]);
 	return L1_norm;
 }
 
 template <size_t dim>
-double EuclideanVector<dim>::norm(void) const {
+double Euclidean_Vector<dim>::norm(void) const {
 	return std::sqrt(this->inner_product(*this));
 }
 
 template <size_t dim>
-bool EuclideanVector<dim>::is_axis_translation(const EuclideanVector& other, const size_t axis_tag) const {
+bool Euclidean_Vector<dim>::is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const {
 	const auto line_vector = *this - other;
 	for (size_t i = 0; i < dim; ++i) {
 		if (i == axis_tag)
@@ -210,19 +247,19 @@ bool EuclideanVector<dim>::is_axis_translation(const EuclideanVector& other, con
 }
 
 template <size_t dim> 
-std::string EuclideanVector<dim>::to_string(void) const {
+std::string Euclidean_Vector<dim>::to_string(void) const {
 	std::string result;
-	for (const auto& element : this->small_buffer_)
+	for (const auto& element : this->vals_)
 		result += ms::double_to_string(element) + " ";
 	result.pop_back();	
 	return result;
 }
 
-template <size_t dim> std::ostream& operator<<(std::ostream& os, const EuclideanVector<dim>& x) {
+template <size_t dim> std::ostream& operator<<(std::ostream& os, const Euclidean_Vector<dim>& x) {
 	return os << x.to_string();
 };
 
 template <size_t dim>
-EuclideanVector<dim> operator*(const double constant, const EuclideanVector<dim>& x) {
+Euclidean_Vector<dim> operator*(const double constant, const Euclidean_Vector<dim>& x) {
 	return x * constant;
 }

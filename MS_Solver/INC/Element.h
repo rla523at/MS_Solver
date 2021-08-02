@@ -35,7 +35,7 @@ enum class ElementType
 template <size_t space_dimension>
 struct Quadrature_Rule
 {
-	std::vector<EuclideanVector<space_dimension>> points;
+	std::vector<Euclidean_Vector<space_dimension>> points;
 	std::vector<double> weights;
 
 	bool operator==(const Quadrature_Rule& other) const {
@@ -48,7 +48,7 @@ template <size_t space_dimension>
 class ReferenceGeometry
 {
 private:
-	using Space_Vector_ = EuclideanVector<space_dimension>;
+	using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
 private:
 	Figure figure_;
@@ -67,14 +67,14 @@ public:
 	bool operator==(const ReferenceGeometry& other) const;
 	bool operator!=(const ReferenceGeometry& other) const;
 
-	EuclideanVector<space_dimension> center_node(void) const;	
+	Euclidean_Vector<space_dimension> center_node(void) const;	
 	size_t num_vertex(void) const;
 	std::vector<order> vertex_node_index_orders(void) const;
 	std::vector<std::vector<order>> face_vertex_node_index_orders_set(void) const;
 	std::vector<std::vector<order>> face_node_index_orders_set(void) const;
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
 	std::vector<std::vector<order>> local_connectivities(void) const;
-	Vector_Function<space_dimension> mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const;
+	Vector_Function<space_dimension> mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const;
 
 	//Space_Vector_ calculate_normal(const std::vector<Space_Vector_>& nodes) const;
 	//double calculate_volume(const std::vector<Space_Vector_>& nodes) const;
@@ -95,7 +95,7 @@ template <size_t space_dimension>
 class Geometry
 {
 private:
-	using Space_Vector_ = EuclideanVector<space_dimension>;
+	using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
 public:
 	ReferenceGeometry<space_dimension> reference_geometry_;
@@ -173,7 +173,7 @@ bool ReferenceGeometry<space_dimension>::operator != (const ReferenceGeometry& o
 }
 
 template <size_t space_dimension>
-EuclideanVector<space_dimension> ReferenceGeometry<space_dimension>::center_node(void) const {
+Euclidean_Vector<space_dimension> ReferenceGeometry<space_dimension>::center_node(void) const {
 	if constexpr (space_dimension == 2) {
 		switch (this->figure_) {
 		case Figure::line:			return { 0, 0 };
@@ -377,7 +377,7 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 }
 
 template <size_t space_dimension>
-Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const {
+Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const {
 	const auto key = std::make_pair(this->figure_, this->figure_order_);
 	const auto& mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
 
@@ -426,7 +426,7 @@ std::vector<std::vector<order>> ReferenceGeometry<space_dimension>::local_connec
 }
 
 template <size_t space_dimension>
-std::vector<EuclideanVector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
+std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
 	if constexpr (space_dimension == 2)	{
 		switch (this->figure_) {
 		case Figure::line: {
@@ -772,7 +772,7 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::faces_geometry
 }
 
 template<size_t space_dimension>
-std::vector<EuclideanVector<space_dimension>> Geometry<space_dimension>::vertex_nodes(void) const {
+std::vector<Euclidean_Vector<space_dimension>> Geometry<space_dimension>::vertex_nodes(void) const {
 	const auto vertex_node_index_orders = this->reference_geometry_.vertex_node_index_orders();
 	const auto num_vertex_node = vertex_node_index_orders.size();
 

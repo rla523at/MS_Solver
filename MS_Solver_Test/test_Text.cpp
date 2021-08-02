@@ -67,7 +67,7 @@ GTEST_TEST(ms, is_there_icase_2) {
 	EXPECT_EQ(result, ref);
 }
 
-//#include "../MS_Solver/INC/EuclideanVector.h"
+//#include "../MS_Solver/INC/Euclidean_Vector.h"
 //GTEST_TEST(ms, extract_file_name_1) {
 //	const std::string path = "C:/Users/KimMinSeok/source/repos/MS_Test/MS_Test/RSC/Quadrature/Standard/Quadrilateral/";
 //	const auto path_txt = ms::extract_file_path_text(path);

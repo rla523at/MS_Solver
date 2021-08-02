@@ -21,7 +21,7 @@ public:
 	static void intialize(const Grid<space_dimension>& grid);
 
 	template <size_t num_equation>
-	static void record_solution_datas(const std::vector<EuclideanVector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients);
+	static void record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients);
 
 	template <size_t num_equation>
 	static void record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value);
@@ -36,7 +36,7 @@ public:
 	static auto calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimension>& grid);
 
 	template <size_t num_equation>
-	static auto convert_to_solution_strings(const std::vector<EuclideanVector<num_equation>>& solutions);
+	static auto convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions);
 
 	static std::vector<std::string> convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix_>& solution_gradients);
 };
@@ -135,7 +135,7 @@ void PostAI::intialize(const Grid<space_dimension>& grid) {
 
 
 template <size_t num_equation>
-void PostAI::record_solution_datas(const std::vector<EuclideanVector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients) {
+void PostAI::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients) {
 #ifdef POST_AI_DATA
 
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
@@ -286,7 +286,7 @@ auto PostAI::calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimen
 
 
 template <size_t num_equation>
-auto PostAI::convert_to_solution_strings(const std::vector<EuclideanVector<num_equation>>& solutions) {
+auto PostAI::convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions) {
 	const auto num_solution = solutions.size();
 	
 	std::vector<std::string> solution_strings;

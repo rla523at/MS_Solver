@@ -1,5 +1,9 @@
 ﻿  Boundary_Flux_Function.cpp
+  Governing_Equation.cpp
   Grid_File_Type.cpp
+  Initial_Condition.cpp
+  Matrix.cpp
+  Numerical_Flux_Function.cpp
   Polynomial.cpp
   PostAI.cpp
   main.cpp

@@ -18,7 +18,7 @@ public:
 
 	Matrix operator+(const Matrix & A) const;
 	Matrix operator*(const double scalar) const;
-	EuclideanVector<num_row> operator*(const EuclideanVector<num_column>&x) const;
+	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>&x) const;
 	bool operator==(const Matrix & A) const;
 
 	double& at(const size_t row_index, const size_t column_index);
@@ -59,7 +59,7 @@ public:
 	double at(const size_t row, const size_t column) const;
 	Dynamic_Matrix_& be_transpose(void);
 	Dynamic_Matrix_& be_inverse(void);
-	void change_column(const size_t row_index, const std::vector<double>& values);
+	void change_column(const size_t row_index, const Dynamic_Euclidean_Vector_& vec);
 	Dynamic_Matrix_ transpose(void) const;
 	std::string to_string(void) const;
 	Dynamic_Matrix_ inverse(void) const;
@@ -118,7 +118,7 @@ bool Matrix<num_row, num_column>::operator==(const Matrix& A) const {
 }
 
 template<size_t num_row, size_t num_column>
-EuclideanVector<num_row> Matrix<num_row, num_column>::operator*(const EuclideanVector<num_column>& x) const {
+Euclidean_Vector<num_row> Matrix<num_row, num_column>::operator*(const Euclidean_Vector<num_column>& x) const {
 	std::array<double, num_row> result = { 0 };
 	if constexpr (num_row * num_column < ms::blas_mv_criteria) {
 		for (size_t i = 0; i < num_row; ++i)

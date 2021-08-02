@@ -20,12 +20,12 @@ public:
 	Vector_Function(const size_t range_dimension) : functions_(range_dimension, 0) {};
 	Vector_Function(const std::initializer_list<Polynomial<domain_dimension>> list) : functions_(list) {};
 
-	std::vector<double> operator()(const EuclideanVector<domain_dimension>& space_vector) const {
+	Dynamic_Euclidean_Vector_ operator()(const Euclidean_Vector<domain_dimension>& space_vector) const {
 		const auto range_dimension = this->range_dimension();
 		
-		std::vector<double> result(range_dimension);
+		Dynamic_Euclidean_Vector_ result(range_dimension);
 		for (size_t i = 0; i < range_dimension; ++i)
-			result[i] = functions_[i](space_vector);
+			result[i] = functions_.at(i)(space_vector);
 
 		return result;
 	}

@@ -740,10 +740,10 @@
 //
 
 namespace ms {
-	//template <size_t DomainDim> std::vector<EuclideanVector<DomainDim>> polynomial_compare_node_set(const size_t polynomial_order){
+	//template <size_t DomainDim> std::vector<Euclidean_Vector<DomainDim>> polynomial_compare_node_set(const size_t polynomial_order){
 	//	const auto num_node = ms::combination_with_repetition(polynomial_order + 1, DomainDim);
 
-	//	std::vector<EuclideanVector<DomainDim>> compare_node_set;
+	//	std::vector<Euclidean_Vector<DomainDim>> compare_node_set;
 	//	compare_node_set.reserve(num_node);
 
 	//	std::array<double, DomainDim> compare_node(DomainDim);

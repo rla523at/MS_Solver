@@ -324,7 +324,7 @@ GTEST_TEST(Polynomial, operator_multiplication_19) {
 
 GTEST_TEST(Polynomial, operator_call_1) {
 	const Polynomial<space_dimension> m = 1;
-	const EuclideanVector values = { 1,2,3 };
+	const Euclidean_Vector values = { 1,2,3 };
 	const auto result = m(values);
 
 	constexpr double ref = 1.0;
@@ -332,7 +332,7 @@ GTEST_TEST(Polynomial, operator_call_1) {
 }
 GTEST_TEST(Polynomial, operator_call_2) {
 	const Polynomial<space_dimension> m = 1;
-	const EuclideanVector values = { 0,0,0 };
+	const Euclidean_Vector values = { 0,0,0 };
 	const auto result = m(values);
 
 	constexpr double ref = 1.0;
@@ -340,7 +340,7 @@ GTEST_TEST(Polynomial, operator_call_2) {
 }
 GTEST_TEST(Polynomial, operator_call_3) {
 	const auto p = 3 * X * (Y ^ 2) * (Z ^ 3);
-	const EuclideanVector values = { 1,2,3 };
+	const Euclidean_Vector values = { 1,2,3 };
 	const auto result = p(values);
 
 	constexpr double ref2 = 324;
@@ -348,7 +348,7 @@ GTEST_TEST(Polynomial, operator_call_3) {
 }
 GTEST_TEST(Polynomial, operator_call_4) {
 	const auto p = X * (Y ^ 2) * (Z ^ 3);
-	const EuclideanVector values = { 1.84,2.789,3.487946 };
+	const Euclidean_Vector values = { 1.84,2.789,3.487946 };
 	const auto result = p(values);
 
 	constexpr double ref3 = 6.073291260986822e+02;

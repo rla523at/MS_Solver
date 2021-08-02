@@ -62,12 +62,12 @@ Dynamic_Matrix_& Dynamic_Matrix_::be_inverse(void) {
 	return *this;
 }
 
-void Dynamic_Matrix_::change_column(const size_t column_index, const std::vector<double>& values) {
+void Dynamic_Matrix_::change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec) {
 	dynamic_require(column_index < this->num_column_, "column idnex can not exceed number of column");
-	dynamic_require(this->num_column_ == values.size(), "number of valu should be matched with number of column");
+	dynamic_require(this->num_column_ == vec.dimension(), "vector dimension should be matched with number of column");
 
 	for (size_t i = 0; i < this->num_column_; ++i)
-		this->at(i, column_index) = values[i];
+		this->at(i, column_index) = vec.at(i);
 }
 
 Dynamic_Matrix_ Dynamic_Matrix_::transpose(void) const {

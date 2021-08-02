@@ -22,7 +22,7 @@ template<size_t num_equation, size_t space_dimension>
 struct Linear_Reconstructed_Solution
 {
 private:
-    using Solution_             = EuclideanVector<num_equation>;
+    using Solution_             = Euclidean_Vector<num_equation>;
     using Solution_Gradient_    = Matrix<num_equation, space_dimension>;
 
 public:
@@ -45,7 +45,7 @@ public:
     Linear_Reconstruction(const Grid<space_dimension_>& grid) : gradient_method(grid) {};
 
 
-    auto reconstruct_solutions(const std::vector<EuclideanVector<num_equation_>>& solutions) const;
+    auto reconstruct_solutions(const std::vector<Euclidean_Vector<num_equation_>>& solutions) const;
 
     static std::string name(void) { return "Linear_Reconstruction_" + Gradient_Method::name(); };
 };
@@ -59,7 +59,7 @@ private:
     static constexpr size_t num_equation_       = Gradient_Method::num_equation_;
     static constexpr size_t space_dimension_    = Gradient_Method::space_dimension_;
 
-    using Solution_ = EuclideanVector<num_equation_>;
+    using Solution_ = Euclidean_Vector<num_equation_>;
 
 protected:
     Gradient_Method gradient_method;
@@ -102,7 +102,7 @@ private:
     static constexpr size_t num_equation_ = Gradient_Method::num_equation_;
     static constexpr size_t space_dimension_ = Gradient_Method::space_dimension_;
 
-    using Solution_ = EuclideanVector<num_equation_>;
+    using Solution_ = Euclidean_Vector<num_equation_>;
 
 //private: for test
 public:
@@ -141,7 +141,7 @@ namespace ms {
 
 //template definition part
 template <typename Gradient_Method>
-auto Linear_Reconstruction<Gradient_Method>::reconstruct_solutions(const std::vector<EuclideanVector<num_equation_>>& solutions) const {
+auto Linear_Reconstruction<Gradient_Method>::reconstruct_solutions(const std::vector<Euclidean_Vector<num_equation_>>& solutions) const {
     const auto num_cell = solutions.size();
     const auto solution_gradients_temp = gradient_method.calculate_solution_gradients(solutions);
 

@@ -29,7 +29,7 @@ public:
 	Polynomial operator*(const Polynomial& other) const;
 	Polynomial operator*(const double constant) const;
 	Polynomial operator^(const size_t power_index) const;
-	double operator()(const EuclideanVector<space_dimension>& domain_vector) const;
+	double operator()(const Euclidean_Vector<space_dimension>& domain_vector) const;
 	bool operator==(const Polynomial& other) const;
 
 	template <size_t VariableIndex, std::enable_if_t<VariableIndex < space_dimension, bool> = true>	Polynomial& be_derivative(void);
@@ -55,7 +55,7 @@ public:
 		SimplePolyTerm& operator-=(const SimplePolyTerm& other);
 		SimplePolyTerm& operator*=(const double constant);
 		SimplePolyTerm operator*(const double constant) const;
-		double operator()(const EuclideanVector<space_dimension>& domain_vector) const;
+		double operator()(const Euclidean_Vector<space_dimension>& domain_vector) const;
 		bool operator==(const SimplePolyTerm& other) const;
 		bool operator!=(const SimplePolyTerm& other) const;
 		bool operator<(const SimplePolyTerm& other) const;
@@ -80,7 +80,7 @@ public:
 		PoweredPolyTerm(const SimplePolyTerm& simple_poly_term) : base_(simple_poly_term) {};
 
 		void multiply_assign_with_same_base(const PoweredPolyTerm& other);
-		double operator()(const EuclideanVector<space_dimension>& domain_vector) const;
+		double operator()(const Euclidean_Vector<space_dimension>& domain_vector) const;
 		bool operator==(const PoweredPolyTerm& other) const;
 		bool operator<(const PoweredPolyTerm& other) const;
 		bool operator>(const PoweredPolyTerm& other) const;
@@ -108,7 +108,7 @@ public:
 		void add_assign_with_same_form(const PolyTerm& other);
 		PolyTerm& operator*=(const PolyTerm& other);
 		PolyTerm operator*(const PolyTerm& other) const;
-		double operator()(const EuclideanVector<space_dimension>& domain_vector) const;
+		double operator()(const Euclidean_Vector<space_dimension>& domain_vector) const;
 		bool operator==(const PolyTerm& other) const; 
 		bool operator!=(const PolyTerm& other) const;
 		PolyTerm& operator=(const PolyTerm& other);
@@ -140,7 +140,7 @@ template <size_t space_dimension> Polynomial<space_dimension> operator+(const do
 template <size_t space_dimension> Polynomial<space_dimension> operator*(const double constant, const Polynomial<space_dimension>& compact_polynomial);
 
 namespace ms {
-	template <size_t space_dimension> std::vector<EuclideanVector<space_dimension>> polynomial_compare_node_set(const size_t polynomial_order);
+	template <size_t space_dimension> std::vector<Euclidean_Vector<space_dimension>> polynomial_compare_node_set(const size_t polynomial_order);
 	size_t combination(const size_t n, const size_t k);
 	size_t combination_with_repetition(const size_t n, const size_t k);
 	bool is_positive_odd_number(const double val);
@@ -236,7 +236,8 @@ template <size_t space_dimension> Polynomial<space_dimension> Polynomial<space_d
 	return result;
 }
 
-template <size_t space_dimension> double Polynomial<space_dimension>::operator()(const EuclideanVector<space_dimension>& domain_vector) const {
+template <size_t space_dimension> 
+double Polynomial<space_dimension>::operator()(const Euclidean_Vector<space_dimension>& domain_vector) const {
 	auto result = this->simple_poly_term_(domain_vector);
 	for (const auto& poly_term : this->added_poly_term_set_)
 		result += poly_term(domain_vector);
@@ -382,7 +383,7 @@ typename Polynomial<space_dimension>::SimplePolyTerm Polynomial<space_dimension>
 }
 
 template <size_t space_dimension> 
-double Polynomial<space_dimension>::SimplePolyTerm::operator()(const EuclideanVector<space_dimension>& domain_vector) const {
+double Polynomial<space_dimension>::SimplePolyTerm::operator()(const Euclidean_Vector<space_dimension>& domain_vector) const {
 	auto result = this->constant_;
 	for (size_t i = 0; i < space_dimension; ++i)
 		result += this->coefficients_[i] * domain_vector[i];
@@ -484,7 +485,7 @@ void Polynomial<space_dimension>::PoweredPolyTerm::multiply_assign_with_same_bas
 }
 
 template <size_t space_dimension> 
-double Polynomial<space_dimension>::PoweredPolyTerm::operator()(const EuclideanVector<space_dimension>& domain_vector) const {
+double Polynomial<space_dimension>::PoweredPolyTerm::operator()(const Euclidean_Vector<space_dimension>& domain_vector) const {
 	return std::pow(this->base_(domain_vector), this->exponent_);
 }
 
@@ -614,7 +615,7 @@ typename Polynomial<space_dimension>::PolyTerm Polynomial<space_dimension>::Poly
 }
 
 template <size_t space_dimension> 
-double Polynomial<space_dimension>::PolyTerm::operator()(const EuclideanVector<space_dimension>& domain_vector) const {
+double Polynomial<space_dimension>::PolyTerm::operator()(const Euclidean_Vector<space_dimension>& domain_vector) const {
 	auto result = this->coefficient_;
 	for (size_t i = 0; i < this->num_term_; ++i)
 		result *= this->data_ptr_[i](domain_vector);
@@ -821,7 +822,7 @@ template <size_t space_dimension> bool Polynomial<space_dimension>::PolyTerm::is
 //public:
 //	template <typename... Args> VectorFunction(Args... args) : elements_{ args... } {};
 //
-//	EuclideanVector<RangeDim> operator()(const EuclideanVector < )
+//	Euclidean_Vector<RangeDim> operator()(const Euclidean_Vector < )
 //		const Function& operator[](const size_t position) const;
 //
 //private:
@@ -836,10 +837,10 @@ template <size_t space_dimension> bool Polynomial<space_dimension>::PolyTerm::is
 
 namespace ms {
 	template <size_t space_dimension> 
-	std::vector<EuclideanVector<space_dimension>> polynomial_compare_node_set(const size_t polynomial_order) {
+	std::vector<Euclidean_Vector<space_dimension>> polynomial_compare_node_set(const size_t polynomial_order) {
 		const auto num_node = ms::combination_with_repetition(polynomial_order + 1, space_dimension);
 
-		std::vector<EuclideanVector<space_dimension>> compare_node_set;
+		std::vector<Euclidean_Vector<space_dimension>> compare_node_set;
 		compare_node_set.reserve(num_node);
 
 		std::array<double, space_dimension> compare_node = { 0 };

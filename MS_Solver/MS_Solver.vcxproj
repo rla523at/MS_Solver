@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="SRC\Boundary_Flux_Function.cpp" />
+    <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\Governing_Equation.cpp" />
     <ClCompile Include="SRC\Grid_File_Type.cpp" />
     <ClCompile Include="SRC\Initial_Condition.cpp" />
