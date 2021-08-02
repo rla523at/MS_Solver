@@ -99,13 +99,13 @@ template <size_t space_dimension>
 Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Space_Vector_>& node_datas) {
 	SET_TIME_POINT;
 
-	std::map<index, ElementType> physical_group_index_to_element_type;
+	std::map<indx, ElementType> physical_group_index_to_element_type;
 	for (const auto& physical_name_sentence : physical_name_text) {
 		const char delimiter = ' ';
 		const auto parsed_sentence_set = ms::parse(physical_name_sentence, delimiter);
 
 		//const size_t dimension		= parsed_sentence_set[0].toValue<size_t>();
-		const auto physical_group_index	= ms::string_to_value<index>(parsed_sentence_set[1]);
+		const auto physical_group_index	= ms::string_to_value<indx>(parsed_sentence_set[1]);
 		const auto name					= ms::erase(parsed_sentence_set[2], "\"");
 		const auto element_type			= ms::string_to_element_type(name);
 
@@ -119,7 +119,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 		const auto delimiter = ' ';
 		const auto parsed_sentences = ms::parse(element_sentence, delimiter);
 
-		auto value_set = ms::string_to_value_set<index>(parsed_sentences);
+		auto value_set = ms::string_to_value_set<indx>(parsed_sentences);
 
 		//const auto index					= value_set[0];
 		const auto figure_type_index		= value_set[1];
@@ -130,7 +130,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 		//reference geometry
 		const auto figure		= Gmsh::figure_type_index_to_element_figure(figure_type_index);
 		const auto figure_order = Gmsh::figure_type_index_to_figure_order(figure_type_index);
-		auto reference_geometry = ReferenceGeometry(figure, figure_order);
+		auto reference_geometry = ReferenceGeometry<space_dimension>(figure, figure_order);
 
 		//geometry
 		constexpr size_t num_index = 5;

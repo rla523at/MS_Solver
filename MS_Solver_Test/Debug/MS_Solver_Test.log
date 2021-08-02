@@ -1,0 +1,20 @@
+﻿  test_AI_Limiter.cpp
+  test_Boundary_Flux_Function.cpp
+  test_Element.cpp
+  test_Euclidean_Vector.cpp
+  test_Governing_Equation.cpp
+  test_Grid_Data_to_Info.cpp
+  test_Grid_File_Convertor.cpp
+  test_Grid_File_Type.cpp
+  test_Matrix.cpp
+  test_Polynomial.cpp
+C:\Users\KimMinSeok\source\repos\MS_Solver\MS_Solver\INC\Polynomial.h(351,22): warning C4244: '인수': 'const unsigned __int64'에서 'std::array<double,3>::size_type'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\KimMinSeok\source\repos\MS_Solver\MS_Solver\INC\Polynomial.h(344): message : 클래스 템플릿 멤버 함수 'Polynomial<3>::SimplePolyTerm::SimplePolyTerm(const std::string &)'을(를) 컴파일하는 중입니다.
+C:\Users\KimMinSeok\source\repos\MS_Solver\MS_Solver\INC\Polynomial.h(23): message : 컴파일되는 함수 템플릿 인스턴스화 'Polynomial<3>::SimplePolyTerm::SimplePolyTerm(const std::string &)'에 대한 참조를 확인하세요.
+C:\Users\KimMinSeok\source\repos\MS_Solver\MS_Solver\INC\Polynomial.h(19): message : 컴파일되는 클래스 템플릿 인스턴스화 'Polynomial<3>::SimplePolyTerm'에 대한 참조를 확인하세요.
+C:\Users\KimMinSeok\source\repos\MS_Solver\MS_Solver_Test\test_Polynomial.cpp(67): message : 컴파일되는 클래스 템플릿 인스턴스화 'Polynomial<3>'에 대한 참조를 확인하세요.
+  test_PostAI.cpp
+  test_Text.cpp
+  코드를 생성하고 있습니다...
+MS_Solver.lib(Governing_Equation.obj) : warning LNK4075: '/EDITANDCONTINUE'이(가) '/SAFESEH' 사양으로 인해 무시됩니다.
+  MS_Solver_Test.vcxproj -> C:\Users\KimMinSeok\source\repos\MS_Solver\Debug\MS_Solver_Test.exe

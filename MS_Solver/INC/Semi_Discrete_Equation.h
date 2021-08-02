@@ -33,7 +33,7 @@ private:
 
 public:
     Semi_Discrete_Equation(Grid<space_dimension_>&& grid)
-        : boundaries_(std::move(grid)), cells_(grid), periodic_boundaries_(std::move(grid)), inner_faces_(std::move(grid)), reconstruction_method_(std::move(grid)) {
+        : cells_(grid), boundaries_(std::move(grid)),  periodic_boundaries_(std::move(grid)), inner_faces_(std::move(grid)), reconstruction_method_(std::move(grid)) {
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";

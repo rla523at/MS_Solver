@@ -1,5 +1,9 @@
 #include "../INC/Matrix.h"
 
+Dynamic_Matrix_::Matrix(const size_t matrix_order) {
+	*this = Matrix(matrix_order, matrix_order);
+}
+
 Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column)
 	:num_row_(num_row), num_column_(num_column) {
 	this->value_.resize(num_row * num_column);
@@ -8,6 +12,11 @@ Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column)
 Dynamic_Matrix_ Dynamic_Matrix_::operator*(const Dynamic_Matrix_& other) const {
 	return Dynamic_Matrix_(this->num_row_, other.num_column_, this->multiply_value(other));
 }
+
+bool  Dynamic_Matrix_::operator==(const Dynamic_Matrix_& other) const {
+	return this->value_ == other.value_;
+}
+
 
 double& Dynamic_Matrix_::at(const size_t row, const size_t column) {
 	dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
@@ -53,9 +62,27 @@ Dynamic_Matrix_& Dynamic_Matrix_::be_inverse(void) {
 	return *this;
 }
 
+void Dynamic_Matrix_::change_column(const size_t column_index, const std::vector<double>& values) {
+	dynamic_require(column_index < this->num_column_, "column idnex can not exceed number of column");
+	dynamic_require(this->num_column_ == values.size(), "number of valu should be matched with number of column");
+
+	for (size_t i = 0; i < this->num_column_; ++i)
+		this->at(i, column_index) = values[i];
+}
+
 Dynamic_Matrix_ Dynamic_Matrix_::transpose(void) const {
 	auto result = *this;
 	return result.be_transpose();
+}
+
+std::string Dynamic_Matrix_::to_string(void) const {
+	std::string result;
+	for (size_t i = 0; i < this->num_row_; ++i) {
+		for (size_t j = 0; j < this->num_column_; ++j)
+			result += ms::double_to_string(this->at(i, j)) + "   \t";
+		result += "\n";
+	}
+	return result;
 }
 
 Dynamic_Matrix_ Dynamic_Matrix_::inverse(void) const {

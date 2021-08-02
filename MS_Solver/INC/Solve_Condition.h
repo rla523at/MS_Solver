@@ -4,7 +4,7 @@
 #include <type_traits>
 
 
-using count =  unsigned int;
+using count =  unsigned long long;
 
 class SEC {}; // Solve End Condition
 

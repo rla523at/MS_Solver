@@ -29,6 +29,8 @@ private:
 	std::array<double, num_row * num_column> values_ = { 0 };
 };
 
+//user define deduction
+Matrix(...)->Matrix<0, 0>;
 
 using Dynamic_Matrix_ = Matrix<0, 0>;
 
@@ -45,17 +47,21 @@ private:
 	std::vector<double> value_;
 
 public:
+	Matrix(const size_t matrix_order);
 	Matrix(const size_t num_row, const size_t num_column);
 	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value)
 		: num_row_(num_row), num_column_(num_column), value_(std::move(value)) {};
 
 	Dynamic_Matrix_ operator*(const Dynamic_Matrix_& other) const;
+	bool operator==(const Dynamic_Matrix_& other) const;
 
 	double& at(const size_t row, const size_t column);
 	double at(const size_t row, const size_t column) const;
 	Dynamic_Matrix_& be_transpose(void);
 	Dynamic_Matrix_& be_inverse(void);
+	void change_column(const size_t row_index, const std::vector<double>& values);
 	Dynamic_Matrix_ transpose(void) const;
+	std::string to_string(void) const;
 	Dynamic_Matrix_ inverse(void) const;
 	std::pair<size_t, size_t> size(void) const;
 

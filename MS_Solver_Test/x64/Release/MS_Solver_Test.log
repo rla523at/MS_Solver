@@ -1,0 +1,12 @@
+﻿  test_AI_Limiter.cpp
+  test_Boundary_Flux_Function.cpp
+  test_Element.cpp
+  test_Grid_File_Type.cpp
+  test_Polynomial.cpp
+  test_PostAI.cpp
+  test_Vector_Function.cpp
+  코드를 생성하고 있습니다...
+  MS_Solver.lib(Governing_Equation.obj) : /GL로 컴파일한 MSIL .netmodule 또는 모듈이 있습니다. /LTCG를 지정하여 링크를 다시 시작하십시오. /LTCG를 링크 명령줄에 추가하면 링커 성능이 향상됩니다.
+  코드를 생성하고 있습니다.
+  코드를 생성했습니다.
+  MS_Solver_Test.vcxproj -> C:\Users\KimMinSeok\source\repos\MS_Solver\x64\Release\MS_Solver_Test.exe

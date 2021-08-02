@@ -3,8 +3,8 @@
 
 #include <type_traits>
 
-using index = unsigned int;
-using order = unsigned short;
+using indx = unsigned long long;
+using order = unsigned long long;
 
 
 class GFT {}; //Grid File Type
@@ -25,8 +25,8 @@ enum class GmshFigureType
 
 class Gmsh : public GFT {
 public:
-	static order figure_type_index_to_figure_order(const index figure_type_index);
-	static Figure figure_type_index_to_element_figure(const index figure_type_index);
+	static order figure_type_index_to_figure_order(const indx figure_type_index);
+	static Figure figure_type_index_to_element_figure(const indx figure_type_index);
 };
 
 

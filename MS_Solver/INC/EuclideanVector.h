@@ -22,7 +22,6 @@ class EuclideanVector
 public:
 	EuclideanVector(void) = default;
 	EuclideanVector(const std::array<double, dim>& other) : small_buffer_(other) {};
-	EuclideanVector(const std::vector<double>& other) : elements_(other) {};
 	template <typename... Args>
 	EuclideanVector(Args... args);
 
@@ -48,7 +47,6 @@ public:
 
 private:
 	std::array<double, dim> small_buffer_ = { 0 };
-	std::vector<double> elements_;
 };
 
 
@@ -175,8 +173,6 @@ template <size_t dim>
 const double* EuclideanVector<dim>::data(void) const {
 	if constexpr (dim != 0)
 		return this->small_buffer_.data();
-	else
-		return this->elements_.data();
 }
 
 template <size_t dim>
