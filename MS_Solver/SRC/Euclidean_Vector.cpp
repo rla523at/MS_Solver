@@ -5,6 +5,10 @@ double& Dynamic_Euclidean_Vector_::operator[](const size_t position) {
 	return this->vals_[position];
 }
 
+bool Dynamic_Euclidean_Vector_::operator==(const Dynamic_Euclidean_Vector_& other) const {
+	return this->vals_ == other.vals_;
+}
+
 double Dynamic_Euclidean_Vector_::at(const size_t position) const {
 	dynamic_require(position < this->dimension(), "position should be less then dimension");
 	return this->vals_[position];

@@ -584,34 +584,38 @@ GTEST_TEST(Polynomial, differentiate_14) {
 //	const VectorFunction<Polynomial> ref = { Y * Z,  X * Z, X * Y };
 //	EXPECT_EQ(result, ref);
 //}
-//
-//
-//
-////Irrational Function
-//GTEST_TEST(IrrationalFunction, operator_call_1) {
-//	const auto p = X;
-//	const auto ir = p.root(0.5);
-//
-//	for (size_t i = 0; i < 10; ++i) {
-//		const double val = 0.31 * i;
-//		const MathVector val_vec = { val };
-//		const double result = ir(val_vec);
-//		const double ref = std::pow(val, 0.5);
-//		EXPECT_DOUBLE_EQ(result, ref);
-//	}
-//}
-//GTEST_TEST(IrrationalFunction, operator_call_2) {
-//	const auto p = (X ^ 2) + X + 1;
-//	const auto ir = p.root(0.5);
-//
-//	for (size_t i = 0; i < 10; ++i) {
-//		const double val = 0.31 * i;
-//		const MathVector val_vec = { val };
-//		const double result = ir(val_vec);
-//		const double ref = std::pow(val * val + val + 1, 0.5);
-//		EXPECT_DOUBLE_EQ(result, ref);
-//	}
-//}
+
+
+
+//Irrational Function
+GTEST_TEST(IrrationalFunction, operator_call_1) {
+	constexpr size_t space_dimension = 1;
+
+	const auto x = Polynomial<space_dimension>("x0");
+
+	const auto p = x;
+	const auto ir = p.root(0.5);
+
+	for (size_t i = 0; i < 10; ++i) {
+		const double val = 0.31 * i;
+		const Euclidean_Vector<space_dimension> val_vec = { val };
+		const double result = ir(val_vec);
+		const double ref = std::pow(val, 0.5);
+		EXPECT_DOUBLE_EQ(result, ref);
+	}
+}
+GTEST_TEST(IrrationalFunction, operator_call_2) {
+	//const auto p = (X ^ 2) + X + 1;
+	//const auto ir = p.root(0.5);
+
+	//for (size_t i = 0; i < 10; ++i) {
+	//	const double val = 0.31 * i;
+	//	const Euclidean_Vector<2> val_vec = { val };
+	//	const double result = ir(val_vec);
+	//	const double ref = std::pow(val * val + val + 1, 0.5);
+	//	EXPECT_DOUBLE_EQ(result, ref);
+	//}
+}
 
 
 //GTEST_TEST(Polynomial, OPERATOR_MULTIPLICATION_10) {

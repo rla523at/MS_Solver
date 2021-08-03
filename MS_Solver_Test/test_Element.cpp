@@ -46,7 +46,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
 
 	const Polynomial<space_dimension> r("x0");
 
-	const Vector_Function<space_dimension> ref = { 1, r };
+	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
@@ -60,7 +60,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Vector_Function<space_dimension> ref = { 1, r, s };
+	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r, s };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
@@ -74,7 +74,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Vector_Function<space_dimension> ref = { 1, r, r * s, s };
+	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
 	EXPECT_EQ(ref, result);
 }
 

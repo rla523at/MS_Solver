@@ -1,12 +1,7 @@
 ﻿  Boundary_Flux_Function.cpp
-  Euclidean_Vector.cpp
-  Governing_Equation.cpp
   Grid_File_Type.cpp
-  Initial_Condition.cpp
-  main.cpp
-  Matrix.cpp
-  Numerical_Flux_Function.cpp
   Polynomial.cpp
   PostAI.cpp
+  main.cpp
   코드를 생성하고 있습니다...
   MS_Solver.vcxproj -> C:\Users\KimMinSeok\source\repos\MS_Solver\x64\Debug\MS_Solver.lib

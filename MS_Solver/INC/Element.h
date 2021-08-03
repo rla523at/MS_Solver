@@ -1,6 +1,6 @@
 #pragma once
 #include "Matrix.h"
-#include "Vector_Function.h"
+#include "Polynomial.h"
 
 #include <map>
 #include <set>
@@ -55,7 +55,7 @@ private:
 	order figure_order_;
 
 	inline static std::map<std::pair<Figure, size_t>, std::vector<Space_Vector_>> key_to_mapping_nodes_;
-	inline static std::map<std::pair<Figure, size_t>, Vector_Function<space_dimension>> key_to_mapping_monomial_vector_function_;
+	inline static std::map<std::pair<Figure, size_t>, Vector_Function<Polynomial<space_dimension>>> key_to_mapping_monomial_vector_function_;
 	inline static std::map<std::pair<Figure, size_t>, Dynamic_Matrix_> key_to_inverse_mapping_monomial_matrix_;
 	inline static std::map<std::pair<Figure, size_t>, Quadrature_Rule<space_dimension>> key_to_quadrature_rule_;
 	inline static std::map<std::pair<Figure, size_t>, std::vector<Space_Vector_>> key_to_post_node_set_;
@@ -74,21 +74,21 @@ public:
 	std::vector<std::vector<order>> face_node_index_orders_set(void) const;
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
 	std::vector<std::vector<order>> local_connectivities(void) const;
-	Vector_Function<space_dimension> mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const;
+	Vector_Function<Polynomial<space_dimension>> mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const;
 
 	//Space_Vector_ calculate_normal(const std::vector<Space_Vector_>& nodes) const;
 	//double calculate_volume(const std::vector<Space_Vector_>& nodes) const;
 
 //private: for test
 	std::vector<Space_Vector_> mapping_nodes(void) const;
-	Vector_Function<space_dimension> mapping_monomial_vector_function(void) const;
+	Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector_function(void) const;
 	Dynamic_Matrix_ inverse_mapping_monomial_matrix(void) const;
 	Quadrature_Rule<space_dimension> reference_quadrature_rule(const size_t integrand_order) const;
 };
 
 
 template <size_t space_dimension>
-Vector_Function<space_dimension> operator*(const Dynamic_Matrix_& A, const Vector_Function<space_dimension>& v);
+Vector_Function<Polynomial<space_dimension>> operator*(const Dynamic_Matrix_& A, const Vector_Function<Polynomial<space_dimension>>& v);
 
 
 template <size_t space_dimension>
@@ -377,7 +377,7 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 }
 
 template <size_t space_dimension>
-Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const {
+Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const {
 	const auto key = std::make_pair(this->figure_, this->figure_order_);
 	const auto& mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
 
@@ -480,14 +480,14 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 }
 
 template <size_t space_dimension>
-Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_monomial_vector_function(void) const {
+Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_monomial_vector_function(void) const {
 	Polynomial<space_dimension> r("x0");
 	Polynomial<space_dimension> s("x1");
 
 	switch (this->figure_) {
 	case Figure::line: {
 		const auto num_monomial = this->figure_order_ + 1;
-		Vector_Function<space_dimension> mapping_monomial_vector(num_monomial);
+		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
 		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a)
 			mapping_monomial_vector[index++] = (r ^ a);
@@ -496,7 +496,7 @@ Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_mon
 	}
 	case Figure::triangle: {
 		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);
-		Vector_Function<space_dimension> mapping_monomial_vector(num_monomial);
+		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
 		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a)
 			for (size_t b = 0; b <= a; ++b)
@@ -506,7 +506,7 @@ Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_mon
 	}
 	case Figure::quadrilateral: {
 		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 1) * (this->figure_order_ + 1));
-		Vector_Function<space_dimension> mapping_monomial_vector(num_monomial);
+		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
 		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a) {
 			for (size_t b = 0; b <= a; ++b)
@@ -522,7 +522,7 @@ Vector_Function<space_dimension> ReferenceGeometry<space_dimension>::mapping_mon
 	}
 	default:
 		throw std::runtime_error("not supproted figure");
-		return Vector_Function<space_dimension>(NULL);
+		return Vector_Function<Polynomial<space_dimension>>(NULL);
 	}
 }
 
@@ -637,12 +637,12 @@ Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::reference_q
 }
 
 template <size_t space_dimension>
-Vector_Function<space_dimension> operator*(const Dynamic_Matrix_& A, const Vector_Function<space_dimension>& v) {
+Vector_Function<Polynomial<space_dimension>> operator*(const Dynamic_Matrix_& A, const Vector_Function<Polynomial<space_dimension>>& v) {
 	const auto [num_row, num_column] = A.size();
 	const auto range_dimension = v.range_dimension();
 	dynamic_require(num_column == range_dimension, "number of column should be same with range dimension");
 
-	Vector_Function<space_dimension> result(num_row);
+	Vector_Function<Polynomial<space_dimension>> result(num_row);
 	for (size_t i = 0; i < num_row; ++i)
 		for (size_t j = 0; j < num_column; ++j)
 			result[i] += A.at(i, j) * v.at(j);
