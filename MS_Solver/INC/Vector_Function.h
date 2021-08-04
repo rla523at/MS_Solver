@@ -50,7 +50,16 @@ public:
 		return this->functions_[index];
 	}
 
-	
+	Vector_Function<Function> cross_product(const Vector_Function& other) const {
+		dynamic_require(this->range_dimension() == 3 && other.range_dimension() == 3, "cross product only defined in range dimension 3 space");
+
+		Vector_Function<Function> result(this->range_dimension());
+		result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
+		result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
+		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+
+		return result;
+	}
 
 	template <size_t variable_index>
 	Vector_Function<Function> differentiate(void) const {

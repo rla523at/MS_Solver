@@ -148,10 +148,13 @@ template <size_t domain_dimension_>
 std::ostream& operator<<(std::ostream& ostream, const Polynomial<domain_dimension_>& polynomial);
 
 template <size_t domain_dimension_> 
-Polynomial<domain_dimension_> operator+(const double constant, const Polynomial<domain_dimension_>& compact_polynomial);
+Polynomial<domain_dimension_> operator+(const double constant, const Polynomial<domain_dimension_>& polynomial);
+
+template <size_t domain_dimension_>
+Polynomial<domain_dimension_> operator-(const double constant, const Polynomial<domain_dimension_>& polynomial);
 
 template <size_t domain_dimension_> 
-Polynomial<domain_dimension_> operator*(const double constant, const Polynomial<domain_dimension_>& compact_polynomial);
+Polynomial<domain_dimension_> operator*(const double constant, const Polynomial<domain_dimension_>& polynomial);
 
 
 template <size_t domain_dimension_>
@@ -372,13 +375,23 @@ template <size_t domain_dimension_> void Polynomial<domain_dimension_>::add_assi
 	this->added_poly_term_set_.push_back(term);
 }
 
-template <size_t domain_dimension_> std::ostream& operator<<(std::ostream& ostream, const Polynomial<domain_dimension_>& polynomial) {
+template <size_t domain_dimension_> 
+std::ostream& operator<<(std::ostream& ostream, const Polynomial<domain_dimension_>& polynomial) {
 	return ostream << polynomial.to_string();
 };
-template <size_t domain_dimension_> Polynomial<domain_dimension_> operator+(const double constant, const Polynomial<domain_dimension_>& polynomial) {
+
+template <size_t domain_dimension_> 
+Polynomial<domain_dimension_> operator+(const double constant, const Polynomial<domain_dimension_>& polynomial) {
 	return polynomial + constant;
 };
-template <size_t domain_dimension_> Polynomial<domain_dimension_> operator*(const double constant, const Polynomial<domain_dimension_>& polynomial) {
+
+template <size_t domain_dimension_>
+Polynomial<domain_dimension_> operator-(const double constant, const Polynomial<domain_dimension_>& polynomial) {
+	return -1 * polynomial + constant;
+}
+
+template <size_t domain_dimension_> 
+Polynomial<domain_dimension_> operator*(const double constant, const Polynomial<domain_dimension_>& polynomial) {
 	return polynomial * constant;
 };
 

@@ -51,3 +51,18 @@ GTEST_TEST(Vector_Function, differentiate_1)
 	Vector_Function<Polynomial<domain_dimension>> ref = { 1,2 };
 	EXPECT_EQ(ref, result);
 }
+
+GTEST_TEST(Vector_Function, cross_product_1)
+{
+	constexpr size_t domain_dimension = 2;
+
+	Polynomial<domain_dimension> x("x0");
+	Polynomial<domain_dimension> y("x1");
+
+	Vector_Function<Polynomial<domain_dimension>> vf1 = { 1 + x ,		2 * x + y,		3 };
+	Vector_Function<Polynomial<domain_dimension>> vf2 = { 2 * x - y ,	1 + (-1 * x),	2 };
+	const auto result = vf1.cross_product(vf2);
+
+	Vector_Function<Polynomial<domain_dimension>> ref = { 7 * x + 2 * y - 3,4 * x - 3 * y - 2, 1 - 5 * (x ^ 2) + (y ^ 2) };
+	EXPECT_EQ(ref, result);
+}
