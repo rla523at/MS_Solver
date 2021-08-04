@@ -50,6 +50,8 @@ public:
 		return this->functions_[index];
 	}
 
+	
+
 	template <size_t variable_index>
 	Vector_Function<Function> differentiate(void) const {
 		static_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");

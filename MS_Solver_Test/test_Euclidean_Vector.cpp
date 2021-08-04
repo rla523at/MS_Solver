@@ -2,7 +2,12 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/EuclideanVector.h"
 
+GTEST_TEST(Euclidean_Vector, constructor_1) {
+	const Euclidean_Vector<2> result = { 1 };
 
+	const Euclidean_Vector ref = { 1,0 };
+	EXPECT_EQ(result, ref);
+}
 
 GTEST_TEST(Euclidean_Vector, operator_addition_1) {
 	const Euclidean_Vector v1 = { 1,2,3 };
