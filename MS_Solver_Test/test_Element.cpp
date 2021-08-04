@@ -220,7 +220,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_1) {
 	Euclidean_Vector p2 = { 4,2 };
 	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2 };
 
-	const auto result = ref_geometry.mapping_vector_function(pv);
+	const auto result = ref_geometry.mapping_function(pv);
 	//std::cout << "\n" << result << "\n";
 
 	Euclidean_Vector rp1 = { -1,0 };
@@ -241,7 +241,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_2) {
 	Euclidean_Vector p3 = { 2,3 };
 	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3 };
 
-	const auto result = ref_geometry.mapping_vector_function(pv);
+	const auto result = ref_geometry.mapping_function(pv);
 	//std::cout << "\n" << result << "\n";
 
 	Euclidean_Vector rp1 = { -1,-1 };
@@ -265,7 +265,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	Euclidean_Vector p4 = { 1,3 };
 	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3,p4 };
 
-	const auto result = ref_geometry.mapping_vector_function(pv);
+	const auto result = ref_geometry.mapping_function(pv);
 
 	Euclidean_Vector rp1 = { -1,-1 };
 	Euclidean_Vector rp2 = { 1,-1 };
@@ -278,105 +278,149 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	EXPECT_EQ(p4, result(rp4));
 }
 
-//GTEST_TEST(Geometry, volume_1) {
+//GTEST_TEST(ReferenceGeometry, scale_function_1) {
 //	constexpr size_t space_dimension = 2;
 //
 //	const Figure fig = Figure::quadrilateral;
 //	const order fig_order = 1;
 //	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 //
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 1,2 };
-//	const Euclidean_Vector n3 = { 2,2 };
-//	const Euclidean_Vector n4 = { 2,1 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+//	Euclidean_Vector p1 = { 1,2 };
+//	Euclidean_Vector p2 = { 3,1 };
+//	Euclidean_Vector p3 = { 4,1 };
+//	Euclidean_Vector p4 = { 1,3 };
+//	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3,p4 };
 //
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.volume();
+//	const auto mapping_function = ref_geometry.mapping_function(pv);
+//	const auto result = ref_geometry.scale_function(mapping_function);
 //
-//	const auto ref = 1;
+//	const auto x = Polynomial<space_dimension>("x0");
+//	const auto y = Polynomial<space_dimension>("x1");
+//	Irrational_Function<space_dimension> ref = (0.25 * y + 1.25) * (-0.25 * x + 0.25) - (0.25 * x + 0.25) * (-0.25 * y - 0.75);
 //	EXPECT_EQ(result, ref);
 //}
-//GTEST_TEST(Geometry, volume_2) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::quadrilateral;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 2,1 };
-//	const Euclidean_Vector n3 = { 4,2 };
-//	const Euclidean_Vector n4 = { 1,2 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.volume();
-//
-//	const auto ref = 2;
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Geometry, volume_3) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::quadrilateral;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 2,1 };
-//	const Euclidean_Vector n3 = { 4,2 };
-//	const Euclidean_Vector n4 = { -100,1 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.volume();
-//
-//	const auto ref = 51;
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Geometry, volume_4) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::triangle;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 2,1 };
-//	const Euclidean_Vector n3 = { 4,2 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.volume();
-//
-//	const auto ref = 0.5;
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Geometry, volume_5) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::triangle;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1.524,1 };
-//	const Euclidean_Vector n2 = { 2,1.154 };
-//	const Euclidean_Vector n3 = { 4.47411,2 };
-//
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.volume();
-//
-//	const auto ref = 0.01084153;
-//	//EXPECT_EQ(result, ref); //suffer by round off error
-//	//EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
-//	EXPECT_NEAR(result, ref, 1.0E-16);
-//}
+
+GTEST_TEST(Geometry, volume_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 1,2 };
+	const Euclidean_Vector n3 = { 2,2 };
+	const Euclidean_Vector n4 = { 2,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 1;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Geometry, volume_2) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 2;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Geometry, volume_3) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { -100,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 51;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Geometry, volume_4) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 0.5;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Geometry, volume_5) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1.524,1 };
+	const Euclidean_Vector n2 = { 2,1.154 };
+	const Euclidean_Vector n3 = { 4.47411,2 };
+
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 0.01084153;
+	//EXPECT_EQ(result, ref); //suffer by round off error
+	//EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
+	EXPECT_NEAR(result, ref, 9.0E-16);
+}
+GTEST_TEST(Geometry, volume_6) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const order fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,2 };	
+	const Euclidean_Vector n2 = { 1.5, 1.257 };
+	const Euclidean_Vector n3 = { 2.4874, 1.24 };
+
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 0.362569100000000;
+	//EXPECT_EQ(result, ref); //suffer by round off error
+	EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
+}
+
 
 GTEST_TEST(Geometry, faces_nodes_1) {
 	constexpr size_t space_dimension = 2;

@@ -36,6 +36,17 @@ public:
 		return result;
 	}
 
+	std::vector<Dynamic_Euclidean_Vector_> operator()(const std::vector<Euclidean_Vector<domain_dimension_>>& space_vectors) const {
+		const auto num_vector = space_vectors.size();
+		
+		std::vector<Dynamic_Euclidean_Vector_> result;
+		result.reserve(num_vector);
+		for (size_t i = 0; i < num_vector; ++i)
+			result.push_back( (*this)(space_vectors[i]));
+
+		return result;
+	}
+
 	bool operator==(const Vector_Function& other) const {
 		return this->functions_ == other.functions_;
 	}
@@ -51,12 +62,19 @@ public:
 	}
 
 	Vector_Function<Function> cross_product(const Vector_Function& other) const {
-		dynamic_require(this->range_dimension() == 3 && other.range_dimension() == 3, "cross product only defined in range dimension 3 space");
+		dynamic_require(this->range_dimension() <= 3 && other.range_dimension() <= 3, "cross product only defined in range dimension 3 space");
 
-		Vector_Function<Function> result(this->range_dimension());
-		result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
-		result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
-		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		const auto range_dimension = this->range_dimension();
+
+		Vector_Function<Function> result(3);
+		if (range_dimension == 2)
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		else {
+			result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
+			result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		}
+
 
 		return result;
 	}
@@ -72,6 +90,16 @@ public:
 			result[i] = this->functions_[i].differentiate<variable_index>();
 		
 		return result;
+	}
+
+	auto L2_norm(void) const {
+		
+		Function result(0);
+
+		for (const auto& function : this->functions_)
+			result += (function ^ 2);
+
+		return result.root(0.5);
 	}
 
 	size_t range_dimension(void) const {

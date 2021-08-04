@@ -57,7 +57,7 @@ private:
 	inline static std::map<std::pair<Figure, size_t>, std::vector<Space_Vector_>> key_to_mapping_nodes_;
 	inline static std::map<std::pair<Figure, size_t>, Vector_Function<Polynomial<space_dimension>>> key_to_mapping_monomial_vector_function_;
 	inline static std::map<std::pair<Figure, size_t>, Dynamic_Matrix_> key_to_inverse_mapping_monomial_matrix_;
-	inline static std::map<std::pair<Figure, size_t>, Quadrature_Rule<space_dimension>> key_to_quadrature_rule_;
+	inline static std::map<std::pair<Figure, size_t>, Quadrature_Rule<space_dimension>> key_to_reference_quadrature_rule_;
 	inline static std::map<std::pair<Figure, size_t>, std::vector<Space_Vector_>> key_to_post_node_set_;
 	inline static std::map<std::pair<Figure, size_t>, std::vector<std::vector<size_t>>> key_to_connectivity_;
 
@@ -74,7 +74,9 @@ public:
 	std::vector<std::vector<order>> face_node_index_orders_set(void) const;
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
 	std::vector<std::vector<order>> local_connectivities(void) const;
-	Vector_Function<Polynomial<space_dimension>> mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const;
+	Vector_Function<Polynomial<space_dimension>> mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const;
+	Irrational_Function<space_dimension> scale_function(const Vector_Function<Polynomial<space_dimension>>& mapping_function) const;
+	Quadrature_Rule<space_dimension> quadrature_rule(const Vector_Function<Polynomial<space_dimension>>& mapping_function, const size_t physical_integrand_order) const;
 
 	//Space_Vector_ calculate_normal(const std::vector<Space_Vector_>& nodes) const;
 	//double calculate_volume(const std::vector<Space_Vector_>& nodes) const;
@@ -102,10 +104,12 @@ public:
 
 private:	
 	std::vector<Space_Vector_> nodes_;
+	Vector_Function<Polynomial<space_dimension>> mapping_function_;
+	mutable std::map<size_t, Quadrature_Rule<space_dimension>> integrand_order_to_quadrature_rule_;
 		
 public:
 	Geometry(const ReferenceGeometry<space_dimension> reference_geometry, std::vector<Space_Vector_>&& consisting_nodes)
-		: reference_geometry_(reference_geometry), nodes_(std::move(consisting_nodes)) {};
+		: reference_geometry_(reference_geometry), nodes_(std::move(consisting_nodes)), mapping_function_(this->reference_geometry_.mapping_function(this->nodes_)) {};
 
 	Space_Vector_ center_node(void) const;
 	Space_Vector_ normal_vector(const Space_Vector_& owner_cell_center) const;
@@ -114,6 +118,7 @@ public:
 	std::vector<Geometry> faces_geometry(void) const;
 	std::vector<Space_Vector_> vertex_nodes(void) const;
 	bool is_axis_parallel(const Geometry& other, const size_t axis_tag) const;
+	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const size_t integrand_order) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_faces_nodes(void) const;
@@ -377,7 +382,7 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 }
 
 template <size_t space_dimension>
-Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_vector_function(const std::vector<Space_Vector_>& mapped_nodes) const {
+Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const {
 	const auto key = std::make_pair(this->figure_, this->figure_order_);
 	const auto& mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
 
@@ -400,6 +405,61 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 	const auto& monomial_vector_function = ReferenceGeometry::key_to_mapping_monomial_vector_function_.at(key);
 	return C * monomial_vector_function;
 }
+
+template <size_t space_dimension>
+Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_function(const Vector_Function<Polynomial<space_dimension>>& mapping_function) const {
+	switch (this->figure_)
+	{
+	case Figure::line: {
+		constexpr size_t r = 0;
+		const auto T_r = mapping_function.differentiate<r>();
+		return T_r.L2_norm();
+	}
+	case Figure::triangle:
+	case Figure::quadrilateral:{
+		constexpr size_t r = 0;
+		constexpr size_t s = 1;
+		const auto T_r = mapping_function.differentiate<r>();
+		const auto T_s = mapping_function.differentiate<s>();
+		const auto cross_product = T_r.cross_product(T_s);
+		return cross_product.L2_norm();
+	}
+	default:
+		throw std::runtime_error("not supported figure");
+		return Irrational_Function<space_dimension>();
+	}
+}
+
+template <size_t space_dimension>
+Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::quadrature_rule(const Vector_Function<Polynomial<space_dimension>>& mapping_function, const size_t physical_integrand_order) const {
+	const auto scale_function = this->scale_function(mapping_function);
+
+	constexpr auto heuristic_additional_order = 2;
+	const auto reference_integrand_order = physical_integrand_order + heuristic_additional_order;
+	const auto key = std::make_pair(this->figure_, reference_integrand_order);
+	if (ReferenceGeometry::key_to_reference_quadrature_rule_.find(key) == ReferenceGeometry::key_to_reference_quadrature_rule_.end())
+		ReferenceGeometry::key_to_reference_quadrature_rule_.emplace(key, this->reference_quadrature_rule(reference_integrand_order));
+
+	const auto& reference_quadrature_rule = ReferenceGeometry::key_to_reference_quadrature_rule_.at(key);
+
+	const auto transformed_QP_temp = mapping_function(reference_quadrature_rule.points);
+
+	const auto num_QP = transformed_QP_temp.size();
+	std::vector<Euclidean_Vector<space_dimension>> transformed_QP(num_QP);
+	std::vector<double> transformed_QW(num_QP);
+	
+	for (size_t i = 0; i < num_QP; ++i) {
+		for (size_t j = 0; j < space_dimension; ++j)
+			transformed_QP[i][j] = transformed_QP_temp[i].at(j);
+
+		const auto& point = reference_quadrature_rule.points[i];
+		const auto& weight = reference_quadrature_rule.weights[i];
+		transformed_QW[i] = scale_function(point) * weight;
+	}
+
+	return { transformed_QP, transformed_QW };
+}
+
 
 template <size_t space_dimension>
 std::vector<std::vector<order>> ReferenceGeometry<space_dimension>::local_connectivities(void) const {
@@ -821,6 +881,14 @@ bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other, const si
 }
 
 template<size_t space_dimension>
+const Quadrature_Rule<space_dimension>& Geometry<space_dimension>::get_quadrature_rule(const size_t integrand_order) const {
+	if (this->integrand_order_to_quadrature_rule_.find(integrand_order) == this->integrand_order_to_quadrature_rule_.end())
+		this->integrand_order_to_quadrature_rule_.emplace(integrand_order, this->reference_geometry_.quadrature_rule(this->mapping_function_, integrand_order));
+
+	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
+}
+
+template<size_t space_dimension>
 bool Geometry<space_dimension>::is_axis_parallel_node(const Space_Vector_& node, const size_t axis_tag) const {
 	for (const auto& my_node : this->nodes_) {
 		if (my_node.is_axis_translation(node,axis_tag))
@@ -831,12 +899,13 @@ bool Geometry<space_dimension>::is_axis_parallel_node(const Space_Vector_& node,
 
 template<size_t space_dimension>
 Geometry<space_dimension>::Space_Vector_ Geometry<space_dimension>::center_node(void) const {
-	Space_Vector_ center;
-	for (const auto& node : this->nodes_)
-		center += node;
+	const auto center_temp = this->mapping_function_(this->reference_geometry_.center_node());
 
-	const auto num_node = this->nodes_.size();
-	return center * (1.0 / num_node);
+	Space_Vector_ center;
+	for (size_t i = 0; i < space_dimension; ++i)
+		center[i] = center_temp.at(i);
+
+	return center;
 }
 
 //template<size_t space_dimension>
@@ -850,10 +919,16 @@ Geometry<space_dimension>::Space_Vector_ Geometry<space_dimension>::center_node(
 //		return -1 * normal;
 //}
 //
-//template<size_t space_dimension>
-//double Geometry<space_dimension>::volume(void) const {
-//	return this->reference_geometry_.calculate_volume(this->nodes_);
-//}
+template<size_t space_dimension>
+double Geometry<space_dimension>::volume(void) const {
+	const auto& quadrature_rule = this->get_quadrature_rule(0);
+
+	auto volume = 0.0;
+	for (const auto weight : quadrature_rule.weights)
+		volume += weight;
+
+	return volume;
+}
 
 template<size_t space_dimension>
 ElementType Element<space_dimension>::type(void) const {

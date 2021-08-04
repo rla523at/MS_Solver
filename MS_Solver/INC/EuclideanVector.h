@@ -40,6 +40,7 @@ public:
 	bool operator==(const Euclidean_Vector& y) const;
 	bool operator==(const Euclidean_Vector<0>& y) const;
 	double operator[](const size_t position) const;
+	double& operator[](const size_t position);
 
 	double at(const size_t position) const;
 	Euclidean_Vector& be_normalize(void);
@@ -188,6 +189,13 @@ double Euclidean_Vector<dim>::operator[](const size_t position) const {
 	dynamic_require(position <= dim, "Position should be less than dimension");
 	return this->vals_[position];
 }
+
+template <size_t dim>
+double& Euclidean_Vector<dim>::operator[](const size_t position) {
+	dynamic_require(position <= dim, "Position should be less than dimension");
+	return this->vals_[position];
+}
+
 
 template <size_t dim>
 double Euclidean_Vector<dim>::at(const size_t position) const {

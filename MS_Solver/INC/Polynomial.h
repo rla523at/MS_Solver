@@ -1,9 +1,8 @@
 #pragma once
-#include "EuclideanVector.h"
 #include "Vector_Function.h"
 
 #include <algorithm>
-
+#include <iostream>
 
 template <size_t domain_dimension_>
 class Irrational_Function;
@@ -11,12 +10,13 @@ class Irrational_Function;
 template <size_t domain_dimension_>
 class Polynomial
 {
-public: // for test
+//private: // for test
+public: 
 	class SimplePolyTerm;
 	class PoweredPolyTerm;
 	class PolyTerm;
 
-//private: //for test
+private:
 	std::vector<PolyTerm> added_poly_term_set_;
 	SimplePolyTerm simple_poly_term_ = 0.0;
 
@@ -35,25 +35,33 @@ public:
 	double operator()(const Euclidean_Vector<domain_dimension_>& domain_vector) const;
 	bool operator==(const Polynomial& other) const;
 
-	template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool> = true>	Polynomial& be_derivative(void);
-	template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool> = true>	Polynomial differentiate(void) const;
-	
 	static constexpr size_t domain_dimension(void);
 	size_t order(void) const;
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
 
+	template <size_t variable_index>
+	Polynomial& be_derivative(void);
+
+	template <size_t variable_index>
+	Polynomial differentiate(void) const;
 
 	//Vector_Function<Polynomial<domain_dimension_>> gradient(void) const;
 	//Vector_Function<Polynomial<domain_dimension_>> gradient(const size_t domain_dimension_) const;
 
 
-//private: for test
+private: 
 	void add_assign_poly_term(const PolyTerm& term);
 
 
+//Inner classes defintion
+private: 
 	class SimplePolyTerm
 	{
+	private:
+		std::array<double, domain_dimension_> coefficients_ = { 0 };
+		double constant_ = 0.0;
+
 	public:
 		SimplePolyTerm(const double constant) : constant_(constant) {};
 		SimplePolyTerm(const std::string& variable);
@@ -61,6 +69,7 @@ public:
 		SimplePolyTerm& operator+=(const SimplePolyTerm& other);
 		SimplePolyTerm& operator-=(const SimplePolyTerm& other);
 		SimplePolyTerm& operator*=(const double constant);
+		SimplePolyTerm operator+(const SimplePolyTerm& other) const;
 		SimplePolyTerm operator*(const double constant) const;
 		double operator()(const Euclidean_Vector<domain_dimension_>& domain_vector) const;
 		bool operator==(const SimplePolyTerm& other) const;
@@ -69,22 +78,26 @@ public:
 		bool operator>(const SimplePolyTerm& other) const;
 
 		double be_constant(void) const;
-		template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool> = true>	double differentiate(void) const;
 		size_t order(void) const;
 		bool is_constant(void) const;
 		std::string to_string(void) const;
 
-	private:
-		std::array<double, domain_dimension_> coefficients_ = { 0 };
-		double constant_ = 0.0;		
+		template <size_t VariableIndex>
+		double differentiate(void) const;
 	};
 
 
 	class PoweredPolyTerm
 	{
+	private:
+		SimplePolyTerm base_ = 0.0;
+		size_t exponent_ = 1;
+
 	public:
+		PoweredPolyTerm(void) = default;
 		PoweredPolyTerm(const double constant) : base_(constant) {};
 		PoweredPolyTerm(const SimplePolyTerm& simple_poly_term) : base_(simple_poly_term) {};
+		PoweredPolyTerm(const SimplePolyTerm& simple_poly_term, const size_t exponent) : base_(simple_poly_term), exponent_(exponent) {};
 
 		void multiply_assign_with_same_base(const PoweredPolyTerm& other);
 		double operator()(const Euclidean_Vector<domain_dimension_>& domain_vector) const;
@@ -93,19 +106,28 @@ public:
 		bool operator>(const PoweredPolyTerm& other) const;
 
 		double be_constant(void) const;
-		template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool> = true>	PolyTerm differentiate(void) const;
+		SimplePolyTerm be_simple(void) const;
 		bool has_same_base(const PoweredPolyTerm& other) const;
 		bool is_constant(void) const;
+		bool is_simple(void) const;
 		size_t order(void) const;
 		std::string to_string(void) const;
 
-	private:
-		SimplePolyTerm base_ = 1.0;
-		size_t exponent_ = 1;
+		template <size_t VariableIndex>
+		PolyTerm differentiate(void) const;
 	};
 
-	class PolyTerm
+
+	class PolyTerm	// SSO
 	{
+	private:
+		double coefficient_ = 1.0;
+		std::vector<PoweredPolyTerm> multiplied_powered_poly_term_set_;
+
+		size_t num_term_ = 0;
+		std::array<PoweredPolyTerm, 4> small_buffer_ = { 0 };
+		PoweredPolyTerm* data_ptr_ = small_buffer_.data();
+
 	public:
 		PolyTerm(const double coeeficient) : coefficient_(coeeficient) {};
 		PolyTerm(const SimplePolyTerm& simple_poly_term);
@@ -121,25 +143,19 @@ public:
 		PolyTerm& operator=(const PolyTerm& other);
 
 		double be_constant(void) const;
-		template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool> = true>	Polynomial differentiate(void) const;
+		SimplePolyTerm be_simple(void) const;
 		size_t order(void) const;
 		bool has_same_form(const PolyTerm& other) const;
-		bool is_constant(void) const;
+		bool is_simple(void) const;
 		bool is_zero(void) const;
 		std::string to_string(void) const;
+
+		template <size_t variable_index>
+		Polynomial differentiate(void) const;
 
 	private:
 		void multiply_assign_powered_poly_term(const PoweredPolyTerm& power_poly_term);
 		bool is_small(void) const;
-
-	//private:
-	public:
-		double coefficient_ = 1.0;
-		std::vector<PoweredPolyTerm> multiplied_powered_poly_term_set_;
-
-		size_t num_term_ = 0;
-		std::array<PoweredPolyTerm, 3> small_buffer_ = { 0,0,0 };
-		PoweredPolyTerm* data_ptr_ = small_buffer_.data();
 	};
 };
 
@@ -165,16 +181,18 @@ private:
 	double exponent_ = 1.0;
 
 public:
+	Irrational_Function(void) = default;
 	Irrational_Function(const Polynomial<domain_dimension_>& polynomial, const double root_index = 1.0) : base_(polynomial), exponent_(root_index) {};
 
 	double operator()(const Euclidean_Vector<domain_dimension_>& value_vector) const;
-
-	//bool operator==(const Irrational_Function& other) const;		
+	bool operator==(const Irrational_Function& other) const;		
+	
+	std::string to_string(void) const;
 	//size_t order(void) const;
-	//std::string to_string(void) const;
 };
 
-//std::ostream& operator<<(std::ostream& ostream, const Irrational_Function& irrational_function);
+template <size_t domain_dimension>
+std::ostream& operator<<(std::ostream& ostream, const Irrational_Function<domain_dimension>& irrational_function);
 
 namespace ms {
 	template <size_t domain_dimension_> std::vector<Euclidean_Vector<domain_dimension_>> polynomial_compare_node_set(const size_t polynomial_order);
@@ -184,15 +202,6 @@ namespace ms {
 	bool is_natural_number(const double val);
 }
 
-
-template <size_t domain_dimension_, size_t RangeDim>
-class PolynomialVectorFunction 
-{
-	PolynomialVectorFunction(const std::array<Polynomial<domain_dimension_>, RangeDim>& polynomial_vector) : polynomial_vector_(polynomial_vector) {};
-
-private:
-	std::array<Polynomial<domain_dimension_>, RangeDim> polynomial_vector_;
-};
 
 //template definition part
 template <size_t domain_dimension_> Polynomial<domain_dimension_>& Polynomial<domain_dimension_>::operator+=(const Polynomial& other) {
@@ -263,7 +272,8 @@ template <size_t domain_dimension_> Polynomial<domain_dimension_> Polynomial<dom
 	return result *= constant;
 }
 
-template <size_t domain_dimension_> Polynomial<domain_dimension_> Polynomial<domain_dimension_>::operator^(const size_t power_index) const {
+template <size_t domain_dimension_> 
+Polynomial<domain_dimension_> Polynomial<domain_dimension_>::operator^(const size_t power_index) const {
 	if (power_index == 0)
 		return 1;
 
@@ -295,19 +305,22 @@ bool Polynomial<domain_dimension_>::operator==(const Polynomial& other) const {
 }
 
 template <size_t domain_dimension_>
-template <size_t VariableIndex, std::enable_if_t<VariableIndex <domain_dimension_, bool>>
+template <size_t variable_index>
 Polynomial<domain_dimension_>& Polynomial<domain_dimension_>::be_derivative(void) {
-	auto result = this->differentiate<VariableIndex>();
+	auto result = this->differentiate<variable_index>();
 	return *this = std::move(result);
 };
 
 template <size_t domain_dimension_>
-template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool>>
+template <size_t variable_index>
 Polynomial<domain_dimension_> Polynomial<domain_dimension_>::differentiate(void) const {
+	if constexpr (domain_dimension_ <= variable_index)
+		return 0.0;
+
 	Polynomial result = 0.0;
-	result.simple_poly_term_ = this->simple_poly_term_.differentiate<VariableIndex>();
+	result.simple_poly_term_ = this->simple_poly_term_.differentiate<variable_index>();
 	for (const auto& poly_term : this->added_poly_term_set_)
-		result += poly_term.differentiate<VariableIndex>();
+		result += poly_term.differentiate<variable_index>();
 
 	return result;
 }
@@ -363,7 +376,8 @@ Irrational_Function<domain_dimension_> Polynomial<domain_dimension_>::root(const
 	return Irrational_Function<domain_dimension_>(*this, root_index);
 }
 
-template <size_t domain_dimension_> void Polynomial<domain_dimension_>::add_assign_poly_term(const PolyTerm& term) {
+template <size_t domain_dimension_> 
+void Polynomial<domain_dimension_>::add_assign_poly_term(const PolyTerm& term) {
 	for (auto iter = this->added_poly_term_set_.begin(); iter != this->added_poly_term_set_.end(); ++iter) {
 		if (iter->has_same_form(term)) {
 			iter->add_assign_with_same_form(term);
@@ -432,6 +446,12 @@ typename Polynomial<domain_dimension_>::SimplePolyTerm& Polynomial<domain_dimens
 }
 
 template <size_t domain_dimension_>
+typename Polynomial<domain_dimension_>::SimplePolyTerm Polynomial<domain_dimension_>::SimplePolyTerm::operator+(const SimplePolyTerm& other) const {
+	auto result = *this;
+	return result += other;
+}
+
+template <size_t domain_dimension_>
 typename Polynomial<domain_dimension_>::SimplePolyTerm Polynomial<domain_dimension_>::SimplePolyTerm::operator*(const double constant) const {
 	auto result = *this;
 	return result *= constant;
@@ -477,9 +497,9 @@ double Polynomial<domain_dimension_>::SimplePolyTerm::be_constant(void) const {
 }
 
 template <size_t domain_dimension_> 
-template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool>> 
+template <size_t variable_index> 
 double Polynomial<domain_dimension_>::SimplePolyTerm::differentiate() const {
-	return this->coefficients_[VariableIndex];
+	return this->coefficients_[variable_index];
 }
 
 //size_t Polynomial::SimplePolyTerm::domain_dimension_(void) const {
@@ -570,21 +590,10 @@ double Polynomial<domain_dimension_>::PoweredPolyTerm::be_constant(void) const {
 	return std::pow(this->base_.be_constant(), this->exponent_);
 }
 
-template <size_t domain_dimension_> 
-template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool>>
-typename Polynomial<domain_dimension_>::PolyTerm Polynomial<domain_dimension_>::PoweredPolyTerm::differentiate(void) const {
-	const auto base_derivative = this->base_.differentiate<VariableIndex>();
-	if (base_derivative == 0.0)
-		return 0.0;
+template <size_t domain_dimension_>
 
-	if (this->exponent_ == 1)
-		return base_derivative;
-	else {
-		auto tmp = *this;	
-		tmp.exponent_--;
-		PolyTerm result = tmp;
-		return result * (base_derivative * this->exponent_);
-	}
+typename Polynomial<domain_dimension_>::SimplePolyTerm Polynomial<domain_dimension_>::PoweredPolyTerm::be_simple(void) const {
+	return this->base_;
 }
 
 template <size_t domain_dimension_> 
@@ -592,8 +601,14 @@ bool Polynomial<domain_dimension_>::PoweredPolyTerm::has_same_base(const Powered
 	return this->base_ == other.base_;
 }
 
-template <size_t domain_dimension_> bool Polynomial<domain_dimension_>::PoweredPolyTerm::is_constant(void) const {
+template <size_t domain_dimension_>
+bool Polynomial<domain_dimension_>::PoweredPolyTerm::is_constant(void) const {
 	return this->base_.is_constant();
+}
+
+template <size_t domain_dimension_>
+bool Polynomial<domain_dimension_>::PoweredPolyTerm::is_simple(void) const {
+	return this->exponent_ == 1;
 }
 
 template <size_t domain_dimension_> size_t Polynomial<domain_dimension_>::PoweredPolyTerm::order(void) const {
@@ -603,7 +618,8 @@ template <size_t domain_dimension_> size_t Polynomial<domain_dimension_>::Powere
 		return this->exponent_;
 }
 
-template <size_t domain_dimension_> std::string Polynomial<domain_dimension_>::PoweredPolyTerm::to_string(void) const {
+template <size_t domain_dimension_> 
+std::string Polynomial<domain_dimension_>::PoweredPolyTerm::to_string(void) const {
 	auto str = this->base_.to_string();
 	if (this->exponent_ != 1)
 		return  str + "^" + std::to_string(this->exponent_);
@@ -611,6 +627,22 @@ template <size_t domain_dimension_> std::string Polynomial<domain_dimension_>::P
 		return str;
 }
 
+template <size_t domain_dimension_>
+template <size_t variable_index>
+typename Polynomial<domain_dimension_>::PolyTerm Polynomial<domain_dimension_>::PoweredPolyTerm::differentiate(void) const {
+	const auto base_derivative = this->base_.differentiate<variable_index>();
+	if (base_derivative == 0.0)
+		return 0.0;
+
+	if (this->exponent_ == 1)
+		return base_derivative;
+	else {
+		auto tmp = *this;
+		tmp.exponent_--;
+		PolyTerm result = tmp;
+		return result * (base_derivative * this->exponent_);
+	}
+}
 
 template <size_t domain_dimension_> 
 Polynomial<domain_dimension_>::PolyTerm::PolyTerm(const SimplePolyTerm& simple_poly_term) {
@@ -630,7 +662,7 @@ template <size_t domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::Pol
 template <size_t domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::PolyTerm(const PolyTerm& other) {
 	this->coefficient_ = other.coefficient_;
 	this->num_term_ = other.num_term_;
-	if (this->is_small()) {
+	if (other.is_small()) {
 		this->small_buffer_ = other.small_buffer_;
 		this->data_ptr_ = this->small_buffer_.data();
 	}
@@ -679,7 +711,7 @@ double Polynomial<domain_dimension_>::PolyTerm::operator()(const Euclidean_Vecto
 
 template <size_t domain_dimension_> 
 bool Polynomial<domain_dimension_>::PolyTerm::operator==(const PolyTerm& other) const {
-	return this->coefficient_ == other.coefficient_ && this->coefficient_ == other.coefficient_ && this->small_buffer_ == other.small_buffer_;
+	return this->coefficient_ == other.coefficient_ &&  this->small_buffer_ == other.small_buffer_;
 }
 
 template <size_t domain_dimension_> 
@@ -709,58 +741,77 @@ double Polynomial<domain_dimension_>::PolyTerm::be_constant(void) const {
 }
 
 template <size_t domain_dimension_>
-template <size_t VariableIndex, std::enable_if_t<VariableIndex < domain_dimension_, bool>>
-	Polynomial<domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::differentiate(void) const {
-		Polynomial<domain_dimension_> result = 0.0;
-		for (size_t i = 0; i < this->num_term_; ++i) {
-			const auto diff_term = this->data_ptr_[i].differentiate<VariableIndex>();
+typename Polynomial<domain_dimension_>::SimplePolyTerm Polynomial<domain_dimension_>::PolyTerm::be_simple(void) const {
+	return this->data_ptr_[0].be_simple() * this->coefficient_;
+}
 
-			if (!diff_term.is_zero()) {
-				PolyTerm derivative = this->coefficient_;
-				if (this->is_small()) {
-					size_t index = 0;
-					for (size_t j = 0; j < this->num_term_; ++j) {
-						if (j == i)
-							continue;
-						else {
-							derivative.small_buffer_[index++] = this->data_ptr_[j];
-							derivative.num_term_++;
-						}
-					}
-				}
-				else {
-					derivative = *this;
-					derivative.multiplied_powered_poly_term_set_.erase(derivative.multiplied_powered_poly_term_set_.begin() + i);
-				}
+template <size_t domain_dimension_>
+template <size_t variable_index>
+Polynomial<domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::differentiate(void) const {
+	Polynomial<domain_dimension_> result = 0.0;
 
-				derivative *= diff_term;
+	for (size_t i = 0; i < this->num_term_; ++i) {
+		const auto diff_term = this->data_ptr_[i].differentiate<variable_index>();
 
-				if (derivative.is_constant())
-					result.simple_poly_term_ += derivative.be_constant();
-				else
-					result.add_assign_poly_term(derivative);
+		if (diff_term.is_zero())
+			continue;
+
+		PolyTerm derivative = this->coefficient_;
+		if (this->is_small()) {
+			size_t index = 0;
+			for (size_t j = 0; j < this->num_term_; ++j) {
+				if (j == i)
+					continue;
+				else 
+					derivative.small_buffer_[index++] = this->data_ptr_[j];					
 			}
+			derivative.num_term_ = index;
+		}
+		else {
+			derivative = *this;
+			derivative.multiplied_powered_poly_term_set_.erase(derivative.multiplied_powered_poly_term_set_.begin() + i);
 		}
 
-		return result;
+		derivative *= diff_term;
+
+		if (derivative.is_simple())
+			result.simple_poly_term_ += derivative.be_simple();
+		else
+			result.add_assign_poly_term(derivative);
 	}
+
+	return result;
+}
 
 template <size_t domain_dimension_> 
 size_t Polynomial<domain_dimension_>::PolyTerm::order(void) const {
 	size_t result = 0;
+
 	for (size_t i = 0; i < this->num_term_; ++i)
 		result += this->data_ptr_[i].order();
+
 	return result;
 }
 
 template <size_t domain_dimension_> 
 bool Polynomial<domain_dimension_>::PolyTerm::has_same_form(const PolyTerm& other) const {
-	return this->coefficient_ == other.coefficient_ && this->small_buffer_ == other.small_buffer_;
+	if (this->num_term_ != other.num_term_)
+		return false;
+
+	for (size_t i = 0; i < this->num_term_; ++i) {
+		if (this->data_ptr_[i] != other.data_ptr_[i])
+			return false;
+	}
+
+	return true;
 }
 
 template <size_t domain_dimension_>
-bool Polynomial<domain_dimension_>::PolyTerm::is_constant(void) const {
-	return this->num_term_ == 0;
+bool Polynomial<domain_dimension_>::PolyTerm::is_simple(void) const {
+	if (this->num_term_ != 1)
+		return false;
+
+	return this->data_ptr_[0].is_simple();
 }
 
 template <size_t domain_dimension_>
@@ -797,7 +848,11 @@ void Polynomial<domain_dimension_>::PolyTerm::multiply_assign_powered_poly_term(
 		}
 	}
 
-	if (this->small_buffer_.size() < ++this->num_term_) {
+	this->num_term_++;
+
+	if (this->small_buffer_.size() < this->num_term_) {
+		std::cout << "\n poly term exceed small buffer \n";
+
 		this->multiplied_powered_poly_term_set_.resize(this->num_term_, 0.0);
 
 		if (this->num_term_ == this->small_buffer_.size() + 1) {
@@ -820,8 +875,23 @@ double Irrational_Function<domain_dimension_>::operator()(const Euclidean_Vector
 	return std::pow(this->base_(value_vector), this->exponent_);
 }
 
+template <size_t domain_dimension_>
+bool Irrational_Function<domain_dimension_>::operator==(const Irrational_Function& other) const {
+	return this->base_ == other.base_ && this->exponent_ == other.exponent_;
+}
 
+template <size_t domain_dimension_>
+std::string Irrational_Function<domain_dimension_>::to_string(void) const {
+	if (this->exponent_ != 1.0)
+		return "[" + this->base_.to_string() + "]^" + ms::double_to_string(this->exponent_);
+	else
+		return this->base_.to_string();
+}	
 
+template <size_t domain_dimension>
+std::ostream& operator<<(std::ostream& ostream, const Irrational_Function<domain_dimension>& irrational_function) {
+	return ostream << irrational_function.to_string();
+}
 
 //
 //

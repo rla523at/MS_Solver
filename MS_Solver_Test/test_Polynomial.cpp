@@ -2,6 +2,61 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Polynomial.h"
 
+TEST(PowerPolyTerm, differentiate_1) {
+	constexpr size_t space_dimension = 2;
+
+	const auto spt1 = Polynomial<space_dimension>::SimplePolyTerm("x0");
+	const auto spt2 = spt1 + 1;
+
+	const auto ppt1 = Polynomial<space_dimension>::PoweredPolyTerm(spt2, 2);
+	
+	constexpr size_t variable_index = 0;
+	const auto result = ppt1.differentiate<variable_index>();
+
+	const auto pt1 = Polynomial<space_dimension>::PolyTerm(spt2);
+	const auto ref = pt1 * 2;
+
+	EXPECT_EQ(result, ref);
+}
+
+
+TEST(PolyTerm, differentiate_1) {
+	constexpr size_t space_dimension = 2;
+	
+	const auto spt1 = Polynomial<space_dimension>::SimplePolyTerm("x0");	
+	const auto spt2 = spt1 + 1;
+
+	const auto pt1 = Polynomial<space_dimension>::PolyTerm(spt1);
+	const auto pt2 = Polynomial<space_dimension>::PolyTerm(spt2);
+	const auto pt3 = pt1 * pt2;
+
+	constexpr size_t variable_index = 0;
+	const auto result = pt3.differentiate<variable_index>();
+
+	const auto x = Polynomial<space_dimension>("x0");
+	const auto ref = 2 * x + 1;
+
+	EXPECT_EQ(result, ref);
+}
+TEST(PolyTerm, differentiate_2) {
+	constexpr size_t space_dimension = 2;
+
+	const auto spt1 = Polynomial<space_dimension>::SimplePolyTerm("x0");
+	const auto spt2 = spt1 + 1;
+
+	const auto pt1 = Polynomial<space_dimension>::PolyTerm(spt2);
+	const auto pt2 = pt1 * pt1;
+
+	constexpr size_t variable_index = 0;
+	const auto result = pt2.differentiate<variable_index>();
+
+	const auto x = Polynomial<space_dimension>("x0");
+	const auto ref = 2 * x + 2;
+
+	EXPECT_EQ(result, ref);
+}
+
+
 inline constexpr size_t space_dimension = 3;
 
 #define X Polynomial<space_dimension>("x0")
@@ -321,6 +376,43 @@ GTEST_TEST(Polynomial, operator_multiplication_19) {
 	const auto ref = (X ^ 4) + 2 * (X ^ 3) * Y + ((X * Y) ^ 2);
 	EXPECT_EQ(result, ref);
 }
+GTEST_TEST(Polynomial, operator_multiplication_20) {
+	const auto p1 = 0.25*Y +1.25;
+	const auto p2 = -0.25 * X + 0.25;
+	const auto result = p1 * p2;
+
+	const auto ref = (-1 * X * Y - 5 * X + Y + 5) * (1.0 / 16.0);
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, operator_multiplication_21) {
+	const auto p1 = X + 1;
+	const auto p2 = Y + 1;
+	const auto p3 = X - 1;
+	const auto p4 = Y - 1;
+	const auto result = p1 * p2 * p3 * p4;
+
+	const auto ref = (X ^ 2) * (Y ^ 2) - 1 * (X ^ 2) - 1 * (Y ^ 2) + 1;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, operator_multiplication_22) {
+	const auto p1 = Y + 1;
+	const auto p2 = Y - 1;
+	const auto result = p1 * p2;
+
+	const auto ref = (Y ^ 2) - 1;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, operator_multiplication_23) {
+	const auto p1 = X + 1;
+	const auto p2 = Y + 1;
+	const auto p3 = X - 1;
+	const auto p4 = p1 * p2 * p3;
+	const auto result = p4 * (Y - 1);
+
+	const auto ref = (X ^ 2) * (Y ^ 2) - 1 * (X ^ 2) - 1 * (Y ^ 2) + 1;
+	EXPECT_EQ(result, ref);
+}
+
 
 GTEST_TEST(Polynomial, operator_call_1) {
 	const Polynomial<space_dimension> m = 1;
@@ -404,7 +496,29 @@ GTEST_TEST(Polynomial, complex_operation_4) {
 	auto ref = -0.125 * X + 0.125 * Y + 0.5;
 	EXPECT_EQ(result, ref);
 }
+GTEST_TEST(Polynomial, complex_operation_5) {
+	const auto p1 = X + 1;
+	const auto p2 = Y + 1;
+	const auto p3 = X - 1;
+	const auto p4 = Y - 1;
+	const auto p5 = p1 * p2 - p3 * p4;
+	const auto result = p5 ^ 2;
 
+	const auto ref = 4 * (X ^ 2) + 8 * X * Y + 4 * (Y ^ 2);
+	EXPECT_EQ(result, ref);
+}
+
+GTEST_TEST(Polynomial, complex_operation_6) {
+	const auto p1 = 0.25 * Y + 1.25;
+	const auto p2 = -0.25 * Y - 0.75;
+	const auto p3 = 0.25 * X + 0.25;
+	const auto p4 = -0.25 * X + 0.25;
+	const auto p5 = p1 * p4 - p2 * p3;
+	const auto result = p5 ^ 2;
+
+	const auto ref = ((X ^ 2) + (Y ^ 2) - 2 * X * Y - 8 * X + 8 * Y + 16) * (1.0 / 64.0);
+	EXPECT_EQ(result, ref);
+}
 
 GTEST_TEST(Polynomial, order_1) {
 	const Polynomial<space_dimension> p = 0;
@@ -552,6 +666,15 @@ GTEST_TEST(Polynomial, differentiate_14) {
 	const auto result = p1.differentiate<variable_index>();
 
 	const auto ref = 0; 
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, differentiate_15) {
+	const auto p1 = X * Y + X;
+
+	constexpr size_t variable_index = 0;
+	const auto result = p1.differentiate<variable_index>();
+
+	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);
 }
 
