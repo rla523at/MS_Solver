@@ -461,7 +461,7 @@ template <size_t domain_dimension_>
 double Polynomial<domain_dimension_>::SimplePolyTerm::operator()(const Euclidean_Vector<domain_dimension_>& domain_vector) const {
 	auto result = this->constant_;
 	for (size_t i = 0; i < domain_dimension_; ++i)
-		result += this->coefficients_[i] * domain_vector[i];
+		result += this->coefficients_[i] * domain_vector.at(i);
 	return result;
 }
 

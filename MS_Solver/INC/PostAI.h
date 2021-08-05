@@ -153,7 +153,7 @@ void PostAI::record_solution_datas(const std::vector<Euclidean_Vector<num_equati
 
 		std::vector<double> vertex_share_cell_solutions(num_vertex_share_cell);
 		for (size_t i = 0; i < num_vertex_share_cell; ++i)
-			vertex_share_cell_solutions[i] = solutions[vertex_share_cell_indexes[i]][0];
+			vertex_share_cell_solutions[i] = solutions[vertex_share_cell_indexes[i]].at(0);
 
 		const auto min_solution = *std::min_element(vertex_share_cell_solutions.begin(), vertex_share_cell_solutions.end());
 		const auto max_solution = *std::max_element(vertex_share_cell_solutions.begin(), vertex_share_cell_solutions.end());
@@ -273,7 +273,7 @@ auto PostAI::calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimen
 
 		for (const auto& vnode : vnodes) {
 			for (size_t i = 0; i < space_dimension; ++i)
-				vnodes_coordinate_string += ms::double_to_str_sp(vnode[i]) + "\t";
+				vnodes_coordinate_string += ms::double_to_str_sp(vnode.at(i)) + "\t";
 
 			vnodes_coordinate_string += "\n";
 		}
@@ -297,7 +297,7 @@ auto PostAI::convert_to_solution_strings(const std::vector<Euclidean_Vector<num_
 
 		const auto& solution = solutions[i];
 		for (size_t j = 0; j < num_equation; ++j)
-			solution_string += ms::double_to_str_sp(solution[j]) + "\t";
+			solution_string += ms::double_to_str_sp(solution.at(j)) + "\t";
 
 		solution_strings.push_back(std::move(solution_string));
 	}

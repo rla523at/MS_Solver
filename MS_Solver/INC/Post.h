@@ -72,7 +72,7 @@ void Post<Governing_Equation>::grid(const std::vector<Element<space_dimension_>>
 		Post::num_post_points_[i] = post_nodes.size();
 		for (const auto node : post_nodes) {
 			for (size_t i = 0; i < space_dimension_; ++i, ++str_per_line) {
-				grid_post_data_text[i] += ms::double_to_string(node[i]) + " ";
+				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
 				if (str_per_line == 10) {
 					grid_post_data_text[i] += "\n";
 					str_per_line = 1;
@@ -127,7 +127,7 @@ void Post<Governing_Equation>::solution(const std::vector<Euclidean_Vector<num_e
 		for (size_t i = 0; i < num_solution; ++i) {
 			const auto& solution = solutions[i];
 			for (size_t j = 0; j < Post::num_post_points_[i]; ++j, ++str_per_line) {
-				solution_post_data_text[0] += ms::double_to_string(solution[0]) + " ";
+				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";
 					str_per_line = 1;

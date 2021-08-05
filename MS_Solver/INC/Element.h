@@ -154,11 +154,11 @@ public:
 	std::vector<std::vector<uint>> face_node_indexes_set(void) const;
 	std::vector<std::vector<uint>> face_vertex_node_indexes_set(void) const;
 
-
 //private:
 	bool is_periodic_boundary(void) const;
 	FaceType check_face_type(const Element& owner_cell_element) const;
 };
+
 
 //template definition part
 template <ushort space_dimension>
@@ -435,7 +435,7 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 	Matrix X(space_dimension, num_mapped_node);
 	for (size_t i = 0; i < space_dimension; ++i)
 		for (size_t j = 0; j < num_mapped_node; ++j)
-			X.at(i, j) = mapped_nodes[j][i];
+			X.at(i, j) = mapped_nodes[j].at(i);
 
 	const auto& inv_M = ReferenceGeometry::key_to_inverse_mapping_monomial_matrix_.at(key);
 	const auto C = X * inv_M;
@@ -761,8 +761,8 @@ std::array<double, space_dimension> Geometry<space_dimension>::coordinate_projec
 			const auto& end_node = face_nodes[1];
 			const auto node_to_node = end_node - start_node;
 
-			x_projected_volume += std::abs(node_to_node[0]);
-			y_projected_volume += std::abs(node_to_node[1]);
+			x_projected_volume += std::abs(node_to_node.at(0));
+			y_projected_volume += std::abs(node_to_node.at(1));
 		}
 
 		return { 0.5 * x_projected_volume, 0.5 * y_projected_volume };

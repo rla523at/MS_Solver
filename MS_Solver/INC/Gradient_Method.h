@@ -71,7 +71,7 @@ std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation, space_dimension>::c
         for (size_t j = 0; j < num_near_cell; ++j) {
             const auto solution_delta = solutions[near_cell_indexes[j]] - solutions[i];
             for (size_t k = 0; k < num_equation; ++k)
-                solution_delta_matrix.at(k, j) = solution_delta[k];
+                solution_delta_matrix.at(k, j) = solution_delta.at(k);
         }
         solution_delta_matrixes.push_back(std::move(solution_delta_matrix));
     }
@@ -115,7 +115,7 @@ Vertex_Least_Square<num_equation, space_dimension>::Vertex_Least_Square(const Gr
             const auto neighbor_center = neighbor_geometry.center_node();
             const auto center_to_center = neighbor_center - this_center;
             for (size_t j = 0; j < space_dimension; ++j)
-                center_to_center_matrix.at(j, i) = center_to_center[j];
+                center_to_center_matrix.at(j, i) = center_to_center.at(j);
         }
 
         const auto& Rc = center_to_center_matrix;

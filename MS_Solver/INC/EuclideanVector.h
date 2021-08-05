@@ -36,10 +36,9 @@ public:
 	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
 	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
 	Euclidean_Vector operator*(const double scalar) const;
-	//bool operator<(const Euclidean_Vector& y) const;
 	bool operator==(const Euclidean_Vector& y) const;
 	bool operator==(const Euclidean_Vector<0>& y) const;
-	double operator[](const size_t position) const;
+	//double operator[](const size_t position) const;
 	double& operator[](const size_t position);
 
 	double at(const size_t position) const;
@@ -153,16 +152,6 @@ template <size_t dim> Euclidean_Vector<dim> Euclidean_Vector<dim>::operator*(con
 	return result *= scalar;
 }
 
-//template <size_t dim>
-//bool Euclidean_Vector<dim>::operator<(const Euclidean_Vector& y) const {
-//	for (size_t i = 0; i < dim; ++i) {
-//		if (this->vals_[i] == y.vals_[i])
-//			continue;
-//		return this->vals_[i] < y.vals_[i];
-//	}
-//	return false;
-//}
-
 template <size_t dim> 
 bool Euclidean_Vector<dim>::operator==(const Euclidean_Vector& y) const {
 	for (size_t i = 0; i < dim; ++i) {
@@ -184,11 +173,11 @@ bool Euclidean_Vector<dim>::operator==(const Euclidean_Vector<0>& y) const {
 	return true;
 }
 
-template <size_t dim> 
-double Euclidean_Vector<dim>::operator[](const size_t position) const {
-	dynamic_require(position <= dim, "Position should be less than dimension");
-	return this->vals_[position];
-}
+//template <size_t dim> 
+//double Euclidean_Vector<dim>::operator[](const size_t position) const {
+//	dynamic_require(position <= dim, "Position should be less than dimension");
+//	return this->vals_[position];
+//}
 
 template <size_t dim>
 double& Euclidean_Vector<dim>::operator[](const size_t position) {
@@ -249,7 +238,7 @@ bool Euclidean_Vector<dim>::is_axis_translation(const Euclidean_Vector& other, c
 		if (i == axis_tag)
 			continue;
 
-		if (std::abs(line_vector[i]) > 1.0E-10)
+		if (std::abs(line_vector.at(i) > 1.0E-10))
 			return false;
 	}
 	return true;

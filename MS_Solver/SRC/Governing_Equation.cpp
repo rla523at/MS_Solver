@@ -2,7 +2,7 @@
 
 Linear_Advection_2D::Physical_Flux_ Linear_Advection_2D::physical_flux(const Solution_& solution) {
 	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speeds_;
-	const auto sol = solution[0];	//scalar
+	const auto sol = solution.at(0);	//scalar
 
 	Physical_Flux_ physical_flux = { x_advection_speed * sol , y_advection_speed * sol };
 	return physical_flux;
@@ -15,7 +15,7 @@ std::vector<Linear_Advection_2D::Physical_Flux_> Linear_Advection_2D::physical_f
 	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speeds_;
 	std::vector<Physical_Flux_> physical_fluxes(num_solution);
 	for (size_t i = 0; i < num_solution; ++i) {
-		const auto sol = solutions[i][0];	//scalar
+		const auto sol = solutions[i].at(0);	//scalar
 		physical_fluxes[i] = { x_advection_speed * sol , y_advection_speed * sol };
 	}
 
@@ -39,7 +39,7 @@ double Linear_Advection_2D::inner_face_maximum_lambda(const Solution_& solution_
 
 
 Burgers_2D::Physical_Flux_ Burgers_2D::physical_flux(const Solution_& solution) {
-	const auto sol = solution[0];
+	const auto sol = solution.at(0); //scalar
 
 	const auto temp_val = 0.5 * sol * sol;
 	return { temp_val, temp_val };
@@ -51,7 +51,7 @@ std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::v
 
 	std::vector<Physical_Flux_> physical_fluxes(num_solution);
 	for (size_t i = 0; i < num_solution; ++i) {
-		const auto sol = solutions[i][0];
+		const auto sol = solutions[i].at(0);	//scalar
 		const auto temp_val = 0.5 * sol * sol;
 		physical_fluxes[i] = { temp_val, temp_val };
 	}
@@ -64,7 +64,7 @@ std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::coordi
 
 	std::vector<std::array<double, Burgers_2D::space_dimension_>> projected_maximum_lambdas(num_solution);
 	for (size_t i = 0; i < num_solution; ++i) {
-		const auto maximum_lambdas = std::abs(solutions[i][0]);
+		const auto maximum_lambdas = std::abs(solutions[i].at(0));	//scalar
 		projected_maximum_lambdas[i] = { maximum_lambdas, maximum_lambdas };
 	}
 
@@ -72,17 +72,17 @@ std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::coordi
 }
 
 double Burgers_2D::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
-	const auto normal_component_sum = nomal_vector[0] + nomal_vector[1];	
-	return std::max(std::abs(solution_o[0] * normal_component_sum), std::abs(solution_n[0] * normal_component_sum));
+	const auto normal_component_sum = nomal_vector.at(0) + nomal_vector.at(1);
+	return std::max(std::abs(solution_o.at(0) * normal_component_sum), std::abs(solution_n.at(0) * normal_component_sum));
 }
 
 Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conservative_variable) {
 	constexpr auto gamma = 1.4;
 	
-	const auto rho = conservative_variable[0];
-	const auto rhou = conservative_variable[1];
-	const auto rhov = conservative_variable[2];
-	const auto rhoE = conservative_variable[3];
+	const auto rho = conservative_variable.at(0);
+	const auto rhou = conservative_variable.at(1);
+	const auto rhov = conservative_variable.at(2);
+	const auto rhoE = conservative_variable.at(3);
 
 	const auto one_over_rho = 1 / rho;	
 
@@ -100,9 +100,9 @@ std::vector<std::array<double, Euler_2D::space_dimension_>> Euler_2D::coordinate
 	std::vector<std::array<double,space_dimension_>> coordinate_projected_maximum_lambdas(num_solution);
 
 	for (size_t i = 0; i < num_solution; ++i) {
-		const auto u = primitive_variables[i][0];
-		const auto v = primitive_variables[i][1];
-		const auto a = primitive_variables[i][3];
+		const auto u = primitive_variables[i].at(0);
+		const auto v = primitive_variables[i].at(1);
+		const auto a = primitive_variables[i].at(3);
 
 		const auto x_projected_maximum_lambda = std::abs(u) + a;
 		const auto y_projected_maximum_lambda = std::abs(v) + a;
@@ -120,14 +120,14 @@ Euler_2D::Physical_Flux_ Euler_2D::physical_flux(const Solution_& cvariable) {
 
 
 Euler_2D::Physical_Flux_ Euler_2D::physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable) {
-	const auto rho = conservative_variable[0];
-	const auto rhou = conservative_variable[1];
-	const auto rhov = conservative_variable[2];
-	const auto rhoE = conservative_variable[3];
-	const auto u = primitivie_variable[0];
-	const auto v = primitivie_variable[1];
-	const auto p = primitivie_variable[2];
-	const auto a = primitivie_variable[3];
+	const auto rho = conservative_variable.at(0);
+	const auto rhou = conservative_variable.at(1);
+	const auto rhov = conservative_variable.at(2);
+	const auto rhoE = conservative_variable.at(3);
+	const auto u = primitivie_variable.at(0);
+	const auto v = primitivie_variable.at(1);
+	const auto p = primitivie_variable.at(2);
+	const auto a = primitivie_variable.at(3);
 	const auto rhouv = rhou * v;
 
 	return 
@@ -152,15 +152,15 @@ std::vector<Euler_2D::Physical_Flux_> Euler_2D::physical_fluxes(const std::vecto
 }
 
 double Euler_2D::inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector) {
-	const auto oc_u = oc_primitive_variable[0];
-	const auto oc_v = oc_primitive_variable[1];
-	const auto oc_a = oc_primitive_variable[3];	
-	const auto oc_side_face_maximum_lambda = std::abs(oc_u * nomal_vector[0] + oc_v * nomal_vector[1]) + oc_a;
+	const auto oc_u = oc_primitive_variable.at(0);
+	const auto oc_v = oc_primitive_variable.at(1);
+	const auto oc_a = oc_primitive_variable.at(3);	
+	const auto oc_side_face_maximum_lambda = std::abs(oc_u * nomal_vector.at(0) + oc_v * nomal_vector.at(1)) + oc_a;
 
-	const auto nc_u = nc_primitive_variable[0];
-	const auto nc_v = nc_primitive_variable[1];
-	const auto nc_a = nc_primitive_variable[3];
-	const auto nc_side_face_maximum_lambda = std::abs(nc_u * nomal_vector[0] + nc_v * nomal_vector[1]) + nc_a;
+	const auto nc_u = nc_primitive_variable.at(0);
+	const auto nc_v = nc_primitive_variable.at(1);
+	const auto nc_a = nc_primitive_variable.at(3);
+	const auto nc_side_face_maximum_lambda = std::abs(nc_u * nomal_vector.at(0) + nc_v * nomal_vector.at(1)) + nc_a;
 
 	return std::max(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
 }

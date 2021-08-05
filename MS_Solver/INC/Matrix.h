@@ -123,7 +123,7 @@ Euclidean_Vector<num_row> Matrix<num_row, num_column>::operator*(const Euclidean
 	if constexpr (num_row * num_column < ms::blas_mv_criteria) {
 		for (size_t i = 0; i < num_row; ++i)
 			for (size_t j = 0; j < num_column; ++j)
-				result[i] += this->values_[i * num_column + j] * x[j];
+				result[i] += this->values_[i * num_column + j] * x.at(j);
 	}
 	return result;
 }

@@ -231,7 +231,7 @@ MLP_Base<Gradient_Method>::MLP_Base(Grid<space_dimension_>&& grid) : gradient_me
         for (size_t i = 0; i < num_vertex; ++i) {
             const auto center_to_vertex = vertex_nodes[i] - center_node;
             for (size_t j = 0; j < space_dimension_; ++j)
-                center_to_vertex_matrix.at(j, i) = center_to_vertex[j];
+                center_to_vertex_matrix.at(j, i) = center_to_vertex.at(j);
         }
         this->center_to_vertex_matrixes_.push_back(std::move(center_to_vertex_matrix));
     }
@@ -256,7 +256,7 @@ auto MLP_Base<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(
 
         for (const auto cell_index : share_cell_indexes) {
             for (size_t i = 0; i < num_equation_; ++i)
-                equation_wise_solutions[i].push_back(solutions[cell_index][i]);
+                equation_wise_solutions[i].push_back(solutions[cell_index].at(i));
         }
 
         std::array<double, num_equation_> min_solution;

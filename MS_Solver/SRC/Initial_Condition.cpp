@@ -5,8 +5,8 @@ std::vector<Sine_Wave_2D::Solution> Sine_Wave_2D::calculate_solutions(const std:
 	
 	std::vector<Solution> solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i][0];
-		const auto y_coord = cell_centers[i][1];
+		const auto x_coord = cell_centers[i].at(0);
+		const auto y_coord = cell_centers[i].at(1);
 		solutions_[i] = std::sin(2 * pi_ * x_coord) * std::sin(2 * pi_ * y_coord);
 	}
 
@@ -21,8 +21,8 @@ std::vector<Sine_Wave_2D::Solution> Sine_Wave_2D::calculate_exact_solutions<Line
 
 	std::vector<Solution> exact_solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i][0];
-		const auto y_coord = cell_centers[i][1];
+		const auto x_coord = cell_centers[i].at(0);
+		const auto y_coord = cell_centers[i].at(1);
 		exact_solutions_[i] = std::sin(2 * pi_ * (x_coord - x_advection_speed * end_time)) * std::sin(2 * pi_ * (y_coord - y_advection_speed * end_time));
 	}
 
@@ -35,8 +35,8 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const 
 
 	std::vector<Solution> solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i][0];
-		const auto y_coord = cell_centers[i][1];
+		const auto x_coord = cell_centers[i].at(0);
+		const auto y_coord = cell_centers[i].at(1);
 
 		if (0.25 <= x_coord && x_coord <= 0.75 && 0.25 <= y_coord && y_coord <= 0.75)
 			solutions_[i] = 1;
@@ -55,8 +55,8 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<
 
 	std::vector<Solution> exact_solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i][0];
-		const auto y_coord = cell_centers[i][1];
+		const auto x_coord = cell_centers[i].at(0);
+		const auto y_coord = cell_centers[i].at(1);
 
 		//Assume that domian [0,1] x [0,1]
 		const auto exact_x_start	= 0.25 + x_advection_speed * end_time - static_cast<int>(0.25 + x_advection_speed * end_time);
