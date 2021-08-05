@@ -6,7 +6,7 @@ GTEST_TEST(ReferenceGeometry, nodes_1) {
 	constexpr size_t space_dimension = 2;
 	
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
@@ -17,7 +17,7 @@ GTEST_TEST(ReferenceGeometry, nodes_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
@@ -28,7 +28,7 @@ GTEST_TEST(ReferenceGeometry, nodes_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_nodes();
 
@@ -40,7 +40,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_monomial_vector_function();
 
@@ -53,7 +53,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_monomial_vector_function();
 
@@ -67,7 +67,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.mapping_monomial_vector_function();
 
@@ -82,7 +82,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
@@ -93,7 +93,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
@@ -104,7 +104,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
@@ -116,7 +116,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	constexpr size_t integrand_order = 0;
@@ -129,7 +129,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	for (size_t i = 0; i < 22; ++i) {
@@ -148,7 +148,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	constexpr size_t integrand_order = 11;
@@ -161,7 +161,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_4) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	for (size_t i = 0; i < 21; ++i) {
@@ -180,7 +180,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_5) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	constexpr size_t integrand_order = 11;
@@ -193,7 +193,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_6) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	for (size_t i = 0; i < 21; ++i) {
@@ -213,7 +213,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	Euclidean_Vector p1 = { 1,2 };
@@ -221,7 +221,6 @@ GTEST_TEST(ReferenceGeometry, mapping_function_1) {
 	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2 };
 
 	const auto result = ref_geometry.mapping_function(pv);
-	//std::cout << "\n" << result << "\n";
 
 	Euclidean_Vector rp1 = { -1,0 };
 	Euclidean_Vector rp2 = { 1,0 };
@@ -233,7 +232,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	Euclidean_Vector p1 = { 1,2 };
@@ -256,7 +255,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	Euclidean_Vector p1 = { 1,2 };
@@ -277,6 +276,7 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	EXPECT_EQ(p3, result(rp3));
 	EXPECT_EQ(p4, result(rp4));
 }
+
 
 //GTEST_TEST(ReferenceGeometry, scale_function_1) {
 //	constexpr size_t space_dimension = 2;
@@ -304,7 +304,7 @@ GTEST_TEST(Geometry, volume_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -323,7 +323,7 @@ GTEST_TEST(Geometry, volume_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -343,7 +343,7 @@ GTEST_TEST(Geometry, volume_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -362,7 +362,7 @@ GTEST_TEST(Geometry, volume_4) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -381,7 +381,7 @@ GTEST_TEST(Geometry, volume_5) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1.524,1 };
@@ -395,7 +395,6 @@ GTEST_TEST(Geometry, volume_5) {
 	const auto result = geometry.volume();
 
 	const auto ref = 0.01084153;
-	//EXPECT_EQ(result, ref); //suffer by round off error
 	//EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
 	EXPECT_NEAR(result, ref, 9.0E-16);
 }
@@ -403,7 +402,7 @@ GTEST_TEST(Geometry, volume_6) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };	
@@ -417,8 +416,37 @@ GTEST_TEST(Geometry, volume_6) {
 	const auto result = geometry.volume();
 
 	const auto ref = 0.362569100000000;
-	//EXPECT_EQ(result, ref); //suffer by round off error
-	EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
+	EXPECT_DOUBLE_EQ(result, ref);
+}
+
+
+GTEST_TEST(Geometry, quadrature_weight_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,2 };
+	const Euclidean_Vector n2 = { 1.5, 1.257 };
+	const Euclidean_Vector n3 = { 2.4874, 1.24 };
+
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	
+	for (ushort integrand_order = 0; integrand_order < 16; ++integrand_order) {
+		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_order);
+
+		double result = 0.0;
+		for (const auto weight : quadrature_rule.weights)
+			result += weight;
+
+		const auto ref = 0.362569100000000;
+		//EXPECT_DOUBLE_EQ(result, ref); //suffer by round off error
+		EXPECT_NEAR(result, ref, 1.0E-15);
+	}
 }
 
 
@@ -426,7 +454,7 @@ GTEST_TEST(Geometry, faces_nodes_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1.524,1 };
@@ -446,7 +474,7 @@ GTEST_TEST(Geometry, faces_nodes_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 
@@ -469,7 +497,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1.524,1 };
@@ -489,7 +517,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_2) {
 
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -510,7 +538,7 @@ GTEST_TEST(Geometry, center_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -527,77 +555,67 @@ GTEST_TEST(Geometry, center_1) {
 	EXPECT_EQ(result, ref);
 }
 
-//GTEST_TEST(Geometry, calculate_normal_1) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::line;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 3,1 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//
-//	const Euclidean_Vector cell_center = { 2,0 };
-//
-//	const auto normal = geometry.normal_vector(cell_center);
-//
-//	const auto tangent = n2 - n1;
-//	const auto normality = tangent.inner_product(normal);
-//	const double size = normal.norm();
-//	const double direction = normal.inner_product({ 0,1 });
-//
-//
-//	const double normality_ref = 0;
-//	const double size_ref = 1;
-//	const double direction_ref = 1;
-//
-//	EXPECT_EQ(normality, normality_ref);
-//	EXPECT_EQ(size, size_ref);
-//	EXPECT_EQ(direction, direction_ref);
-//}
-//GTEST_TEST(Geometry, calculate_normal_2) {
-//	constexpr size_t space_dimension = 2;
-//
-//	const Figure fig = Figure::line;
-//	const order fig_order = 1;
-//	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 3,1 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//
-//	Euclidean_Vector cell_center = { 2,2 };
-//
-//	const auto normal = geometry.normal_vector(cell_center);
-//
-//	const auto tangent = n2 - n1;
-//	const auto normality = tangent.inner_product(normal);
-//	const double size = normal.norm();
-//	const double direction = normal.inner_product({ 0,1 });
-//
-//	//std::cout << normal; -0이 나오는데 뭔가 좀 이상하다~
-//
-//	const double normality_ref = 0;
-//	const double size_ref = 1;
-//	const double direction_ref = -1;
-//
-//	EXPECT_EQ(normality, normality_ref);
-//	EXPECT_EQ(size, size_ref);
-//	EXPECT_EQ(direction, direction_ref);
-//}
+GTEST_TEST(Geometry, normalized_normal_vector_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 3,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
+
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+	const auto normal = geometry.normalized_normal_vector(geometry.center_node());
+
+	const auto tangent = n2 - n1;
+	const auto normality = tangent.inner_product(normal);
+	const double size = normal.norm();
+	const double direction = normal.inner_product({ 0,1 });
+
+
+	const double normality_ref = 0;
+	const double size_ref = 1;
+	const double direction_ref = 1;
+
+	EXPECT_EQ(normality, normality_ref);
+	EXPECT_EQ(size, size_ref);
+	EXPECT_EQ(direction, direction_ref);
+}
+GTEST_TEST(Geometry, normalized_normal_vector_2) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
+
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+	const auto normal = geometry.normalized_normal_vector(geometry.center_node());
+
+	const auto tangent = n2 - n1;
+	const auto normality = tangent.inner_product(normal);
+	const double size = normal.norm();
+
+
+	const double normality_ref = 0;
+	const double size_ref = 1;
+
+	EXPECT_EQ(normality, normality_ref);
+	EXPECT_DOUBLE_EQ(size, size_ref);
+}
 
 GTEST_TEST(Geometry, is_axis_parallel_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::line;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 0,0 };
@@ -619,7 +637,7 @@ GTEST_TEST(Element, vertex_node_indexes_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -630,12 +648,12 @@ GTEST_TEST(Element, vertex_node_indexes_1) {
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
 	ElementType element_type = ElementType::cell;
-	std::vector<size_t> indexes = { 5,6,7,8 };
+	std::vector<uint> indexes = { 5,6,7,8 };
 
 	Element element(element_type, std::move(geometry), std::move(indexes));
 	const auto result = element.vertex_node_indexes();
 
-	const std::vector<size_t> ref = { 5,6,7,8 };
+	const std::vector<uint> ref = { 5,6,7,8 };
 	EXPECT_EQ(ref, result);
 }
 
@@ -644,7 +662,7 @@ GTEST_TEST(Element, face_node_indexes_set) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -656,12 +674,12 @@ GTEST_TEST(Element, face_node_indexes_set) {
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
 	ElementType element_type = ElementType::cell;
-	std::vector<size_t> indexes = { 5,6,7,8 };
+	std::vector<uint> indexes = { 5,6,7,8 };
 
 	Element element(element_type, std::move(geometry), std::move(indexes));
 	const auto result = element.face_node_indexes_set();
 
-	const std::vector<std::vector<size_t>> ref = { {5,6},{6,7},{7,8},{8,5} };
+	const std::vector<std::vector<uint>> ref = { {5,6},{6,7},{7,8},{8,5} };
 	EXPECT_EQ(ref, result);
 }
 
@@ -670,7 +688,7 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
-	const order fig_order = 1;
+	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
@@ -682,14 +700,155 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
 
 	ElementType element_type = ElementType::cell;
-	std::vector<size_t> indexes = { 5,6,7,8 };
+	std::vector<uint> indexes = { 5,6,7,8 };
 
 	Element element(element_type, std::move(geometry), std::move(indexes));
 	const auto result = element.face_vertex_node_indexes_set();
 
-	const std::vector<std::vector<size_t>> ref = { {5,6},{6,7},{7,8},{8,5} };
+	const std::vector<std::vector<uint>> ref = { {5,6},{6,7},{7,8},{8,5} };
 	EXPECT_EQ(ref, result);
 }
+
+TEST(Element, check_face_type_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 3,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 1,2 };
+
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::triangle;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n3 = { 3,3 };
+	std::vector<Euclidean_Vector<2>> cell_nodes = { n1,n2,n3 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.check_face_type(cell_element);
+	const auto ref = FaceType::inward_face;
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, check_face_type_2) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 3,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n2,n1 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 2,1 };
+
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::triangle;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n3 = { 3,3 };
+	std::vector<Euclidean_Vector<2>> cell_nodes = { n1,n2,n3 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.check_face_type(cell_element);
+	const auto ref = FaceType::outward_face;
+
+	EXPECT_EQ(result, ref);
+}
+
+TEST(Element, normalized_normal_vector_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 3,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 1,2 };
+	
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::triangle;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n3 = { 3,3 };
+	std::vector<Euclidean_Vector<2>> cell_nodes = { n1,n2,n3 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.normalized_normal_vector(cell_element, face_element.geometry_.center_node());
+
+	const Euclidean_Vector ref = { 0,-1 };
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, normalized_normal_vector_2) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 3,1 };
+	std::vector<Euclidean_Vector<2>> nodes = { n2,n1 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 2,1 };
+
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::triangle;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n3 = { 3,3 };
+	std::vector<Euclidean_Vector<2>> cell_nodes = { n1,n2,n3 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.normalized_normal_vector(cell_element, face_element.geometry_.center_node());
+
+	const Euclidean_Vector ref = { 0,-1 };
+
+	EXPECT_EQ(result, ref);
+}
+
 
 //GTEST_TEST(Geometry, periodic_match_2) {
 //	const Figure fig = Figure::line;

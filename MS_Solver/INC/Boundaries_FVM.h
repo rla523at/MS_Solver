@@ -16,7 +16,7 @@ private:
 protected:
     size_t num_boundaries_ = 0;
     std::vector<Space_Vector_> normals_;
-    std::vector<size_t> oc_indexes_;
+    std::vector<uint> oc_indexes_;
     std::vector<double> areas_;    
     std::vector<std::unique_ptr<Boundary_Flux_Function<Governing_Equation>>> boundary_flux_functions_;
 
@@ -70,17 +70,29 @@ template <typename Governing_Equation>
 Boundaries_FVM_Base<Governing_Equation>::Boundaries_FVM_Base(Grid<space_dimension_>&& grid) {
     SET_TIME_POINT;
 
-    this->num_boundaries_ = grid.elements.boundary_elements.size();
+    this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
 
+    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& boundary_elements = grid.elements.boundary_elements;
+
+    this->num_boundaries_ = boundary_elements.size();
     this->areas_.reserve(this->num_boundaries_);
     this->boundary_flux_functions_.reserve(this->num_boundaries_);
-    for (const auto& element : grid.elements.boundary_elements) {
-        this->areas_.push_back(element.geometry_.volume());
-        this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Governing_Equation>::make(element.type()));
-    }
+    this->normals_.reserve(this->num_boundaries_);
 
-    this->normals_ = std::move(grid.connectivity.boundary_normals);
-    this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
+    for (uint i = 0; i < num_boundaries_; ++i) {
+        const auto& boundary_element = boundary_elements[i];
+        
+        this->areas_.push_back(boundary_element.geometry_.volume());
+        this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Governing_Equation>::make(boundary_element.type()));
+        
+        const auto oc_index = this->oc_indexes_[i];
+        const auto& oc_element = cell_elements[oc_index];
+
+        const auto center = boundary_element.geometry_.center_node();
+
+        this->normals_.push_back(boundary_element.normalized_normal_vector(oc_element, center));
+    }
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();

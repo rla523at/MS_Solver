@@ -1,6 +1,5 @@
 #pragma once
 #include "Grid_File_Type.h"
-#include "Element.h"
 #include "Profiler.h"
 #include "Log.h"
 
@@ -8,7 +7,9 @@
 #include <unordered_set>
 #include <sstream>
 
-template <size_t space_dimension>
+
+
+template <ushort space_dimension>
 struct Grid_Elements
 {
 	std::vector<Element<space_dimension>> cell_elements;
@@ -18,18 +19,11 @@ struct Grid_Elements
 };
 
 
-namespace ms {
-	inline ElementType string_to_element_type(const std::string& str);
-	template <typename T>
-	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<size_t>& indexes);
-}
-
-
-template <typename Grid_File_Type, size_t space_dimension>
+template <typename Grid_File_Type, ushort space_dimension>
 class Grid_Element_Builder;
 
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 class Grid_Element_Builder<Gmsh, space_dimension>
 {
 	using Space_Vector_ = Euclidean_Vector<space_dimension>;
@@ -48,8 +42,15 @@ public:
 };
 
 
+namespace ms {
+	inline ElementType string_to_element_type(const std::string& str);
+	template <typename T>
+	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes);
+}
+
+
 //template definition part
-template <size_t space_dimension>
+template <ushort space_dimension>
 Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file(const std::string& grid_file_name) {
 	SET_TIME_POINT;
 	Log::content_ << "================================================================================\n";
@@ -77,35 +78,38 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::buil
 	return make_elements(element_text, physical_name_text, node_datas);
 }
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 std::vector<Euclidean_Vector<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension>::make_node_datas(const Text& node_text) {
 	std::vector<Space_Vector_> node_datas;
 	node_datas.reserve(node_text.size());
+
 	for (const auto& node_data : node_text) {
 		const char delimiter = ' ';
 		auto parsed_data_set = ms::parse(node_data, delimiter);
 
 		//const auto node_index = ms::string_to_value<size_t>(parsed_data_set[0]);
 		std::array<double, space_dimension> node_coords;
-		for (size_t i = 0; i < space_dimension; ++i)
+		for (ushort i = 0; i < space_dimension; ++i)
 			node_coords[i] = ms::string_to_value<double>(parsed_data_set[i + 1]);
 
 		node_datas.push_back(node_coords);
 	}
+
 	return node_datas;
 }
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Space_Vector_>& node_datas) {
 	SET_TIME_POINT;
 
-	std::map<indx, ElementType> physical_group_index_to_element_type;
+	std::map<ushort, ElementType> physical_group_index_to_element_type;
+
 	for (const auto& physical_name_sentence : physical_name_text) {
 		const char delimiter = ' ';
 		const auto parsed_sentence_set = ms::parse(physical_name_sentence, delimiter);
 
 		//const size_t dimension		= parsed_sentence_set[0].toValue<size_t>();
-		const auto physical_group_index	= ms::string_to_value<indx>(parsed_sentence_set[1]);
+		const auto physical_group_index	= ms::string_to_value<ushort>(parsed_sentence_set[1]);
 		const auto name					= ms::erase(parsed_sentence_set[2], "\"");
 		const auto element_type			= ms::string_to_element_type(name);
 
@@ -115,11 +119,12 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 	std::vector<Element<space_dimension>> cell_elements;
 	std::vector<Element<space_dimension>> boundary_elements;
 	std::vector<Element<space_dimension>> periodic_boundary_elements;
+
 	for (const auto& element_sentence : element_text) {
 		const auto delimiter = ' ';
 		const auto parsed_sentences = ms::parse(element_sentence, delimiter);
 
-		auto value_set = ms::string_to_value_set<indx>(parsed_sentences);
+		auto value_set = ms::string_to_value_set<uint>(parsed_sentences);
 
 		//const auto index					= value_set[0];
 		const auto figure_type_index		= value_set[1];
@@ -133,12 +138,12 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 		auto reference_geometry = ReferenceGeometry<space_dimension>(figure, figure_order);
 
 		//geometry
-		constexpr size_t num_index = 5;
+		constexpr ushort num_index = 5;
 		value_set.erase(value_set.begin(), value_set.begin() + num_index);
 
 		const auto num_nodes = value_set.size();
-		std::vector<size_t> node_indexes(num_nodes);
-		for (size_t i = 0; i < num_nodes; ++i)
+		std::vector<uint> node_indexes(num_nodes);
+		for (ushort i = 0; i < num_nodes; ++i)
 			node_indexes[i] = value_set[i] - 1;		//Gmsh node index start with 1
 
 		auto nodes = ms::extract_by_index(node_datas, node_indexes);
@@ -174,10 +179,11 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 	return { cell_elements, boundary_elements, periodic_boundary_element_pairs, inner_face_elements };
 }
 
-template<size_t space_dimension>
+template<ushort space_dimension>
 std::vector<Element<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension>::make_inner_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements) {
 	//construct inner face elements
-	std::map<std::vector<size_t>, Element<space_dimension>> vnode_indexes_to_inner_face_element;
+	std::map<std::vector<uint>, Element<space_dimension>> vnode_indexes_to_inner_face_element;
+
 	for (const auto& cell_element : cell_elements) {
 		auto inner_face_elements = cell_element.make_inner_face_elements();
 		for (auto& inner_face_element : inner_face_elements) {
@@ -213,23 +219,23 @@ std::vector<Element<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension
 	return inner_face_elements;
 }
 
-template<size_t space_dimension>
+template<ushort space_dimension>
 std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_Element_Builder<Gmsh, space_dimension>::match_periodic_boundaries(std::vector<Element<space_dimension>>& periodic_boundary_elements) {
 	
 	const auto num_periodic_element = periodic_boundary_elements.size();
-	const auto num_pair = static_cast<size_t>(0.5 * num_periodic_element);
+	const auto num_pair = static_cast<uint>(0.5 * num_periodic_element);
 
-	std::unordered_set<size_t> matched_index;
+	std::unordered_set<uint> matched_index;
 	matched_index.reserve(num_periodic_element);
 
 	std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> matched_periodic_element_pairs;
 	matched_periodic_element_pairs.reserve(num_pair);
 
-	for (size_t i = 0; i < num_periodic_element; ++i) {
+	for (uint i = 0; i < num_periodic_element; ++i) {
 		if (matched_index.find(i) != matched_index.end())
 			continue;
 
-		for (size_t j = i + 1; j < num_periodic_element; ++j) {
+		for (uint j = i + 1; j < num_periodic_element; ++j) {
 			if (matched_index.find(j) != matched_index.end())
 				continue;
 
@@ -250,7 +256,7 @@ std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_
 
 
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 Text Grid_Element_Builder<Gmsh, space_dimension>::read_about(std::ifstream& grid_file_stream, const std::string& target) {
 	const auto target_str = "$" + target;
 
@@ -287,10 +293,11 @@ namespace ms {
 	}
 
 	template <typename T>
-	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<size_t>& indexes) {
+	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes) {
 		const auto num_extracted_value = indexes.size();
 		std::vector<T> extracted_values(num_extracted_value);
-		for (size_t i = 0; i < num_extracted_value; ++i)
+
+		for (ushort i = 0; i < num_extracted_value; ++i)
 			extracted_values[i] = set[indexes[i]]; // index start with 1
 
 		return extracted_values;

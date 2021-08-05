@@ -4,7 +4,7 @@
 
 
 //FVM이면 공통으로 사용하는 variable
-template <size_t space_dimension>
+template <ushort space_dimension>
 class Inner_Faces_FVM_Base
 {
 private:
@@ -13,7 +13,7 @@ private:
 protected:
     size_t num_inner_face_ = 0;
     std::vector<Space_Vector_> normals_;
-    std::vector<std::pair<size_t, size_t>> oc_nc_index_pairs_;
+    std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
     std::vector<double> areas_;
 
 public:
@@ -22,7 +22,7 @@ public:
 
 
 //FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
-template <size_t space_dimension>
+template <ushort space_dimension>
 class Inner_Faces_FVM_Constant : public Inner_Faces_FVM_Base<space_dimension>
 {
 private:
@@ -38,7 +38,7 @@ public:
 
 
 //FVM이고 Linear Reconstruction이면 공통으로 사용하는 variable & Method
-template <size_t space_dimension>
+template <ushort space_dimension>
 class Inner_Faces_FVM_Linear : public Inner_Faces_FVM_Base<space_dimension>
 {
 private:
@@ -56,25 +56,38 @@ public:
 
 
 // template definition part
-template <size_t space_dimension>
+template <ushort space_dimension>
 Inner_Faces_FVM_Base<space_dimension>::Inner_Faces_FVM_Base(Grid<space_dimension> && grid) {
     SET_TIME_POINT;
 
-    this->num_inner_face_ = grid.elements.inner_face_elements.size();
-
-    this->areas_.reserve(this->num_inner_face_);
-    for (const auto& element : grid.elements.inner_face_elements)
-        this->areas_.push_back(element.geometry_.volume());
-
-    this->normals_ = std::move(grid.connectivity.inner_face_normals);
     this->oc_nc_index_pairs_ = std::move(grid.connectivity.inner_face_oc_nc_index_pairs);
+
+    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& inner_face_elements = grid.elements.inner_face_elements;
+
+    this->num_inner_face_ = inner_face_elements.size();
+    this->areas_.reserve(this->num_inner_face_);
+    this->normals_.reserve(this->num_inner_face_);
+
+    for (uint i = 0; i < this->num_inner_face_; ++i) {
+        const auto& inner_face_element = inner_face_elements[i];
+
+        this->areas_.push_back(inner_face_element.geometry_.volume());
+
+        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
+        const auto& oc_element = cell_elements[oc_index];
+
+        const auto inner_face_center = inner_face_element.geometry_.center_node();
+
+        this->normals_.push_back(inner_face_element.normalized_normal_vector(oc_element, inner_face_center));        
+    }
 
     Log::content_ << std::left << std::setw(50) << "@ Inner faces FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 }
 
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 template<typename Numerical_Flux_Function, typename Residual, typename Solution>
 void Inner_Faces_FVM_Constant<space_dimension>::calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions) const {
     const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, this->normals_, this->oc_nc_index_pairs_);
@@ -87,7 +100,7 @@ void Inner_Faces_FVM_Constant<space_dimension>::calculate_RHS(std::vector<Residu
 }
 
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 Inner_Faces_FVM_Linear<space_dimension>::Inner_Faces_FVM_Linear(Grid<space_dimension>&& grid) : Inner_Faces_FVM_Base<space_dimension>(std::move(grid)) {
     SET_TIME_POINT;
 
@@ -116,7 +129,7 @@ Inner_Faces_FVM_Linear<space_dimension>::Inner_Faces_FVM_Linear(Grid<space_dimen
 };
 
 
-template <size_t space_dimension>
+template <ushort space_dimension>
 template <typename Numerical_Flux_Function, size_t num_equation>
 void Inner_Faces_FVM_Linear<space_dimension>::calculate_RHS(std::vector<Euclidean_Vector<num_equation>>& RHS, const Linear_Reconstructed_Solution<num_equation, space_dimension>& linear_reconstructed_solution) const {
     const auto& solutions = linear_reconstructed_solution.solutions;

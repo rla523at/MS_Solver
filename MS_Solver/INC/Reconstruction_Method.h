@@ -64,9 +64,9 @@ private:
 protected:
     Gradient_Method gradient_method;
 
-	std::vector<std::vector<size_t>> vnode_indexes_set_;
+	std::vector<std::vector<uint>> vnode_indexes_set_;
 	std::vector<Dynamic_Matrix_> center_to_vertex_matrixes_;
-	std::unordered_map<size_t, std::set<size_t>> vnode_index_to_share_cell_indexes_;
+	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
 
 public:
     auto reconstruct_solutions(const std::vector<Solution_>& solutions) const;
@@ -164,7 +164,7 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
     PostAI::record_solution_datas(solutions, solution_gradients);
 
     const auto num_cell = solutions.size();
-    for (size_t i = 0; i < num_cell; ++i) {
+    for (uint i = 0; i < num_cell; ++i) {
         auto& gradient = solution_gradients[i];
         const auto vertex_solution_delta_matrix = gradient * this->center_to_vertex_matrixes_[i];
 
@@ -174,11 +174,11 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
         const auto& vnode_indexes = this->vnode_indexes_set_[i];
         const auto num_vertex = vnode_indexes.size();
 
-        for (size_t j = 0; j < num_vertex; ++j) {
+        for (ushort j = 0; j < num_vertex; ++j) {
             const auto vnode_index = vnode_indexes[j];
             const auto& [min_solution, max_solution] = vnode_index_to_min_max_solution.at(vnode_index);
 
-            for (size_t e = 0; e < num_equation_; ++e) {
+            for (ushort e = 0; e < num_equation_; ++e) {
                 const auto limiting_value = this->limit(vertex_solution_delta_matrix.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
@@ -186,8 +186,8 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
 
         PostAI::record_limiting_value(i, limiting_values);
 
-        for (size_t i = 0; i < num_equation_; ++i)
-            for (size_t j = 0; j < space_dimension_; ++j)
+        for (ushort i = 0; i < num_equation_; ++i)
+            for (ushort j = 0; j < space_dimension_; ++j)
                 gradient.at(i, j) *= limiting_values.at(i);
     }
 
