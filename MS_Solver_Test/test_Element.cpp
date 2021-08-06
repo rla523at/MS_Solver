@@ -632,6 +632,180 @@ GTEST_TEST(Geometry, is_axis_parallel_1) {
 	EXPECT_FALSE(geometry.is_axis_parallel(geometry2, axis_tag));
 }
 
+GTEST_TEST(Geometry, orthonormal_basis_1) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,2 };
+	const Euclidean_Vector n2 = { 3,1 };
+	const Euclidean_Vector n3 = { 4,1 };
+	const Euclidean_Vector n4 = { 1,3 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	for (ushort i = 0; i < 6; ++i) {
+		const auto polynomial_order = i;
+		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+
+		double max_error = 0.0;
+		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
+			for (ushort j = 0; j <= i; ++j) {
+				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+
+				if (i == j)
+					max_error = std::max(max_error, std::abs(1 - result));
+				else
+					max_error = std::max(max_error, std::abs(result));
+			}
+		}
+
+		constexpr double allowable_error = 1.0E-15;
+		EXPECT_LE(max_error, allowable_error);
+	}
+}
+GTEST_TEST(Geometry, orthonormal_basis_2) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 0,2 };
+	const Euclidean_Vector n2 = { 2,0 };
+	const Euclidean_Vector n3 = { 2,2 };
+	const Euclidean_Vector n4 = { 0,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	for (ushort i = 0; i < 6; ++i) {
+		const auto polynomial_order = i;
+		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+
+		double max_error = 0.0;
+		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
+			for (ushort j = 0; j <= i; ++j) {
+				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+
+				if (i == j)
+					max_error = std::max(max_error, std::abs(1 - result));
+				else
+					max_error = std::max(max_error, std::abs(result));
+			}
+		}
+
+		constexpr double allowable_error = 1.0E-15;
+		EXPECT_LE(max_error, allowable_error);
+	}
+}
+GTEST_TEST(Geometry, orthonormal_basis_3) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,2 };
+	const Euclidean_Vector n2 = { 2.4874,1.257 };
+	const Euclidean_Vector n3 = { 3.4874,1.24 };
+	const Euclidean_Vector n4 = { 1,2.577 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	for (ushort i = 0; i < 6; ++i) {
+		const auto polynomial_order = i;
+		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+
+		double max_error = 0.0;
+		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
+			for (ushort j = 0; j <= i; ++j) {
+				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+
+				if (i == j)
+					max_error = std::max(max_error, std::abs(1 - result));
+				else
+					max_error = std::max(max_error, std::abs(result));
+			}
+		}
+
+		constexpr double allowable_error = 1.0E-15;
+		EXPECT_LE(max_error, allowable_error);
+	}
+}
+GTEST_TEST(Geometry, orthonormal_basis_4) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148};
+	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218};
+	const Euclidean_Vector n3 = { 0.3309655464243111, 0.3010404355350647};
+	const Euclidean_Vector n4 = { 0.3359655464243111, 0.2910404355350647};
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	for (ushort i = 0; i < 6; ++i) {
+		const auto polynomial_order = i;
+		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+
+		double max_error = 0.0;
+		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
+			for (ushort j = 0; j <= i; ++j) {
+				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+
+				if (i == j)
+					max_error = std::max(max_error, std::abs(1 - result));
+				else
+					max_error = std::max(max_error, std::abs(result));
+			}
+		}
+
+		constexpr double allowable_error = 1.0E-15;
+		EXPECT_LE(max_error, allowable_error);
+	}
+}
+GTEST_TEST(Geometry, orthonormal_basis_5) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148 };
+	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218 };
+	const Euclidean_Vector n3 = { 0.3309655464243111, 0.3010404355350647 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	for (ushort i = 0; i < 6; ++i) {
+		const auto polynomial_order = i;
+		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+
+		double max_error = 0.0;
+		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
+			for (ushort j = 0; j <= i; ++j) {
+				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+
+				if (i == j)
+					max_error = std::max(max_error, std::abs(1 - result));
+				else
+					max_error = std::max(max_error, std::abs(result));
+			}
+		}
+
+		constexpr double allowable_error = 1.0E-15;
+		EXPECT_LE(max_error, allowable_error);
+	}
+}
 
 GTEST_TEST(Element, vertex_node_indexes_1) {
 	constexpr size_t space_dimension = 2;

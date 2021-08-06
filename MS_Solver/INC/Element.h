@@ -7,7 +7,6 @@
 #include <unordered_set>
 
 
-using ushort	= unsigned short;
 using uint		= unsigned int;
 
 
@@ -123,6 +122,8 @@ public:
 	std::vector<Geometry> faces_geometry(void) const;
 	std::vector<Space_Vector_> vertex_nodes(void) const;
 	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
+	std::vector<Polynomial<space_dimension>> initial_basis_functions(const ushort order) const;
+	std::vector<Polynomial<space_dimension>> orthonormal_basis_functions(const ushort order) const;
 	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 
 	//private: for test
@@ -158,6 +159,57 @@ public:
 	bool is_periodic_boundary(void) const;
 	FaceType check_face_type(const Element& owner_cell_element) const;
 };
+
+
+namespace ms {
+	template <ushort space_dimension>
+	double integrate(const Polynomial<space_dimension>& integrand, const Quadrature_Rule<space_dimension>& quadrature_rule) {
+		const auto& QP_set = quadrature_rule.points;
+		const auto& QW_set = quadrature_rule.weights;
+
+		double result = 0.0;
+		for (ushort i = 0; i < QP_set.size(); ++i)
+			result += integrand(QP_set[i]) * QW_set[i];
+
+		return result;
+	}
+
+	template <ushort space_dimension>
+	double integrate(const Polynomial<space_dimension>& integrand, const Geometry<space_dimension>& geometry) {
+		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.order());
+		return ms::integrate(integrand, quadrature_rule);
+	}
+
+	template <ushort space_dimension>
+	double inner_product(const Polynomial<space_dimension>& f1, const Polynomial<space_dimension>& f2, const Geometry<space_dimension>& geometry) {
+		return ms::integrate(f1 * f2, geometry);
+	}
+
+	template <ushort space_dimension>
+	double L2_Norm(const Polynomial<space_dimension>& function, const Geometry<space_dimension>& geometry) {
+		return std::sqrt(ms::inner_product(function, function, geometry));
+	}
+
+	template <ushort space_dimension>
+	std::vector<Polynomial<space_dimension>> Gram_Schmidt_process(const std::vector<Polynomial<space_dimension>>& functions, const Geometry<space_dimension>& geometry) {
+		auto normalized_functions = functions;
+
+		for (ushort i = 0; i < functions.size(); ++i) {
+			for (ushort j = 0; j < i; ++j)
+				normalized_functions[i] -= ms::inner_product(normalized_functions[i], normalized_functions[j], geometry) * normalized_functions[j];
+
+			normalized_functions[i] *= 1.0 / ms::L2_Norm(normalized_functions[i], geometry);
+		}
+
+		return normalized_functions;
+	}
+
+
+	
+	//double inner_product(const Polynomial& f1, const Polynomial& f2, const QuadratureRule& quadrature_rule);
+	//double L2_Norm(const Polynomial& polynomial, const QuadratureRule& quadrature_rule);
+	//std::vector<Polynomial> Gram_Schmidt_Process(const std::vector<Polynomial>& initial_polynomial_set, const QuadratureRule& quadrature_rule);
+}
 
 
 //template definition part
@@ -587,7 +639,7 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 		const auto num_monomial = this->figure_order_ + 1;
 		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a)
+		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
 			mapping_monomial_vector[index++] = (r ^ a);
 
 		return mapping_monomial_vector;	// 1 r r^2 ...
@@ -596,8 +648,8 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);
 		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a)
-			for (size_t b = 0; b <= a; ++b)
+		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
+			for (ushort b = 0; b <= a; ++b)
 				mapping_monomial_vector[index++] = (r ^ (a - b)) * (s ^ b);
 
 		return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...
@@ -606,8 +658,8 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 1) * (this->figure_order_ + 1));
 		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-		for (size_t a = 0, index = 0; a <= this->figure_order_; ++a) {
-			for (size_t b = 0; b <= a; ++b)
+		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a) {
+			for (ushort b = 0; b <= a; ++b)
 				mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
 
 			if (a == 0)
@@ -845,6 +897,38 @@ bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other, const us
 			return false;
 	}
 	return true;
+}
+
+template <ushort space_dimension>
+std::vector<Polynomial<space_dimension>> Geometry<space_dimension>::initial_basis_functions(const ushort order) const {
+	const auto num_basis = ms::combination_with_repetition(1 + space_dimension, order);
+
+	std::vector<Polynomial<space_dimension>> initial_basis_set;
+	initial_basis_set.reserve(num_basis);
+
+	if (space_dimension == 2) {
+		//1 (x - x_c) (y - y_c)  ...
+		Polynomial<space_dimension> x("x0");
+		Polynomial<space_dimension> y("x1");
+
+		const auto center_node = this->center_node();
+		const auto x_c = center_node.at(0);
+		const auto y_c = center_node.at(1);
+
+		for (ushort a = 0; a <= order; ++a)
+			for (ushort b = 0; b <= a; ++b)
+				initial_basis_set.push_back(((x - x_c) ^ (a - b)) * ((y - y_c) ^ b));
+	}
+	else
+		throw std::runtime_error("not supported space dimension");
+
+	return initial_basis_set;
+}
+
+template <ushort space_dimension>
+std::vector<Polynomial<space_dimension>> Geometry<space_dimension>::orthonormal_basis_functions(const ushort order) const {
+	const auto initial_basis_set = this->initial_basis_functions(order);
+	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }
 
 template <ushort space_dimension>

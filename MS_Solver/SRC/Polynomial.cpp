@@ -790,7 +790,7 @@ namespace ms {
 	//	return compare_node_set;
 	//}
 
-	size_t combination(const size_t n, const size_t k) {
+	ushort combination(const ushort n, const ushort k) {
 		//calculate nCk
 		//the combination of n things taken k at a time without repetition.
 		if (n == k || k == 0)
@@ -799,7 +799,7 @@ namespace ms {
 			return combination(n - 1, k - 1) + combination(n - 1, k);
 	}
 
-	size_t ms::combination_with_repetition(const size_t n, const size_t k) {
+	ushort ms::combination_with_repetition(const ushort n, const ushort k) {
 		//calculate nHk
 		//the combination of n things taken k at a time with repetition.
 		return combination(n + k - 1, k);
