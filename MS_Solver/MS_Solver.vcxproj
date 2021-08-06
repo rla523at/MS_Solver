@@ -180,7 +180,7 @@
     <ClInclude Include="INC\Cells_FVM.h" />
     <ClInclude Include="INC\Discrete_Equation.h" />
     <ClInclude Include="INC\Element.h" />
-    <ClInclude Include="INC\EuclideanVector.h" />
+    <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
     <ClInclude Include="INC\Gradient_Method.h" />
     <ClInclude Include="INC\Grid_Builder.h" />

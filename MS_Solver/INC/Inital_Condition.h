@@ -1,6 +1,6 @@
 #pragma once
 #include <numbers>
-#include "EuclideanVector.h"
+#include "Euclidean_Vector.h"
 #include "Governing_Equation.h"
 
 class IC {}; //Initial Condition
