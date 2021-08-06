@@ -4,7 +4,7 @@
 #include "Inital_Condition.h"
 #include "Setting.h"
 
-class PostAI
+class Post_AI_Data
 {
 //private: //for test
 public:
@@ -44,7 +44,7 @@ public:
 
 //template definition part
 template <size_t space_dimension>
-void PostAI::intialize(const Grid<space_dimension>& grid) {
+void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 #ifdef POST_AI_DATA
 
 	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
@@ -135,7 +135,7 @@ void PostAI::intialize(const Grid<space_dimension>& grid) {
 
 
 template <size_t num_equation>
-void PostAI::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients) {
+void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients) {
 #ifdef POST_AI_DATA
 
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
@@ -180,7 +180,7 @@ void PostAI::record_solution_datas(const std::vector<Euclidean_Vector<num_equati
 }
 
 template <size_t num_equation>
-void PostAI::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
+void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
 #ifdef POST_AI_DATA
 
 	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
@@ -201,7 +201,7 @@ void PostAI::record_limiting_value(const size_t index, const std::array<double, 
 
 
 template <size_t space_dimension>
-auto PostAI::calculate_face_share_cell_indexes_set(const Grid<space_dimension>& grid) {
+auto Post_AI_Data::calculate_face_share_cell_indexes_set(const Grid<space_dimension>& grid) {
 	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
 	const auto& cell_elements = grid.elements.cell_elements;
 	const auto num_cell = cell_elements.size();
@@ -256,7 +256,7 @@ auto PostAI::calculate_face_share_cell_indexes_set(const Grid<space_dimension>& 
 
 
 template <size_t space_dimension>
-auto PostAI::calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimension>& grid) {
+auto Post_AI_Data::calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimension>& grid) {
 	const auto& cell_elements = grid.elements.cell_elements;
 	const auto num_cell = cell_elements.size();
 
@@ -286,7 +286,7 @@ auto PostAI::calculate_vertex_nodes_coordinate_string_set(const Grid<space_dimen
 
 
 template <size_t num_equation>
-auto PostAI::convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions) {
+auto Post_AI_Data::convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions) {
 	const auto num_solution = solutions.size();
 	
 	std::vector<std::string> solution_strings;

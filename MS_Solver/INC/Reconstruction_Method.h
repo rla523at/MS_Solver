@@ -161,7 +161,7 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
     auto solution_gradients = this->gradient_method.calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
 
-    PostAI::record_solution_datas(solutions, solution_gradients);
+    Post_AI_Data::record_solution_datas(solutions, solution_gradients);
 
     const auto num_cell = solutions.size();
     for (uint i = 0; i < num_cell; ++i) {
@@ -184,14 +184,14 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
             }
         }
 
-        PostAI::record_limiting_value(i, limiting_values);
+        Post_AI_Data::record_limiting_value(i, limiting_values);
 
         for (ushort i = 0; i < num_equation_; ++i)
             for (ushort j = 0; j < space_dimension_; ++j)
                 gradient.at(i, j) *= limiting_values.at(i);
     }
 
-    PostAI::post();
+    Post_AI_Data::post();
 
     //dynamic matrix to matrix
     std::vector<Matrix<num_equation_, space_dimension_>> limited_solution_gradient;

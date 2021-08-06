@@ -132,7 +132,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_2) {
 	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	for (size_t i = 0; i < 22; ++i) {
+	for (ushort i = 0; i < 22; ++i) {
 		const auto ref_quad_rule = ref_geometry.reference_quadrature_rule(i);
 		
 		double sum = 0.0;
@@ -164,7 +164,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_4) {
 	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	for (size_t i = 0; i < 21; ++i) {
+	for (ushort i = 0; i < 21; ++i) {
 		const auto ref_quad_rule = ref_geometry.reference_quadrature_rule(i);
 
 		double sum = 0.0;
@@ -196,7 +196,7 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_6) {
 	const ushort fig_order = 1;
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 
-	for (size_t i = 0; i < 21; ++i) {
+	for (ushort i = 0; i < 21; ++i) {
 		const auto ref_quad_rule = ref_geometry.reference_quadrature_rule(i);
 
 		double sum = 0.0;
@@ -277,7 +277,58 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	EXPECT_EQ(p4, result(rp4));
 }
 
+TEST(ReferenceGeometry, reference_connectivity_1) {
+	constexpr ushort space_dimension = 2;
 
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	constexpr ushort post_order = 0;
+	const auto result = ref_geometry.reference_connectivity(post_order);
+
+	const std::vector<std::vector<ushort>> ref = { {1,2,3} };
+	EXPECT_EQ(result, ref);
+}
+TEST(ReferenceGeometry, reference_connectivity_2) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	constexpr ushort post_order = 1;
+	const auto result = ref_geometry.reference_connectivity(post_order);
+
+	const std::vector<std::vector<ushort>> ref = { {1,2,4},{2,5,4},{2,3,5},{4,5,6} };
+	EXPECT_EQ(result, ref);
+}
+TEST(ReferenceGeometry, reference_connectivity_3) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	constexpr ushort post_order = 0;
+	const auto result = ref_geometry.reference_connectivity(post_order);
+
+	const std::vector<std::vector<ushort>> ref = { {1,2,3},{2,4,3} };
+	EXPECT_EQ(result, ref);
+}
+TEST(ReferenceGeometry, reference_connectivity_4) {
+	constexpr ushort space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	constexpr ushort post_order = 1;
+	const auto result = ref_geometry.reference_connectivity(post_order);
+
+	const std::vector<std::vector<ushort>> ref = { {1,2,4},{2,5,4},{2,3,5},{3,6,5},{4,5,7},{5,8,7},{5,6,8},{6,9,8} };
+	EXPECT_EQ(result, ref);
+}
 //GTEST_TEST(ReferenceGeometry, scale_function_1) {
 //	constexpr size_t space_dimension = 2;
 //
@@ -663,7 +714,7 @@ GTEST_TEST(Geometry, orthonormal_basis_1) {
 			}
 		}
 
-		constexpr double allowable_error = 1.0E-15;
+		constexpr double allowable_error = 9.0E-10;
 		EXPECT_LE(max_error, allowable_error);
 	}
 }
@@ -698,7 +749,7 @@ GTEST_TEST(Geometry, orthonormal_basis_2) {
 			}
 		}
 
-		constexpr double allowable_error = 1.0E-15;
+		constexpr double allowable_error = 9.0E-11;
 		EXPECT_LE(max_error, allowable_error);
 	}
 }
@@ -733,7 +784,7 @@ GTEST_TEST(Geometry, orthonormal_basis_3) {
 			}
 		}
 
-		constexpr double allowable_error = 1.0E-15;
+		constexpr double allowable_error = 9.0E-9;
 		EXPECT_LE(max_error, allowable_error);
 	}
 }
@@ -768,7 +819,7 @@ GTEST_TEST(Geometry, orthonormal_basis_4) {
 			}
 		}
 
-		constexpr double allowable_error = 1.0E-15;
+		constexpr double allowable_error = 9.0E-13;
 		EXPECT_LE(max_error, allowable_error);
 	}
 }
@@ -802,7 +853,7 @@ GTEST_TEST(Geometry, orthonormal_basis_5) {
 			}
 		}
 
-		constexpr double allowable_error = 1.0E-15;
+		constexpr double allowable_error = 9.0E-13;
 		EXPECT_LE(max_error, allowable_error);
 	}
 }

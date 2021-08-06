@@ -64,8 +64,8 @@ private:
 	inline static std::map<std::pair<Figure, ushort>, Vector_Function<Polynomial<space_dimension>>> key_to_mapping_monomial_vector_function_;
 	inline static std::map<std::pair<Figure, ushort>, Dynamic_Matrix_> key_to_inverse_mapping_monomial_matrix_;
 	inline static std::map<std::pair<Figure, ushort>, Quadrature_Rule<space_dimension>> key_to_reference_quadrature_rule_;
-	inline static std::map<std::pair<Figure, ushort>, std::vector<Space_Vector_>> key_to_post_node_set_;
-	inline static std::map<std::pair<Figure, ushort>, std::vector<std::vector<ushort>>> key_to_connectivity_;
+	inline static std::map<std::pair<Figure, ushort>, std::vector<Space_Vector_>> key_to_post_nodes_;
+	inline static std::map<std::pair<Figure, ushort>, std::vector<std::vector<ushort>>> key_to_reference_connectivity_;
 
 public:
 	ReferenceGeometry(const Figure figure, const ushort figure_order);
@@ -89,7 +89,9 @@ public:
 	std::vector<Space_Vector_> mapping_nodes(void) const;
 	Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector_function(void) const;
 	Dynamic_Matrix_ inverse_mapping_monomial_matrix(void) const;
-	Quadrature_Rule<space_dimension> reference_quadrature_rule(const size_t integrand_order) const;
+	Quadrature_Rule<space_dimension> reference_quadrature_rule(const ushort integrand_order) const;
+	std::vector<Space_Vector_> reference_post_nodes(const ushort post_order) const;
+	std::vector<std::vector<ushort>> reference_connectivity(const ushort post_order) const;
 };
 
 
@@ -655,7 +657,7 @@ Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>:
 		return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...
 	}
 	case Figure::quadrilateral: {
-		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 1) * (this->figure_order_ + 1));
+		const auto num_monomial = (this->figure_order_ + 1) * (this->figure_order_ + 1);
 		Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
 		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a) {
@@ -691,7 +693,7 @@ Dynamic_Matrix_ ReferenceGeometry<space_dimension>::inverse_mapping_monomial_mat
 }
 
 template <ushort space_dimension>
-Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::reference_quadrature_rule(const size_t integrand_order) const {
+Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::reference_quadrature_rule(const ushort integrand_order) const {
 	switch (this->figure_)
 	{
 	case Figure::line: {
@@ -783,6 +785,145 @@ Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::reference_q
 	default:
 		throw std::runtime_error("not supported figure");
 		break;
+	}
+}
+
+template <ushort space_dimension>
+std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::reference_post_nodes(const ushort post_order) const {
+	std::vector<Space_Vector_> reference_post_nodes;
+
+	switch (this->figure_) {
+	case Figure::triangle: {
+		const ushort num_reference_post_point = static_cast<ushort>((post_order + 2) * (post_order + 3) * 0.5);
+		reference_post_nodes.reserve(num_reference_post_point);
+
+		const double delta = 2.0 / (post_order + 1);
+
+		const double X0_start_coord = -1.0;
+		const double X1_start_coord = -1.0;
+
+		for (ushort j = 0; j <= post_order + 1; ++j) {
+			for (ushort i = 0; i <= post_order + 1 - j; ++i) {
+				const double X0_coord = X0_start_coord + delta * i;
+				const double X1_coord = X1_start_coord + delta * j;
+
+				reference_post_nodes.push_back({ X0_coord, X1_coord });
+			}
+		}
+		break;
+	}
+	case Figure::quadrilateral: {
+		const ushort num_reference_post_point = (post_order + 2) * (post_order + 2);
+		reference_post_nodes.reserve(num_reference_post_point);
+
+		const double delta = 2.0 / (post_order + 1);
+
+		const double X0_start_coord = -1.0;
+		const double X1_start_coord = -1.0;
+
+		for (ushort j = 0; j <= post_order + 1; ++j) {
+			for (ushort i = 0; i <= post_order + 1; ++i) {
+				const double X0_coord = X0_start_coord + delta * i;
+				const double X1_coord = X1_start_coord + delta * j;
+
+				reference_post_nodes.push_back({ X0_coord, X1_coord });
+			}
+		}
+		break;
+	}
+	default:
+		throw std::runtime_error("not supproted figure");
+		break;
+	}
+
+	return reference_post_nodes;
+}
+
+template <ushort space_dimension>
+std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::reference_connectivity(const ushort post_order) const {
+	std::vector<std::vector<ushort>> sub_element_indexes;
+
+	switch (this->figure_) {
+	case Figure::triangle: {
+		const ushort num_sub_element = (post_order + 1) * (post_order + 1);
+		sub_element_indexes.resize(num_sub_element);
+
+		constexpr ushort num_sub_element_node = 3;
+
+		ushort count = 0;
+		for (ushort j = 0; j < post_order + 1; j++) {
+			for (ushort i = 0; i < post_order + 1 - j; i++) {
+				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 1
+				//						|							|				// a_(j+1)	= a_j + (order + 2) - j
+				//						|							|				// By recurrence relation
+				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= 1 + (order + 3) * j - j*(j+1)/2
+
+				const ushort a_j	= 1 + (post_order + 3) * j			- static_cast<ushort>(j			* (j + 1)	* 0.5);
+				const ushort a_jp1	= 1 + (post_order + 3) * (j + 1)	- static_cast<ushort>((j + 1)	* (j + 2)	* 0.5);
+
+				const ushort start_index	= a_j + i;
+				const ushort next_index		= a_jp1 + i;
+
+				sub_element_indexes[count].resize(num_sub_element_node);
+				sub_element_indexes[count][0] = start_index;
+				sub_element_indexes[count][1] = start_index + 1;
+				sub_element_indexes[count][2] = next_index;
+				count++;
+
+				if (i == post_order - j)
+					continue;
+
+				sub_element_indexes[count].resize(num_sub_element_node);
+				sub_element_indexes[count][0] = start_index + 1;
+				sub_element_indexes[count][1] = next_index + 1;
+				sub_element_indexes[count][2] = next_index;
+				count++;
+			}
+		}
+
+		return sub_element_indexes;
+	}
+
+	case Figure::quadrilateral: {
+		const ushort num_simplex = 2 * (post_order + 1) * (post_order + 1);
+		sub_element_indexes.resize(num_simplex);
+
+		const ushort num_sub_element_node = 3;
+
+		ushort count = 0;
+		for (ushort j = 0; j <= post_order; j++) {
+			for (ushort i = 0; i <= post_order; i++) {
+				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 1
+				//						|							|				// a_(j+1)	= a_j + order + 2
+				//						|							|				// By recurrence relation
+				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= 1 + (order + 2) * j
+
+				const ushort a_j	= 1 + (post_order + 2) * j;
+				const ushort a_jp1	= 1 + (post_order + 2) * (j + 1);
+
+				const ushort start_index = a_j + i;
+				const ushort next_index = a_jp1 + i;
+
+				sub_element_indexes[count].resize(num_sub_element_node);
+				sub_element_indexes[count][0] = start_index;
+				sub_element_indexes[count][1] = start_index + 1;
+				sub_element_indexes[count][2] = next_index;
+				count++;
+
+				sub_element_indexes[count].resize(num_sub_element_node);
+				sub_element_indexes[count][0] = start_index + 1;
+				sub_element_indexes[count][1] = next_index + 1;
+				sub_element_indexes[count][2] = next_index;
+				count++;
+			}
+		}
+
+		return sub_element_indexes;
+	}
+
+	default:
+		throw std::runtime_error("not supported figure");
+		return sub_element_indexes;
 	}
 }
 

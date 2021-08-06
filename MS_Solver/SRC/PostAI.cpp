@@ -1,6 +1,6 @@
 #include "../INC/PostAI.h"
 
-void PostAI::set_path(const std::string& path) {
+void Post_AI_Data::set_path(const std::string& path) {
 #ifdef POST_AI_DATA
 
 	path_ = path;
@@ -8,7 +8,7 @@ void PostAI::set_path(const std::string& path) {
 #endif
 }
 
-void PostAI::post(void) {
+void Post_AI_Data::post(void) {
 #ifdef POST_AI_DATA
 
 	static size_t num_post = 1;
@@ -39,7 +39,7 @@ void PostAI::post(void) {
 #endif
 }
 
-std::vector<std::string> PostAI::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix_>& solution_gradients) {
+std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix_>& solution_gradients) {
 	const auto num_solution = solution_gradients.size();
 	const auto [num_equation, space_dimension] = solution_gradients.front().size();
 
