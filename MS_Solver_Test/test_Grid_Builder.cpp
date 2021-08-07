@@ -1,29 +1,22 @@
-//#pragma once
-//#include "gtest/gtest.h"
-//
-//#include "../MS_Solver/INC/Grid_Data_to_Info.h"
-//
-//
-//GTEST_TEST(Grid_Info_Extractor, cell_center) {
-//	auto grid_data = Grid_File_Convertor<Gmsh,2>::convert("RSC/Grid/Quad_10.msh");
-//	const auto grid_info = Grid_Info_Extractor<2>::convert(std::move(grid_data));
-//
-//	const auto& cell_centers = grid_info.cell_grid_information.centers;
-//
-//	const auto num_cell = cell_centers.size();
-//	for (size_t i = 0; i < 10; ++i) {
-//		const auto y_coord = 0.05 + 0.1 * i;
-//		for (size_t j = 0; j < 10; ++j) {
-//			const auto x_coord = 0.05 + 0.1 * j;
-//
-//			const auto result = cell_centers[i * 10 + j];
-//
-//			Euclidean_Vector<2> ref_ceter = { x_coord, y_coord };
-//			for (size_t i = 0; i < 2; ++i)
-//				EXPECT_DOUBLE_EQ(result[i], ref_ceter[i]);
-//		}
-//	}
-//}
+#pragma once
+#include "gtest/gtest.h"
+
+#include "../MS_Solver/INC/Grid_Builder.h"
+
+
+TEST(Grid, set_of_face_share_cell_indexes) {
+	constexpr ushort space_dimension = 2;
+	
+	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
+	const auto set_of_face_share_cell_indexes = grid.calculate_set_of_face_share_cell_indexes();
+
+	auto result = set_of_face_share_cell_indexes[0];
+	std::sort(result.begin(), result.end());
+
+	const std::vector<size_t> ref = { 2,3,4,7 };
+	EXPECT_EQ(ref, result);
+}
+
 //
 //GTEST_TEST(Grid_Info_Extractor, volume) {
 //	auto grid_data = Grid_File_Convertor<Gmsh, 2>::convert("RSC/Grid/Quad_10.msh");

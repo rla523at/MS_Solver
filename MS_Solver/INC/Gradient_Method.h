@@ -1,21 +1,23 @@
 #pragma once
 #include "Grid_Builder.h"
 
-template <size_t num_equation, size_t space_dimension>
+template <ushort num_equation_, ushort space_dimension_>
 class Least_Square_Base
 {
 private:    
-    using Solution_ = Euclidean_Vector<num_equation>;
-    using This_     = Least_Square_Base<num_equation, space_dimension>;
+    using Solution_ = Euclidean_Vector<num_equation_>;
+    using This_     = Least_Square_Base<num_equation_, space_dimension_>;
 
 protected:
-    static inline std::vector<std::vector<size_t>> near_cell_indexes_set_;
-    static inline std::vector<Dynamic_Matrix_> least_square_matrixes_;
+    inline static std::vector<std::vector<size_t>> near_cell_indexes_set_;
+    inline static std::vector<Dynamic_Matrix_> least_square_matrixes_;
 
 private:
     Least_Square_Base(void) = delete;
 
 public:
+    static constexpr ushort space_dimension(void) { return space_dimension_; };
+    static constexpr ushort num_equation(void) { return num_equation_; };
     static std::vector<Dynamic_Matrix_> calculate_solution_gradients(const std::vector<Solution_>& solutions);
 
 private:
@@ -23,33 +25,33 @@ private:
 };
 
 
-template <size_t num_equation, size_t space_dimension>
-class Vertex_Least_Square : public Least_Square_Base<num_equation, space_dimension>
+template <ushort num_equation_, ushort space_dimension_>
+class Vertex_Least_Square : public Least_Square_Base<num_equation_, space_dimension_>
 {
 private:
-    using Base_ = Least_Square_Base<num_equation, space_dimension>;
+    using Base_ = Least_Square_Base<num_equation_, space_dimension_>;
 
 private:
     Vertex_Least_Square(void) = delete;
 
 public:
-    static void initialize(const Grid<space_dimension>& grid);
+    static void initialize(const Grid<space_dimension_>& grid);
 
     static std::string name(void) { return "Vertex_Least_Square"; };
 };
 
 
-template <size_t num_equation, size_t space_dimension>
-class Face_Least_Square : public Least_Square_Base<num_equation, space_dimension>
+template <ushort num_equation_, ushort space_dimension_>
+class Face_Least_Square : public Least_Square_Base<num_equation_, space_dimension_>
 {
 private:
-    using Base_ = Least_Square_Base<num_equation, space_dimension>;
+    using Base_ = Least_Square_Base<num_equation_, space_dimension_>;
 
 private:
     Face_Least_Square(void) = delete;
 
 public:
-    static void initialize(const Grid<space_dimension>& grid);
+    static void initialize(const Grid<space_dimension_>& grid);
 
     static std::string name(void) { return "Face_Least_Square"; };
 };
@@ -57,8 +59,8 @@ public:
 
 
 //template definition part
-template <size_t num_equation, size_t space_dimension>
-std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation, space_dimension>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
+template <ushort num_equation_, ushort space_dimension_>
+std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();
 
     std::vector<Dynamic_Matrix_> solution_gradients;
@@ -72,8 +74,8 @@ std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation, space_dimension>::c
     return solution_gradients;
 }
 
-template <size_t num_equation, size_t space_dimension>
-std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation, space_dimension>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) {
+template <ushort num_equation_, ushort space_dimension_>
+std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();    
     std::vector<Dynamic_Matrix_> solution_delta_matrixes(num_solution);
 
@@ -90,8 +92,8 @@ std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation, space_dimension>::c
     return solution_delta_matrixes;
 }
 
-template <size_t num_equation, size_t space_dimension>
-void Vertex_Least_Square<num_equation, space_dimension>::initialize(const Grid<space_dimension>& grid) {
+template <ushort num_equation_, ushort space_dimension_>
+void Vertex_Least_Square<num_equation_, space_dimension_>::initialize(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
     const auto& cell_elements = grid.elements.cell_elements;
@@ -110,7 +112,7 @@ void Vertex_Least_Square<num_equation, space_dimension>::initialize(const Grid<s
         const auto& geometry = element.geometry_;
         const auto this_center = geometry.center_node();
 
-        Dynamic_Matrix_ center_to_center_matrix(space_dimension, num_vertex_share_cell);
+        Dynamic_Matrix_ center_to_center_matrix(space_dimension_, num_vertex_share_cell);
 
         for (size_t j = 0; j < num_vertex_share_cell; ++j) {
             const auto& neighbor_geometry = cell_elements[vertex_share_cell_indexes[j]].geometry_;
@@ -134,8 +136,8 @@ void Vertex_Least_Square<num_equation, space_dimension>::initialize(const Grid<s
 
 
 
-template <size_t num_equation, size_t space_dimension>
-void Face_Least_Square<num_equation, space_dimension>::initialize(const Grid<space_dimension>& grid) {
+template <ushort num_equation_, ushort space_dimension_>
+void Face_Least_Square<num_equation_, space_dimension_>::initialize(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
     const auto& cell_elements = grid.elements.cell_elements;
@@ -153,7 +155,7 @@ void Face_Least_Square<num_equation, space_dimension>::initialize(const Grid<spa
         const auto target_cell_element = cell_elements[i];
         const auto target_cell_center = target_cell_element.geometry_.center_node();
 
-        Dynamic_Matrix_ center_to_center_matrix(space_dimension, num_face_share_cell);
+        Dynamic_Matrix_ center_to_center_matrix(space_dimension_, num_face_share_cell);
         for (size_t j = 0; j < num_face_share_cell; ++j) {
             const auto& neighbor_geometry = cell_elements[face_share_cell_indexes[j]].geometry_;
             const auto neighbor_center = neighbor_geometry.center_node();

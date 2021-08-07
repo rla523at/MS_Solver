@@ -258,47 +258,47 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 
 template <typename Governing_Equation, ushort post_order>
 void Post_HOM_Solution_Data<Governing_Equation, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
-	const auto num_cell = cell_elements.size();
-	Post_HOM_Solution_Data::basis_post_points_.resize(num_cell);
+	//const auto num_cell = cell_elements.size();
+	//Post_HOM_Solution_Data::basis_post_points_.resize(num_cell);
 
-	ushort str_per_line = 1;
-	size_t connectivity_start_index = 1;
+	//ushort str_per_line = 1;
+	//size_t connectivity_start_index = 1;
 
-	Text grid_post_data_text(space_dimension_);
-	for (uint i = 0; i < num_cell; ++i) {
-		const auto& geometry = cell_elements[i].geometry_;
+	//Text grid_post_data_text(space_dimension_);
+	//for (uint i = 0; i < num_cell; ++i) {
+	//	const auto& geometry = cell_elements[i].geometry_;
 
-		const auto post_nodes = geometry.post_nodes(post_order);
-		//Post_HOM_Solution_Data::basis_post_points_[i] = geometry. geometry가  solution order을 알고 있어야 basis를 들고 있던가 말던가 하지 ^^
+	//	const auto post_nodes = geometry.post_nodes(post_order);
+	//	//Post_HOM_Solution_Data::basis_post_points_[i] = geometry. geometry가  solution order을 알고 있어야 basis를 들고 있던가 말던가 하지 ^^
 
-		for (const auto& node : post_nodes) {
-			for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
-				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
-				if (str_per_line == 10) {
-					grid_post_data_text[i] += "\n";
-					str_per_line = 1;
-				}
-			}
-		}
+	//	for (const auto& node : post_nodes) {
+	//		for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
+	//			grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
+	//			if (str_per_line == 10) {
+	//				grid_post_data_text[i] += "\n";
+	//				str_per_line = 1;
+	//			}
+	//		}
+	//	}
 
-		std::string connectivity_str;
-		auto local_connectivities = geometry.reference_geometry_.local_connectivities();
-		for (const auto& local_connectivity : local_connectivities) {
-			for (const auto& index : local_connectivity)
-				connectivity_str += std::to_string(connectivity_start_index + index) + " ";
-			grid_post_data_text << std::move(connectivity_str);
-		}
+	//	std::string connectivity_str;
+	//	auto local_connectivities = geometry.reference_geometry_.local_connectivities();
+	//	for (const auto& local_connectivity : local_connectivities) {
+	//		for (const auto& index : local_connectivity)
+	//			connectivity_str += std::to_string(connectivity_start_index + index) + " ";
+	//		grid_post_data_text << std::move(connectivity_str);
+	//	}
 
-		connectivity_start_index += Post_Solution_Data_Base::num_post_points_[i];
-		Post_Solution_Data_Base::num_node_ += Post_Solution_Data_Base::num_post_points_[i];
-		Post_Solution_Data_Base::num_element_ += local_connectivities.size();
-	}
+	//	connectivity_start_index += Post_Solution_Data_Base::num_post_points_[i];
+	//	Post_Solution_Data_Base::num_node_ += Post_Solution_Data_Base::num_post_points_[i];
+	//	Post_Solution_Data_Base::num_element_ += local_connectivities.size();
+	//}
 
-	auto grid_post_header_text = Post_Solution_Data_Base::header_text(Post_File_Type::Grid);
+	//auto grid_post_header_text = Post_Solution_Data_Base::header_text(Post_File_Type::Grid);
 
-	const auto grid_file_path = path_ + "grid.plt";
-	grid_post_header_text.write(grid_file_path);
-	grid_post_data_text.add_write(grid_file_path);
+	//const auto grid_file_path = path_ + "grid.plt";
+	//grid_post_header_text.write(grid_file_path);
+	//grid_post_data_text.add_write(grid_file_path);
 }
 
 

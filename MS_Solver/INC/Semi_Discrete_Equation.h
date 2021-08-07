@@ -29,11 +29,10 @@ private:
     Cells_ cells_;
     Periodic_Boundaries_ periodic_boundaries_;
     Inner_Faces_ inner_faces_;
-    Reconstruction_Method reconstruction_method_;
-
+    
 public:
     Semi_Discrete_Equation(Grid<space_dimension_>&& grid)
-        : cells_(grid), boundaries_(std::move(grid)),  periodic_boundaries_(std::move(grid)), inner_faces_(std::move(grid)), reconstruction_method_(std::move(grid)) {
+        : cells_(grid), boundaries_(std::move(grid)),  periodic_boundaries_(std::move(grid)), inner_faces_(std::move(grid)) {
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";

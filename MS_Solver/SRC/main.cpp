@@ -17,7 +17,7 @@ int main(void) {
 	auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(GRID_FILE_NAME);
 
 	Post_Solution_Data_::post_grid(grid.elements.cell_elements);
-	Post_AI_Data::intialize(grid);
+	Post_AI_Data::intialize(grid);	
 
 	const auto semi_discrete_eq = Semi_Discrete_Equation_(std::move(grid));
 	auto solutions				= semi_discrete_eq.calculate_initial_solutions<INITIAL_CONDITION>();
