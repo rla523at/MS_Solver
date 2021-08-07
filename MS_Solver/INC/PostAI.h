@@ -23,8 +23,7 @@ public:
 	template <size_t num_equation>
 	static void record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients);
 
-	template <size_t num_equation>
-	static void record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value);
+	static void record_limiting_value(const size_t index, const std::vector<double>& limiting_value);
 
 	static void post(void);
 
@@ -178,26 +177,6 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 
 #endif
 }
-
-template <size_t num_equation>
-void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-#ifdef POST_AI_DATA
-
-	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
-		return;
-
-	std::string limiting_value_string = "@limiterFunction\n";
-
-	for (size_t i = 0; i < num_equation; ++i)
-		limiting_value_string += ms::double_to_str_sp(limiting_value[i]) + "\t";
-	limiting_value_string += "\n";
-
-	ai_data_text_set_[index] << std::move(limiting_value_string);
-
-#endif
-}
-
-
 
 
 template <size_t space_dimension>

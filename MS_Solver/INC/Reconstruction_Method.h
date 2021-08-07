@@ -164,12 +164,13 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
     Post_AI_Data::record_solution_datas(solutions, solution_gradients);
 
     const auto num_cell = solutions.size();
+    std::vector<Matrix<num_equation_, space_dimension_>> limited_solution_gradients(num_cell);
+
     for (uint i = 0; i < num_cell; ++i) {
         auto& gradient = solution_gradients[i];
         const auto vertex_solution_delta_matrix = gradient * this->center_to_vertex_matrixes_[i];
 
-        std::array<double, num_equation_> limiting_values;
-        limiting_values.fill(1);
+        std::vector<double> limiting_values(num_equation_, 1);
 
         const auto& vnode_indexes = this->vnode_indexes_set_[i];
         const auto num_vertex = vnode_indexes.size();
@@ -186,21 +187,13 @@ auto MLP_Base<Gradient_Method>::reconstruct_solutions(const std::vector<Solution
 
         Post_AI_Data::record_limiting_value(i, limiting_values);
 
-        for (ushort i = 0; i < num_equation_; ++i)
-            for (ushort j = 0; j < space_dimension_; ++j)
-                gradient.at(i, j) *= limiting_values.at(i);
+        Dynamic_Matrix_ limiting_value_matrix(num_equation_, limiting_values);
+        ms::gemm(limiting_value_matrix, gradient, limited_solution_gradients[i].data());
     }
 
     Post_AI_Data::post();
 
-    //dynamic matrix to matrix
-    std::vector<Matrix<num_equation_, space_dimension_>> limited_solution_gradient;
-    limited_solution_gradient.reserve(num_cell);
-
-    for (const auto& solution_gradient : solution_gradients)
-        limited_solution_gradient.push_back(solution_gradient);
-
-    return Linear_Reconstructed_Solution<num_equation_, space_dimension_>{ solutions, limited_solution_gradient };
+    return Linear_Reconstructed_Solution<num_equation_, space_dimension_>{ solutions, limited_solution_gradients };
 }
 
 template <typename Gradient_Method>
@@ -230,8 +223,9 @@ MLP_Base<Gradient_Method>::MLP_Base(Grid<space_dimension_>&& grid) : gradient_me
         Dynamic_Matrix_ center_to_vertex_matrix(space_dimension_, num_vertex);
         for (size_t i = 0; i < num_vertex; ++i) {
             const auto center_to_vertex = vertex_nodes[i] - center_node;
-            for (size_t j = 0; j < space_dimension_; ++j)
-                center_to_vertex_matrix.at(j, i) = center_to_vertex.at(j);
+            center_to_vertex_matrix.change_column(i, center_to_vertex);
+            //for (size_t j = 0; j < space_dimension_; ++j)
+            //    center_to_vertex_matrix.at(j, i) = center_to_vertex.at(j);
         }
         this->center_to_vertex_matrixes_.push_back(std::move(center_to_vertex_matrix));
     }

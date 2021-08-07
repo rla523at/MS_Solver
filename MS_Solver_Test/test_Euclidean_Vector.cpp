@@ -1,6 +1,6 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "../MS_Solver/INC/EuclideanVector.h"
+#include "../MS_Solver/INC/Euclidean_Vector.h"
 
 GTEST_TEST(Euclidean_Vector, constructor_1) {
 	const Euclidean_Vector<2> result = { 1 };

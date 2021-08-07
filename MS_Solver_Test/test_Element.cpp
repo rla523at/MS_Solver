@@ -46,7 +46,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
 
 	const Polynomial<space_dimension> r("x0");
 
-	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r };
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
@@ -60,7 +60,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r, s };
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
@@ -74,7 +74,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Vector_Function<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
 	EXPECT_EQ(ref, result);
 }
 
@@ -97,7 +97,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_2) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
-	const Matrix ref(3, 3, { 0, -0.5, -0.5,0.5,  0.5,    0,0.5,    0,  0.5 });
+	const Dynamic_Matrix_ ref(3, 3, { 0, -0.5, -0.5,0.5,  0.5,    0,0.5,    0,  0.5 });
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_3) {
@@ -108,7 +108,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_3) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
-	Matrix ref(4, 4, { 0.25, -0.25,  0.25, -0.25,  0.25,  0.25, -0.25, -0.25,  0.25,  0.25,  0.25,  0.25,  0.25, -0.25, -0.25,  0.25 });
+	const Dynamic_Matrix_ ref(4, 4, { 0.25, -0.25,  0.25, -0.25,  0.25,  0.25, -0.25, -0.25,  0.25,  0.25,  0.25,  0.25,  0.25, -0.25, -0.25,  0.25 });
 	EXPECT_EQ(result, ref);
 }
 

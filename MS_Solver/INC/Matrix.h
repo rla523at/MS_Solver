@@ -3,10 +3,6 @@
 #include <mkl.h>
 
 
-namespace ms {
-	inline constexpr size_t blas_mv_criteria = 50;
-}
-
 template<size_t num_row, size_t num_column>
 class Matrix
 {
@@ -21,18 +17,25 @@ public:
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>&x) const;
 	bool operator==(const Matrix & A) const;
 
-	double& at(const size_t row_index, const size_t column_index);
 	double at(const size_t row_index, const size_t column_index) const;
 	std::string to_string(void) const;
+
+	double* data(void);
 
 private:
 	std::array<double, num_row * num_column> values_ = { 0 };
 };
 
-//user define deduction
-Matrix(...)->Matrix<0, 0>;
 
+//user define deduction
 using Dynamic_Matrix_ = Matrix<0, 0>;
+
+
+namespace ms {
+	inline constexpr size_t blas_mv_criteria = 50;
+
+	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr);
+}
 
 
 template<>
@@ -40,6 +43,9 @@ class Matrix<0, 0>
 {
 	template<size_t num_row, size_t num_column>
 	friend class Matrix;
+
+	friend void ms::gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr);
+
 private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
 	size_t num_row_ = 0;
@@ -48,32 +54,37 @@ private:
 
 public:
 	Matrix(const size_t matrix_order);
+	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
 	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value)
 		: num_row_(num_row), num_column_(num_column), value_(std::move(value)) {};
 
 	Dynamic_Matrix_ operator*(const Dynamic_Matrix_& other) const;
 	bool operator==(const Dynamic_Matrix_& other) const;
-
-	double& at(const size_t row, const size_t column);
+		
 	double at(const size_t row, const size_t column) const;
-	Dynamic_Matrix_& be_transpose(void);
-	Dynamic_Matrix_& be_inverse(void);
-	void change_column(const size_t row_index, const Dynamic_Euclidean_Vector_& vec);
 	Dynamic_Matrix_ transpose(void) const;
 	std::string to_string(void) const;
 	Dynamic_Matrix_ inverse(void) const;
 	std::pair<size_t, size_t> size(void) const;
 
+	Dynamic_Matrix_& be_transpose(void);
+	Dynamic_Matrix_& be_inverse(void);
+	void change_column(const size_t row_index, const Dynamic_Euclidean_Vector_& vec);
+
+	template <size_t dimension>
+	void change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec);
+
 private:
 	bool is_square_matrix(void) const;
 	bool is_transposed(void) const;
 	bool is_in_range(const size_t irow, const size_t jcolumn) const;
-	std::vector<double> multiply_value(const Dynamic_Matrix_& other) const;
+	//std::vector<double> multiply_value(const Dynamic_Matrix_& other) const;
 	size_t leading_dimension(void) const;
+
+	double& at(const size_t row, const size_t column);
 	std::vector<int> PLU_decomposition(void);
 };
-
 
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A);
@@ -129,11 +140,6 @@ Euclidean_Vector<num_row> Matrix<num_row, num_column>::operator*(const Euclidean
 }
 
 template<size_t num_row, size_t num_column>
-double& Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) {
-	return this->values_[row_index * num_column + column_index];
-}
-
-template<size_t num_row, size_t num_column>
 double Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) const {
 	return this->values_[row_index * num_column + column_index];
 }
@@ -150,6 +156,11 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 }
 
 template<size_t num_row, size_t num_column>
+double* Matrix<num_row, num_column>::data(void) {
+	return this->values_.data();
+}
+
+template<size_t num_row, size_t num_column>
 std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m) {
 	return os << m.to_string();
 }
@@ -157,6 +168,15 @@ std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m)
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A) {
 	return A * scalar;
+}
+
+template <size_t dimension>
+void Dynamic_Matrix_::change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec) {
+	dynamic_require(column_index < this->num_column_,	"column idnex can not exceed number of column");
+	dynamic_require(this->num_row_ == dimension,		"vector dimension should be matched with number of row");
+
+	for (size_t i = 0; i < this->num_row_; ++i)
+		this->at(i, column_index) = vec.at(i);
 }
 
 //#include "MathVector.h"

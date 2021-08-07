@@ -23,6 +23,7 @@ private:
 	SimplePolyTerm simple_poly_term_ = 0.0;
 
 public:
+	Polynomial(void) = default;
 	Polynomial(const double coeeficient) : simple_poly_term_(coeeficient) {};
 	Polynomial(const std::string& variable) : simple_poly_term_(variable) {};
 
