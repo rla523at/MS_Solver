@@ -14,6 +14,7 @@
 #define TIME_STEP_CONSTANT				0.9
 #define END_CONDITION_NAME				Time
 #define	END_CONDITION_CONSTANT			2.0
+#define POST_ORDER						0
 #define POST_CONDITION_NAME				Time
 #define POST_CONDITION_CONSTANT			2.0
 #define PATH							"E:/Code/Result/MS_FVM/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" + GRID_FILE_NAME + "/"

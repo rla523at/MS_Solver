@@ -1,10 +1,10 @@
 #include "../INC/Inital_Condition.h"
 #include "../INC/Discrete_Equation.h"
 #include "../INC/Setting.h"
-#include "../INC/Post.h"
+#include "../INC/Post_Solution_Data.h"
 #include "../INC/Log.h"
 
-using Post_Solution_Data_		= Post_Solution_Data<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD>;
+using Post_Solution_Data_		= Post_Solution_Data<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, POST_ORDER>;
 using Grid_Builder_				= Grid_Builder<DIMENSION>;
 using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, RECONSTRUCTION_METHOD, NUMERICAL_FLUX>;
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;

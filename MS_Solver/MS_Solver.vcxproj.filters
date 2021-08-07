@@ -119,7 +119,7 @@
     <ClInclude Include="INC\Periodic_Boundaries_FVM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Post.h">
+    <ClInclude Include="INC\Post_Solution_Data.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\PostAI.h">

@@ -117,17 +117,18 @@ private:
 public:
 	Geometry(const ReferenceGeometry<space_dimension> reference_geometry, std::vector<Space_Vector_>&& consisting_nodes)
 		: reference_geometry_(reference_geometry), nodes_(std::move(consisting_nodes)), mapping_function_(this->reference_geometry_.mapping_function(this->nodes_)) {};
-
+		
 	Space_Vector_ center_node(void) const;
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	double volume(void) const;
 	std::array<double, space_dimension> coordinate_projected_volume(void) const;
 	std::vector<Geometry> faces_geometry(void) const;
+	std::vector<Space_Vector_> post_nodes(const ushort post_order) const;
 	std::vector<Space_Vector_> vertex_nodes(void) const;
 	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
+	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 	std::vector<Polynomial<space_dimension>> initial_basis_functions(const ushort order) const;
 	std::vector<Polynomial<space_dimension>> orthonormal_basis_functions(const ushort order) const;
-	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_faces_nodes(void) const;
@@ -1011,6 +1012,11 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::faces_geometry
 	}
 
 	return faces_geometry;
+}
+
+template <ushort space_dimension>
+std::vector<Euclidean_Vector<space_dimension>> Geometry<space_dimension>::post_nodes(const ushort post_order) const {
+	return this->reference_geometry_.post_nodes(this->mapping_function_, post_order);
 }
 
 template <ushort space_dimension>

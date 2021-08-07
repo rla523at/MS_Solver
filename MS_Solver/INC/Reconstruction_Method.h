@@ -129,6 +129,14 @@ private:
 };
 
 
+class HOM_Reconstruction : public RM {};
+
+class Polynomial_Reconstruction : public HOM_Reconstruction
+{
+
+
+};
+
 
 namespace ms {
 	template <typename T>

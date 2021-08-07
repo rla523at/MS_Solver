@@ -3,7 +3,7 @@
 #include "Time_Integral_Method.h"
 #include "Time_Step_Method.h"
 #include "Solve_Condition.h"
-#include "Post.h"
+#include "Post_Solution_Data.h"
 
 template <typename Time_Integral_Method>
 class Discrete_Equation
