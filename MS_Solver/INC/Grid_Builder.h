@@ -22,6 +22,9 @@ struct Grid
 {
 	Grid_Elements<space_dimension> elements;
 	Grid_Connectivity<space_dimension> connectivity;
+		
+	std::vector<std::vector<size_t>> calculate_set_of_face_share_cell_indexes(void) const;
+	std::vector<std::vector<size_t>> calculate_set_of_vertex_share_cell_indexes(void) const;
 };
 
 
@@ -42,6 +45,89 @@ private:
 
 
 //template definition part
+template <ushort space_dimension>
+std::vector<std::vector<size_t>> Grid<space_dimension>::calculate_set_of_face_share_cell_indexes(void) const {
+	const auto& vnode_index_to_share_cell_indexes = this->connectivity.vnode_index_to_share_cell_indexes;
+	const auto& cell_elements = this->elements.cell_elements;
+	const auto num_cell = cell_elements.size();
+
+	//face share cell indexes set
+	std::vector<std::vector<size_t>> set_of_face_share_cell_indexes;
+	set_of_face_share_cell_indexes.reserve(num_cell);
+
+	for (size_t i = 0; i < num_cell; ++i) {
+		const auto& element = cell_elements[i];
+		const auto& geometry = element.geometry_;
+
+		const auto face_vnode_indexes_set = element.face_vertex_node_indexes_set();
+		const auto num_face = face_vnode_indexes_set.size();
+
+		std::vector<size_t> face_share_cell_indexes;
+		face_share_cell_indexes.reserve(num_face);
+
+		for (const auto& face_vnode_indexes : face_vnode_indexes_set) {
+			std::vector<size_t> this_face_share_cell_indexes;
+
+			const auto num_face_vnode = face_vnode_indexes.size();
+
+			const auto& set_0 = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[0]);
+			const auto& set_1 = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[1]);
+			std::set_intersection(set_0.begin(), set_0.end(), set_1.begin(), set_1.end(), std::back_inserter(this_face_share_cell_indexes));
+
+			if (2 < num_face_vnode) {
+				std::vector<size_t> buffer;
+				for (size_t i = 2; i < num_face_vnode; ++i) {
+					const auto& set_i = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[i]);
+
+					buffer.clear();
+					std::set_intersection(this_face_share_cell_indexes.begin(), this_face_share_cell_indexes.end(), set_i.begin(), set_i.end(), std::back_inserter(buffer));
+					std::swap(this_face_share_cell_indexes, buffer);
+				}
+			}
+
+			const auto my_index_pos_iter = std::find(this_face_share_cell_indexes.begin(), this_face_share_cell_indexes.end(), i);
+			dynamic_require(my_index_pos_iter != this_face_share_cell_indexes.end(), "my index should be included in this face share cell indexes");
+
+			this_face_share_cell_indexes.erase(my_index_pos_iter);
+			//dynamic_require(this_face_share_cell_indexes.size() == 1, "face share cell should be unique"); this is not true for boundary.
+
+			face_share_cell_indexes.push_back(this_face_share_cell_indexes.front());
+		}
+
+		set_of_face_share_cell_indexes.push_back(std::move(face_share_cell_indexes));
+	}
+
+	return set_of_face_share_cell_indexes;
+}
+
+
+template <ushort space_dimension>
+std::vector<std::vector<size_t>> Grid<space_dimension>::calculate_set_of_vertex_share_cell_indexes(void) const {
+	const auto& cell_elements = this->elements.cell_elements;
+	const auto& vnode_index_to_share_cell_indexes = this->connectivity.vnode_index_to_share_cell_indexes;
+
+	const auto num_cell = cell_elements.size();
+	std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes;
+	set_of_vertex_share_cell_indexes.reserve(num_cell);
+
+	for (size_t i = 0; i < num_cell; ++i) {
+		const auto& element = cell_elements[i];
+		const auto& geometry = element.geometry_;
+				
+		auto vnode_indexes = element.vertex_node_indexes();
+		std::set<size_t> vertex_share_cell_index_set;
+		for (const auto vnode_index : vnode_indexes) {
+			const auto& share_cell_indexes = vnode_index_to_share_cell_indexes.at(vnode_index);
+			vertex_share_cell_index_set.insert(share_cell_indexes.begin(), share_cell_indexes.end());
+		}
+		vertex_share_cell_index_set.erase(i);
+
+		set_of_vertex_share_cell_indexes.push_back({ vertex_share_cell_index_set.begin(), vertex_share_cell_index_set.end() });
+	}
+
+	return set_of_vertex_share_cell_indexes;
+}
+
 template <ushort space_dimension>
 template <typename Grid_File_Type>
 Grid<space_dimension> Grid_Builder<space_dimension>::build(const std::string& grid_file_name) {
