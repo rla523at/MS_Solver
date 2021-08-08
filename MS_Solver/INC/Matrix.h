@@ -14,6 +14,7 @@ public:
 
 	Matrix operator+(const Matrix & A) const;
 	Matrix operator*(const double scalar) const;
+	Matrix<0, 0> operator*(const Matrix<0, 0>& dynamic_matrix) const;
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>&x) const;
 	bool operator==(const Matrix & A) const;
 
@@ -50,14 +51,14 @@ private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
 	size_t num_row_ = 0;
 	size_t num_column_ = 0;
-	std::vector<double> value_;
+	std::vector<double> values_;
 
 public:
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
 	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value)
-		: num_row_(num_row), num_column_(num_column), value_(std::move(value)) {};
+		: num_row_(num_row), num_column_(num_column), values_(std::move(value)) {};
 
 	Dynamic_Matrix_ operator*(const Dynamic_Matrix_& other) const;
 	bool operator==(const Dynamic_Matrix_& other) const;
@@ -71,6 +72,9 @@ public:
 	Dynamic_Matrix_& be_transpose(void);
 	Dynamic_Matrix_& be_inverse(void);
 	void change_column(const size_t row_index, const Dynamic_Euclidean_Vector_& vec);
+
+	template <size_t num_row>
+	Euclidean_Vector<num_row> column(const size_t column_index) const;
 
 	template <size_t dimension>
 	void change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec);
@@ -97,7 +101,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m)
 template<size_t num_row, size_t num_column>
 Matrix<num_row,num_column>::Matrix(const Matrix<0, 0>& dynamic_matrix) {
 	dynamic_require(num_row == dynamic_matrix.num_row_ && num_column == dynamic_matrix.num_column_, "both matrix should be same size");
-	std::copy(dynamic_matrix.value_.begin(), dynamic_matrix.value_.end(), this->values_.begin());
+	std::copy(dynamic_matrix.values_.begin(), dynamic_matrix.values_.end(), this->values_.begin());
 }
 
 template<size_t num_row, size_t num_column>
@@ -120,6 +124,28 @@ Matrix<num_row, num_column> Matrix<num_row, num_column>::operator*(const double 
 	Matrix result = *this;
 	for (size_t i = 0; i < num_row * num_column; ++i)
 		result.values_[i] *= scalar;
+	return result;
+}
+
+template<size_t num_row, size_t num_column>
+Dynamic_Matrix_ Matrix<num_row, num_column>::operator*(const Dynamic_Matrix_& B) const {
+	dynamic_require(num_column == B.num_row_, "dimension should be matched for matrix multiplication");
+
+	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+	const auto transA = CBLAS_TRANSPOSE::CblasNoTrans;
+	const auto transB = B.transpose_type_;
+	const auto m = static_cast<MKL_INT>(num_row);
+	const auto n = static_cast<MKL_INT>(B.num_column_);
+	const auto k = static_cast<MKL_INT>(num_column);
+	const auto alpha = 1.0;
+	const auto lda = static_cast<MKL_INT>(num_column);
+	const auto ldb = static_cast<MKL_INT>(B.leading_dimension());
+	const auto beta = 0.0;
+	const auto ldc = n;
+
+	Dynamic_Matrix_ result(m, n);
+	cblas_dgemm(layout, transA, transB, m, n, k, alpha, this->values_.data(), lda, B.values_.data(), ldb, beta, result.values_.data(), ldc);
+
 	return result;
 }
 

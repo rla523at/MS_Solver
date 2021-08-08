@@ -120,8 +120,10 @@ private:
     using This_         = Polynomial_Reconstruction<space_dimension, solution_order>;
     using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
+    static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension, solution_order);
+
 private:
-    inline static std::vector<Dynamic_Vector_Function_<Polynomial<space_dimension>>> basis_functions_;
+    inline static std::vector<Vector_Function<Polynomial<space_dimension>, num_basis_>> basis_functions_;
 
 private:
     Polynomial_Reconstruction(void) = delete;
@@ -129,7 +131,7 @@ private:
 public:
     static void initialize(const Grid<space_dimension>& grid);
     static std::vector<Dynamic_Matrix_> calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
-
+    static constexpr ushort num_basis(void) { return This_::num_basis_; };
 };
 
 
@@ -293,7 +295,7 @@ void Polynomial_Reconstruction<space_dimension, solution_order>::initialize(cons
         const auto& cell_element = cell_elements[i];
         const auto& cell_geometry = cell_element.geometry_;
 
-        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function(solution_order));
+        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function<solution_order>());
     }    
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -313,10 +315,9 @@ std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution
         const auto& basis_function = This_::basis_functions_[i];
         const auto& nodes = set_of_nodes[i];
 
-        const auto range_dimension = basis_function.range_dimension();
         const auto num_node = nodes.size();
 
-        Dynamic_Matrix_ basis_value(range_dimension, num_node);
+        Dynamic_Matrix_ basis_value(This_::num_basis_, num_node);
         for (size_t j = 0; j < num_node; ++j)
             basis_value.change_column(j, basis_function(nodes[j]));
 

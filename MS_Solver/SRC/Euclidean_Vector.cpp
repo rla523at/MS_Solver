@@ -1,6 +1,6 @@
 #include "../INC/Euclidean_Vector.h"
 
-double& Dynamic_Euclidean_Vector_::operator[](const size_t position) {
+double Dynamic_Euclidean_Vector_::operator[](const size_t position) const {
 	dynamic_require(position < this->dimension(), "position should be less then dimension");
 	return this->vals_[position];
 }

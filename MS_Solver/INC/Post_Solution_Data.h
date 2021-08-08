@@ -23,6 +23,7 @@ protected:
 	static inline size_t num_element_ = 0;
 	static inline size_t num_node_ = 0;
 	static inline const double* time_ptr_ = nullptr;
+	static inline std::vector<size_t> num_post_points_;
 
 private:
 	Post_Solution_Data_Base(void) = delete;
@@ -45,11 +46,7 @@ private:
 	static constexpr size_t space_dimension_	= Governing_Equation::space_dimension();
 	static constexpr size_t num_equation_		= Governing_Equation::num_equation();
 
-	using Base_ = Post_Solution_Data_Base<Governing_Equation, post_order>;
 	using This_ = Post_FVM_Solution_Data<Governing_Equation, post_order>;
-
-private:
-	static inline std::vector<size_t> num_post_points_;
 
 private:
 	Post_FVM_Solution_Data(void) = delete;
@@ -66,18 +63,18 @@ class Post_HOM_Solution_Data : public Post_Solution_Data_Base<Governing_Equation
 private:
 	static_require(ms::is_governing_equation<Governing_Equation>, "it should be governing equation");
 
-	static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
-	static constexpr size_t num_equation_ = Governing_Equation::num_equation();
+	static constexpr ushort space_dimension_	= Governing_Equation::space_dimension();
+	static constexpr ushort num_equation_		= Governing_Equation::num_equation();
+	static constexpr ushort num_basis_			= Reconstruction_Method::num_basis();
 
 	using This_ = Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>;
-	using Base_ = Post_Solution_Data_Base<Governing_Equation, post_order>;
 
 private:
-	static inline std::vector<Dynamic_Matrix_> basis_post_points_;
+	static inline std::vector<Dynamic_Matrix_> set_of_basis_post_points_;
 
 public:
 	static void post_grid(const std::vector<Element<space_dimension_>>& cell_elements);
-	static void post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment = "");
+	static void post_solution(const std::vector<Matrix<num_equation_,num_basis_>>& solution_coefficients, const std::string& comment = "");
 };
 
 
@@ -150,7 +147,7 @@ Text Post_Solution_Data_Base<Governing_Equation, post_order>::header_text(const 
 template <typename Governing_Equation, ushort post_order>
 void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
 	const auto num_cell = cell_elements.size();
-	Post_FVM_Solution_Data::num_post_points_.resize(num_cell);
+	This_::num_post_points_.resize(num_cell);
 
 	ushort str_per_line = 1;
 	size_t connectivity_start_index = 1;
@@ -160,8 +157,6 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std
 		const auto& geometry = cell_elements[i].geometry_;
 
 		const auto post_nodes = geometry.post_nodes(post_order);
-		Post_FVM_Solution_Data::num_post_points_[i] = post_nodes.size();
-
 		for (const auto& node : post_nodes) {
 			for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
 				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
@@ -182,15 +177,16 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std
 			grid_post_data_text << std::move(connectivity_str);
 		}
 
-		connectivity_start_index += Post_FVM_Solution_Data::num_post_points_[i];
-		Base_::num_node_ += Post_FVM_Solution_Data::num_post_points_[i];
-		Base_::num_element_ += connectivities.size();
-
+		const auto num_post_node = post_nodes.size();
+		connectivity_start_index += num_post_node;
+		This_::num_node_ += num_post_node;
+		This_::num_element_ += connectivities.size();
+		This_::num_post_points_[i] = num_post_node;
 	}
 
-	auto grid_post_header_text = Base_::header_text(Post_File_Type::Grid);
+	auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
 
-	const auto grid_file_path = Base_::path_ + "grid.plt";
+	const auto grid_file_path = This_::path_ + "grid.plt";
 	grid_post_header_text.write(grid_file_path);
 	grid_post_data_text.add_write(grid_file_path);
 }
@@ -202,12 +198,12 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 	
 	std::string solution_file_path;
 	if (comment.empty())
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
 	else
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
 
 	//solution post header text
-	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
+	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
 	solution_post_header_text.write(solution_file_path);
 
 
@@ -219,11 +215,11 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
 		solution_post_data_text.resize(num_equation_);
 
-		const auto num_solution = solutions.size();
+		const auto num_solution = solution_coefficients.size();
 		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& solution = solutions[i];
+			const auto& solution_coefficient = solution_coefficients[i];
 			for (size_t j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
-				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+				solution_post_data_text[0] += ms::double_to_string(solution_coefficient.at(0)) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";
 					str_per_line = 1;
@@ -239,23 +235,20 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 			const auto& cvariable = solutions[i];
 			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
 
-			for (size_t j = 0; j < This_::num_post_points_[i]; ++j) {
+			for (size_t j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
 				//write conservative variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+				for (size_t k = 0; k < This_::num_equation_; ++k)
 					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k] += "\n";
-						str_per_line = 1;
-					}
-				}
 
 				//write primitive variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+				for (size_t k = 0; k < This_::num_equation_; ++k)
 					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k + 4] += "\n";
-						str_per_line = 1;
-					}
+
+				if (str_per_line == 10) {
+					for (auto& sentence : solution_post_data_text)
+						sentence += "\n";
+
+					str_per_line = 1;
 				}
 			}
 		}
@@ -303,53 +296,53 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 
 		const auto num_post_node = post_nodes.size();
 
-		connectivity_start_index += num_post_node;
-		Base_::num_node_ += num_post_node;
-		Base_::num_element_ += connectivities.size();
+		connectivity_start_index += num_post_node;		
+		This_::num_node_ += num_post_node;
+		This_::num_element_ += connectivities.size();
+		This_::num_post_points_[i] = num_post_node;
 
 		set_of_post_nodes.push_back(std::move(post_nodes));
 	}	
 
-	This_::basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_values(set_of_post_nodes);
+	This_::set_of_basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_values(set_of_post_nodes);
 
-	auto grid_post_header_text = Base_::header_text(Post_File_Type::Grid);
+	auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
 
-	const auto grid_file_path = Base_::path_ + "grid.plt";
+	const auto grid_file_path = This_::path_ + "grid.plt";
 	grid_post_header_text.write(grid_file_path);
 	grid_post_data_text.add_write(grid_file_path);
 }
 
 
 template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
-void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment) {
-	static size_t count = 1;
+void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_solution(const std::vector<Matrix<num_equation_, num_basis_>>& solution_coefficients, const std::string& comment) {
+	static ushort count = 1;
 
 	std::string solution_file_path;
 	if (comment.empty())
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
 	else
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
 
 	//solution post header text
-	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
+	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
 	solution_post_header_text.write(solution_file_path);
 
-	//change to solutions
-
-
-
 	//solution post data text
-	size_t str_per_line = 1;
+	ushort str_per_line = 1;
 
 	Text solution_post_data_text;
-	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
-		solution_post_data_text.resize(num_equation_);
+	const auto num_solution = solution_coefficients.size();
 
-		const auto num_solution = solutions.size();
-		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& solution = solutions[i];
-			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
-				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+	solution_post_data_text.resize(This_::num_equation_);
+
+	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
+		for (uint i = 0; i < num_solution; ++i) {
+			const auto post_point_solutions = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
+
+			for (ushort j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
+				const auto solution = post_point_solutions.column(j);
+				solution_post_data_text[0] += ms::double_to_string(solution[0]) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";
 					str_per_line = 1;
@@ -358,30 +351,28 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 		}
 	}
 	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
-		solution_post_data_text.resize(2 * num_equation_);
+		solution_post_data_text.resize(2 * This_::num_equation_);
 
-		const auto num_solution = solutions.size();
 		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& cvariable = solutions[i];
-			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+			const auto post_point_solutions = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
 
-			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j) {
+			for (ushort j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
+				const auto cvariable = post_point_solutions.column<This_::num_equation_>(j);
+				const auto pvariable = Governing_Equation::conservative_to_primitive(cvariable);
+
 				//write conservative variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+				for (size_t k = 0; k < This_::num_equation_; ++k) 
 					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k] += "\n";
-						str_per_line = 1;
-					}
-				}
 
 				//write primitive variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+				for (size_t k = 0; k < This_::num_equation_; ++k) 
 					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k + 4] += "\n";
-						str_per_line = 1;
-					}
+
+				if (str_per_line == 10) {					
+					for (auto& sentence : solution_post_data_text)
+						sentence += "\n";
+
+					str_per_line = 1;
 				}
 			}
 		}

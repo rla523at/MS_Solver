@@ -8,7 +8,7 @@ Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& va
 	dynamic_require(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
 	this->num_row_ = matrix_order;
 	this->num_column_ = matrix_order;
-	this->value_.resize(matrix_order * matrix_order);
+	this->values_.resize(matrix_order * matrix_order);
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->at(i, i) = value[i];
@@ -17,25 +17,38 @@ Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& va
 Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column){
 	this->num_row_ = num_row;
 	this->num_column_ = num_column;
-	this->value_.resize(num_row * num_column);
+	this->values_.resize(num_row * num_column);
 }
 
 Dynamic_Matrix_ Dynamic_Matrix_::operator*(const Dynamic_Matrix_& other) const {
 	Dynamic_Matrix_ result(this->num_row_, other.num_column_);
-	ms::gemm(*this, other, result.value_.data());
+	ms::gemm(*this, other, result.values_.data());
 	return result;
 }
 
 bool  Dynamic_Matrix_::operator==(const Dynamic_Matrix_& other) const {
-	return this->value_ == other.value_;
+	return this->values_ == other.values_;
 }
 
 double Dynamic_Matrix_::at(const size_t row, const size_t column) const {
 	dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
-		return this->value_[column * this->num_row_ + row];
+		return this->values_[column * this->num_row_ + row];
 	else
-		return this->value_[row * this->num_column_ + column];
+		return this->values_[row * this->num_column_ + column];
+}
+
+
+template <size_t num_row>
+Euclidean_Vector<num_row> Dynamic_Matrix_::column(const size_t column_index) const {
+	dynamic_require(this->num_row_ == num_row, "this dynamic matrix should have given row dimension");
+
+	std::array<double, num_row> column_values = { 0 };
+
+	for (size_t i = 0; i < num_row; ++i)
+		column_values[i] = this->at(i, column_index);
+
+	return column_values;
 }
 
 Dynamic_Matrix_ Dynamic_Matrix_::transpose(void) const {
@@ -81,7 +94,7 @@ Dynamic_Matrix_& Dynamic_Matrix_::be_inverse(void) {
 	const int matrix_layout = LAPACK_ROW_MAJOR;
 	const lapack_int n = static_cast<int>(this->num_row_);
 	const lapack_int lda = n;
-	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->value_.data(), lda, ipiv.data());
+	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data(), lda, ipiv.data());
 
 	dynamic_require(info == 0, "info should be 0 when success matrix inverse");
 	//info > 0 "U is singular matrix in L-U decomposition"
@@ -121,9 +134,9 @@ size_t Dynamic_Matrix_::leading_dimension(void) const {
 double& Dynamic_Matrix_::at(const size_t row, const size_t column) {
 	dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
-		return this->value_[column * this->num_row_ + row];
+		return this->values_[column * this->num_row_ + row];
 	else
-		return this->value_[row * this->num_column_ + column];
+		return this->values_[row * this->num_column_ + column];
 }
 
 std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
@@ -134,7 +147,7 @@ std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
 	const lapack_int n = static_cast<int>(this->num_column_);
 	const lapack_int lda = n;
 	std::vector<int> ipiv(std::min(m, n));
-	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->value_.data(), lda, ipiv.data());
+	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->values_.data(), lda, ipiv.data());
 
 	dynamic_require(0 <= info, "info should be greater than 0 when sucess PLU decomposition");
 	return ipiv;
@@ -143,8 +156,7 @@ std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
 
 namespace ms {
 	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr) {
-		if (A.num_column_ != B.num_row_)
-			throw std::length_error("length is not matched");
+		dynamic_require(A.num_column_ == B.num_row_, "dimension should be matched for matrix multiplication");
 
 		const CBLAS_LAYOUT layout = CBLAS_LAYOUT::CblasRowMajor;
 		const CBLAS_TRANSPOSE transA = A.transpose_type_;
@@ -158,6 +170,6 @@ namespace ms {
 		const double beta = 0;
 		const MKL_INT ldc = n;
 
-		cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.value_.data(), lda, B.value_.data(), ldb, beta, output_ptr, ldc);
+		cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.values_.data(), lda, B.values_.data(), ldb, beta, output_ptr, ldc);
 	}
 }

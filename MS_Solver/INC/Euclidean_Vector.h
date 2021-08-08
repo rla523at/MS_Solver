@@ -78,8 +78,9 @@ private:
 public:
 	Euclidean_Vector(const size_t dimension) : vals_(dimension) {};
 	Euclidean_Vector(const std::initializer_list<double> list) : vals_(list) {};
+	Euclidean_Vector(std::vector<double>&& values) : vals_(std::move(values)) {};
 
-	double& operator[](const size_t position);
+	double operator[](const size_t position) const;
 	bool operator==(const Dynamic_Euclidean_Vector_& other) const;
 
 	double at(const size_t position) const;
