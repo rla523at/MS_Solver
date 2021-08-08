@@ -4,16 +4,19 @@ Dynamic_Matrix_::Matrix(const size_t matrix_order) {
 	*this = Matrix(matrix_order, matrix_order);
 }
 
-Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& value) {
+Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& value){
 	dynamic_require(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
+	this->num_row_ = matrix_order;
+	this->num_column_ = matrix_order;
 	this->value_.resize(matrix_order * matrix_order);
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->at(i, i) = value[i];
 }
 
-Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column)
-	:num_row_(num_row), num_column_(num_column) {
+Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column){
+	this->num_row_ = num_row;
+	this->num_column_ = num_column;
 	this->value_.resize(num_row * num_column);
 }
 

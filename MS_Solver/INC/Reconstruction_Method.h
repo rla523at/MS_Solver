@@ -27,16 +27,21 @@ private:
     static constexpr size_t num_equation_       = Gradient_Method::num_equation();
     static constexpr size_t space_dimension_    = Gradient_Method::space_dimension();
 
+    using This_                 = Linear_Reconstruction<Gradient_Method>;
     using Solution_             = Euclidean_Vector<num_equation_>;
     using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
+
+private:
+    inline static std::vector<Solution_Gradient_> solution_gradients_;
 
 private:
     Linear_Reconstruction(void) = delete;
 
 public:
     static void initialize(const Grid<space_dimension_>& grid) { Gradient_Method::initialize(grid); };
-    static std::vector<Solution_Gradient_> reconstruct_solutions(const std::vector<Solution_>& solutions);
+    static void reconstruct(const std::vector<Solution_>& solutions);
     static std::string name(void) { return "Linear_Reconstruction_" + Gradient_Method::name(); };
+    static const std::vector<Solution_Gradient_>& get_solution_gradients(void) { return solution_gradients_; };
 };
 
 
@@ -55,14 +60,16 @@ private:
     MLP_u1(void) = delete;
 
 protected:
+    inline static std::vector<Solution_Gradient_> solution_gradients_;
 	inline static std::vector<std::vector<uint>> vnode_indexes_set_;
     inline static std::vector<Dynamic_Matrix_> center_to_vertex_matrixes_;
     inline static std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
 
 public:
     static void initialize(Grid<space_dimension_>&& grid);
-    static std::vector<Solution_Gradient_> reconstruct_solutions(const std::vector<Solution_>& solutions);
+    static void reconstruct(const std::vector<Solution_>& solutions);
     static std::string name(void) { return "MLP_u1_" + Gradient_Method::name(); };
+    static const std::vector<Solution_Gradient_>& get_solution_gradients(void) { return solution_gradients_; };
 
 protected:
     static auto calculate_vertex_node_index_to_min_max_solution(const std::vector<Solution_>& solutions);
@@ -118,24 +125,21 @@ namespace ms {
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
 
     template <typename T>
-    inline constexpr bool is_constant_reconstruction = std::is_same_v<Constant_Reconstruction, T>;
+    inline constexpr bool is_default_reconstruction = std::is_same_v<Constant_Reconstruction, T> || std::is_same_v<Polynomial_Reconstruction, T>;
 }
 
 
 //template definition part
 template <typename Gradient_Method>
-std::vector<typename Linear_Reconstruction<Gradient_Method>::Solution_Gradient_> Linear_Reconstruction<Gradient_Method>::reconstruct_solutions(const std::vector<Solution_>& solutions) {
+void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     const auto num_cell = solutions.size();
     const auto solution_gradients_temp = Gradient_Method::calculate_solution_gradients(solutions);
 
     //dynamic matrix to matrix
-    std::vector<Matrix<num_equation_, space_dimension_>> solution_gradients;
-    solution_gradients.reserve(num_cell);
+    This_::solution_gradients_.reserve(num_cell);
 
     for (const auto& solution_gradient : solution_gradients_temp)
-        solution_gradients.push_back(solution_gradient);
-
-    return solution_gradients;
+        solution_gradients_.push_back(solution_gradient);
 }
 
 template <typename Gradient_Method>
@@ -148,6 +152,7 @@ void MLP_u1<Gradient_Method>::initialize(Grid<space_dimension_>&& grid) {
     const auto num_cell = cell_elements.size();
     This_::vnode_indexes_set_.reserve(num_cell);
     This_::center_to_vertex_matrixes_.reserve(num_cell);
+    This_::solution_gradients_.reserve(num_cell);
 
     //vnode index to share cell indexes
     This_::vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
@@ -179,14 +184,13 @@ void MLP_u1<Gradient_Method>::initialize(Grid<space_dimension_>&& grid) {
 
 
 template <typename Gradient_Method>
-std::vector<typename MLP_u1<Gradient_Method>::Solution_Gradient_> MLP_u1<Gradient_Method>::reconstruct_solutions(const std::vector<Solution_>& solutions) {
+void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     const auto solution_gradients = Gradient_Method::calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = This_::calculate_vertex_node_index_to_min_max_solution(solutions);
 
     Post_AI_Data::record_solution_datas(solutions, solution_gradients);
 
     const auto num_cell = solutions.size();
-    std::vector<Matrix<num_equation_, space_dimension_>> limited_solution_gradients(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
@@ -210,12 +214,10 @@ std::vector<typename MLP_u1<Gradient_Method>::Solution_Gradient_> MLP_u1<Gradien
         Post_AI_Data::record_limiting_value(i, limiting_values);
 
         Dynamic_Matrix_ limiting_value_matrix(num_equation_, limiting_values);
-        ms::gemm(limiting_value_matrix, gradient, limited_solution_gradients[i].data());
+        ms::gemm(limiting_value_matrix, gradient, This_::solution_gradients_[i].data());
     }
 
     Post_AI_Data::post();
-
-    return limited_solution_gradients;
 }
 
 

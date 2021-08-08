@@ -77,16 +77,20 @@ std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>:
 template <ushort num_equation_, ushort space_dimension_>
 std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();    
-    std::vector<Dynamic_Matrix_> solution_delta_matrixes(num_solution);
+    std::vector<Dynamic_Matrix_> solution_delta_matrixes;
+    solution_delta_matrixes.reserve(num_solution);
 
     for (size_t i = 0; i < num_solution; ++i) {
         const auto& near_cell_indexes = This_::near_cell_indexes_set_.at(i);
         const auto num_near_cell = near_cell_indexes.size();
                 
+        Dynamic_Matrix_ solution_delta_matrix(num_equation_, num_near_cell);
         for (size_t j = 0; j < num_near_cell; ++j) {
             const auto solution_delta = solutions[near_cell_indexes[j]] - solutions[i];
-            solution_delta_matrixes[i].change_column(j, solution_delta);
+            solution_delta_matrix.change_column(j, solution_delta);
         }
+
+        solution_delta_matrixes.push_back(std::move(solution_delta_matrix));
     }
 
     return solution_delta_matrixes;

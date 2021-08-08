@@ -10,6 +10,6 @@ class Cells;
 template <size_t space_dimension>
 class Cells<FVM, space_dimension> : public Cells_FVM<space_dimension>
 {
-public:
-    Cells(const Grid<space_dimension>& grid) : Cells_FVM<space_dimension>(grid) {};
+private:
+    Cells(void) = delete;
 };

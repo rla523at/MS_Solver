@@ -22,17 +22,19 @@ class Semi_Discrete_Equation
     using Inner_Faces_          = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
 
     using Solution_             = typename Governing_Equation::Solution_;
-    using Boundary_Flux_             = Euclidean_Vector<num_equation_>;
+    using Residual_             = Euclidean_Vector<num_equation_>;
 
 private:
-    Boundaries_ boundaries_;
-    Cells_ cells_;
-    Periodic_Boundaries_ periodic_boundaries_;
-    Inner_Faces_ inner_faces_;
+    Semi_Discrete_Equation(void) = delete;
     
 public:
-    Semi_Discrete_Equation(Grid<space_dimension_>&& grid)
-        : cells_(grid), boundaries_(std::move(grid)),  periodic_boundaries_(std::move(grid)), inner_faces_(std::move(grid)) {
+    static void initialize(Grid<space_dimension_>&& grid) {
+        Reconstruction_Method::initialize(std::move(grid));
+        Cells_::initialize(std::move(grid));
+        Boundaries_::initialize(std::move(grid));
+        Periodic_Boundaries_::initialize(std::move(grid));
+        Inner_Faces_::initialize(std::move(grid));
+
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
@@ -41,45 +43,39 @@ public:
     };
 
     template <typename Time_Step_Method>
-    double calculate_time_step(const std::vector<Solution_>& solutions) const {
+    static double calculate_time_step(const std::vector<Solution_>& solutions) {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
         if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) {
             const auto projected_maximum_lambdas = Governing_Equation::coordinate_projected_maximum_lambdas(solutions);
-            return this->cells_.calculate_time_step(projected_maximum_lambdas, time_step_constant_);
+            return Cells_::calculate_time_step(projected_maximum_lambdas, time_step_constant_);
         }
         else
             return time_step_constant_;
     }
 
-    std::vector<Boundary_Flux_> calculate_RHS(const std::vector<Solution_>& solutions) const {
+    static std::vector<Residual_> calculate_RHS(const std::vector<Solution_>& solutions) {
         static const auto num_solution = solutions.size();
-        std::vector<Boundary_Flux_> RHS(num_solution);
+        std::vector<Residual_> RHS(num_solution);
 
-        if constexpr (ms::is_constant_reconstruction<Reconstruction_Method>) {
-            this->boundaries_.calculate_RHS(RHS, solutions);
-            this->periodic_boundaries_.calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
-            this->inner_faces_.calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
-            this->cells_.scale_RHS(RHS);            
-        }
-        else{
-            const auto reconstructed_solutions = this->reconstruction_method_.reconstruct_solutions(solutions);
-            this->boundaries_.calculate_RHS(RHS, reconstructed_solutions);
-            this->periodic_boundaries_.calculate_RHS<Numerical_Flux_Function, num_equation_>(RHS, reconstructed_solutions);
-            this->inner_faces_.calculate_RHS<Numerical_Flux_Function, num_equation_>(RHS, reconstructed_solutions);
-            this->cells_.scale_RHS(RHS);
-        }
+        if constexpr (!ms::is_default_reconstruction<Reconstruction_Method>)
+            Reconstruction_Method::reconstruct(solutions);
+
+        Boundaries_::calculate_RHS(RHS, solutions);
+        Periodic_Boundaries_::template calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
+        Inner_Faces_::template calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
+        Cells_::calculate_RHS(RHS, solutions);
 
         return RHS;
     }
 
     template <typename Initial_Condition>
-    std::vector<Solution_> calculate_initial_solutions(void)const {
-        return cells_.calculate_initial_solutions<Initial_Condition>();
+    static std::vector<Solution_> calculate_initial_solutions(void) {
+        return Cells_::template calculate_initial_solutions<Initial_Condition>();
     }
 
     template <typename Initial_Condition>
-    void estimate_error(const std::vector<Solution_>& computed_solution, const double time)const {
-        cells_.estimate_error<Initial_Condition, Governing_Equation>(computed_solution, time);
+    static void estimate_error(const std::vector<Solution_>& computed_solution, const double time) {
+        Cells_::template estimate_error<Initial_Condition, Governing_Equation>(computed_solution, time);
     }
 
 };

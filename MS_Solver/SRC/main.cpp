@@ -1,8 +1,8 @@
 #include "../INC/Inital_Condition.h"
 #include "../INC/Discrete_Equation.h"
-#include "../INC/Setting.h"
 #include "../INC/Post_Solution_Data.h"
 #include "../INC/Log.h"
+#include "../INC/Setting.h"
 
 using Post_Solution_Data_		= Post_Solution_Data<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, POST_ORDER>;
 using Grid_Builder_				= Grid_Builder<DIMENSION>;
@@ -18,12 +18,12 @@ int main(void) {
 
 	Post_Solution_Data_::post_grid(grid.elements.cell_elements);
 	Post_AI_Data::intialize(grid);	
+	Semi_Discrete_Equation_::initialize(std::move(grid));
 
-	const auto semi_discrete_eq = Semi_Discrete_Equation_(std::move(grid));
-	auto solutions				= semi_discrete_eq.calculate_initial_solutions<INITIAL_CONDITION>();
-	
-	Discrete_Equation_::solve<TIME_STEP_METHOD, SOLVE_END_CONDITION, SOLVE_POST_CONDITION, Post_Solution_Data_>(semi_discrete_eq, solutions);
-	semi_discrete_eq.estimate_error<INITIAL_CONDITION>(solutions, END_CONDITION_CONSTANT);
+	auto solutions = Semi_Discrete_Equation_::calculate_initial_solutions<INITIAL_CONDITION>();
+	Discrete_Equation_::solve<Semi_Discrete_Equation_, TIME_STEP_METHOD, SOLVE_END_CONDITION, SOLVE_POST_CONDITION, Post_Solution_Data_>(solutions);
+		
+	Semi_Discrete_Equation_::estimate_error<INITIAL_CONDITION>(solutions, END_CONDITION_CONSTANT);
 
 	Log::write();
 }

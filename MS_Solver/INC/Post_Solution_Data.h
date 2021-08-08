@@ -46,6 +46,7 @@ private:
 	static constexpr size_t num_equation_		= Governing_Equation::num_equation();
 
 	using Base_ = Post_Solution_Data_Base<Governing_Equation, post_order>;
+	using This_ = Post_FVM_Solution_Data<Governing_Equation, post_order>;
 
 private:
 	static inline std::vector<size_t> num_post_points_;
@@ -213,7 +214,7 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 		const auto num_solution = solutions.size();
 		for (size_t i = 0; i < num_solution; ++i) {
 			const auto& solution = solutions[i];
-			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
+			for (size_t j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
 				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";
@@ -230,7 +231,7 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 			const auto& cvariable = solutions[i];
 			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
 
-			for (size_t j = 0; j < Post_FVM_Solution_Data::num_post_points_[i]; ++j) {
+			for (size_t j = 0; j < This_::num_post_points_[i]; ++j) {
 				//write conservative variable
 				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
 					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
@@ -302,70 +303,70 @@ void Post_HOM_Solution_Data<Governing_Equation, post_order>::post_grid(const std
 }
 
 
-template <typename Governing_Equation, ushort post_order>
-void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment) {
-	static size_t count = 1;
-
-	std::string solution_file_path;
-	if (comment.empty())
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
-	else
-		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
-
-	//solution post header text
-	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
-	solution_post_header_text.write(solution_file_path);
-
-
-	//solution post data text
-	size_t str_per_line = 1;
-
-	Text solution_post_data_text;
-
-	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
-		solution_post_data_text.resize(num_equation_);
-
-		const auto num_solution = solutions.size();
-		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& solution = solutions[i];
-			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
-				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
-				if (str_per_line == 10) {
-					solution_post_data_text[0] += "\n";
-					str_per_line = 1;
-				}
-			}
-		}
-	}
-	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
-		solution_post_data_text.resize(2 * num_equation_);
-
-		const auto num_solution = solutions.size();
-		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& cvariable = solutions[i];
-			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
-
-			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j) {
-				//write conservative variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
-					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k] += "\n";
-						str_per_line = 1;
-					}
-				}
-
-				//write primitive variable
-				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
-					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-					if (str_per_line == 10) {
-						solution_post_data_text[k + 4] += "\n";
-						str_per_line = 1;
-					}
-				}
-			}
-		}
-	}
-
-	solution_post_data_text.add_write(solution_file_path);
-}
+//template <typename Governing_Equation, ushort post_order>
+//void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment) {
+//	static size_t count = 1;
+//
+//	std::string solution_file_path;
+//	if (comment.empty())
+//		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
+//	else
+//		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+//
+//	//solution post header text
+//	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
+//	solution_post_header_text.write(solution_file_path);
+//
+//
+//	//solution post data text
+//	size_t str_per_line = 1;
+//
+//	Text solution_post_data_text;
+//
+//	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
+//		solution_post_data_text.resize(num_equation_);
+//
+//		const auto num_solution = solutions.size();
+//		for (size_t i = 0; i < num_solution; ++i) {
+//			const auto& solution = solutions[i];
+//			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
+//				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+//				if (str_per_line == 10) {
+//					solution_post_data_text[0] += "\n";
+//					str_per_line = 1;
+//				}
+//			}
+//		}
+//	}
+//	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
+//		solution_post_data_text.resize(2 * num_equation_);
+//
+//		const auto num_solution = solutions.size();
+//		for (size_t i = 0; i < num_solution; ++i) {
+//			const auto& cvariable = solutions[i];
+//			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+//
+//			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j) {
+//				//write conservative variable
+//				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+//					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
+//					if (str_per_line == 10) {
+//						solution_post_data_text[k] += "\n";
+//						str_per_line = 1;
+//					}
+//				}
+//
+//				//write primitive variable
+//				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+//					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
+//					if (str_per_line == 10) {
+//						solution_post_data_text[k + 4] += "\n";
+//						str_per_line = 1;
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	solution_post_data_text.add_write(solution_file_path);
+//}
