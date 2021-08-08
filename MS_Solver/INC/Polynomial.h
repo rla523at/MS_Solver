@@ -198,9 +198,11 @@ template <ushort domain_dimension>
 std::ostream& operator<<(std::ostream& ostream, const Irrational_Function<domain_dimension>& irrational_function);
 
 namespace ms {
-	template <ushort domain_dimension_> std::vector<Euclidean_Vector<domain_dimension_>> polynomial_compare_node_set(const ushort polynomial_order);
-	ushort combination(const ushort n, const ushort k);
-	ushort combination_with_repetition(const ushort n, const ushort k);
+	template <ushort domain_dimension_> 
+	std::vector<Euclidean_Vector<domain_dimension_>> polynomial_compare_node_set(const ushort polynomial_order);
+	constexpr ushort combination(const ushort n, const ushort k);
+	constexpr ushort combination_with_repetition(const ushort n, const ushort k);
+
 	bool is_positive_odd_number(const double val);
 	bool is_natural_number(const double val);
 }
@@ -1000,5 +1002,20 @@ namespace ms {
 		}
 
 		return compare_node_set;
+	}
+
+	constexpr ushort combination(const ushort n, const ushort k) {
+		//calculate nCk
+		//the combination of n things taken k at a time without repetition.
+		if (n == k || k == 0)
+			return 1;
+		else
+			return combination(n - 1, k - 1) + combination(n - 1, k);
+	}
+
+	constexpr ushort combination_with_repetition(const ushort n, const ushort k) {
+		//calculate nHk
+		//the combination of n things taken k at a time with repetition.
+		return combination(n + k - 1, k);
 	}
 }

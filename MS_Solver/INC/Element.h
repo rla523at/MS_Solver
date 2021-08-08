@@ -128,8 +128,12 @@ public:
 	std::vector<Space_Vector_> vertex_nodes(void) const;
 	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
 	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
-	std::vector<Polynomial<space_dimension>> initial_basis_functions(const ushort order) const;
-	std::vector<Polynomial<space_dimension>> orthonormal_basis_functions(const ushort order) const;
+
+	template <ushort order>
+	auto initial_basis_function(void) const;
+
+	template <ushort order>
+	auto orthonormal_basis_function(void) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_faces_nodes(void) const;
@@ -195,11 +199,31 @@ namespace ms {
 		return std::sqrt(ms::inner_product(function, function, geometry));
 	}
 
-	template <ushort space_dimension>
-	std::vector<Polynomial<space_dimension>> Gram_Schmidt_process(const std::vector<Polynomial<space_dimension>>& functions, const Geometry<space_dimension>& geometry) {
-		auto normalized_functions = functions;
+	template <ushort space_dimension, ushort range_dimension>
+	Vector_Function<Polynomial<space_dimension>, range_dimension> Gram_Schmidt_process(const Vector_Function<Polynomial<space_dimension>, range_dimension>& function, const Geometry<space_dimension>& geometry) {				
+		std::array<Polynomial<space_dimension>, range_dimension> normalized_function = { 0 };
 
-		for (ushort i = 0; i < functions.size(); ++i) {
+		for (ushort i = 0; i < range_dimension; ++i) {
+			normalized_function[i] = function[i];
+
+			for (ushort j = 0; j < i; ++j)
+				normalized_function[i] -= ms::inner_product(normalized_function[i], normalized_function[j], geometry) * normalized_function[j];
+
+			normalized_function[i] *= 1.0 / ms::L2_Norm(normalized_function[i], geometry);
+		}
+
+		return normalized_function;
+	}
+
+	template <ushort space_dimension>
+	Dynamic_Vector_Function_<Polynomial<space_dimension>> Gram_Schmidt_process(const Dynamic_Vector_Function_<Polynomial<space_dimension>>& functions, const Geometry<space_dimension>& geometry) {
+		const auto range_dimension = functions.range_dimension();
+
+		std::vector<Polynomial<space_dimension>> normalized_functions(range_dimension);
+
+		for (ushort i = 0; i < range_dimension; ++i) {
+			normalized_functions[i] = functions[i];
+
 			for (ushort j = 0; j < i; ++j)
 				normalized_functions[i] -= ms::inner_product(normalized_functions[i], normalized_functions[j], geometry) * normalized_functions[j];
 
@@ -1096,13 +1120,15 @@ bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other, const us
 }
 
 template <ushort space_dimension>
-std::vector<Polynomial<space_dimension>> Geometry<space_dimension>::initial_basis_functions(const ushort order) const {
-	const auto num_basis = ms::combination_with_repetition(1 + space_dimension, order);
+template <ushort order>
+auto Geometry<space_dimension>::initial_basis_function(void) const {
+	constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, order);
 
-	std::vector<Polynomial<space_dimension>> initial_basis_set;
-	initial_basis_set.reserve(num_basis);
-
+	std::array<Polynomial<space_dimension>, num_basis> initial_basis_set = { 0 };
+	
 	if (space_dimension == 2) {
+		ushort index = 0;
+
 		//1 (x - x_c) (y - y_c)  ...
 		Polynomial<space_dimension> x("x0");
 		Polynomial<space_dimension> y("x1");
@@ -1113,17 +1139,19 @@ std::vector<Polynomial<space_dimension>> Geometry<space_dimension>::initial_basi
 
 		for (ushort a = 0; a <= order; ++a)
 			for (ushort b = 0; b <= a; ++b)
-				initial_basis_set.push_back(((x - x_c) ^ (a - b)) * ((y - y_c) ^ b));
+				initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
 	}
 	else
 		throw std::runtime_error("not supported space dimension");
 
-	return initial_basis_set;
+	Vector_Function<Polynomial<space_dimension>, num_basis> initial_basis_function = initial_basis_set;
+	return initial_basis_function;
 }
 
 template <ushort space_dimension>
-std::vector<Polynomial<space_dimension>> Geometry<space_dimension>::orthonormal_basis_functions(const ushort order) const {
-	const auto initial_basis_set = this->initial_basis_functions(order);
+template <ushort order>
+auto Geometry<space_dimension>::orthonormal_basis_function(void) const {
+	const auto initial_basis_set = this->initial_basis_function<order>();
 	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }
 

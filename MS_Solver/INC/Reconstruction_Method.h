@@ -113,9 +113,22 @@ protected:
 
 class HOM_Reconstruction : public RM {};
 
+template <ushort space_dimension, ushort solution_order>
 class Polynomial_Reconstruction : public HOM_Reconstruction
 {
+private:
+    using This_         = Polynomial_Reconstruction<space_dimension, solution_order>;
+    using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
+private:
+    inline static std::vector<Dynamic_Vector_Function_<Polynomial<space_dimension>>> basis_functions_;
+
+private:
+    Polynomial_Reconstruction(void) = delete;
+
+public:
+    static void initialize(const Grid<space_dimension>& grid);
+    static std::vector<Dynamic_Matrix_> calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
 
 };
 
@@ -125,7 +138,7 @@ namespace ms {
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
 
     template <typename T>
-    inline constexpr bool is_default_reconstruction = std::is_same_v<Constant_Reconstruction, T> || std::is_same_v<Polynomial_Reconstruction, T>;
+    inline constexpr bool is_default_reconstruction = std::is_same_v<Constant_Reconstruction, T>; /*|| std::is_same_v<Polynomial_Reconstruction, T>;*/
 }
 
 
@@ -265,6 +278,54 @@ double MLP_u1<Gradient_Method>::limit(const double vertex_solution_delta, const 
     else
         return min((max_solution - center_solution) / vertex_solution_delta, 1);
 }
+
+
+template <ushort space_dimension, ushort solution_order>
+void Polynomial_Reconstruction<space_dimension, solution_order>::initialize(const Grid<space_dimension>& grid) {
+    SET_TIME_POINT;
+
+    const auto& cell_elements = grid.elements.cell_elements;
+
+    const auto num_cell = cell_elements.size();
+    This_::basis_functions_.reserve(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& cell_element = cell_elements[i];
+        const auto& cell_geometry = cell_element.geometry_;
+
+        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function(solution_order));
+    }    
+
+    Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::print();
+}
+
+template <ushort space_dimension, ushort solution_order>
+std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order>::calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
+    const auto num_cell = This_::basis_functions_.size();
+
+    dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
+
+    std::vector<Dynamic_Matrix_> set_of_basis_values;
+    set_of_basis_values.reserve(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& basis_function = This_::basis_functions_[i];
+        const auto& nodes = set_of_nodes[i];
+
+        const auto range_dimension = basis_function.range_dimension();
+        const auto num_node = nodes.size();
+
+        Dynamic_Matrix_ basis_value(range_dimension, num_node);
+        for (size_t j = 0; j < num_node; ++j)
+            basis_value.change_column(j, basis_function(nodes[j]));
+
+        set_of_basis_values.push_back(std::move(basis_value));
+    }
+
+    return set_of_basis_values;
+}
+
 
 
 //template <typename Gradient_Method>

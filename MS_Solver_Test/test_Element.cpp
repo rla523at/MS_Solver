@@ -698,26 +698,25 @@ GTEST_TEST(Geometry, orthonormal_basis_1) {
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	for (ushort i = 0; i < 6; ++i) {
-		const auto polynomial_order = i;
-		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+	constexpr auto polynomial_order = 5;
+	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
 
-		double max_error = 0.0;
-		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
-			for (ushort j = 0; j <= i; ++j) {
-				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+	double max_error = 0.0;
+	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+		for (ushort j = 0; j <= i; ++j) {
+			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
-				if (i == j)
-					max_error = std::max(max_error, std::abs(1 - result));
-				else
-					max_error = std::max(max_error, std::abs(result));
-			}
+			if (i == j)
+				max_error = std::max(max_error, std::abs(1 - result));
+			else
+				max_error = std::max(max_error, std::abs(result));
 		}
-
-		constexpr double allowable_error = 9.0E-10;
-		EXPECT_LE(max_error, allowable_error);
 	}
+
+	constexpr double allowable_error = 9.0E-10;
+	EXPECT_LE(max_error, allowable_error);
 }
+
 GTEST_TEST(Geometry, orthonormal_basis_2) {
 	constexpr ushort space_dimension = 2;
 
@@ -733,25 +732,24 @@ GTEST_TEST(Geometry, orthonormal_basis_2) {
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	for (ushort i = 0; i < 6; ++i) {
-		const auto polynomial_order = i;
-		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+	constexpr auto polynomial_order = 5;
+	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
 
-		double max_error = 0.0;
-		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
-			for (ushort j = 0; j <= i; ++j) {
-				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+	double max_error = 0.0;
+	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+		for (ushort j = 0; j <= i; ++j) {
+			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
-				if (i == j)
-					max_error = std::max(max_error, std::abs(1 - result));
-				else
-					max_error = std::max(max_error, std::abs(result));
-			}
+			if (i == j)
+				max_error = std::max(max_error, std::abs(1 - result));
+			else
+				max_error = std::max(max_error, std::abs(result));
 		}
-
-		constexpr double allowable_error = 9.0E-11;
-		EXPECT_LE(max_error, allowable_error);
 	}
+
+	constexpr double allowable_error = 9.0E-11;
+	EXPECT_LE(max_error, allowable_error);
+	
 }
 GTEST_TEST(Geometry, orthonormal_basis_3) {
 	constexpr ushort space_dimension = 2;
@@ -768,25 +766,23 @@ GTEST_TEST(Geometry, orthonormal_basis_3) {
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	for (ushort i = 0; i < 6; ++i) {
-		const auto polynomial_order = i;
-		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+	constexpr auto polynomial_order = 5;
+	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
 
-		double max_error = 0.0;
-		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
-			for (ushort j = 0; j <= i; ++j) {
-				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+	double max_error = 0.0;
+	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+		for (ushort j = 0; j <= i; ++j) {
+			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
-				if (i == j)
-					max_error = std::max(max_error, std::abs(1 - result));
-				else
-					max_error = std::max(max_error, std::abs(result));
-			}
+			if (i == j)
+				max_error = std::max(max_error, std::abs(1 - result));
+			else
+				max_error = std::max(max_error, std::abs(result));
 		}
-
-		constexpr double allowable_error = 9.0E-9;
-		EXPECT_LE(max_error, allowable_error);
 	}
+
+	constexpr double allowable_error = 9.0E-9;
+	EXPECT_LE(max_error, allowable_error);
 }
 GTEST_TEST(Geometry, orthonormal_basis_4) {
 	constexpr ushort space_dimension = 2;
@@ -803,25 +799,24 @@ GTEST_TEST(Geometry, orthonormal_basis_4) {
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	for (ushort i = 0; i < 6; ++i) {
-		const auto polynomial_order = i;
-		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+	constexpr auto polynomial_order = 5;
+	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
 
-		double max_error = 0.0;
-		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
-			for (ushort j = 0; j <= i; ++j) {
-				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+	double max_error = 0.0;
+	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+		for (ushort j = 0; j <= i; ++j) {
+			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
-				if (i == j)
-					max_error = std::max(max_error, std::abs(1 - result));
-				else
-					max_error = std::max(max_error, std::abs(result));
-			}
+			if (i == j)
+				max_error = std::max(max_error, std::abs(1 - result));
+			else
+				max_error = std::max(max_error, std::abs(result));
 		}
-
-		constexpr double allowable_error = 9.0E-13;
-		EXPECT_LE(max_error, allowable_error);
 	}
+
+	constexpr double allowable_error = 9.0E-13;
+	EXPECT_LE(max_error, allowable_error);
+	
 }
 GTEST_TEST(Geometry, orthonormal_basis_5) {
 	constexpr ushort space_dimension = 2;
@@ -837,25 +832,23 @@ GTEST_TEST(Geometry, orthonormal_basis_5) {
 
 	Geometry geometry(ref_geometry, std::move(nodes));
 
-	for (ushort i = 0; i < 6; ++i) {
-		const auto polynomial_order = i;
-		const auto orthonormal_basis = geometry.orthonormal_basis_functions(polynomial_order);
+	constexpr auto polynomial_order = 5;
+	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
 
-		double max_error = 0.0;
-		for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
-			for (ushort j = 0; j <= i; ++j) {
-				const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
+	double max_error = 0.0;
+	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+		for (ushort j = 0; j <= i; ++j) {
+			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
-				if (i == j)
-					max_error = std::max(max_error, std::abs(1 - result));
-				else
-					max_error = std::max(max_error, std::abs(result));
-			}
+			if (i == j)
+				max_error = std::max(max_error, std::abs(1 - result));
+			else
+				max_error = std::max(max_error, std::abs(result));
 		}
-
-		constexpr double allowable_error = 9.0E-13;
-		EXPECT_LE(max_error, allowable_error);
 	}
+
+	constexpr double allowable_error = 9.0E-13;
+	EXPECT_LE(max_error, allowable_error);
 }
 
 GTEST_TEST(Element, vertex_node_indexes_1) {

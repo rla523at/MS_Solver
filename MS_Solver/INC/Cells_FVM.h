@@ -95,7 +95,8 @@ auto Cells_FVM<space_dimension>::calculate_initial_solutions(void) {
 
 template <ushort space_dimension>
 template <typename Initial_Condition, typename Governing_Equation, typename Solution>
-void Cells_FVM<space_dimension>::estimate_error(const std::vector<Solution>& computed_solutions, const double time) {
+void Cells_FVM<space_dimension>::estimate_error(const std::vector<Solution>& computed_solutions, const double time) {  
+
     Log::content_ << "================================================================================\n";
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";

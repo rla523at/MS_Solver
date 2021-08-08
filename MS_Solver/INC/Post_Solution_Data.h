@@ -60,7 +60,7 @@ public:
 };
 
 
-template <typename Governing_Equation, ushort post_order>
+template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
 class Post_HOM_Solution_Data : public Post_Solution_Data_Base<Governing_Equation, post_order>
 {
 private:
@@ -69,6 +69,7 @@ private:
 	static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
 	static constexpr size_t num_equation_ = Governing_Equation::num_equation();
 
+	using This_ = Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>;
 	using Base_ = Post_Solution_Data_Base<Governing_Equation, post_order>;
 
 private:
@@ -80,12 +81,16 @@ public:
 };
 
 
-template <typename Governing_Equation, typename Spatial_Discrete_Method, ushort post_order>
+template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, ushort post_order>
 class Post_Solution_Data {};
 
 
-template <typename Governing_Equation, ushort post_order>
-class Post_Solution_Data<Governing_Equation, FVM, post_order> : public Post_FVM_Solution_Data<Governing_Equation, post_order>
+template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
+class Post_Solution_Data<Governing_Equation, FVM, Reconstruction_Method, post_order> : public Post_FVM_Solution_Data<Governing_Equation, post_order>
+{};
+
+template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
+class Post_Solution_Data<Governing_Equation, HOM, Reconstruction_Method, post_order> : public Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>
 {};
 
 
@@ -170,10 +175,12 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std
 		const auto connectivities = geometry.reference_geometry_.post_connectivities(post_order, connectivity_start_index);
 
 		std::string connectivity_str;
-		for (const auto& connectivity : connectivities)
+		for (const auto& connectivity : connectivities) {
 			for (const auto index : connectivity)
 				connectivity_str += std::to_string(index) + " ";
-		grid_post_data_text << std::move(connectivity_str);
+
+			grid_post_data_text << std::move(connectivity_str);
+		}
 
 		connectivity_start_index += Post_FVM_Solution_Data::num_post_points_[i];
 		Base_::num_node_ += Post_FVM_Solution_Data::num_post_points_[i];
@@ -258,116 +265,127 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 }
 
 
-template <typename Governing_Equation, ushort post_order>
-void Post_HOM_Solution_Data<Governing_Equation, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
-	//const auto num_cell = cell_elements.size();
-	//Post_HOM_Solution_Data::basis_post_points_.resize(num_cell);
+template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
+void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
+	const auto num_cell = cell_elements.size();
 
-	//ushort str_per_line = 1;
-	//size_t connectivity_start_index = 1;
+	std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_post_nodes;
+	set_of_post_nodes.reserve(num_cell);
+	
+	ushort str_per_line = 1;
+	size_t connectivity_start_index = 1;
 
-	//Text grid_post_data_text(space_dimension_);
-	//for (uint i = 0; i < num_cell; ++i) {
-	//	const auto& geometry = cell_elements[i].geometry_;
+	Text grid_post_data_text(space_dimension_);
+	for (uint i = 0; i < num_cell; ++i) {
+		const auto& geometry = cell_elements[i].geometry_;
 
-	//	const auto post_nodes = geometry.post_nodes(post_order);
-	//	//Post_HOM_Solution_Data::basis_post_points_[i] = geometry. geometry가  solution order을 알고 있어야 basis를 들고 있던가 말던가 하지 ^^
+		auto post_nodes = geometry.post_nodes(post_order);
 
-	//	for (const auto& node : post_nodes) {
-	//		for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
-	//			grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
-	//			if (str_per_line == 10) {
-	//				grid_post_data_text[i] += "\n";
-	//				str_per_line = 1;
-	//			}
-	//		}
-	//	}
+		for (const auto& node : post_nodes) {
+			for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
+				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
+				if (str_per_line == 10) {
+					grid_post_data_text[i] += "\n";
+					str_per_line = 1;
+				}
+			}
+		}
+		
+		const auto connectivities = geometry.reference_geometry_.post_connectivities(post_order, connectivity_start_index);
 
-	//	std::string connectivity_str;
-	//	auto local_connectivities = geometry.reference_geometry_.local_connectivities();
-	//	for (const auto& local_connectivity : local_connectivities) {
-	//		for (const auto& index : local_connectivity)
-	//			connectivity_str += std::to_string(connectivity_start_index + index) + " ";
-	//		grid_post_data_text << std::move(connectivity_str);
-	//	}
+		std::string connectivity_str;
+		for (const auto& connectivity : connectivities) {
+			for (const auto index : connectivity)
+				connectivity_str += std::to_string(index) + " ";
+		
+			grid_post_data_text << std::move(connectivity_str);
+		}
 
-	//	connectivity_start_index += Post_Solution_Data_Base::num_post_points_[i];
-	//	Post_Solution_Data_Base::num_node_ += Post_Solution_Data_Base::num_post_points_[i];
-	//	Post_Solution_Data_Base::num_element_ += local_connectivities.size();
-	//}
+		const auto num_post_node = post_nodes.size();
 
-	//auto grid_post_header_text = Post_Solution_Data_Base::header_text(Post_File_Type::Grid);
+		connectivity_start_index += num_post_node;
+		Base_::num_node_ += num_post_node;
+		Base_::num_element_ += connectivities.size();
 
-	//const auto grid_file_path = path_ + "grid.plt";
-	//grid_post_header_text.write(grid_file_path);
-	//grid_post_data_text.add_write(grid_file_path);
+		set_of_post_nodes.push_back(std::move(post_nodes));
+	}	
+
+	This_::basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_values(set_of_post_nodes);
+
+	auto grid_post_header_text = Base_::header_text(Post_File_Type::Grid);
+
+	const auto grid_file_path = Base_::path_ + "grid.plt";
+	grid_post_header_text.write(grid_file_path);
+	grid_post_data_text.add_write(grid_file_path);
 }
 
 
-//template <typename Governing_Equation, ushort post_order>
-//void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment) {
-//	static size_t count = 1;
-//
-//	std::string solution_file_path;
-//	if (comment.empty())
-//		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
-//	else
-//		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
-//
-//	//solution post header text
-//	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
-//	solution_post_header_text.write(solution_file_path);
-//
-//
-//	//solution post data text
-//	size_t str_per_line = 1;
-//
-//	Text solution_post_data_text;
-//
-//	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
-//		solution_post_data_text.resize(num_equation_);
-//
-//		const auto num_solution = solutions.size();
-//		for (size_t i = 0; i < num_solution; ++i) {
-//			const auto& solution = solutions[i];
-//			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
-//				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
-//				if (str_per_line == 10) {
-//					solution_post_data_text[0] += "\n";
-//					str_per_line = 1;
-//				}
-//			}
-//		}
-//	}
-//	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
-//		solution_post_data_text.resize(2 * num_equation_);
-//
-//		const auto num_solution = solutions.size();
-//		for (size_t i = 0; i < num_solution; ++i) {
-//			const auto& cvariable = solutions[i];
-//			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
-//
-//			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j) {
-//				//write conservative variable
-//				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
-//					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-//					if (str_per_line == 10) {
-//						solution_post_data_text[k] += "\n";
-//						str_per_line = 1;
-//					}
-//				}
-//
-//				//write primitive variable
-//				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
-//					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-//					if (str_per_line == 10) {
-//						solution_post_data_text[k + 4] += "\n";
-//						str_per_line = 1;
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	solution_post_data_text.add_write(solution_file_path);
-//}
+template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
+void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_solution(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const std::string& comment) {
+	static size_t count = 1;
+
+	std::string solution_file_path;
+	if (comment.empty())
+		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + ".plt";
+	else
+		solution_file_path = Base_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+
+	//solution post header text
+	auto solution_post_header_text = Base_::header_text(Post_File_Type::Solution);
+	solution_post_header_text.write(solution_file_path);
+
+	//change to solutions
+
+
+
+	//solution post data text
+	size_t str_per_line = 1;
+
+	Text solution_post_data_text;
+	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
+		solution_post_data_text.resize(num_equation_);
+
+		const auto num_solution = solutions.size();
+		for (size_t i = 0; i < num_solution; ++i) {
+			const auto& solution = solutions[i];
+			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j, ++str_per_line) {
+				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+				if (str_per_line == 10) {
+					solution_post_data_text[0] += "\n";
+					str_per_line = 1;
+				}
+			}
+		}
+	}
+	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
+		solution_post_data_text.resize(2 * num_equation_);
+
+		const auto num_solution = solutions.size();
+		for (size_t i = 0; i < num_solution; ++i) {
+			const auto& cvariable = solutions[i];
+			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+
+			for (size_t j = 0; j < Base_::num_post_points_[i]; ++j) {
+				//write conservative variable
+				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+					solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
+					if (str_per_line == 10) {
+						solution_post_data_text[k] += "\n";
+						str_per_line = 1;
+					}
+				}
+
+				//write primitive variable
+				for (size_t k = 0; k < num_equation_; ++k, ++str_per_line) {
+					solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
+					if (str_per_line == 10) {
+						solution_post_data_text[k + 4] += "\n";
+						str_per_line = 1;
+					}
+				}
+			}
+		}
+	}
+
+	solution_post_data_text.add_write(solution_file_path);
+}

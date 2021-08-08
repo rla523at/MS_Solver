@@ -13,7 +13,7 @@ public:
 	inline static std::vector<Text> ai_data_text_set_;
 	inline static std::vector<std::vector<size_t>> vertex_share_cell_indexes_set_;
 	inline static std::vector<size_t> target_cell_indexes_;
-
+	
 public:
 	static void set_path(const std::string& path);
 
@@ -44,7 +44,7 @@ public:
 //template definition part
 template <size_t space_dimension>
 void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
-#ifdef POST_AI_DATA
+#ifdef POST_AI_DATA_MODE
 
 	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
 	const auto& cell_elements = grid.elements.cell_elements;
@@ -135,7 +135,7 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 
 template <size_t num_equation>
 void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Dynamic_Matrix_>& solution_gradients) {
-#ifdef POST_AI_DATA
+#ifdef POST_AI_DATA_MODE
 
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
 	dynamic_require(num_data_ == solution_gradients.size(), "number of solution gradient should be same with number of data");
