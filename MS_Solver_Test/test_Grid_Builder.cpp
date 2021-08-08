@@ -13,7 +13,7 @@ TEST(Grid, set_of_face_share_cell_indexes) {
 	auto result = set_of_face_share_cell_indexes[0];
 	std::sort(result.begin(), result.end());
 
-	const std::vector<size_t> ref = { 2,3,4,7 };
+	const std::vector<size_t> ref = { 1,2,3,6 };
 	EXPECT_EQ(ref, result);
 }
 

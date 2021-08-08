@@ -287,7 +287,7 @@ TEST(ReferenceGeometry, reference_connectivity_1) {
 	constexpr ushort post_order = 0;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {1,2,3} };
+	const std::vector<std::vector<ushort>> ref = { {0,1,2} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_2) {
@@ -300,7 +300,7 @@ TEST(ReferenceGeometry, reference_connectivity_2) {
 	constexpr ushort post_order = 1;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {1,2,4},{2,5,4},{2,3,5},{4,5,6} };
+	const std::vector<std::vector<ushort>> ref = { {0,1,3},{1,4,3},{1,2,4},{3,4,5} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_3) {
@@ -313,7 +313,7 @@ TEST(ReferenceGeometry, reference_connectivity_3) {
 	constexpr ushort post_order = 0;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {1,2,3},{2,4,3} };
+	const std::vector<std::vector<ushort>> ref = { {0,1,2},{1,3,2} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_4) {
@@ -326,7 +326,7 @@ TEST(ReferenceGeometry, reference_connectivity_4) {
 	constexpr ushort post_order = 1;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {1,2,4},{2,5,4},{2,3,5},{3,6,5},{4,5,7},{5,8,7},{5,6,8},{6,9,8} };
+	const std::vector<std::vector<ushort>> ref = { {0,1,3},{1,4,3},{1,2,4},{2,5,4},{3,4,6},{4,7,6},{4,5,7},{5,8,7} };
 	EXPECT_EQ(result, ref);
 }
 //GTEST_TEST(ReferenceGeometry, scale_function_1) {

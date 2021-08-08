@@ -167,17 +167,18 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std
 			}
 		}
 
+		const auto connectivities = geometry.reference_geometry_.post_connectivities(post_order, connectivity_start_index);
+
 		std::string connectivity_str;
-		auto local_connectivities = geometry.reference_geometry_.local_connectivities();
-		for (const auto& local_connectivity : local_connectivities) {
-			for (const auto& index : local_connectivity)
-				connectivity_str += std::to_string(connectivity_start_index + index) + " ";
-			grid_post_data_text << std::move(connectivity_str);
-		}
+		for (const auto& connectivity : connectivities)
+			for (const auto index : connectivity)
+				connectivity_str += std::to_string(index) + " ";
+		grid_post_data_text << std::move(connectivity_str);
 
 		connectivity_start_index += Post_FVM_Solution_Data::num_post_points_[i];
 		Base_::num_node_ += Post_FVM_Solution_Data::num_post_points_[i];
-		Base_::num_element_ += local_connectivities.size();
+		Base_::num_element_ += connectivities.size();
+
 	}
 
 	auto grid_post_header_text = Base_::header_text(Post_File_Type::Grid);

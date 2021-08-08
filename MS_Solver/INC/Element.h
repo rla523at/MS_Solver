@@ -80,11 +80,12 @@ public:
 	std::vector<std::vector<ushort>> face_vertex_node_index_orders_set(void) const;
 	std::vector<std::vector<ushort>> face_node_index_orders_set(void) const;
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
-	std::vector<std::vector<ushort>> local_connectivities(void) const;
+	//std::vector<std::vector<ushort>> local_connectivities(void) const;
 	Vector_Function<Polynomial<space_dimension>, space_dimension> mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const;
 	Irrational_Function<space_dimension> scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
 	Quadrature_Rule<space_dimension> quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const;
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
+	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 
 	//private: for test
 	std::vector<Space_Vector_> mapping_nodes(void) const;
@@ -574,28 +575,54 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 }
 
 template <ushort space_dimension>
-std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::local_connectivities(void) const {
-	switch (this->figure_) {
-	case Figure::triangle: {
-		//  2
-		//  弛 \ 
-		//  弛  \
-		//  0式式式1
-		return { { 0,1,2 } };
-	}
-	case Figure::quadrilateral: {
-		//  3式式式式式2
-		//  弛     弛
-		//  弛     弛 
-		//  0式式式式式1
+std::vector<std::vector<size_t>> ReferenceGeometry<space_dimension>::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const {
+	const auto key = std::make_pair(this->figure_, post_order);
+	if (ReferenceGeometry::key_to_reference_connectivity_.find(key) == ReferenceGeometry::key_to_reference_connectivity_.end())
+		ReferenceGeometry::key_to_reference_connectivity_.emplace(key, this->reference_connectivity(post_order));
 
-		return { {0,1,2},{0,2,3} };
+	const auto& reference_connectivities = ReferenceGeometry::key_to_reference_connectivity_.at(key);
+
+	const auto num_connectivity = reference_connectivities.size();
+	
+	std::vector<std::vector<size_t>> connectivities(num_connectivity);	
+
+	for (ushort i = 0; i < num_connectivity; ++i) {
+		auto& connectivity = connectivities[i];
+		const auto& reference_connecitivity = reference_connectivities[i];
+
+		const auto num_index = reference_connecitivity.size();
+		connectivity.resize(num_index);
+
+		for (ushort j = 0; j < num_index; ++j)
+			connectivity[j] = reference_connecitivity[j] + connectivity_start_index;
 	}
-	default:
-		throw std::runtime_error("wrong element figure");
-		return {};
-	}
+
+	return connectivities;
 }
+
+//template <ushort space_dimension>
+//std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::local_connectivities(void) const {
+//	switch (this->figure_) {
+//	case Figure::triangle: {
+//		//  2
+//		//  弛 \ 
+//		//  弛  \
+//		//  0式式式1
+//		return { { 0,1,2 } };
+//	}
+//	case Figure::quadrilateral: {
+//		//  3式式式式式2
+//		//  弛     弛
+//		//  弛     弛 
+//		//  0式式式式式1
+//
+//		return { {0,1,2},{0,2,3} };
+//	}
+//	default:
+//		throw std::runtime_error("wrong element figure");
+//		return {};
+//	}
+//}
 
 template <ushort space_dimension>
 std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
@@ -874,13 +901,13 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::reference_c
 		ushort count = 0;
 		for (ushort j = 0; j < post_order + 1; j++) {
 			for (ushort i = 0; i < post_order + 1 - j; i++) {
-				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 1
+				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 0
 				//						|							|				// a_(j+1)	= a_j + (order + 2) - j
 				//						|							|				// By recurrence relation
-				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= 1 + (order + 3) * j - j*(j+1)/2
+				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= (order + 3) * j - j*(j+1)/2
 
-				const ushort a_j = 1 + (post_order + 3) * j - static_cast<ushort>(j * (j + 1) * 0.5);
-				const ushort a_jp1 = 1 + (post_order + 3) * (j + 1) - static_cast<ushort>((j + 1) * (j + 2) * 0.5);
+				const ushort a_j = (post_order + 3) * j - static_cast<ushort>(j * (j + 1) * 0.5);
+				const ushort a_jp1 = (post_order + 3) * (j + 1) - static_cast<ushort>((j + 1) * (j + 2) * 0.5);
 
 				const ushort start_index = a_j + i;
 				const ushort next_index = a_jp1 + i;
@@ -914,13 +941,13 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::reference_c
 		ushort count = 0;
 		for (ushort j = 0; j <= post_order; j++) {
 			for (ushort i = 0; i <= post_order; i++) {
-				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 1
+				//	next_index		a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 0
 				//						|							|				// a_(j+1)	= a_j + order + 2
 				//						|							|				// By recurrence relation
-				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= 1 + (order + 2) * j
+				//	start_index		a_j + i		-------------	a_j + i + 1			// a_j		= (order + 2) * j
 
-				const ushort a_j = 1 + (post_order + 2) * j;
-				const ushort a_jp1 = 1 + (post_order + 2) * (j + 1);
+				const ushort a_j = (post_order + 2) * j;
+				const ushort a_jp1 = (post_order + 2) * (j + 1);
 
 				const ushort start_index = a_j + i;
 				const ushort next_index = a_jp1 + i;
