@@ -186,9 +186,19 @@ private:
 	static constexpr ushort domain_dimension_	= Function::domain_dimension();
 
 private:
-	std::array<Function, num_value_> functions_;
+	std::array<Function, num_value_> functions_ = { 0 };
 
 public:
+	Matrix_Function(void) = default;
+	Matrix_Function(const std::array<Function, num_value_>&functions) : functions_(functions) {};
+
+	template <typename... Args>
+	Matrix_Function(const Args... args) {
+		static_require(sizeof...(Args) <= num_value_, "Number of arguments can not exceed dimension");
+
+		functions_ = { Function(args)... };
+	}
+
 	Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) {
 		std::array<double, num_value_> values;
 
@@ -197,6 +207,10 @@ public:
 				values[i * range_num_column + j] = this->at(i, j)(space_vector);
 		
 		return values;
+	}
+
+	bool operator==(const Matrix_Function& other) const {
+		return this->functions_ == other.functions_;
 	}
 
 	const Function& at(const ushort row_index, const ushort column_index) const {

@@ -113,3 +113,19 @@ GTEST_TEST(Dynamic_Vector_Function, operator_call_1)
 	Dynamic_Euclidean_Vector_ ref = { 2,3 };
 	EXPECT_EQ(ref, result);
 }
+
+TEST(Matrix_Function, change_column) {
+	constexpr size_t domain_dimension = 2;
+
+	Polynomial<domain_dimension> x("x0");
+	Polynomial<domain_dimension> y("x1");
+
+	Vector_Function<Polynomial<domain_dimension>, domain_dimension> vf = { x + y , 2 * x + y };
+		
+	Matrix_Function<Polynomial<domain_dimension>, domain_dimension, domain_dimension> result;
+	result.change_column(0, vf[0].gradient());
+	result.change_column(1, vf[1].gradient());
+
+	Matrix_Function<Polynomial<domain_dimension>, domain_dimension, domain_dimension> ref = { 1,2,1,1 };
+	EXPECT_EQ(result, ref);
+}
