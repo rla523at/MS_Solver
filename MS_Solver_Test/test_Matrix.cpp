@@ -47,3 +47,13 @@ TEST(Matrix, scalar_multiplication_2) {
 	const Matrix<30, 30> ref(ref_val);
 	EXPECT_EQ(result, ref);
 }
+
+TEST(Dynamic_Matrix, change_columns_1) {
+	const Matrix<2, 2> m = { 1,2,3,4 };
+
+	Dynamic_Matrix_ dm(4, 2);
+	dm.change_rows(0, m);
+
+	const Dynamic_Matrix_ ref(4, 4, { 1,2,3,4,0,0,0,0 });
+	EXPECT_EQ(dm, ref);
+}

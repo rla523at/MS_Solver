@@ -65,7 +65,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
         const auto num_quadrature_point = quadrature_rule.points.size();
         
-        Dynamic_Matrix_ gradient_basis_weight(num_quadrature_point * space_dimension_, This_::num_basis_);
+        Dynamic_Matrix_ gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
 
         for (ushort q = 0; q < num_quadrature_point; ++q) {
             const auto& quadrature_point = quadrature_rule.points[q];
@@ -73,12 +73,13 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
             
             const auto part_of_gradient_basis_weight = transposed_basis_Jacobian(quadrature_point) * quadrature_weight;
 
-            gradient_basis_weight[]
+            gradient_basis_weight.change_rows(q * This_::space_dimension_, part_of_gradient_basis_weight);
         }
 
+        This_::gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
     }
 
-    Log::content_ << std::left << std::setw(50) << "@ Cells FVM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 };
 //

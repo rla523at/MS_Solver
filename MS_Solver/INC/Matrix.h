@@ -24,6 +24,8 @@ template<size_t num_row, size_t num_column>
 class Matrix
 {
 private:
+	friend Dynamic_Matrix_;
+
 	template<size_t num_row, size_t num_column>
 	friend void ms::gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, Matrix<num_row, num_column>& output_matrix);
 
@@ -97,6 +99,9 @@ public:
 	template <size_t dimension>
 	void change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec);
 
+	template <size_t num_row, size_t num_column>
+	void change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A);
+
 private:
 	bool is_square_matrix(void) const;
 	bool is_transposed(void) const;
@@ -151,9 +156,8 @@ Matrix<num_row, num_column> Matrix<num_row, num_column>::operator*(const double 
 		for (size_t i = 0; i < num_row * num_column; ++i)
 			result.values_[i] *= scalar;
 	}
-	else {
+	else 
 		cblas_dscal(this->num_value_, scalar, result.values_.data(), 1);
-	}
 
 	return result;
 }
@@ -244,4 +248,14 @@ void Dynamic_Matrix_::change_column(const size_t column_index, const Euclidean_V
 
 	for (size_t i = 0; i < this->num_row_; ++i)
 		this->at(i, column_index) = vec.at(i);
+}
+
+template <size_t num_row, size_t num_column>
+void Dynamic_Matrix_::change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A) {
+	dynamic_require(this->num_column_ == num_column,		"dimension should be matched");
+	dynamic_require(start_row_index + num_row <= num_row,	"range can't not exceed given range");
+	dynamic_require(!this->is_transposed(),					"it should be not transposed for this routine");
+
+	const auto jump_index = start_row_index * this->num_column_;
+	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
 }
