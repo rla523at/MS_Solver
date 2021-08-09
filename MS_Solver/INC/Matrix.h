@@ -48,6 +48,7 @@ public:
 	bool operator==(const Matrix & A) const;
 
 	double at(const size_t row_index, const size_t column_index) const;
+	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;
 
 	//void change_column(const size_t column_index, const Euclidean_Vector<num_row>& x);
@@ -204,6 +205,17 @@ template<size_t num_row, size_t num_column>
 double Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) const {
 	dynamic_require(row_index < num_row && column_index < num_column, "index can not exceed given range");
 	return this->values_[row_index * num_column + column_index];
+}
+
+template<size_t num_row, size_t num_column>
+Euclidean_Vector<num_row> Matrix<num_row, num_column>::column(const size_t column_index) const {
+	dynamic_require(column_index < num_column, "index can not exceed given range");
+
+	std::array<double, num_row> column_value;	
+	for (size_t i = 0; i < num_row; ++i)
+		column_value[i] = this->at(i, column_index);
+
+	return column_value;
 }
 
 template<size_t num_row, size_t num_column>

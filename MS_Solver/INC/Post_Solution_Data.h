@@ -304,7 +304,7 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 		set_of_post_nodes.push_back(std::move(post_nodes));
 	}	
 
-	This_::set_of_basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_values(set_of_post_nodes);
+	This_::set_of_basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_nodes(set_of_post_nodes);
 
 	auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
 

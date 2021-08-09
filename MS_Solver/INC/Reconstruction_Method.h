@@ -131,7 +131,8 @@ private:
 public:
     static void initialize(const Grid<space_dimension>& grid);
     static auto calculate_transposed_basis_Jacobians(void);
-    static std::vector<Dynamic_Matrix_> calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
+    static std::vector<Dynamic_Matrix_> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
+    static std::vector<double> calculate_P0_basis_values(const std::vector<Space_Vector_>& center_nodes);
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
 };
@@ -323,7 +324,7 @@ static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calcula
 
 
 template <ushort space_dimension, ushort solution_order_>
-std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
+std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
     const auto num_cell = This_::basis_functions_.size();
 
     dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
@@ -346,6 +347,24 @@ std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution
 
     return set_of_basis_values;
 }
+
+template <ushort space_dimension, ushort solution_order_>
+std::vector<double> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_P0_basis_values(const std::vector<Space_Vector_>& center_nodes) {
+    const auto num_cell = center_nodes.size();
+    std::vector<double> P0_basis_values(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& basis_function = This_::basis_functions_[i];
+        const auto& P0_basis_function = basis_function[0];
+        const auto& cell_center = center_nodes[i];
+
+        P0_basis_values[i] = P0_basis_function(cell_center);
+    }
+
+    return P0_basis_values;
+}
+
+
 
 
 

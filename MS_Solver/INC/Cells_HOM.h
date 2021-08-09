@@ -3,37 +3,40 @@
 #include "Grid_Builder.h"
 #include "Reconstruction_Method.h"
 
-//FVM이면 공통으로 사용하는 variable & method
+//HOM이면 공통으로 사용하는 variable & method
 template <typename Governing_Equation, typename Reconstruction_Method>
 class Cells_HOM
 {
 private:
     static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
+    static constexpr ushort num_equation_       = Governing_Equation::num_equation();
     static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
 
-    using This_             = Cells_HOM<Governing_Equation, Reconstruction_Method>;
-    using SpaceVector_      = Euclidean_Vector<This_::space_dimension_>;
+    using This_                 = Cells_HOM<Governing_Equation, Reconstruction_Method>;
+    using Space_Vector_          = Euclidean_Vector<This_::space_dimension_>;
+    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
 
-protected:
-    inline static std::vector<Dynamic_Matrix_> gradient_basis_weights_;
+protected:    
     inline static std::vector<double> volumes_;
     inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
+    inline static std::vector<Dynamic_Matrix_> gradient_basis_weights_;
+    inline static std::vector<double> P0_basis_values_;
 
 private:
     Cells_HOM(void) = delete;
 
 public:
     static void initialize(const Grid<space_dimension_>& grid);
-    static double calculate_time_step(const std::vector<std::array<double, space_dimension_>>& coordinate_projected_maximum_lambdas, const double cfl);
+    static double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl);
 
-    template <typename Residual, typename Solution>
-    static void calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions);
+    //template <typename Residual, typename Solution>
+    //static void calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions);
 
-    template <typename Initial_Condtion>
-    static auto calculate_initial_solutions(void);
+    //template <typename Initial_Condtion>
+    //static auto calculate_initial_solutions(void);
 
-    template <typename Initial_Condition, typename Governing_Equation, typename Solution>
-    static void estimate_error(const std::vector<Solution>& computed_solution, const double time);
+    //template <typename Initial_Condition>
+    //static void estimate_error(const std::vector<Solution>& computed_solution, const double time);
 };
 
 
@@ -45,9 +48,12 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     const auto& cell_elements = grid.elements.cell_elements;
 
     const auto num_cell = cell_elements.size();
-    This_::gradient_basis_weights_.reserve(num_cell);
     This_::volumes_.reserve(num_cell);
     This_::coordinate_projected_volumes_.reserve(num_cell);
+    This_::gradient_basis_weights_.reserve(num_cell);
+
+    std::vector<Space_Vector_> cell_centers;
+    cell_centers.reserve(num_cell);
 
     const auto transposed_basis_Jacobians = Reconstruction_Method::calculate_transposed_basis_Jacobians();
     constexpr auto solution_order = Reconstruction_Method::solution_order();
@@ -60,7 +66,8 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
 
         This_::volumes_.push_back(volume);
         This_::coordinate_projected_volumes_.push_back(geometry.coordinate_projected_volume());
-                        
+        cell_centers.push_back(geometry.center_node());
+
         const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
         const auto num_quadrature_point = quadrature_rule.points.size();
@@ -79,28 +86,33 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
         This_::gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
     }
 
+    This_::P0_basis_values_ = Reconstruction_Method::calculate_P0_basis_values(cell_centers);
+
     Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 };
 
 
-template <typename Governing_Equation, typename Reconstruction_Method>
-double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<std::array<double, This_::space_dimension_>>& coordinate_projected_maximum_lambdas, const double cfl) {
-    const auto num_cell = coordinate_projected_maximum_lambdas.size();
-
-    std::vector<double> local_time_step(num_cell);
-    for (size_t i = 0; i < num_cell; ++i) {
-        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
-        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
-
-        const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
-        const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
-
-        local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
-    }
-
-    return *std::min_element(local_time_step.begin(), local_time_step.end());
-}
+//template <typename Governing_Equation, typename Reconstruction_Method>
+//double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) {
+//    
+//    
+//
+//    const auto num_cell = coordinate_projected_maximum_lambdas.size();
+//
+//    std::vector<double> local_time_step(num_cell);
+//    for (size_t i = 0; i < num_cell; ++i) {
+//        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
+//        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+//
+//        const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
+//        const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
+//
+//        local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
+//    }
+//
+//    return *std::min_element(local_time_step.begin(), local_time_step.end());
+//}
 //
 //template <ushort space_dimension>
 //template <typename Residual, typename Solution>

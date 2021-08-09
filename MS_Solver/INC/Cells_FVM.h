@@ -11,10 +11,10 @@ private:
     static constexpr ushort num_equation_ = Governing_Equation::num_equation();
 
     using This_         = Cells_FVM<Governing_Equation>;
-    using SpaceVector_  = Euclidean_Vector<space_dimension_>;    
+    using Space_Vector_  = Euclidean_Vector<space_dimension_>;    
 
 protected:
-    inline static std::vector<SpaceVector_> centers_;
+    inline static std::vector<Space_Vector_> centers_;
     inline static std::vector<double> volumes_;
     inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
     inline static std::vector<double> residual_scale_factors_;
