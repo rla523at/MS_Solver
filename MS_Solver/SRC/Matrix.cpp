@@ -153,7 +153,6 @@ std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
 	return ipiv;
 }
 
-
 namespace ms {
 	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr) {
 		dynamic_require(A.num_column_ == B.num_row_, "dimension should be matched for matrix multiplication");

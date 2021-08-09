@@ -3,13 +3,13 @@
 #include "Spatial_Discrete_Method.h"
 
 
-template <typename Spatial_Discrete_Method, size_t space_dimension>
+template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method>
 class Cells;
 
 
-template <size_t space_dimension>
-class Cells<FVM, space_dimension> : public Cells_FVM<space_dimension>
-{
+template <typename Governing_Equation, typename Reconstruction_Method>
+class Cells<Governing_Equation, FVM, Reconstruction_Method> : public Cells_FVM<Governing_Equation::space_dimension()>
+{   
 private:
     Cells(void) = delete;
 };

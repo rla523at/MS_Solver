@@ -229,7 +229,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
         Post_AI_Data::record_limiting_value(i, limiting_values);
 
         Dynamic_Matrix_ limiting_value_matrix(num_equation_, limiting_values);
-        ms::gemm(limiting_value_matrix, gradient, This_::solution_gradients_[i].data());
+        ms::gemm(limiting_value_matrix, gradient, This_::solution_gradients_[i]);
     }
 
     Post_AI_Data::post();

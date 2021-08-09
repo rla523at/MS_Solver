@@ -38,10 +38,10 @@ public:
 	double operator()(const Euclidean_Vector<domain_dimension_>& domain_vector) const;
 	bool operator==(const Polynomial& other) const;
 
-	static constexpr ushort domain_dimension(void);
 	ushort order(void) const;
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
+	Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
 
 	template <ushort variable_index>
 	Polynomial& be_derivative(void);
@@ -49,8 +49,8 @@ public:
 	template <ushort variable_index>
 	Polynomial differentiate(void) const;
 
-	//Vector_Function<Polynomial<domain_dimension_>> gradient(void) const;
-	//Vector_Function<Polynomial<domain_dimension_>> gradient(const ushort domain_dimension_) const;
+	
+	static constexpr ushort domain_dimension(void);
 
 
 private: 
@@ -380,6 +380,24 @@ template <ushort domain_dimension_>
 Irrational_Function<domain_dimension_> Polynomial<domain_dimension_>::root(const double root_index) const {
 	return Irrational_Function<domain_dimension_>(*this, root_index);
 }
+
+template <ushort domain_dimension_>
+Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> Polynomial<domain_dimension_>::gradient(void) const {
+	std::array<Polynomial<domain_dimension_>, domain_dimension_> gradient;
+	
+	if constexpr (domain_dimension_ == 2) {
+		gradient[0] = this->differentiate<0>();
+		gradient[1] = this->differentiate<1>();
+	}
+	else if constexpr (domain_dimension_ == 3) {
+		gradient[0] = this->differentiate<0>();
+		gradient[1] = this->differentiate<1>();
+		gradient[2] = this->differentiate<2>();
+	}
+
+	return gradient;
+}
+
 
 template <ushort domain_dimension_> 
 void Polynomial<domain_dimension_>::add_assign_poly_term(const PolyTerm& term) {

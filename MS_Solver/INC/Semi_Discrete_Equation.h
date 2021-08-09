@@ -8,16 +8,17 @@
 template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Semi_Discrete_Equation
 {
+private:
     static_require(ms::is_governing_equation<Governing_Equation>,               "It should be governing equation");
     static_require(ms::is_spatial_discrete_method<Spatial_Discrete_Method>,     "It should be spatial discrete method");
     static_require(ms::is_reconsturction_method<Reconstruction_Method>,         "It should be reconstruction method");
     static_require(ms::is_numeirical_flux_function<Numerical_Flux_Function>,    "It should be numerical flux function");
 
-    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
-    static constexpr size_t num_equation_ = Governing_Equation::num_equation();
+    static constexpr size_t space_dimension_    = Governing_Equation::space_dimension();
+    static constexpr size_t num_equation_       = Governing_Equation::num_equation();
 
     using Boundaries_           = Boundaries<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
-    using Cells_                = Cells<Spatial_Discrete_Method, space_dimension_>;
+    using Cells_                = Cells<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
     using Periodic_Boundaries_  = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
     using Inner_Faces_          = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
 

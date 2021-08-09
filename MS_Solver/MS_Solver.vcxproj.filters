@@ -158,5 +158,8 @@
     <ClInclude Include="INC\Vector_Function.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Cells_HOM.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

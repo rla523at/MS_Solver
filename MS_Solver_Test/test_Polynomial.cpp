@@ -678,35 +678,44 @@ GTEST_TEST(Polynomial, differentiate_15) {
 	EXPECT_EQ(result, ref);
 }
 
-//GTEST_TEST(Polynomial, gradient_1) {
-//	const auto p = X + Y + 1;
-//	const auto result = p.gradient();
-//
-//	const VectorFunction<Polynomial> ref = { 1, 1 };
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Polynomial, gradient_2) {
-//	const auto p = (X ^ 2) + X * Y + 1;
-//	const auto result = p.gradient();
-//
-//	const VectorFunction<Polynomial> ref = { 2 * X + Y, X };
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Polynomial, gradient_3) {
-//	const auto p = (X ^ 2) + X * Y + 1;
-//	const size_t domain_dimension = 3;
-//	const auto result = p.gradient(domain_dimension);
-//
-//	const VectorFunction<Polynomial> ref = { 2 * X + Y, X, 0 };
-//	EXPECT_EQ(result, ref);
-//}
-//GTEST_TEST(Polynomial, gradient_4) {
-//	const auto p = X * Y * Z;
-//	const auto result = p.gradient();
-//
-//	const VectorFunction<Polynomial> ref = { Y * Z,  X * Z, X * Y };
-//	EXPECT_EQ(result, ref);
-//}
+GTEST_TEST(Polynomial, gradient_1) {
+	constexpr ushort space_dimension = 2;
+
+	const Polynomial<space_dimension> x("x0");
+	const Polynomial<space_dimension> y("x1");
+
+	const auto p = x + y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial<space_dimension>,space_dimension> ref = { 1, 1 };
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, gradient_2) {
+	constexpr ushort space_dimension = 2;
+
+	const Polynomial<space_dimension> x("x0");
+	const Polynomial<space_dimension> y("x1");
+
+	const auto p = (x ^ 2) + x * y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial<space_dimension>, space_dimension> ref = { 2 * x + y, x };
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, gradient_3) {
+	const auto p = (X ^ 2) + X * Y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial<space_dimension>, space_dimension> ref = { 2 * X + Y, X, 0 };
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(Polynomial, gradient_4) {
+	const auto p = X * Y * Z;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial<space_dimension>, space_dimension> ref = { Y * Z,  X * Z, X * Y };
+	EXPECT_EQ(result, ref);
+}
 
 
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Euclidean_Vector.h"
+#include "Matrix.h"
 
 #include <initializer_list>
 
@@ -175,62 +175,45 @@ public:
 
 		return result;
 	}
-
-	//std::vector<Dynamic_Euclidean_Vector_> operator()(const std::vector<Euclidean_Vector<domain_dimension_>>& space_vectors) const {
-	//	const auto num_vector = space_vectors.size();
-	//	
-	//	std::vector<Dynamic_Euclidean_Vector_> result;
-	//	result.reserve(num_vector);
-	//	for (size_t i = 0; i < num_vector; ++i)
-	//		result.push_back( (*this)(space_vectors[i]));
-
-	//	return result;
-	//}
-
-	//Function& operator[](const size_t index) {
-	//	dynamic_require(index < this->range_dimension(), "index can not exceed range dimension");
-	//	return this->functions_[index];
-	//}
-
-	//Vector_Function<Function> cross_product(const Vector_Function& other) const {
-	//	dynamic_require(this->range_dimension() <= 3 && other.range_dimension() <= 3, "cross product only defined in range dimension 3 space");
-
-	//	const auto range_dimension = this->range_dimension();
-
-	//	Vector_Function<Function> result(3);
-	//	if (range_dimension == 2)
-	//		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
-	//	else {
-	//		result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
-	//		result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
-	//		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
-	//	}
+};
 
 
-	//	return result;
-	//}
+template <typename Function, ushort range_num_row, ushort range_num_column>
+class Matrix_Function
+{
+private:
+	static constexpr ushort num_value_			= range_num_row * range_num_column;
+	static constexpr ushort domain_dimension_	= Function::domain_dimension();
 
-	//template <size_t variable_index>
-	//Vector_Function<Function> differentiate(void) const {
-	//	static_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");
+private:
+	std::array<Function, num_value_> functions_;
 
-	//	const auto range_dimension = this->range_dimension();
-	//	Vector_Function<Function> result(range_dimension);
-	//	
-	//	for (size_t i = 0; i < range_dimension; ++i) 
-	//		result[i] = this->functions_[i].differentiate<variable_index>();
-	//	
-	//	return result;
-	//}
+public:
+	Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) {
+		std::array<double, num_value_> values;
 
-	//auto L2_norm(void) const {		
-	//	Function result(0);
+		for (ushort i = 0; i < range_num_row; ++i)
+			for (ushort j = 0; j < range_num_column; ++j)
+				values[i * range_num_column + j] = this->at(i, j)(space_vector);
+		
+		return values;
+	}
 
-	//	for (const auto& function : this->functions_)
-	//		result += (function ^ 2);
+	const Function& at(const ushort row_index, const ushort column_index) const {
+		dynamic_require(row_index < range_num_row && column_index < range_num_column, "index can not exceed given range");
+		return this->functions_[row_index * range_num_column + column_index];
+	}
 
-	//	return result.root(0.5);
-	//}
+	void change_column(const ushort column_index, const Vector_Function<Function, range_num_row>& column_vector) {
+		for (ushort i = 0; i < range_num_row; ++i) 
+			this->at(i, column_index) = column_vector[i];		
+	}
+
+private:
+	Function& at(const ushort row_index, const ushort column_index) {
+		dynamic_require(row_index < range_num_row&& column_index < range_num_column, "index can not exceed given range");
+		return this->functions_[row_index * range_num_column + column_index];
+	}
 };
 
 
