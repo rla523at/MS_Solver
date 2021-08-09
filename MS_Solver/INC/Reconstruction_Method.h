@@ -113,14 +113,14 @@ protected:
 
 class HOM_Reconstruction : public RM {};
 
-template <ushort space_dimension, ushort solution_order>
+template <ushort space_dimension, ushort solution_order_>
 class Polynomial_Reconstruction : public HOM_Reconstruction
 {
 private:
-    using This_         = Polynomial_Reconstruction<space_dimension, solution_order>;
+    using This_         = Polynomial_Reconstruction<space_dimension, solution_order_>;
     using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
-    static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension, solution_order);
+    static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension, solution_order_);
 
 private:
     inline static std::vector<Vector_Function<Polynomial<space_dimension>, num_basis_>> basis_functions_;
@@ -130,8 +130,10 @@ private:
 
 public:
     static void initialize(const Grid<space_dimension>& grid);
+    static auto calculate_transposed_basis_Jacobians(void);
     static std::vector<Dynamic_Matrix_> calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
+    static constexpr ushort solution_order(void) { return solution_order_; };
 };
 
 
@@ -282,8 +284,8 @@ double MLP_u1<Gradient_Method>::limit(const double vertex_solution_delta, const 
 }
 
 
-template <ushort space_dimension, ushort solution_order>
-void Polynomial_Reconstruction<space_dimension, solution_order>::initialize(const Grid<space_dimension>& grid) {
+template <ushort space_dimension, ushort solution_order_>
+void Polynomial_Reconstruction<space_dimension, solution_order_>::initialize(const Grid<space_dimension>& grid) {
     SET_TIME_POINT;
 
     const auto& cell_elements = grid.elements.cell_elements;
@@ -295,15 +297,33 @@ void Polynomial_Reconstruction<space_dimension, solution_order>::initialize(cons
         const auto& cell_element = cell_elements[i];
         const auto& cell_geometry = cell_element.geometry_;
 
-        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function<solution_order>());
+        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function<solution_order_>());
     }    
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 }
 
-template <ushort space_dimension, ushort solution_order>
-std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order>::calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
+template <ushort space_dimension, ushort solution_order_>
+static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_transposed_basis_Jacobians(void) {
+    const auto num_cell = This_::basis_functions_.size();
+    
+    std::vector<Matrix_Function<Polynomial<space_dimension>, space_dimension, This_::num_basis_>> transposed_basis_Jacobians(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        auto& transposed_jacobian_basis = transposed_basis_Jacobians[i];
+        const auto& basis_function = This_::basis_functions_[i];
+
+        for (ushort j = 0; j < This_::num_basis_; ++j)
+            transposed_jacobian_basis.change_column(j, basis_function[j].gradient());
+    }
+
+    return transposed_basis_Jacobians;
+}
+
+
+template <ushort space_dimension, ushort solution_order_>
+std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_values(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
     const auto num_cell = This_::basis_functions_.size();
 
     dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");

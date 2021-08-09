@@ -2,6 +2,7 @@
 #include <array>
 #include <iomanip>
 #include <initializer_list>
+#include <mkl.h>
 #include <string>
 #include <sstream>
 #include <stdexcept>
@@ -131,8 +132,13 @@ Euclidean_Vector<dim>& Euclidean_Vector<dim>::operator-=(const Euclidean_Vector&
 
 template <size_t dim>
 Euclidean_Vector<dim>& Euclidean_Vector<dim>::operator*=(const double scalar) {
-	for (size_t i = 0; i < dim; ++i)
-		this->vals_[i] *= scalar;
+	if constexpr (dim < 10) {
+		for (size_t i = 0; i < dim; ++i)
+			this->vals_[i] *= scalar;
+	}
+	else {
+		cblas_dscal(dim, scalar, this->vals_.data(), 1);
+	}
 	return *this;
 }
 

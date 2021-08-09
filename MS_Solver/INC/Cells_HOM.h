@@ -49,12 +49,33 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     This_::volumes_.reserve(num_cell);
     This_::coordinate_projected_volumes_.reserve(num_cell);
 
-    for (const auto& cell_elemnt : cell_elements) {
-        const auto& geometry = cell_elemnt.geometry_;
+    const auto transposed_basis_Jacobians = Reconstruction_Method::calculate_transposed_basis_Jacobians();
+    constexpr auto solution_order = Reconstruction_Method::solution_order();
+    constexpr auto integrand_order = 2 * solution_order;
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& cell_element = cell_elements[i];
+        const auto& geometry = cell_element.geometry_;
         const auto volume = geometry.volume();
 
         This_::volumes_.push_back(volume);
         This_::coordinate_projected_volumes_.push_back(geometry.coordinate_projected_volume());
+                        
+        const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];
+        const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
+        const auto num_quadrature_point = quadrature_rule.points.size();
+        
+        Dynamic_Matrix_ gradient_basis_weight(num_quadrature_point * space_dimension_, This_::num_basis_);
+
+        for (ushort q = 0; q < num_quadrature_point; ++q) {
+            const auto& quadrature_point = quadrature_rule.points[q];
+            const auto quadrature_weight = quadrature_rule.weights[q];
+            
+            const auto part_of_gradient_basis_weight = transposed_basis_Jacobian(quadrature_point) * quadrature_weight;
+
+            gradient_basis_weight[]
+        }
+
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Cells FVM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";

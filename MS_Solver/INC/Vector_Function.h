@@ -199,7 +199,7 @@ public:
 		functions_ = { Function(args)... };
 	}
 
-	Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) {
+	Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
 		std::array<double, num_value_> values;
 
 		for (ushort i = 0; i < range_num_row; ++i)

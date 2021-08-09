@@ -1,6 +1,5 @@
 #pragma once
 #include "Euclidean_Vector.h"
-#include <mkl.h>
 
 
 template<size_t num_row, size_t num_column>
@@ -147,8 +146,15 @@ Matrix<num_row, num_column> Matrix<num_row, num_column>::operator+(const Matrix&
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> Matrix<num_row, num_column>::operator*(const double scalar) const {
 	Matrix result = *this;
-	for (size_t i = 0; i < num_row * num_column; ++i)
-		result.values_[i] *= scalar;
+
+	if constexpr (this->num_value_ < 10) {
+		for (size_t i = 0; i < num_row * num_column; ++i)
+			result.values_[i] *= scalar;
+	}
+	else {
+		cblas_dscal(this->num_value_, scalar, result.values_.data(), 1);
+	}
+
 	return result;
 }
 
