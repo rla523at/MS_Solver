@@ -215,11 +215,11 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
 		solution_post_data_text.resize(num_equation_);
 
-		const auto num_solution = solution_coefficients.size();
+		const auto num_solution = solutions.size();
 		for (size_t i = 0; i < num_solution; ++i) {
-			const auto& solution_coefficient = solution_coefficients[i];
+			const auto& solution = solutions[i];
 			for (size_t j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
-				solution_post_data_text[0] += ms::double_to_string(solution_coefficient.at(0)) + " ";
+				solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";
 					str_per_line = 1;

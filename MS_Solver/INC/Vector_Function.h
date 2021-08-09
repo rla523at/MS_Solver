@@ -142,11 +142,11 @@ public:
 	Dynamic_Euclidean_Vector_ operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
 		const auto range_dimension_ = this->range_dimension();
 		
-		Dynamic_Euclidean_Vector_ result(range_dimension_);
+		std::vector<double> result(range_dimension_);
 		for (size_t i = 0; i < range_dimension_; ++i)
 			result[i] = functions_.at(i)(space_vector);
 
-		return result;
+		return std::move(result);
 	}
 
 	const Function& operator[](const size_t index) const {
