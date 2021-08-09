@@ -8,7 +8,7 @@ class Cells;
 
 
 template <typename Governing_Equation, typename Reconstruction_Method>
-class Cells<Governing_Equation, FVM, Reconstruction_Method> : public Cells_FVM<Governing_Equation::space_dimension()>
+class Cells<Governing_Equation, FVM, Reconstruction_Method> : public Cells_FVM<Governing_Equation>
 {   
 private:
     Cells(void) = delete;

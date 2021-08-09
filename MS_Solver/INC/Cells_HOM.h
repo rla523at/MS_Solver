@@ -82,24 +82,25 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 };
-//
-//template <ushort space_dimension>
-//double Cells_HOM<space_dimension>::calculate_time_step(const std::vector<std::array<double, space_dimension>>& coordinate_projected_maximum_lambdas, const double cfl) {
-//    const auto num_cell = coordinate_projected_maximum_lambdas.size();
-//
-//    std::vector<double> local_time_step(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i) {
-//        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
-//        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
-//
-//        const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
-//        const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
-//
-//        local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
-//    }
-//
-//    return *std::min_element(local_time_step.begin(), local_time_step.end());
-//}
+
+
+template <typename Governing_Equation, typename Reconstruction_Method>
+double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<std::array<double, This_::space_dimension_>>& coordinate_projected_maximum_lambdas, const double cfl) {
+    const auto num_cell = coordinate_projected_maximum_lambdas.size();
+
+    std::vector<double> local_time_step(num_cell);
+    for (size_t i = 0; i < num_cell; ++i) {
+        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
+        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+
+        const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
+        const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
+
+        local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
+    }
+
+    return *std::min_element(local_time_step.begin(), local_time_step.end());
+}
 //
 //template <ushort space_dimension>
 //template <typename Residual, typename Solution>

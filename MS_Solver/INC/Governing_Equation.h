@@ -2,14 +2,16 @@
 #include "Matrix.h"
 
 
+using ushort = unsigned short;
+
 class GE {}; // Governing Equation
 
 
 class SCL_2D : public GE    // 2D Scalar Conservation Law 
 {
 protected:
-    static constexpr size_t num_equation_ = 1;
-    static constexpr size_t space_dimension_ = 2;
+    static constexpr ushort num_equation_ = 1;
+    static constexpr ushort space_dimension_ = 2;
 
 private:
     SCL_2D(void) = delete;
@@ -19,8 +21,8 @@ public:
     using Solution_      = Euclidean_Vector<num_equation_>;
     using Physical_Flux_ = Matrix<num_equation_, space_dimension_>;
 
-    static constexpr size_t space_dimension(void) { return space_dimension_; };
-    static constexpr size_t num_equation(void) { return num_equation_; };
+    static constexpr ushort space_dimension(void) { return space_dimension_; };
+    static constexpr ushort num_equation(void) { return num_equation_; };
 };
 
 
@@ -59,8 +61,8 @@ public:
 class Euler_2D : public GE
 {
 protected:
-    static constexpr size_t num_equation_ = 4;
-    static constexpr size_t space_dimension_ = 2;
+    static constexpr ushort num_equation_ = 4;
+    static constexpr ushort space_dimension_ = 2;
 
 public:
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
@@ -78,8 +80,8 @@ public:
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& conservative_variables, const std::vector<Solution_>& primitive_variables);
     static double inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector);
     
-    static constexpr size_t space_dimension(void) { return space_dimension_; };
-    static constexpr size_t num_equation(void) { return num_equation_; };
+    static constexpr ushort space_dimension(void) { return space_dimension_; };
+    static constexpr ushort num_equation(void) { return num_equation_; };
     static std::string name(void) { return "Euler_2D"; };
 };
 

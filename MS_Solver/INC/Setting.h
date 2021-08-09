@@ -2,7 +2,7 @@
 
 //mode 
 //#define POST_AI_DATA_MODE
-//#define ERROR_CALCULATION_MODE
+#define ERROR_CALCULATION_MODE
 
 
 //Setting
@@ -12,7 +12,7 @@
 #define GOVERNING_EQUATION_NAME			Linear_Advection
 #define INITIAL_CONDITION_NAME			Square_Wave
 #define SPATIAL_DISCRETE_METHOD			FVM
-#define RECONSTRUCTION_ORDER			1
+#define RECONSTRUCTION_ORDER			1 
 #define RECONSTRUCTION_TYPE				MLP_u1
 #define GRADIENT_METHOD					Vertex_Least_Square
 #define NUMERICAL_FLUX_NAME				LLF

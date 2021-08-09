@@ -47,8 +47,7 @@ public:
     static double calculate_time_step(const std::vector<Solution_>& solutions) {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
         if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) {
-            const auto projected_maximum_lambdas = Governing_Equation::coordinate_projected_maximum_lambdas(solutions);
-            return Cells_::calculate_time_step(projected_maximum_lambdas, time_step_constant_);
+            return Cells_::calculate_time_step(solutions, time_step_constant_);
         }
         else
             return time_step_constant_;
@@ -75,8 +74,8 @@ public:
     }
 
     template <typename Initial_Condition>
-    static void estimate_error(const std::vector<Solution_>& computed_solution, const double time) {
-        Cells_::template estimate_error<Initial_Condition, Governing_Equation>(computed_solution, time);
+    static void estimate_error(const std::vector<Solution_>& computed_solutions, const double time) {
+        Cells_::template estimate_error<Initial_Condition>(computed_solutions, time);
     }
 
 };

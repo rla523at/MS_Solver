@@ -1,41 +1,43 @@
 #pragma once
 #include "Grid_Builder.h"
+#include "Governing_Equation.h"
 
 //FVM이면 공통으로 사용하는 variable & method
-template <ushort space_dimension>
+template <typename Governing_Equation>
 class Cells_FVM
 {
 private:
-    using This_         = Cells_FVM<space_dimension>;
-    using SpaceVector_  = Euclidean_Vector<space_dimension>;
+    static constexpr ushort space_dimension_ = Governing_Equation::space_dimension();
+    static constexpr ushort num_equation_ = Governing_Equation::num_equation();
+
+    using This_         = Cells_FVM<Governing_Equation>;
+    using SpaceVector_  = Euclidean_Vector<space_dimension_>;    
 
 protected:
     inline static std::vector<SpaceVector_> centers_;
     inline static std::vector<double> volumes_;
-    inline static std::vector<std::array<double, space_dimension>> coordinate_projected_volumes_;
+    inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
     inline static std::vector<double> residual_scale_factors_;
 
 private:
     Cells_FVM(void) = delete;
 
 public:
-    static void initialize(const Grid<space_dimension>& grid);
-    static double calculate_time_step(const std::vector<std::array<double, space_dimension>>& coordinate_projected_maximum_lambdas, const double cfl);
-
-    template <typename Residual, typename Solution>
-    static void calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions);
+    static void initialize(const Grid<space_dimension_>& grid);
+    static double calculate_time_step(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const double cfl);
+    static void calculate_RHS(std::vector<Euclidean_Vector<num_equation_>>& RHS, const std::vector<Euclidean_Vector<num_equation_>>& solutions);
 
     template <typename Initial_Condtion>
     static auto calculate_initial_solutions(void);
 
-    template <typename Initial_Condition, typename Governing_Equation, typename Solution>
-    static void estimate_error(const std::vector<Solution>& computed_solution, const double time);
+    template <typename Initial_Condition>
+    static void estimate_error(const std::vector<Euclidean_Vector<num_equation_>>& computed_solutions, const double time);
 };
 
 
 //template definition
-template <ushort space_dimension>
-void Cells_FVM<space_dimension>::initialize(const Grid<space_dimension>& grid) {
+template <typename Governing_Equation>
+void Cells_FVM<Governing_Equation>::initialize(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
     const auto& cell_elements = grid.elements.cell_elements;
@@ -60,14 +62,15 @@ void Cells_FVM<space_dimension>::initialize(const Grid<space_dimension>& grid) {
     Log::print();
 };
 
-template <ushort space_dimension>
-double Cells_FVM<space_dimension>::calculate_time_step(const std::vector<std::array<double, space_dimension>>& coordinate_projected_maximum_lambdas, const double cfl) {
-    const auto num_cell = coordinate_projected_maximum_lambdas.size();
+template <typename Governing_Equation>
+double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const double cfl) {
+    const auto projected_maximum_lambdas = Governing_Equation::coordinate_projected_maximum_lambdas(solutions);
+    const auto num_cell = projected_maximum_lambdas.size();
 
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
         const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
-        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = projected_maximum_lambdas[i];
 
         const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
@@ -78,24 +81,23 @@ double Cells_FVM<space_dimension>::calculate_time_step(const std::vector<std::ar
     return *std::min_element(local_time_step.begin(), local_time_step.end());
 }
 
-template <ushort space_dimension>
-template <typename Residual, typename Solution>
-void Cells_FVM<space_dimension>::calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions){
+template <typename Governing_Equation>
+void Cells_FVM<Governing_Equation>::calculate_RHS(std::vector<Euclidean_Vector<num_equation_>>& RHS, const std::vector<Euclidean_Vector<num_equation_>>& solutions) {
     const auto num_cell = RHS.size();
 
     for (size_t i = 0; i < num_cell; ++i)
         RHS[i] *= This_::residual_scale_factors_[i];
 }
 
-template <ushort space_dimension>
+template <typename Governing_Equation>
 template <typename Initial_Condtion>
-auto Cells_FVM<space_dimension>::calculate_initial_solutions(void) {
+auto Cells_FVM<Governing_Equation>::calculate_initial_solutions(void) {
     return Initial_Condtion::calculate_solutions(This_::centers_);
 }
 
-template <ushort space_dimension>
-template <typename Initial_Condition, typename Governing_Equation, typename Solution>
-void Cells_FVM<space_dimension>::estimate_error(const std::vector<Solution>& computed_solutions, const double time) {  
+template <typename Governing_Equation>
+template <typename Initial_Condition>
+void Cells_FVM<Governing_Equation>::estimate_error(const std::vector<Euclidean_Vector<num_equation_>>& computed_solutions, const double time) {
 
     Log::content_ << "================================================================================\n";
     Log::content_ << "\t\t\t\t Error Anlysis\n";
