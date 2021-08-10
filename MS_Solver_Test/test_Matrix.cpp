@@ -64,16 +64,16 @@ TEST(Matrix, scalar_multiplication_1) {
 	EXPECT_EQ(result, ref);
 }
 TEST(Matrix, scalar_multiplication_2) {
-	std::array<double, 900> ar;
+	std::array<double, 100> ar;
 	ar.fill(1);
 
-	const Matrix<30, 30> m(ar);
+	const Matrix<10, 10> m(ar);
 	const auto result = m * 10;
 
-	std::array<double, 900> ref_val;
+	std::array<double, 100> ref_val;
 	ref_val.fill(10);
 
-	const Matrix<30, 30> ref(ref_val);
+	const Matrix<10, 10> ref(ref_val);
 	EXPECT_EQ(result, ref);
 }
 
@@ -95,19 +95,19 @@ TEST(Matrix, column_2) {
 TEST(Dynamic_Matrix, change_rows_1) {
 	const Matrix<2, 2> m = { 1,2,3,4 };
 
-	Dynamic_Matrix_ dm(4, 2);
+	Dynamic_Matrix dm(4, 2);
 	dm.change_rows(0, m);
 
-	const Dynamic_Matrix_ ref(4, 2, { 1,2,3,4,0,0,0,0 });
+	const Dynamic_Matrix ref(4, 2, { 1,2,3,4,0,0,0,0 });
 	EXPECT_EQ(dm, ref);
 }
 
 TEST(Dynamic_Matrix, change_columns_1) {
 	const Matrix<2, 2> m = { 1,2,3,4 };
 
-	Dynamic_Matrix_ dm(2, 4);
+	Dynamic_Matrix dm(2, 4);
 	dm.change_columns(0, m);
 
-	const Dynamic_Matrix_ ref(2, 4, { 1,2,0,0,3,4,0,0 });
+	const Dynamic_Matrix ref(2, 4, { 1,2,0,0,3,4,0,0 });
 	EXPECT_EQ(dm, ref);
 }

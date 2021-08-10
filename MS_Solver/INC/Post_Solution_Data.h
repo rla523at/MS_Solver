@@ -70,7 +70,7 @@ private:
 	using This_ = Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>;
 
 private:
-	static inline std::vector<Dynamic_Matrix_> set_of_basis_post_points_;
+	static inline std::vector<Dynamic_Matrix> set_of_basis_post_points_;
 
 public:
 	static void post_grid(const std::vector<Element<space_dimension_>>& cell_elements);

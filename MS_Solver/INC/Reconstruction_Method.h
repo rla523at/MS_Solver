@@ -62,7 +62,7 @@ private:
 protected:
     inline static std::vector<Solution_Gradient_> solution_gradients_;
 	inline static std::vector<std::vector<uint>> vnode_indexes_set_;
-    inline static std::vector<Dynamic_Matrix_> center_to_vertex_matrixes_;
+    inline static std::vector<Dynamic_Matrix> center_to_vertex_matrixes_;
     inline static std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
 
 public:
@@ -131,9 +131,9 @@ private:
 public:
     static void initialize(const Grid<space_dimension>& grid);
     static auto calculate_transposed_basis_Jacobians(void);
-    static Dynamic_Matrix_ calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes);
+    static Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes);
     static double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node);
-    static std::vector<Dynamic_Matrix_> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
+    static std::vector<Dynamic_Matrix> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
     static std::vector<double> calculate_P0_basis_values(const std::vector<Space_Vector_>& center_nodes);
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
@@ -189,7 +189,7 @@ void MLP_u1<Gradient_Method>::initialize(Grid<space_dimension_>&& grid) {
         const auto vertex_nodes = geometry.vertex_nodes();
         const auto num_vertex = vertex_nodes.size();
 
-        Dynamic_Matrix_ center_to_vertex_matrix(space_dimension_, num_vertex);
+        Dynamic_Matrix center_to_vertex_matrix(space_dimension_, num_vertex);
         for (size_t i = 0; i < num_vertex; ++i) {
             const auto center_to_vertex = vertex_nodes[i] - center_node;
             center_to_vertex_matrix.change_column(i, center_to_vertex);
@@ -233,7 +233,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
         Post_AI_Data::record_limiting_value(i, limiting_values);
 
-        Dynamic_Matrix_ limiting_value_matrix(num_equation_, limiting_values);
+        Dynamic_Matrix limiting_value_matrix(num_equation_, limiting_values);
         ms::gemm(limiting_value_matrix, gradient, This_::solution_gradients_[i]);
     }
 
@@ -325,12 +325,12 @@ static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calcula
 }
 
 template <ushort space_dimension, ushort solution_order_>
-Dynamic_Matrix_ Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) {
+Dynamic_Matrix Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) {
     const auto& basis_function = This_::basis_functions_[cell_index];
 
     const auto num_node = nodes.size();
 
-    Dynamic_Matrix_ basis_nodes(This_::num_basis_, num_node);
+    Dynamic_Matrix basis_nodes(This_::num_basis_, num_node);
     for (size_t j = 0; j < num_node; ++j)
         basis_nodes.change_column(j, basis_function(nodes[j]));
 
@@ -346,12 +346,12 @@ double Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_P0
 }
 
 template <ushort space_dimension, ushort solution_order_>
-std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
+std::vector<Dynamic_Matrix> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
     const auto num_cell = This_::basis_functions_.size();
 
     dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
 
-    std::vector<Dynamic_Matrix_> set_of_basis_nodes;
+    std::vector<Dynamic_Matrix> set_of_basis_nodes;
     set_of_basis_nodes.reserve(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) 

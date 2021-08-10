@@ -39,7 +39,7 @@ void Post_AI_Data::post(void) {
 #endif
 }
 
-std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix_>& solution_gradients) {
+std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix>& solution_gradients) {
 	const auto num_solution = solution_gradients.size();
 	const auto [num_equation, space_dimension] = solution_gradients.front().size();
 

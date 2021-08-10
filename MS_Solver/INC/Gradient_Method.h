@@ -10,7 +10,7 @@ private:
 
 protected:
     inline static std::vector<std::vector<size_t>> near_cell_indexes_set_;
-    inline static std::vector<Dynamic_Matrix_> least_square_matrixes_;
+    inline static std::vector<Dynamic_Matrix> least_square_matrixes_;
 
 private:
     Least_Square_Base(void) = delete;
@@ -18,10 +18,10 @@ private:
 public:
     static constexpr ushort space_dimension(void) { return space_dimension_; };
     static constexpr ushort num_equation(void) { return num_equation_; };
-    static std::vector<Dynamic_Matrix_> calculate_solution_gradients(const std::vector<Solution_>& solutions);
+    static std::vector<Dynamic_Matrix> calculate_solution_gradients(const std::vector<Solution_>& solutions);
 
 private:
-    static std::vector<Dynamic_Matrix_> calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions);
+    static std::vector<Dynamic_Matrix> calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions);
 };
 
 
@@ -60,10 +60,10 @@ public:
 
 //template definition part
 template <ushort num_equation_, ushort space_dimension_>
-std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
+std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();
 
-    std::vector<Dynamic_Matrix_> solution_gradients;
+    std::vector<Dynamic_Matrix> solution_gradients;
     solution_gradients.reserve(num_solution);
 
     const auto solution_delta_matrixes = This_::calculate_solution_delta_matrixes(solutions);
@@ -75,16 +75,16 @@ std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>:
 }
 
 template <ushort num_equation_, ushort space_dimension_>
-std::vector<Dynamic_Matrix_> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) {
+std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();    
-    std::vector<Dynamic_Matrix_> solution_delta_matrixes;
+    std::vector<Dynamic_Matrix> solution_delta_matrixes;
     solution_delta_matrixes.reserve(num_solution);
 
     for (size_t i = 0; i < num_solution; ++i) {
         const auto& near_cell_indexes = This_::near_cell_indexes_set_.at(i);
         const auto num_near_cell = near_cell_indexes.size();
                 
-        Dynamic_Matrix_ solution_delta_matrix(num_equation_, num_near_cell);
+        Dynamic_Matrix solution_delta_matrix(num_equation_, num_near_cell);
         for (size_t j = 0; j < num_near_cell; ++j) {
             const auto solution_delta = solutions[near_cell_indexes[j]] - solutions[i];
             solution_delta_matrix.change_column(j, solution_delta);
@@ -116,7 +116,7 @@ void Vertex_Least_Square<num_equation_, space_dimension_>::initialize(const Grid
         const auto& geometry = element.geometry_;
         const auto this_center = geometry.center_node();
 
-        Dynamic_Matrix_ center_to_center_matrix(space_dimension_, num_vertex_share_cell);
+        Dynamic_Matrix center_to_center_matrix(space_dimension_, num_vertex_share_cell);
 
         for (size_t j = 0; j < num_vertex_share_cell; ++j) {
             const auto& neighbor_geometry = cell_elements[vertex_share_cell_indexes[j]].geometry_;
@@ -159,7 +159,7 @@ void Face_Least_Square<num_equation_, space_dimension_>::initialize(const Grid<s
         const auto target_cell_element = cell_elements[i];
         const auto target_cell_center = target_cell_element.geometry_.center_node();
 
-        Dynamic_Matrix_ center_to_center_matrix(space_dimension_, num_face_share_cell);
+        Dynamic_Matrix center_to_center_matrix(space_dimension_, num_face_share_cell);
         for (size_t j = 0; j < num_face_share_cell; ++j) {
             const auto& neighbor_geometry = cell_elements[face_share_cell_indexes[j]].geometry_;
             const auto neighbor_center = neighbor_geometry.center_node();

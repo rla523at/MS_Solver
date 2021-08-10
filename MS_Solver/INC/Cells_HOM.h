@@ -20,8 +20,9 @@ private:
 protected:    
     inline static std::vector<double> volumes_;
     inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
-    inline static std::vector<Dynamic_Matrix_> set_of_basis_quadrature_nodes_;
-    inline static std::vector<Dynamic_Matrix_> gradient_basis_weights_;
+    inline static std::vector<const Quadrature_Rule<space_dimension_>*> quadrature_rule_ptrs_;
+    inline static std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
+    inline static std::vector<Dynamic_Matrix> gradient_basis_weights_;
     inline static std::vector<double> P0_basis_values_;
 
 private:
@@ -32,11 +33,11 @@ public:
     static double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl);
     static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients);
 
-    //template <typename Initial_Condtion>
-    //static auto calculate_initial_solutions(void);
+    template <typename Initial_Condition>
+    static auto calculate_initial_solutions(void);
 
-    //template <typename Initial_Condition>
-    //static void estimate_error(const std::vector<Solution>& computed_solution, const double time);
+    template <typename Initial_Condition>
+    static void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time);
 };
 
 
@@ -50,9 +51,10 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     const auto num_cell = cell_elements.size();
     This_::volumes_.reserve(num_cell);
     This_::coordinate_projected_volumes_.reserve(num_cell);
-    This_::P0_basis_values_.reserve(num_cell);
-    This_::set_of_basis_quadrature_nodes_.reserve(num_cell);
+    This_::quadrature_rule_ptrs_.reserve(num_cell);
+    This_::set_of_basis_qnodes_.reserve(num_cell); // 2 * solution_order
     This_::gradient_basis_weights_.reserve(num_cell);
+    This_::P0_basis_values_.reserve(num_cell);
 
     const auto transposed_basis_Jacobians = Reconstruction_Method::calculate_transposed_basis_Jacobians();
     constexpr auto solution_order = Reconstruction_Method::solution_order();
@@ -68,12 +70,13 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
         This_::P0_basis_values_.push_back(Reconstruction_Method::calculate_P0_basis_value(i, geometry.center_node()));
 
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
-        This_::set_of_basis_quadrature_nodes_.push_back(Reconstruction_Method::calculate_basis_nodes(i, quadrature_rule.points));
-
+        This_::quadrature_rule_ptrs_.push_back(&quadrature_rule);
+        This_::set_of_basis_qnodes_.push_back(Reconstruction_Method::calculate_basis_nodes(i, quadrature_rule.points));
+        
         const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];        
         const auto num_quadrature_point = quadrature_rule.points.size();
         
-        Dynamic_Matrix_ gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
+        Dynamic_Matrix gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
 
         for (ushort q = 0; q < num_quadrature_point; ++q) {
             const auto& quadrature_point = quadrature_rule.points[q];
@@ -129,11 +132,11 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
         
     for (uint i = 0; i < num_solution; ++i) {
         const auto& solution_coefficient = solution_coefficients[i];
-        const auto& basis_quadrature_nodes = This_::set_of_basis_quadrature_nodes_[i];
+        const auto& basis_quadrature_nodes = This_::set_of_basis_qnodes_[i];
         const auto solution_quadrature_nodes = solution_coefficient * basis_quadrature_nodes;
 
         const auto [num_eq, num_quadrature_node] = solution_quadrature_nodes.size();
-        Dynamic_Matrix_ flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
+        Dynamic_Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
 
         for (size_t i = 0; i < num_quadrature_node; ++i) {
             const auto physical_flux = Governing_Equation::physical_flux(solution_quadrature_nodes.column<This_::num_equation_>(i));
@@ -145,52 +148,86 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
 
         RHS[i] += delta_rhs;
     }
-    
- 
-
 }
 
 
-//template <ushort space_dimension>
-//template <typename Initial_Condtion>
-//auto Cells_HOM<space_dimension>::calculate_initial_solutions(void) {
-//    return Initial_Condtion::calculate_solutions(This_::centers_);
-//}
-//
-//template <ushort space_dimension>
-//template <typename Initial_Condition, typename Governing_Equation, typename Solution>
-//void Cells_HOM<space_dimension>::estimate_error(const std::vector<Solution>& computed_solutions, const double time) {
-//
-//    Log::content_ << "================================================================================\n";
-//    Log::content_ << "\t\t\t\t Error Anlysis\n";
-//    Log::content_ << "================================================================================\n";
-//
-//    if constexpr (std::is_same_v<Governing_Equation, Linear_Advection_2D>) {
-//        double global_L1_error = 0.0;
-//        double global_L2_error = 0.0;
-//        double global_Linf_error = 0.0;
-//
-//        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(This_::centers_, time);
-//        const auto num_solutions = computed_solutions.size();
-//
-//        for (size_t i = 0; i < num_solutions; ++i) {
-//            const auto local_error = (exact_solutions[i] - computed_solutions[i]).L1_norm();
-//            global_L1_error += local_error;
-//            global_L2_error += local_error * local_error;
-//            global_Linf_error = max(global_Linf_error, local_error);
-//        }
-//
-//        global_L1_error = global_L1_error / num_solutions;
-//        global_L2_error = global_L2_error / num_solutions;
-//
-//        global_L2_error = std::sqrt(global_L2_error);
-//
-//        Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
-//        Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
-//
-//    }
-//    else
-//        Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
-//
-//    Log::print();
-//}
+template <typename Governing_Equation, typename Reconstruction_Method>
+template <typename Initial_Condition>
+auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_solutions(void) {
+    const auto num_cell = This_::quadrature_rule_ptrs_.size();
+    std::vector<Matrix<This_::num_equation_, This_::num_basis_>> initial_solution_coefficients(num_cell);
+    
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;
+        const auto num_qnode = qnodes.size();
+
+        Dynamic_Matrix initial_solution_qnodes(This_::num_equation_, num_qnode);
+
+        for (ushort q = 0; q < num_qnode; ++q)
+            initial_solution_qnodes.change_column(q, Initial_Condition::calculate_solution(qnodes[q]));
+
+        const auto qnodes_basis = This_::set_of_basis_qnodes_[i].transpose();
+        
+        ms::gemm(initial_solution_qnodes, qnodes_basis, initial_solution_coefficients[i]);
+    }
+
+    return initial_solution_coefficients;
+}
+
+template <typename Governing_Equation, typename Reconstruction_Method>
+template <typename Initial_Condition>
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) {
+
+    Log::content_ << "================================================================================\n";
+    Log::content_ << "\t\t\t\t Error Anlysis\n";
+    Log::content_ << "================================================================================\n";
+
+    const auto num_cell = solution_coefficients.size();
+
+    Euclidean_Vector<This_::num_equation_> global_L1_error;
+    Euclidean_Vector<This_::num_equation_> global_L2_error;
+    Euclidean_Vector<This_::num_equation_> global_Linf_error;
+
+    for (size_t i = 0; i < num_cell; ++i) {
+        const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;        
+        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(qnodes, time);
+        const auto computed_solutions = solution_coefficients[i] * This_::set_of_basis_qnodes_[i];
+
+        const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
+
+        
+
+
+    }
+
+    if constexpr (std::is_same_v<Governing_Equation, Linear_Advection_2D>) {
+        double global_L1_error = 0.0;
+        double global_L2_error = 0.0;
+        double global_Linf_error = 0.0;
+
+        
+
+        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(This_::centers_, time);
+        const auto num_solutions = computed_solutions.size();
+
+        for (size_t i = 0; i < num_solutions; ++i) {
+            const auto local_error = (exact_solutions[i] - computed_solutions[i]).L1_norm();
+            global_L1_error += local_error;
+            global_L2_error += local_error * local_error;
+            global_Linf_error = max(global_Linf_error, local_error);
+        }
+
+        global_L1_error = global_L1_error / num_solutions;
+        global_L2_error = global_L2_error / num_solutions;
+
+        global_L2_error = std::sqrt(global_L2_error);
+
+        Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
+        Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
+
+    }
+    else
+        Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
+
+    Log::print();
+}

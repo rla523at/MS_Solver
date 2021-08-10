@@ -6,18 +6,17 @@ using ushort = unsigned short;
 template<size_t num_row, size_t num_column>
 class Matrix;
 
-using Dynamic_Matrix_ = Matrix<0, 0>;
+class Dynamic_Matrix;
 
 
 namespace ms {
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_mv_criteria = 50;
 
-	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr);
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
 
 	template<size_t num_row, size_t num_column>
-	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, Matrix<num_row, num_column>& output_matrix);
-	
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);	
 }
 
 
@@ -26,10 +25,10 @@ template<size_t num_row, size_t num_column>
 class Matrix
 {
 private:
-	friend Dynamic_Matrix_;
+	friend Dynamic_Matrix;
 
 	template<size_t num_row, size_t num_column>
-	friend void ms::gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, Matrix<num_row, num_column>& output_matrix);
+	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);
 
 	static constexpr size_t num_value_ = num_row * num_column;
 
@@ -39,14 +38,14 @@ private:
 public:
 	Matrix(void) = default;
 	Matrix(const std::array<double, num_value_>& values) : values_{ values } {};
-	Matrix(const Matrix<0, 0>& dynamic_matrix);
+	Matrix(const Dynamic_Matrix& dynamic_matrix);
 	template <typename... Args>
 	Matrix(Args... args);
 
 	Matrix& operator+=(const Matrix& A);
 	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
-	Matrix<0, 0> operator*(const Matrix<0, 0>& dynamic_matrix) const;
+	Dynamic_Matrix operator*(const Dynamic_Matrix& dynamic_matrix) const;
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
 	bool operator==(const Matrix & A) const;
 
@@ -61,15 +60,14 @@ public:
 };
 
 
-// Dynamic matrix := Matrix template class specialization
-template<>
-class Matrix<0, 0>
+// Dynamic matrix 
+class Dynamic_Matrix
 {
+private:
 	template<size_t num_row, size_t num_column>
 	friend class Matrix;
 
-	friend void ms::gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* ptr);
-
+	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* ptr);
 
 private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -78,23 +76,23 @@ private:
 	std::vector<double> values_;
 
 public:
-	Matrix(const size_t matrix_order);
-	Matrix(const size_t matrix_order, const std::vector<double>& value);
-	Matrix(const size_t num_row, const size_t num_column);
-	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);		
+	Dynamic_Matrix(const size_t matrix_order);
+	Dynamic_Matrix(const size_t matrix_order, const std::vector<double>& value);
+	Dynamic_Matrix(const size_t num_row, const size_t num_column);
+	Dynamic_Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
 
-	Dynamic_Matrix_ operator*(const Dynamic_Matrix_& other) const;
-	bool operator==(const Dynamic_Matrix_& other) const;
+	Dynamic_Matrix operator*(const Dynamic_Matrix& other) const;
+	bool operator==(const Dynamic_Matrix& other) const;
 		
 	double at(const size_t row, const size_t column) const;
-	Dynamic_Matrix_ transpose(void) const;
+	Dynamic_Matrix transpose(void) const;
 	std::string to_string(void) const;
-	Dynamic_Matrix_ inverse(void) const;
+	Dynamic_Matrix inverse(void) const;
 	std::pair<size_t, size_t> size(void) const;
 
-	Dynamic_Matrix_& be_transpose(void);
-	Dynamic_Matrix_& be_inverse(void);
-	void change_column(const size_t row_index, const Dynamic_Euclidean_Vector_& vec);
+	Dynamic_Matrix& be_transpose(void);
+	Dynamic_Matrix& be_inverse(void);
+	void change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec);
 
 	template <size_t num_row>
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
@@ -129,13 +127,13 @@ std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m)
 //template definition part
 namespace ms {
 	template<size_t num_row, size_t num_column>
-	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, Matrix<num_row, num_column>& output_matrix) {
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix) {
 		ms::gemm(A, B, output_matrix.values_.data());
 	}
 }
 
 template<size_t num_row, size_t num_column>
-Matrix<num_row,num_column>::Matrix(const Matrix<0, 0>& dynamic_matrix) {
+Matrix<num_row,num_column>::Matrix(const Dynamic_Matrix& dynamic_matrix) {
 	dynamic_require(num_row == dynamic_matrix.num_row_ && num_column == dynamic_matrix.num_column_, "both matrix should be same size");
 	std::copy(dynamic_matrix.values_.begin(), dynamic_matrix.values_.end(), this->values_.begin());
 }
@@ -183,7 +181,7 @@ Matrix<num_row, num_column> Matrix<num_row, num_column>::operator*(const double 
 }
 
 template<size_t num_row, size_t num_column>
-Dynamic_Matrix_ Matrix<num_row, num_column>::operator*(const Dynamic_Matrix_& B) const {
+Dynamic_Matrix Matrix<num_row, num_column>::operator*(const Dynamic_Matrix& B) const {
 	dynamic_require(num_column == B.num_row_, "dimension should be matched for matrix multiplication");
 
 	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
@@ -198,15 +196,10 @@ Dynamic_Matrix_ Matrix<num_row, num_column>::operator*(const Dynamic_Matrix_& B)
 	const auto beta = 0.0;
 	const auto ldc = n;
 
-	Dynamic_Matrix_ result(m, n);
+	Dynamic_Matrix result(m, n);
 	cblas_dgemm(layout, transA, transB, m, n, k, alpha, this->values_.data(), lda, B.values_.data(), ldb, beta, result.values_.data(), ldc);
 
 	return result;
-}
-
-template<size_t num_row, size_t num_column>
-bool Matrix<num_row, num_column>::operator==(const Matrix& A) const {
-	return this->values_ == A.values_;
 }
 
 template<size_t num_row, size_t num_column>
@@ -219,6 +212,12 @@ Euclidean_Vector<num_row> Matrix<num_row, num_column>::operator*(const Euclidean
 	}
 	return result;
 }
+
+template<size_t num_row, size_t num_column>
+bool Matrix<num_row, num_column>::operator==(const Matrix& A) const {
+	return this->values_ == A.values_;
+}
+
 
 template<size_t num_row, size_t num_column>
 double Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) const {
@@ -273,7 +272,7 @@ Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row,
 }
 
 template <size_t dimension>
-void Dynamic_Matrix_::change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec) {
+void Dynamic_Matrix::change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec) {
 	dynamic_require(column_index < this->num_column_,	"column idnex can not exceed number of column");
 	dynamic_require(this->num_row_ == dimension,		"vector dimension should be matched with number of row");
 
@@ -282,7 +281,7 @@ void Dynamic_Matrix_::change_column(const size_t column_index, const Euclidean_V
 }
 
 template <size_t num_row, size_t num_column>
-void Dynamic_Matrix_::change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A) {
+void Dynamic_Matrix::change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A) {
 	dynamic_require(this->num_column_ == num_column,				"dimension should be matched");
 	dynamic_require(start_row_index + num_row <= this->num_row_,	"range can't not exceed given range");
 	dynamic_require(!this->is_transposed(),							"it should be not transposed for this routine");
@@ -292,7 +291,7 @@ void Dynamic_Matrix_::change_rows(const size_t start_row_index, const Matrix<num
 }
 
 template <size_t num_row, size_t num_column>
-void Dynamic_Matrix_::change_columns(const size_t start_column_index, const Matrix<num_row, num_column>& A) {
+void Dynamic_Matrix::change_columns(const size_t start_column_index, const Matrix<num_row, num_column>& A) {
 	dynamic_require(this->num_row_ == num_row,								"dimension should be matched");
 	dynamic_require(start_column_index + num_column <= this->num_column_,	"range can't not exceed given range");
 	dynamic_require(!this->is_transposed(),									"it should be not transposed for this routine");

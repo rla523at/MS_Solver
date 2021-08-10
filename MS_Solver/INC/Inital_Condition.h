@@ -1,30 +1,38 @@
 #pragma once
-#include <numbers>
-#include "Euclidean_Vector.h"
 #include "Governing_Equation.h"
+#include "Setting.h"
+
+#include <numbers>
+
 
 class IC {}; //Initial Condition
 
 class Sine_Wave_2D : public IC {
-    static constexpr size_t num_eqation_ = 1;
-    static constexpr size_t dimension_ = 2;
-    static constexpr double pi_ = std::numbers::pi;
+    static constexpr ushort num_eqation_ = 1;
+    static constexpr ushort dimension_ = 2;
+    static constexpr double x_wave_number_ = 2 * std::numbers::pi / static_cast<double>(X_WAVE_LENGTH);
+    static constexpr double y_wave_number_ = 2 * std::numbers::pi / static_cast<double>(Y_WAVE_LENGTH);
 
-    using Space_Vector_  = Euclidean_Vector<dimension_>;
-    using Solution      = Euclidean_Vector<num_eqation_>;
-public:
-    static std::vector<Solution> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
-    static std::string name(void) { return "Sine_Wave_2D"; };
-    template <typename Governing_Equation>
-    static std::vector<Solution> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
+    using This_             = Sine_Wave_2D;
+    using Space_Vector_     = Euclidean_Vector<dimension_>;
+    using Solution_         = Euclidean_Vector<num_eqation_>;
 
 private:
     Sine_Wave_2D(void) = delete;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& space_vectors);
+    static std::string name(void);
+
+
+    template <typename Governing_Equation>
+    static std::vector<Solution_> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 };
 
 
 template <>
-std::vector<Sine_Wave_2D::Solution> Sine_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time);
+std::vector<Sine_Wave_2D::Solution_> Sine_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 
 
 class Square_Wave_2D : public IC {

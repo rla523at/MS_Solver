@@ -27,7 +27,7 @@ public:
     static double calculate_time_step(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const double cfl);
     static void calculate_RHS(std::vector<Euclidean_Vector<num_equation_>>& RHS, const std::vector<Euclidean_Vector<num_equation_>>& solutions);
 
-    template <typename Initial_Condtion>
+    template <typename Initial_Condition>
     static auto calculate_initial_solutions(void);
 
     template <typename Initial_Condition>
@@ -93,9 +93,9 @@ void Cells_FVM<Governing_Equation>::calculate_RHS(std::vector<Euclidean_Vector<n
 }
 
 template <typename Governing_Equation>
-template <typename Initial_Condtion>
+template <typename Initial_Condition>
 auto Cells_FVM<Governing_Equation>::calculate_initial_solutions(void) {
-    return Initial_Condtion::calculate_solutions(This_::centers_);
+    return Initial_Condition::calculate_solutions(This_::centers_);
 }
 
 template <typename Governing_Equation>

@@ -46,9 +46,8 @@ public:
     template <typename Time_Step_Method>
     static double calculate_time_step(const std::vector<Solution_>& solutions) {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
-        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) {
+        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) 
             return Cells_::calculate_time_step(solutions, time_step_constant_);
-        }
         else
             return time_step_constant_;
     }

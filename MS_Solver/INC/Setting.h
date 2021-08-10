@@ -1,10 +1,4 @@
 #pragma once
-
-//mode 
-//#define POST_AI_DATA_MODE
-//#define ERROR_CALCULATION_MODE
-
-
 //Setting
 #define DIMENSION						2
 #define GRID_FILE_TYPE					Gmsh
@@ -46,6 +40,27 @@
 //END_CONDITION_CONSTANT			-
 //POST_CONDITION_NAME				Time
 //POST_CONDITION_CONSTANT			-
+
+
+// Mode 
+	//#define POST_AI_DATA_MODE
+	//#define ERROR_CALCULATION_MODE
+
+// User Define Setting
+	//Initial condtion
+		//Sine Wave 2D
+		#define X_WAVE_LENGTH 1
+		#define Y_WAVE_LENGTH 1
+
+
+
+
+
+
+
+
+
+
 
 
 

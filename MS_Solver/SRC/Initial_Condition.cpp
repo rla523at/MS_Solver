@@ -1,29 +1,42 @@
 #include "../INC/Inital_Condition.h"
 
-std::vector<Sine_Wave_2D::Solution> Sine_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-	const auto num_cell = cell_centers.size();
+Sine_Wave_2D::Solution_ Sine_Wave_2D::calculate_solution(const Space_Vector_& space_vector) {
+	const auto x_coord = space_vector.at(0);
+	const auto y_coord = space_vector.at(1);
+
+	return { std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord) };
+}
+
+
+std::vector<Sine_Wave_2D::Solution_> Sine_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
+	const auto num_cell = space_vectors.size();
 	
-	std::vector<Solution> solutions_(num_cell);
+	std::vector<Solution_> solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i].at(0);
-		const auto y_coord = cell_centers[i].at(1);
-		solutions_[i] = std::sin(2 * pi_ * x_coord) * std::sin(2 * pi_ * y_coord);
+		const auto x_coord = space_vectors[i].at(0);
+		const auto y_coord = space_vectors[i].at(1);
+
+		solutions_[i] = std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord);
 	}
 
 	return solutions_;
 }
 
+std::string Sine_Wave_2D::name(void) { 
+	return "Sine_Wave_2D"; 
+};
+
 
 template <>
-std::vector<Sine_Wave_2D::Solution> Sine_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time){
+std::vector<Sine_Wave_2D::Solution_> Sine_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time){
 	const auto num_cell = cell_centers.size();
 	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speed();
 
-	std::vector<Solution> exact_solutions_(num_cell);
+	std::vector<Solution_> exact_solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
 		const auto x_coord = cell_centers[i].at(0);
 		const auto y_coord = cell_centers[i].at(1);
-		exact_solutions_[i] = std::sin(2 * pi_ * (x_coord - x_advection_speed * end_time)) * std::sin(2 * pi_ * (y_coord - y_advection_speed * end_time));
+		exact_solutions_[i] = std::sin(This_::x_wave_number_ * (x_coord - x_advection_speed * end_time)) * std::sin(This_::y_wave_number_ * (y_coord - y_advection_speed * end_time));
 	}
 
 	return exact_solutions_;

@@ -1,10 +1,10 @@
 #include "../INC/Matrix.h"
 
-Dynamic_Matrix_::Matrix(const size_t matrix_order) {
-	*this = Matrix(matrix_order, matrix_order);
+Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order) {
+	*this = Dynamic_Matrix(matrix_order, matrix_order);
 }
 
-Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& value){
+Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order, const std::vector<double>& value) {
 	dynamic_require(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
 	this->num_row_ = matrix_order;
 	this->num_column_ = matrix_order;
@@ -14,13 +14,13 @@ Dynamic_Matrix_::Matrix(const size_t matrix_order, const std::vector<double>& va
 		this->at(i, i) = value[i];
 }
 
-Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column){
+Dynamic_Matrix::Dynamic_Matrix(const size_t num_row, const size_t num_column) {
 	this->num_row_ = num_row;
 	this->num_column_ = num_column;
 	this->values_.resize(num_row * num_column);
 }
 
-Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) {
+Dynamic_Matrix::Dynamic_Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) {
 	dynamic_require(num_row * num_column == value.size(), "num value should be same with matrix size");
 
 	this->num_row_ = num_row;
@@ -28,17 +28,17 @@ Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column, std::vect
 	this->values_ = std::move(value);
 }
 
-Dynamic_Matrix_ Dynamic_Matrix_::operator*(const Dynamic_Matrix_& other) const {
-	Dynamic_Matrix_ result(this->num_row_, other.num_column_);
+Dynamic_Matrix Dynamic_Matrix::operator*(const Dynamic_Matrix& other) const {
+	Dynamic_Matrix result(this->num_row_, other.num_column_);
 	ms::gemm(*this, other, result.values_.data());
 	return result;
 }
 
-bool  Dynamic_Matrix_::operator==(const Dynamic_Matrix_& other) const {
+bool  Dynamic_Matrix::operator==(const Dynamic_Matrix& other) const {
 	return this->num_row_ == other.num_row_ && this->values_ == other.values_;
 }
 
-double Dynamic_Matrix_::at(const size_t row, const size_t column) const {
+double Dynamic_Matrix::at(const size_t row, const size_t column) const {
 	dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
 		return this->values_[column * this->num_row_ + row];
@@ -48,7 +48,7 @@ double Dynamic_Matrix_::at(const size_t row, const size_t column) const {
 
 
 template <size_t num_row>
-Euclidean_Vector<num_row> Dynamic_Matrix_::column(const size_t column_index) const {
+Euclidean_Vector<num_row> Dynamic_Matrix::column(const size_t column_index) const {
 	dynamic_require(this->num_row_ == num_row, "this dynamic matrix should have given row dimension");
 
 	std::array<double, num_row> column_values = { 0 };
@@ -59,12 +59,12 @@ Euclidean_Vector<num_row> Dynamic_Matrix_::column(const size_t column_index) con
 	return column_values;
 }
 
-Dynamic_Matrix_ Dynamic_Matrix_::transpose(void) const {
+Dynamic_Matrix Dynamic_Matrix::transpose(void) const {
 	auto result = *this;
 	return result.be_transpose();
 }
 
-std::string Dynamic_Matrix_::to_string(void) const {
+std::string Dynamic_Matrix::to_string(void) const {
 	std::string result;
 	for (size_t i = 0; i < this->num_row_; ++i) {
 		for (size_t j = 0; j < this->num_column_; ++j)
@@ -74,16 +74,16 @@ std::string Dynamic_Matrix_::to_string(void) const {
 	return result;
 }
 
-Dynamic_Matrix_ Dynamic_Matrix_::inverse(void) const {
+Dynamic_Matrix Dynamic_Matrix::inverse(void) const {
 	auto result = *this;
 	return result.be_inverse();
 }
 
-std::pair<size_t, size_t> Dynamic_Matrix_::size(void) const {
+std::pair<size_t, size_t> Dynamic_Matrix::size(void) const {
 	return std::make_pair(this->num_row_, this->num_column_);
 }
 
-Dynamic_Matrix_& Dynamic_Matrix_::be_transpose(void) {
+Dynamic_Matrix& Dynamic_Matrix::be_transpose(void) {
 	std::swap(this->num_row_, this->num_column_);
 
 	if (this->is_transposed())
@@ -94,7 +94,7 @@ Dynamic_Matrix_& Dynamic_Matrix_::be_transpose(void) {
 	return *this;
 }
 
-Dynamic_Matrix_& Dynamic_Matrix_::be_inverse(void) {
+Dynamic_Matrix& Dynamic_Matrix::be_inverse(void) {
 	dynamic_require(this->is_square_matrix(), "invertable matrix should be square matrix");
 
 	const auto ipiv = this->PLU_decomposition();
@@ -111,7 +111,7 @@ Dynamic_Matrix_& Dynamic_Matrix_::be_inverse(void) {
 	return *this;
 }
 
-void Dynamic_Matrix_::change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec) {
+void Dynamic_Matrix::change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec) {
 	dynamic_require(column_index < this->num_column_, "column idnex can not exceed number of column");
 	dynamic_require(this->num_row_ == vec.dimension(), "vector dimension should be matched with number of column");
 
@@ -119,19 +119,19 @@ void Dynamic_Matrix_::change_column(const size_t column_index, const Dynamic_Euc
 		this->at(i, column_index) = vec.at(i);
 }
 
-bool Dynamic_Matrix_::is_square_matrix(void) const {
+bool Dynamic_Matrix::is_square_matrix(void) const {
 	return this->num_row_ == this->num_column_;
 }
 
-bool Dynamic_Matrix_::is_transposed(void) const {
+bool Dynamic_Matrix::is_transposed(void) const {
 	return this->transpose_type_ != CBLAS_TRANSPOSE::CblasNoTrans;
 }
 
-bool Dynamic_Matrix_::is_in_range(const size_t row, const size_t column) const {
+bool Dynamic_Matrix::is_in_range(const size_t row, const size_t column) const {
 	return row < this->num_row_&& column < this->num_column_;
 }
 
-size_t Dynamic_Matrix_::leading_dimension(void) const {
+size_t Dynamic_Matrix::leading_dimension(void) const {
 	// num column before OP()
 	if (this->is_transposed())
 		return this->num_row_;
@@ -139,7 +139,7 @@ size_t Dynamic_Matrix_::leading_dimension(void) const {
 		return this->num_column_;
 }
 
-double& Dynamic_Matrix_::at(const size_t row, const size_t column) {
+double& Dynamic_Matrix::at(const size_t row, const size_t column) {
 	//dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
 		return this->values_[column * this->num_row_ + row];
@@ -147,7 +147,7 @@ double& Dynamic_Matrix_::at(const size_t row, const size_t column) {
 		return this->values_[row * this->num_column_ + column];
 }
 
-std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
+std::vector<int> Dynamic_Matrix::PLU_decomposition(void) {
 	dynamic_require(!this->is_transposed(), "matrix should not be transposed");
 
 	const int matrix_layout = LAPACK_ROW_MAJOR;
@@ -162,7 +162,7 @@ std::vector<int> Dynamic_Matrix_::PLU_decomposition(void) {
 }
 
 namespace ms {
-	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr) {
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr) {
 		dynamic_require(A.num_column_ == B.num_row_, "dimension should be matched for matrix multiplication");
 
 		const CBLAS_LAYOUT layout = CBLAS_LAYOUT::CblasRowMajor;
