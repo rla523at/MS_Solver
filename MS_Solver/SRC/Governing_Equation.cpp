@@ -22,7 +22,7 @@ std::vector<Linear_Advection_2D::Physical_Flux_> Linear_Advection_2D::physical_f
 	return physical_fluxes;
 }
 
-std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> Linear_Advection_2D::coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
+std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	//static size_t num_solution = solutions.size();
 	const size_t num_solution = solutions.size();
 
@@ -59,7 +59,7 @@ std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::v
 	return physical_fluxes;
 }
 
-std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
+std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	static size_t num_solution = solutions.size();
 
 	std::vector<std::array<double, Burgers_2D::space_dimension_>> projected_maximum_lambdas(num_solution);
@@ -84,7 +84,7 @@ Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conserv
 	const auto rhov = conservative_variable.at(2);
 	const auto rhoE = conservative_variable.at(3);
 
-	const auto one_over_rho = 1 / rho;	
+	const auto one_over_rho = 1.0 / rho;	
 
 	const auto u = rhou * one_over_rho;
 	const auto v = rhov * one_over_rho;
@@ -94,8 +94,14 @@ Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conserv
 	return { u,v,p,a };
 }
 
-std::vector<std::array<double, Euler_2D::space_dimension_>> Euler_2D::coordinate_projected_maximum_lambdas(const std::vector<Solution_>& primitive_variables) {
-	static size_t num_solution = primitive_variables.size();
+std::vector<std::array<double, Euler_2D::space_dimension_>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables) {
+	static auto num_solution = conservative_variables.size();
+
+	std::vector<Solution_> primitive_variables;
+	primitive_variables.reserve(num_solution);
+
+	for (size_t i = 0; i < num_solution; ++i)
+		primitive_variables.push_back(Euler_2D::conservative_to_primitive(conservative_variables[i]));
 
 	std::vector<std::array<double,space_dimension_>> coordinate_projected_maximum_lambdas(num_solution);
 

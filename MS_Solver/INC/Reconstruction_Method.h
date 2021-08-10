@@ -170,7 +170,7 @@ void MLP_u1<Gradient_Method>::initialize(Grid<space_dimension_>&& grid) {
     const auto num_cell = cell_elements.size();
     This_::vnode_indexes_set_.reserve(num_cell);
     This_::center_to_vertex_matrixes_.reserve(num_cell);
-    This_::solution_gradients_.reserve(num_cell);
+    This_::solution_gradients_.resize(num_cell);
 
     //vnode index to share cell indexes
     This_::vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);

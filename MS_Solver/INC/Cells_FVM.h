@@ -7,8 +7,8 @@ template <typename Governing_Equation>
 class Cells_FVM
 {
 private:
-    static constexpr ushort space_dimension_ = Governing_Equation::space_dimension();
-    static constexpr ushort num_equation_ = Governing_Equation::num_equation();
+    static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
+    static constexpr ushort num_equation_       = Governing_Equation::num_equation();
 
     using This_         = Cells_FVM<Governing_Equation>;
     using Space_Vector_  = Euclidean_Vector<space_dimension_>;    
@@ -64,7 +64,7 @@ void Cells_FVM<Governing_Equation>::initialize(const Grid<space_dimension_>& gri
 
 template <typename Governing_Equation>
 double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const double cfl) {
-    const auto projected_maximum_lambdas = Governing_Equation::coordinate_projected_maximum_lambdas(solutions);
+    const auto projected_maximum_lambdas = Governing_Equation::calculate_coordinate_projected_maximum_lambdas(solutions);
     const auto num_cell = projected_maximum_lambdas.size();
 
     std::vector<double> local_time_step(num_cell);
@@ -74,6 +74,9 @@ double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Eucl
 
         const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
+
+        if (!std::isnormal(x_radii) || !std::isnormal(y_radii))
+            std::cout << "not normal!";
 
         local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
     }

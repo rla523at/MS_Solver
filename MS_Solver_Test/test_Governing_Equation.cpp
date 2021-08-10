@@ -25,7 +25,7 @@ GTEST_TEST(Linear_Advection_2D, calculate_coordinate_projected_maximum_lambdas_1
 	std::vector<Linear_Advection_2D::Solution_> solutions(num);
 	for (size_t i = 0; i < num; ++i)
 		solutions[i] = { i };
-	const auto result = Linear_Advection_2D::coordinate_projected_maximum_lambdas(solutions);
+	const auto result = Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(solutions);
 
 	std::vector<std::array<double, 2>> ref(num, { 1.0,0.5 });
 	EXPECT_EQ(result, ref);
@@ -79,7 +79,7 @@ GTEST_TEST(Burgers_2D, calculate_coordinate_projected_maximum_lambdas_1) {
 	std::vector<Burgers_2D::Solution_> solutions(num);
 	for (size_t i = 0; i < num; ++i)
 		solutions[i] = { i };
-	const auto result = Burgers_2D::coordinate_projected_maximum_lambdas(solutions);
+	const auto result = Burgers_2D::calculate_coordinate_projected_maximum_lambdas(solutions);
 
 	std::vector<std::array<double, 2>> ref(num);
 	for (size_t i = 0; i < num; ++i) 
@@ -92,7 +92,7 @@ GTEST_TEST(Burgers_2D, calculate_coordinate_projected_maximum_lambdas_2) {
 	std::vector<Burgers_2D::Solution_> solutions(num);
 	for (int i = 0; i < num; ++i)
 		solutions[i] = { -i };
-	const auto result = Burgers_2D::coordinate_projected_maximum_lambdas(solutions);
+	const auto result = Burgers_2D::calculate_coordinate_projected_maximum_lambdas(solutions);
 
 	std::vector<std::array<double, 2>> ref(num);
 	for (size_t i = 0; i < num; ++i)

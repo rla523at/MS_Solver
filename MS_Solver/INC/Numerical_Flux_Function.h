@@ -1,6 +1,8 @@
 #pragma once
 #include "Governing_Equation.h"
 
+using uint = unsigned int;
+
 
 class NFF {};    // Numerical Flux Function
 
@@ -16,7 +18,7 @@ private:
     using Numerical_Flux_   = Euclidean_Vector<Governing_Equation::num_equation()>;
 
 public:
-    static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<size_t, size_t>>& oc_nc_index_pairs);
+    static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
     static auto calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal);
 };
 
@@ -30,7 +32,7 @@ private:
     using Numerical_Flux_   = Euclidean_Vector<Euler_2D::num_equation()>;
 
 public:
-    static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<size_t, size_t>>& oc_nc_index_pairs);
+    static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
     static Numerical_Flux_ calculate(const Solution_& oc_side_cvariable, const Solution_& nc_side_cvariable, const Space_Vector_& normal);
 };
 
@@ -43,7 +45,7 @@ namespace ms {
 
 //template definition part
 template <typename Governing_Equation>
-auto LLF<Governing_Equation>::calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<size_t, size_t>>& oc_nc_index_pairs) {
+auto LLF<Governing_Equation>::calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) {
     const auto num_inner_face = normals.size();
     const auto physical_fluxes = Governing_Equation::physical_fluxes(solutions);
 

@@ -38,7 +38,7 @@ public:
     static constexpr auto advection_speed(void) { return advection_speeds_; };
     static Physical_Flux_ physical_flux(const Solution_& solution);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& solutions);
-    static std::vector<std::array<double, space_dimension_>> coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
+    static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
     static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
     static std::string name(void) { return "Linear_Advection_2D"; }; 
 };
@@ -52,7 +52,7 @@ private:
 public:
     static Physical_Flux_ physical_flux(const Solution_& solution);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& solutions);
-    static std::vector<std::array<double, space_dimension_>> coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
+    static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
     static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
     static std::string name(void) { return "Burgers_2D"; };    
 };
@@ -74,7 +74,7 @@ private:
 
 public:
     static Solution_ conservative_to_primitive(const Solution_& conservative_variable);
-    static std::vector<std::array<double, space_dimension_>> coordinate_projected_maximum_lambdas(const std::vector<Solution_>& primitive_variables);
+    static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables);
     static Physical_Flux_ physical_flux(const Solution_& conservative_variable);
     static Physical_Flux_ physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& conservative_variables, const std::vector<Solution_>& primitive_variables);

@@ -74,7 +74,7 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<
 	return exact_solutions_;
 }
 
-std::vector<Modifid_SOD_2D::Solution_> Modifid_SOD_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+std::vector<Modified_SOD_2D::Solution_> Modified_SOD_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
 	const auto num_cell = cell_centers.size();
 	
 	constexpr auto gamma = 1.4;

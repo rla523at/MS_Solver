@@ -1,6 +1,6 @@
 #include "../INC/Numerical_Flux_Function.h"
 
-std::vector<LLF<Euler_2D>::Numerical_Flux_> LLF<Euler_2D>::calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<size_t, size_t>>& oc_nc_index_pairs) {
+std::vector<LLF<Euler_2D>::Numerical_Flux_> LLF<Euler_2D>::calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) {
     const auto num_cell = conservative_variables.size();
 
     std::vector<Solution_> primitive_variables(num_cell);

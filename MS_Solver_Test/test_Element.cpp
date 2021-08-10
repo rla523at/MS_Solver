@@ -469,6 +469,27 @@ GTEST_TEST(Geometry, volume_6) {
 	const auto ref = 0.362569100000000;
 	EXPECT_DOUBLE_EQ(result, ref);
 }
+GTEST_TEST(Geometry, volume_7) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,2 };
+	const Euclidean_Vector n2 = { 1.0016, 1.257 };
+	const Euclidean_Vector n3 = { 1.0017, 1.24 };
+	const Euclidean_Vector n4 = { 1.001, 2.577};
+
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.volume();
+
+	const auto ref = 8.939999999999641e-04;
+	EXPECT_DOUBLE_EQ(result, ref);
+}
 
 
 GTEST_TEST(Geometry, quadrature_weight_1) {

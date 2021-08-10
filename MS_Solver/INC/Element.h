@@ -565,7 +565,7 @@ Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::quadrature_
 	const auto scale_function = this->scale_function(mapping_function);
 
 	constexpr ushort heuristic_additional_order = 2;
-	const auto reference_integrand_order = physical_integrand_order + heuristic_additional_order;
+	const ushort reference_integrand_order = physical_integrand_order + heuristic_additional_order;
 	const auto key = std::make_pair(this->figure_, reference_integrand_order);
 	if (ReferenceGeometry::key_to_reference_quadrature_rule_.find(key) == ReferenceGeometry::key_to_reference_quadrature_rule_.end())
 		ReferenceGeometry::key_to_reference_quadrature_rule_.emplace(key, this->reference_quadrature_rule(reference_integrand_order));
@@ -1083,7 +1083,7 @@ std::vector<Euclidean_Vector<space_dimension>> Geometry<space_dimension>::vertex
 }
 
 template <ushort space_dimension>
-std::vector<std::vector<typename Geometry<space_dimension>::Space_Vector_>> Geometry<space_dimension>::calculate_faces_nodes(void) const {
+std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimension>::calculate_faces_nodes(void) const {
 	const auto faces_node_index_orders = this->reference_geometry_.face_node_index_orders_set();
 	const auto num_face = faces_node_index_orders.size();
 
