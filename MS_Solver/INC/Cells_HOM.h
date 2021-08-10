@@ -56,7 +56,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     This_::gradient_basis_weights_.reserve(num_cell);
     This_::P0_basis_values_.reserve(num_cell);
 
-    const auto transposed_basis_Jacobians = Reconstruction_Method::calculate_transposed_basis_Jacobians();
+    const auto set_of_transposed_gradient_basis = Reconstruction_Method::calculate_set_of_transposed_gradient_basis();
     constexpr auto solution_order = Reconstruction_Method::solution_order();
     constexpr auto integrand_order = 2 * solution_order;
 
@@ -73,7 +73,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
         This_::quadrature_rule_ptrs_.push_back(&quadrature_rule);
         This_::set_of_basis_qnodes_.push_back(Reconstruction_Method::calculate_basis_nodes(i, quadrature_rule.points));
         
-        const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];        
+        const auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];        
         const auto num_quadrature_point = quadrature_rule.points.size();
         
         Dynamic_Matrix gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
@@ -82,7 +82,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
             const auto& quadrature_point = quadrature_rule.points[q];
             const auto quadrature_weight = quadrature_rule.weights[q];
             
-            const auto part_of_gradient_basis_weight = transposed_basis_Jacobian(quadrature_point) * quadrature_weight;
+            const auto part_of_gradient_basis_weight = transposed_gradient_basis(quadrature_point) * quadrature_weight;
 
             gradient_basis_weight.change_rows(q * This_::space_dimension_, part_of_gradient_basis_weight);
         }

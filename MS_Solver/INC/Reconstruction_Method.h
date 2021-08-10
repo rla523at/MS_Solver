@@ -130,7 +130,7 @@ private:
 
 public:
     static void initialize(const Grid<space_dimension>& grid);
-    static auto calculate_transposed_basis_Jacobians(void);
+    static auto calculate_set_of_transposed_gradient_basis(void);
     static Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes);
     static double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node);
     static std::vector<Dynamic_Matrix> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
@@ -308,7 +308,7 @@ void Polynomial_Reconstruction<space_dimension, solution_order_>::initialize(con
 }
 
 template <ushort space_dimension, ushort solution_order_>
-static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_transposed_basis_Jacobians(void) {
+static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_transposed_gradient_basis(void) {
     const auto num_cell = This_::basis_functions_.size();
     
     std::vector<Matrix_Function<Polynomial<space_dimension>, space_dimension, This_::num_basis_>> transposed_basis_Jacobians(num_cell);

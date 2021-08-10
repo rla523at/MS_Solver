@@ -10,6 +10,7 @@ class Dynamic_Matrix;
 
 
 namespace ms {
+	inline constexpr ushort blas_dscal_criteria = 10;
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_mv_criteria = 50;
 
@@ -171,7 +172,7 @@ template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> Matrix<num_row, num_column>::operator*(const double scalar) const {
 	Matrix result = *this;
 
-	if constexpr (this->num_value_ < 10) {
+	if constexpr (this->num_value_ < ms::blas_dscal_criteria) {
 		for (size_t i = 0; i < num_row * num_column; ++i)
 			result.values_[i] *= scalar;
 	}

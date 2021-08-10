@@ -175,6 +175,7 @@
   <ItemGroup>
     <ClInclude Include="INC\Boundaries.h" />
     <ClInclude Include="INC\Boundaries_FVM.h" />
+    <ClInclude Include="INC\Boundaries_HOM.h" />
     <ClInclude Include="INC\Boundary_Flux_Function.h" />
     <ClInclude Include="INC\Cells.h" />
     <ClInclude Include="INC\Cells_FVM.h" />

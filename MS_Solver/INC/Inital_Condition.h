@@ -25,7 +25,6 @@ public:
     static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& space_vectors);
     static std::string name(void);
 
-
     template <typename Governing_Equation>
     static std::vector<Solution_> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 };
