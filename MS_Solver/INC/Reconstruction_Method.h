@@ -131,6 +131,8 @@ private:
 public:
     static void initialize(const Grid<space_dimension>& grid);
     static auto calculate_transposed_basis_Jacobians(void);
+    static Dynamic_Matrix_ calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes);
+    static double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node);
     static std::vector<Dynamic_Matrix_> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
     static std::vector<double> calculate_P0_basis_values(const std::vector<Space_Vector_>& center_nodes);
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
@@ -322,6 +324,26 @@ static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calcula
     return transposed_basis_Jacobians;
 }
 
+template <ushort space_dimension, ushort solution_order_>
+Dynamic_Matrix_ Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) {
+    const auto& basis_function = This_::basis_functions_[cell_index];
+
+    const auto num_node = nodes.size();
+
+    Dynamic_Matrix_ basis_nodes(This_::num_basis_, num_node);
+    for (size_t j = 0; j < num_node; ++j)
+        basis_nodes.change_column(j, basis_function(nodes[j]));
+
+    return basis_nodes;
+}
+
+template <ushort space_dimension, ushort solution_order_>
+double Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node) {
+    const auto& basis_function = This_::basis_functions_[cell_index];
+    const auto& P0_basis_function = basis_function[0];
+
+    return P0_basis_function(center_node);
+}
 
 template <ushort space_dimension, ushort solution_order_>
 std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
@@ -329,23 +351,14 @@ std::vector<Dynamic_Matrix_> Polynomial_Reconstruction<space_dimension, solution
 
     dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
 
-    std::vector<Dynamic_Matrix_> set_of_basis_values;
-    set_of_basis_values.reserve(num_cell);
+    std::vector<Dynamic_Matrix_> set_of_basis_nodes;
+    set_of_basis_nodes.reserve(num_cell);
 
-    for (uint i = 0; i < num_cell; ++i) {
-        const auto& basis_function = This_::basis_functions_[i];
-        const auto& nodes = set_of_nodes[i];
+    for (uint i = 0; i < num_cell; ++i) 
+        set_of_basis_nodes.push_back(This_::calculate_basis_nodes(i, set_of_nodes[i]));
+    
 
-        const auto num_node = nodes.size();
-
-        Dynamic_Matrix_ basis_value(This_::num_basis_, num_node);
-        for (size_t j = 0; j < num_node; ++j)
-            basis_value.change_column(j, basis_function(nodes[j]));
-
-        set_of_basis_values.push_back(std::move(basis_value));
-    }
-
-    return set_of_basis_values;
+    return set_of_basis_nodes;
 }
 
 template <ushort space_dimension, ushort solution_order_>

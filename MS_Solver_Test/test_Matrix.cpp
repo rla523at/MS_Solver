@@ -63,12 +63,22 @@ TEST(Matrix, column_2) {
 	EXPECT_EQ(result, ref);
 }
 
-TEST(Dynamic_Matrix, change_columns_1) {
+TEST(Dynamic_Matrix, change_rows_1) {
 	const Matrix<2, 2> m = { 1,2,3,4 };
 
 	Dynamic_Matrix_ dm(4, 2);
 	dm.change_rows(0, m);
 
-	const Dynamic_Matrix_ ref(4, 4, { 1,2,3,4,0,0,0,0 });
+	const Dynamic_Matrix_ ref(4, 2, { 1,2,3,4,0,0,0,0 });
+	EXPECT_EQ(dm, ref);
+}
+
+TEST(Dynamic_Matrix, change_columns_1) {
+	const Matrix<2, 2> m = { 1,2,3,4 };
+
+	Dynamic_Matrix_ dm(2, 4);
+	dm.change_columns(0, m);
+
+	const Dynamic_Matrix_ ref(2, 4, { 1,2,0,0,3,4,0,0 });
 	EXPECT_EQ(dm, ref);
 }

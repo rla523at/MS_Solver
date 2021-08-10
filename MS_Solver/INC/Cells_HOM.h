@@ -13,12 +13,14 @@ private:
     static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
 
     using This_                 = Cells_HOM<Governing_Equation, Reconstruction_Method>;
-    using Space_Vector_          = Euclidean_Vector<This_::space_dimension_>;
+    using Space_Vector_         = Euclidean_Vector<This_::space_dimension_>;
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
+    using Residual_             = Matrix<num_equation_, num_basis_>;
 
 protected:    
     inline static std::vector<double> volumes_;
     inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
+    inline static std::vector<Dynamic_Matrix_> set_of_basis_quadrature_nodes_;
     inline static std::vector<Dynamic_Matrix_> gradient_basis_weights_;
     inline static std::vector<double> P0_basis_values_;
 
@@ -28,9 +30,7 @@ private:
 public:
     static void initialize(const Grid<space_dimension_>& grid);
     static double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl);
-
-    //template <typename Residual, typename Solution>
-    //static void calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions);
+    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients);
 
     //template <typename Initial_Condtion>
     //static auto calculate_initial_solutions(void);
@@ -50,10 +50,9 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
     const auto num_cell = cell_elements.size();
     This_::volumes_.reserve(num_cell);
     This_::coordinate_projected_volumes_.reserve(num_cell);
+    This_::P0_basis_values_.reserve(num_cell);
+    This_::set_of_basis_quadrature_nodes_.reserve(num_cell);
     This_::gradient_basis_weights_.reserve(num_cell);
-
-    std::vector<Space_Vector_> cell_centers;
-    cell_centers.reserve(num_cell);
 
     const auto transposed_basis_Jacobians = Reconstruction_Method::calculate_transposed_basis_Jacobians();
     constexpr auto solution_order = Reconstruction_Method::solution_order();
@@ -66,10 +65,12 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
 
         This_::volumes_.push_back(volume);
         This_::coordinate_projected_volumes_.push_back(geometry.coordinate_projected_volume());
-        cell_centers.push_back(geometry.center_node());
+        This_::P0_basis_values_.push_back(Reconstruction_Method::calculate_P0_basis_value(i, geometry.center_node()));
 
-        const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
+        This_::set_of_basis_quadrature_nodes_.push_back(Reconstruction_Method::calculate_basis_nodes(i, quadrature_rule.points));
+
+        const auto& transposed_basis_Jacobian = transposed_basis_Jacobians[i];        
         const auto num_quadrature_point = quadrature_rule.points.size();
         
         Dynamic_Matrix_ gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
@@ -85,8 +86,6 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
 
         This_::gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
     }
-
-    This_::P0_basis_values_ = Reconstruction_Method::calculate_P0_basis_values(cell_centers);
 
     Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -122,17 +121,28 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
 }
 
 
-//
-// 
-//template <ushort space_dimension>
-//template <typename Residual, typename Solution>
-//void Cells_HOM<space_dimension>::calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions) {
-//    const auto num_cell = RHS.size();
-//
-//    for (size_t i = 0; i < num_cell; ++i)
-//        RHS[i] *= This_::residual_scale_factors_[i];
-//}
-//
+
+ 
+template <typename Governing_Equation, typename Reconstruction_Method>
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) {
+    const auto num_solution = solution_coefficients.size();
+        
+    for (uint i = 0; i < num_solution; ++i) {
+        const auto& solution_coefficient = solution_coefficients[i];
+        const auto& basis_quadrature_nodes = This_::set_of_basis_quadrature_nodes_[i];
+
+        const auto solution_quadrature_nodes = solution_coefficient * basis_quadrature_nodes;
+
+
+
+
+    }
+    
+ 
+
+}
+
+
 //template <ushort space_dimension>
 //template <typename Initial_Condtion>
 //auto Cells_HOM<space_dimension>::calculate_initial_solutions(void) {

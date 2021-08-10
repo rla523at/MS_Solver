@@ -22,6 +22,12 @@ std::vector<Linear_Advection_2D::Physical_Flux_> Linear_Advection_2D::physical_f
 	return physical_fluxes;
 }
 
+Dynamic_Matrix_ Linear_Advection_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
+	const auto [num_eq, num_node] = solution_nodes.size();
+
+	//Dynamic_Matrix_ flux_nodes()
+}
+
 std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	//static size_t num_solution = solutions.size();
 	const size_t num_solution = solutions.size();

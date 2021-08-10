@@ -78,8 +78,7 @@ public:
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
-	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value)
-		: num_row_(num_row), num_column_(num_column), values_(std::move(value)) {};
+	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);		
 
 	Dynamic_Matrix_ operator*(const Dynamic_Matrix_& other) const;
 	bool operator==(const Dynamic_Matrix_& other) const;
@@ -102,6 +101,10 @@ public:
 
 	template <size_t num_row, size_t num_column>
 	void change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A);
+
+	template <size_t num_row, size_t num_column>
+	void change_columns(const size_t start_column_index, const Matrix<num_row, num_column>& A);
+
 
 private:
 	bool is_square_matrix(void) const;
@@ -264,10 +267,21 @@ void Dynamic_Matrix_::change_column(const size_t column_index, const Euclidean_V
 
 template <size_t num_row, size_t num_column>
 void Dynamic_Matrix_::change_rows(const size_t start_row_index, const Matrix<num_row, num_column>& A) {
-	dynamic_require(this->num_column_ == num_column,		"dimension should be matched");
-	dynamic_require(start_row_index + num_row <= num_row,	"range can't not exceed given range");
-	dynamic_require(!this->is_transposed(),					"it should be not transposed for this routine");
+	dynamic_require(this->num_column_ == num_column,				"dimension should be matched");
+	dynamic_require(start_row_index + num_row <= this->num_row_,	"range can't not exceed given range");
+	dynamic_require(!this->is_transposed(),							"it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_column_;
 	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
+}
+
+template <size_t num_row, size_t num_column>
+void Dynamic_Matrix_::change_columns(const size_t start_column_index, const Matrix<num_row, num_column>& A) {
+	dynamic_require(this->num_row_ == num_row,								"dimension should be matched");
+	dynamic_require(start_column_index + num_column <= this->num_column_,	"range can't not exceed given range");
+	dynamic_require(!this->is_transposed(),									"it should be not transposed for this routine");
+
+	for (size_t i = 0; i < this->num_row_; ++i) 
+		for (size_t j = 0; j < num_column; ++j) 
+			this->at(i, start_column_index + j) = A.at(i, j);	
 }

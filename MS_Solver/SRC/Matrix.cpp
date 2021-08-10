@@ -20,6 +20,14 @@ Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column){
 	this->values_.resize(num_row * num_column);
 }
 
+Dynamic_Matrix_::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) {
+	dynamic_require(num_row * num_column == value.size(), "num value should be same with matrix size");
+
+	this->num_row_ = num_row;
+	this->num_column_ = num_column;
+	this->values_ = std::move(value);
+}
+
 Dynamic_Matrix_ Dynamic_Matrix_::operator*(const Dynamic_Matrix_& other) const {
 	Dynamic_Matrix_ result(this->num_row_, other.num_column_);
 	ms::gemm(*this, other, result.values_.data());
@@ -27,7 +35,7 @@ Dynamic_Matrix_ Dynamic_Matrix_::operator*(const Dynamic_Matrix_& other) const {
 }
 
 bool  Dynamic_Matrix_::operator==(const Dynamic_Matrix_& other) const {
-	return this->values_ == other.values_;
+	return this->num_row_ == other.num_row_ && this->values_ == other.values_;
 }
 
 double Dynamic_Matrix_::at(const size_t row, const size_t column) const {
@@ -132,7 +140,7 @@ size_t Dynamic_Matrix_::leading_dimension(void) const {
 }
 
 double& Dynamic_Matrix_::at(const size_t row, const size_t column) {
-	dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
+	//dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
 		return this->values_[column * this->num_row_ + row];
 	else
