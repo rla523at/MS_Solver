@@ -43,6 +43,7 @@ public:
 	Matrix(Args... args);
 
 	Matrix& operator+=(const Matrix& A);
+
 	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
 	Dynamic_Matrix operator*(const Dynamic_Matrix& dynamic_matrix) const;

@@ -177,54 +177,47 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
 template <typename Governing_Equation, typename Reconstruction_Method>
 template <typename Initial_Condition>
 void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) {
-
     Log::content_ << "================================================================================\n";
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
-
-    const auto num_cell = solution_coefficients.size();
-
-    Euclidean_Vector<This_::num_equation_> global_L1_error;
-    Euclidean_Vector<This_::num_equation_> global_L2_error;
-    Euclidean_Vector<This_::num_equation_> global_Linf_error;
-
-    for (size_t i = 0; i < num_cell; ++i) {
-        const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;        
-        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(qnodes, time);
-        const auto computed_solutions = solution_coefficients[i] * This_::set_of_basis_qnodes_[i];
-
-        const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
-
-        
-
-
-    }
-
+    
     if constexpr (std::is_same_v<Governing_Equation, Linear_Advection_2D>) {
+        const auto num_cell = solution_coefficients.size();
+
         double global_L1_error = 0.0;
         double global_L2_error = 0.0;
         double global_Linf_error = 0.0;
 
-        
+        for (size_t i = 0; i < num_cell; ++i) {
+            const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;
+            const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(qnodes, time);
+            const auto computed_solutions = solution_coefficients[i] * This_::set_of_basis_qnodes_[i];
 
-        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(This_::centers_, time);
-        const auto num_solutions = computed_solutions.size();
+            const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
 
-        for (size_t i = 0; i < num_solutions; ++i) {
-            const auto local_error = (exact_solutions[i] - computed_solutions[i]).L1_norm();
+            const auto num_qnode = qnodes.size();
+
+            double local_error = 0.0;
+            double volume = 0.0;
+            for (size_t q = 0; q < num_qnode; ++q) {
+                local_error += (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm() * qweights[q];
+                volume += qweights[q];
+            }
+            local_error = local_error / volume;
+
             global_L1_error += local_error;
             global_L2_error += local_error * local_error;
             global_Linf_error = max(global_Linf_error, local_error);
+
         }
 
-        global_L1_error = global_L1_error / num_solutions;
-        global_L2_error = global_L2_error / num_solutions;
+        global_L1_error = global_L1_error / num_cell;
+        global_L2_error = global_L2_error / num_cell;
 
         global_L2_error = std::sqrt(global_L2_error);
 
         Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
         Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
-
     }
     else
         Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
