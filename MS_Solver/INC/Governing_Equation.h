@@ -29,6 +29,9 @@ public:
 class Linear_Advection_2D : public SCL_2D
 {
 private:
+    using This_ = Linear_Advection_2D;
+
+private:
     static constexpr std::array<double, space_dimension_> advection_speeds_ = { 1.0, 0.5 };
 
 private:
@@ -38,7 +41,7 @@ public:
     static constexpr auto advection_speed(void) { return advection_speeds_; };
     static Physical_Flux_ physical_flux(const Solution_& solution);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& solutions);
-    static Dynamic_Matrix_ flux_nodes(const Dynamic_Matrix_& solution_nodes);
+    //static Dynamic_Matrix_ flux_nodes(const Dynamic_Matrix_& solution_nodes);
     static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
     static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
     static std::string name(void) { return "Linear_Advection_2D"; }; 
@@ -48,11 +51,15 @@ public:
 class Burgers_2D : public SCL_2D
 {
 private:
+    using This_ = Burgers_2D;
+
+private:
     Burgers_2D(void) = delete;
 
 public:
     static Physical_Flux_ physical_flux(const Solution_& solution);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& solutions);
+    //static Dynamic_Matrix_ flux_nodes(const Dynamic_Matrix_& solution_nodes);
     static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
     static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
     static std::string name(void) { return "Burgers_2D"; };    
@@ -61,11 +68,11 @@ public:
 
 class Euler_2D : public GE
 {
-protected:
+private:
     static constexpr ushort num_equation_ = 4;
     static constexpr ushort space_dimension_ = 2;
 
-public:
+    using This_                 = Euler_2D;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
     using Solution_             = Euclidean_Vector<num_equation_>;
     using Physical_Flux_        = Matrix<num_equation_, space_dimension_>;
@@ -78,6 +85,7 @@ public:
     static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables);
     static Physical_Flux_ physical_flux(const Solution_& conservative_variable);
     static Physical_Flux_ physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable);
+    //static Dynamic_Matrix_ flux_nodes(const Dynamic_Matrix_& solution_nodes);
     static std::vector<Physical_Flux_> physical_fluxes(const std::vector<Solution_>& conservative_variables, const std::vector<Solution_>& primitive_variables);
     static double inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector);
     

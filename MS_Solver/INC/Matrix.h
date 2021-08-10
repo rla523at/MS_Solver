@@ -1,6 +1,7 @@
 #pragma once
 #include "Euclidean_Vector.h"
 
+using ushort = unsigned short;
 
 template<size_t num_row, size_t num_column>
 class Matrix;
@@ -9,7 +10,8 @@ using Dynamic_Matrix_ = Matrix<0, 0>;
 
 
 namespace ms {
-	inline constexpr size_t blas_mv_criteria = 50;
+	inline constexpr ushort blas_axpy_criteria = 20;
+	inline constexpr ushort blas_mv_criteria = 50;
 
 	void gemm(const Dynamic_Matrix_& A, const Dynamic_Matrix_& B, double* output_ptr);
 
@@ -41,7 +43,8 @@ public:
 	template <typename... Args>
 	Matrix(Args... args);
 
-	Matrix operator+(const Matrix & A) const;
+	Matrix& operator+=(const Matrix& A);
+	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
 	Matrix<0, 0> operator*(const Matrix<0, 0>& dynamic_matrix) const;
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
@@ -145,11 +148,24 @@ Matrix<num_row, num_column>::Matrix(Args... args) : values_{ static_cast<double>
 };
 
 template<size_t num_row, size_t num_column>
-Matrix<num_row, num_column> Matrix<num_row, num_column>::operator+(const Matrix& A) const {
+Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator+=(const Matrix& A) {
+	if constexpr (this->num_value_ < ms::blas_axpy_criteria) {
+		for (size_t i = 0; i < this->num_value_; ++i)
+			this->values_[i] += A.values_[i];
+	}
+	else 
+		cblas_daxpy(this->num_value_, 1.0, A.values_.data(), 1, this->values_.data(), 1);
+
+	return *this;
+}
+
+template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column> Matrix<num_row, num_column>::operator+(const Matrix& A) const {	
 	Matrix result = *this;
-	for (size_t i = 0; i < num_row * num_column; ++i)
-		result.values_[i] += A.values_[i];
-	return result;
+	return result += A;
+	//for (size_t i = 0; i < num_row * num_column; ++i)
+	//	result.values_[i] += A.values_[i];
+	//return result;
 }
 
 template<size_t num_row, size_t num_column>

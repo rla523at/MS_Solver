@@ -22,11 +22,18 @@ std::vector<Linear_Advection_2D::Physical_Flux_> Linear_Advection_2D::physical_f
 	return physical_fluxes;
 }
 
-Dynamic_Matrix_ Linear_Advection_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
-	const auto [num_eq, num_node] = solution_nodes.size();
-
-	//Dynamic_Matrix_ flux_nodes()
-}
+//Dynamic_Matrix_ Linear_Advection_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
+//	const auto [num_eq, num_node] = solution_nodes.size();
+//
+//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);	
+//	
+//	for (size_t i = 0; i < num_node; ++i) {
+//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
+//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
+//	}
+//
+//	return flux_nodes;
+//}
 
 std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	//static size_t num_solution = solutions.size();
@@ -64,6 +71,19 @@ std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::v
 
 	return physical_fluxes;
 }
+
+//Dynamic_Matrix_ Burgers_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
+//	const auto [num_eq, num_node] = solution_nodes.size();
+//
+//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);
+//
+//	for (size_t i = 0; i < num_node; ++i) {
+//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
+//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
+//	}
+//
+//	return flux_nodes;
+//}
 
 std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	static size_t num_solution = solutions.size();
@@ -130,7 +150,6 @@ Euler_2D::Physical_Flux_ Euler_2D::physical_flux(const Solution_& cvariable) {
 	return physical_flux(cvariable, pvariable);
 }
 
-
 Euler_2D::Physical_Flux_ Euler_2D::physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable) {
 	const auto rho = conservative_variable.at(0);
 	const auto rhou = conservative_variable.at(1);
@@ -162,6 +181,19 @@ std::vector<Euler_2D::Physical_Flux_> Euler_2D::physical_fluxes(const std::vecto
 	
 	return physical_fluxes;
 }
+
+//Dynamic_Matrix_ Euler_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
+//	const auto [num_eq, num_node] = solution_nodes.size();
+//
+//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);
+//
+//	for (size_t i = 0; i < num_node; ++i) {
+//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
+//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
+//	}
+//
+//	return flux_nodes;
+//}
 
 double Euler_2D::inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector) {
 	const auto oc_u = oc_primitive_variable.at(0);

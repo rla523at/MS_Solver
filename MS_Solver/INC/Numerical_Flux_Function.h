@@ -13,9 +13,15 @@ class LLF : public NFF  // Local Lax Fridrich method
 private:
     static_require(ms::is_governing_equation<Governing_Equation>, "It should be Governing Equation");
 
-    using Space_Vector_     = typename Governing_Equation::Space_Vector_;
-    using Solution_         = typename Governing_Equation::Solution_;
-    using Numerical_Flux_   = Euclidean_Vector<Governing_Equation::num_equation()>;
+    static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
+    static constexpr ushort num_equation_       = Governing_Equation::num_equation();
+
+    using Space_Vector_     = Euclidean_Vector<space_dimension_>;
+    using Solution_         = Euclidean_Vector<num_equation_>;
+    using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
+
+private:
+    LLF(void) = delete;
 
 public:
     static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
@@ -27,9 +33,15 @@ template<>
 class LLF<Euler_2D> : public NFF
 {
 private:
-    using Space_Vector_     = typename Euler_2D::Space_Vector_;
-    using Solution_         = typename Euler_2D::Solution_;
-    using Numerical_Flux_   = Euclidean_Vector<Euler_2D::num_equation()>;
+    static constexpr ushort space_dimension_    = Euler_2D::space_dimension();
+    static constexpr ushort num_equation_       = Euler_2D::num_equation();
+
+    using Space_Vector_     = Euclidean_Vector<space_dimension_>;
+    using Solution_         = Euclidean_Vector<num_equation_>;
+    using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
+
+private:
+    LLF(void) = delete;
 
 public:
     static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);

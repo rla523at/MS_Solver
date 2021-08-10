@@ -2,6 +2,35 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Matrix.h"
 
+TEST(Matrix, operator_plus_1) {
+	std::array<double, 16> ar;
+	ar.fill(1);
+
+	const Matrix<4, 4> m1 = ar;
+	const Matrix<4, 4> m2 = ar;
+	const auto result = m1 + m2;
+
+	std::array<double, 16> ref_val;
+	ref_val.fill(2);
+
+	const Matrix<4, 4> ref = ref_val;
+	EXPECT_EQ(result, ref);
+}
+TEST(Matrix, operator_plus_2) {
+	std::array<double, 36> ar;
+	ar.fill(1);
+
+	const Matrix<6, 6> m1 = ar;
+	const Matrix<6, 6> m2 = ar;
+	const auto result = m1 + m2;
+
+	std::array<double, 36> ref_val;
+	ref_val.fill(2);
+
+	const Matrix<6, 6> ref = ref_val;
+	EXPECT_EQ(result, ref);
+}
+
 GTEST_TEST(Matrix, operator_mv_1) {
 	const Euclidean_Vector v = { 1,2 };
 	const Matrix<2,2> m = { 1,2,3,4 };

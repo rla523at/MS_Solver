@@ -22,7 +22,7 @@ private:
     using Periodic_Boundaries_  = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
     using Inner_Faces_          = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
 
-    using Solution_             = typename Governing_Equation::Solution_;
+    using Solution_             = Euclidean_Vector<num_equation_>;
     using Residual_             = Euclidean_Vector<num_equation_>;
 
 private:

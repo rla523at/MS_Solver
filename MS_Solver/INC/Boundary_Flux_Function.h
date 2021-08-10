@@ -8,10 +8,11 @@ class Boundary_Flux_Function
 protected:
 	static_require(ms::is_governing_equation<Governing_Equation>, "It should be Governing Equation");
 
-	static constexpr size_t num_equation_ = Governing_Equation::num_equation();
+	static constexpr ushort space_dimension_	= Governing_Equation::space_dimension();
+	static constexpr ushort num_equation_		= Governing_Equation::num_equation();
 
-	using Space_Vector_		= typename Governing_Equation::Space_Vector_;
-	using Solution_			= typename Governing_Equation::Solution_;
+	using Space_Vector_		= Euclidean_Vector<space_dimension_>;
+	using Solution_			= Euclidean_Vector<num_equation_>;
 	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
 
 public:
@@ -25,11 +26,12 @@ class Supersonic_Outlet_2D : public Boundary_Flux_Function<Governing_Equation>
 protected:
 	static_require(ms::is_governing_equation<Governing_Equation>, "It should be Governing Equation");
 
-	static constexpr size_t num_equation_ = Governing_Equation::num_equation();
+	static constexpr ushort space_dimension_	= Governing_Equation::space_dimension();
+	static constexpr ushort num_equation_		= Governing_Equation::num_equation();
 
-	using Space_Vector_ = typename Governing_Equation::Space_Vector_;
-	using Solution_ = typename Governing_Equation::Solution_;
-	using Boundary_Flux_ = Euclidean_Vector<num_equation_>;
+	using Space_Vector_		= Euclidean_Vector<space_dimension_>;
+	using Solution_			= Euclidean_Vector<num_equation_>;
+	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
 
 public:
 	Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) override;

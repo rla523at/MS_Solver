@@ -12,7 +12,7 @@ private:
     static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
 
     using This_         = Boundaries_FVM_Base<Governing_Equation>;
-    using Space_Vector_ = Governing_Equation::Space_Vector_;
+    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
 
 private:
     Boundaries_FVM_Base(void) = delete;
@@ -59,7 +59,7 @@ private:
     using Base_             = Boundaries_FVM_Base<Governing_Equation>;
     using This_             = Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>;
     using Space_Vector_     = Euclidean_Vector <space_dimension_>;
-    using Solution_         = typename Governing_Equation::Solution_;
+    using Solution_         = Euclidean_Vector<num_equation_>;
     using Boundary_Flux_    = Euclidean_Vector<num_equation_>;
 
 private:
