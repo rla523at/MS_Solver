@@ -46,19 +46,6 @@ double Dynamic_Matrix::at(const size_t row, const size_t column) const {
 		return this->values_[row * this->num_column_ + column];
 }
 
-
-template <size_t num_row>
-Euclidean_Vector<num_row> Dynamic_Matrix::column(const size_t column_index) const {
-	dynamic_require(this->num_row_ == num_row, "this dynamic matrix should have given row dimension");
-
-	std::array<double, num_row> column_values = { 0 };
-
-	for (size_t i = 0; i < num_row; ++i)
-		column_values[i] = this->at(i, column_index);
-
-	return column_values;
-}
-
 Dynamic_Matrix Dynamic_Matrix::transpose(void) const {
 	auto result = *this;
 	return result.be_transpose();
@@ -159,6 +146,10 @@ std::vector<int> Dynamic_Matrix::PLU_decomposition(void) {
 
 	dynamic_require(0 <= info, "info should be greater than 0 when sucess PLU decomposition");
 	return ipiv;
+}
+
+std::ostream& operator<<(std::ostream& os, const Dynamic_Matrix& m) {
+	return os << m.to_string();
 }
 
 namespace ms {

@@ -92,6 +92,16 @@ TEST(Matrix, column_2) {
 	EXPECT_EQ(result, ref);
 }
 
+TEST(Dynamic_Matrix, change_row_1) {
+	Dynamic_Matrix m(2, 2, { 1,2,3,4 });
+
+	Euclidean_Vector v = { 5,6 };
+	m.change_row(0, v);
+
+	Dynamic_Matrix ref(2, 2, {5, 6, 3, 4});
+	EXPECT_EQ(m, ref);
+}
+
 TEST(Dynamic_Matrix, change_rows_1) {
 	const Matrix<2, 2> m = { 1,2,3,4 };
 

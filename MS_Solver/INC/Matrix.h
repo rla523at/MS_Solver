@@ -72,6 +72,13 @@ private:
 };
 
 
+template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A);
+
+template<size_t num_row, size_t num_column>
+std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m);
+
+
 // Dynamic matrix 
 class Dynamic_Matrix
 {
@@ -111,6 +118,9 @@ public:
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 
 	template <size_t dimension>
+	void change_row(const size_t row_index, const Euclidean_Vector<dimension>& vec);
+
+	template <size_t dimension>
 	void change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec);
 
 	template <size_t num_row, size_t num_column>
@@ -130,12 +140,8 @@ private:
 	std::vector<int> PLU_decomposition(void);
 };
 
-template<size_t num_row, size_t num_column>
-Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A);
 
-template<size_t num_row, size_t num_column>
-std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m);
-
+std::ostream& operator<<(std::ostream& os, const Dynamic_Matrix& m);
 
 //template definition part
 namespace ms {
@@ -325,6 +331,27 @@ std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m)
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A) {
 	return A * scalar;
+}
+
+template <size_t num_row>
+Euclidean_Vector<num_row> Dynamic_Matrix::column(const size_t column_index) const {
+	dynamic_require(this->num_row_ == num_row, "this dynamic matrix should have given row dimension");
+
+	std::array<double, num_row> column_values = { 0 };
+
+	for (size_t i = 0; i < num_row; ++i)
+		column_values[i] = this->at(i, column_index);
+
+	return column_values;
+}
+
+template <size_t dimension>
+void Dynamic_Matrix::change_row(const size_t row_index, const Euclidean_Vector<dimension>& vec) {
+	dynamic_require(row_index < this->num_row_,		"column idnex can not exceed number of column");
+	dynamic_require(this->num_column_ == dimension, "vector dimension should be matched with number of column");
+
+	const auto jump_index = row_index * this->num_column_;
+	std::copy(vec.begin(), vec.end(), this->values_.begin() + jump_index);
 }
 
 template <size_t dimension>

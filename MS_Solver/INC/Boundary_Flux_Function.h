@@ -16,7 +16,7 @@ protected:
 	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
 
 public:
-	virtual Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) abstract;
+	virtual Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const abstract;
 };
 
 
@@ -34,13 +34,13 @@ protected:
 	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
 
 public:
-	Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) override;
+	Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override;
 };
 
 
 class Slip_Wall_2D : public Boundary_Flux_Function<Euler_2D>
 {
-	Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) override;
+	Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override;
 };
 
 
@@ -56,9 +56,9 @@ public:
 
 //template definition part
 template <typename Governing_Equation> 
-Supersonic_Outlet_2D<Governing_Equation>::Boundary_Flux_ Supersonic_Outlet_2D<Governing_Equation>::calculate(const Solution_& solution, const Space_Vector_& normal) {
-		const auto oc_physical_flux = Governing_Equation::physical_flux(solution);
-		return oc_physical_flux * normal;
+Supersonic_Outlet_2D<Governing_Equation>::Boundary_Flux_ Supersonic_Outlet_2D<Governing_Equation>::calculate(const Solution_& solution, const Space_Vector_& normal) const {
+	const auto oc_physical_flux = Governing_Equation::physical_flux(solution);
+	return oc_physical_flux * normal;
 }
 
 

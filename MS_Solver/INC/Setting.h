@@ -43,7 +43,7 @@
 
 
 // Mode 
-	#define POST_AI_DATA_MODE
+	//#define POST_AI_DATA_MODE
 	//#define ERROR_CALCULATION_MODE
 
 // User Define Setting

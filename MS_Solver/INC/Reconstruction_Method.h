@@ -145,7 +145,7 @@ private:
     static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension, solution_order_);
 
 private:
-    inline static std::vector<Vector_Function<Polynomial<space_dimension>, num_basis_>> basis_functions_;
+    inline static std::vector<Vector_Function<Polynomial<space_dimension>, num_basis_>> set_of_basis_functions_;
 
 private:
     Polynomial_Reconstruction(void) = delete;
@@ -153,6 +153,7 @@ private:
 public:
     static void initialize(const Grid<space_dimension>& grid);
     static auto calculate_set_of_transposed_gradient_basis(void);
+    static auto calculate_basis_node(const uint cell_index, const Space_Vector_& node);
     static Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes);
     static double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node);
     static std::vector<Dynamic_Matrix> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes);
@@ -475,13 +476,13 @@ void Polynomial_Reconstruction<space_dimension, solution_order_>::initialize(con
     const auto& cell_elements = grid.elements.cell_elements;
 
     const auto num_cell = cell_elements.size();
-    This_::basis_functions_.reserve(num_cell);
+    This_::set_of_basis_functions_.reserve(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& cell_element = cell_elements[i];
         const auto& cell_geometry = cell_element.geometry_;
 
-        This_::basis_functions_.push_back(cell_geometry.orthonormal_basis_function<solution_order_>());
+        This_::set_of_basis_functions_.push_back(cell_geometry.orthonormal_basis_function<solution_order_>());
     }    
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -489,14 +490,14 @@ void Polynomial_Reconstruction<space_dimension, solution_order_>::initialize(con
 }
 
 template <ushort space_dimension, ushort solution_order_>
-static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_transposed_gradient_basis(void) {
-    const auto num_cell = This_::basis_functions_.size();
+auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_transposed_gradient_basis(void) {
+    const auto num_cell = This_::set_of_basis_functions_.size();
     
     std::vector<Matrix_Function<Polynomial<space_dimension>, space_dimension, This_::num_basis_>> transposed_basis_Jacobians(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
         auto& transposed_jacobian_basis = transposed_basis_Jacobians[i];
-        const auto& basis_function = This_::basis_functions_[i];
+        const auto& basis_function = This_::set_of_basis_functions_[i];
 
         for (ushort j = 0; j < This_::num_basis_; ++j)
             transposed_jacobian_basis.change_column(j, basis_function[j].gradient());
@@ -505,9 +506,33 @@ static auto Polynomial_Reconstruction<space_dimension, solution_order_>::calcula
     return transposed_basis_Jacobians;
 }
 
+//template <ushort space_dimension, ushort solution_order_>
+//Euclidean_Vector<Polynomial_Reconstruction<space_dimension, solution_order_>::num_basis_> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_node(const uint cell_index, const Space_Vector_& node) {
+///*    const auto& basis_functions = This_::set_of_basis_functions_[cell_index];
+//    
+//    std::array<double, This_::num_basis_> values;
+//    for (size_t i = 0; i < This_::num_basis_; ++i)
+//        values[i] = basis_functions[i](node);
+//
+//    return values*/;
+//}
+
+template <ushort space_dimension, ushort solution_order_>
+auto Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_node(const uint cell_index, const Space_Vector_& node) {
+    const auto& basis_functions = This_::set_of_basis_functions_[cell_index];
+
+    std::array<double, This_::num_basis_> values;
+    for (size_t i = 0; i < This_::num_basis_; ++i)
+        values[i] = basis_functions[i](node);
+
+    Euclidean_Vector<This_::num_basis_> basis_value = values;
+    return basis_value;
+}
+
+
 template <ushort space_dimension, ushort solution_order_>
 Dynamic_Matrix Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) {
-    const auto& basis_function = This_::basis_functions_[cell_index];
+    const auto& basis_function = This_::set_of_basis_functions_[cell_index];
 
     const auto num_node = nodes.size();
 
@@ -520,7 +545,7 @@ Dynamic_Matrix Polynomial_Reconstruction<space_dimension, solution_order_>::calc
 
 template <ushort space_dimension, ushort solution_order_>
 double Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node) {
-    const auto& basis_function = This_::basis_functions_[cell_index];
+    const auto& basis_function = This_::set_of_basis_functions_[cell_index];
     const auto& P0_basis_function = basis_function[0];
 
     return P0_basis_function(center_node);
@@ -528,7 +553,7 @@ double Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_P0
 
 template <ushort space_dimension, ushort solution_order_>
 std::vector<Dynamic_Matrix> Polynomial_Reconstruction<space_dimension, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) {
-    const auto num_cell = This_::basis_functions_.size();
+    const auto num_cell = This_::set_of_basis_functions_.size();
 
     dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
 
@@ -548,7 +573,7 @@ std::vector<double> Polynomial_Reconstruction<space_dimension, solution_order_>:
     std::vector<double> P0_basis_values(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& basis_function = This_::basis_functions_[i];
+        const auto& basis_function = This_::set_of_basis_functions_[i];
         const auto& P0_basis_function = basis_function[0];
         const auto& cell_center = center_nodes[i];
 

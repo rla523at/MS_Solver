@@ -43,6 +43,8 @@ public:
 	double operator[](const size_t position) const;
 
 	double at(const size_t position) const;
+	auto begin(void) const;
+	auto end(void) const;
 	static constexpr size_t dimension(void);
 	double inner_product(const Euclidean_Vector& y) const;
 	double L1_norm(void) const;
@@ -195,6 +197,16 @@ template <size_t dimension_>
 double Euclidean_Vector<dimension_>::at(const size_t position) const {
 	dynamic_require(position <= dimension_, "Position should be less than dimension");
 	return this->values_[position];
+}
+
+template <size_t dimension_>
+auto Euclidean_Vector<dimension_>::begin(void) const {
+	return this->values_.cbegin();
+}
+
+template <size_t dimension_>
+auto Euclidean_Vector<dimension_>::end(void) const {
+	return this->values_.cend();
 }
 
 template <size_t dimension_>
