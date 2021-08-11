@@ -21,3 +21,11 @@ class Inner_Faces<FVM, Reconstruction_Method, space_dimension> : public Inner_Fa
 private:
     Inner_Faces(void) = delete;
 };
+
+
+template<typename Reconstruction_Method, size_t space_dimension>
+class Inner_Faces<HOM, Reconstruction_Method, space_dimension> : public Inner_Faces_HOM<Reconstruction_Method, space_dimension>
+{
+private:
+    Inner_Faces(void) = delete;
+};

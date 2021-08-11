@@ -191,6 +191,7 @@
     <ClInclude Include="INC\Inital_Condition.h" />
     <ClInclude Include="INC\Inner_Faces.h" />
     <ClInclude Include="INC\Inner_Faces_FVM.h" />
+    <ClInclude Include="INC\Inner_Faces_HOM.h" />
     <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\Numerical_Flux_Function.h" />
