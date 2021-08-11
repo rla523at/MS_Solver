@@ -139,7 +139,7 @@ public:
 	Vector_Function(std::vector<Function>&& functions) : functions_(std::move(functions)) {};
 	Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
 
-	Dynamic_Euclidean_Vector_ operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
+	Dynamic_Euclidean_Vector operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
 		const auto range_dimension_ = this->range_dimension();
 		
 		std::vector<double> result(range_dimension_);

@@ -110,7 +110,7 @@ GTEST_TEST(Dynamic_Vector_Function, operator_call_1)
 	Euclidean_Vector v = { 1,1 };
 	const auto result = vf(v);
 
-	Dynamic_Euclidean_Vector_ ref = { 2,3 };
+	Dynamic_Euclidean_Vector ref = { 2,3 };
 	EXPECT_EQ(ref, result);
 }
 

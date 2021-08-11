@@ -15,6 +15,7 @@ namespace ms {
 	inline constexpr ushort blas_mv_criteria = 50;
 
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
+	void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
 
 	template<size_t num_row, size_t num_column>
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);	
@@ -26,6 +27,9 @@ template<size_t num_row, size_t num_column>
 class Matrix
 {
 private:
+	template<size_t num_other_row, size_t num_other_column>
+	friend class Matrix;
+
 	friend Dynamic_Matrix;
 
 	template<size_t num_row, size_t num_column>
@@ -37,13 +41,16 @@ private:
 	std::array<double, num_value_> values_ = { 0 };
 
 public:
-	Matrix(void) = default;
+	Matrix(void) = default;			
 	Matrix(const std::array<double, num_value_>& values) : values_{ values } {};
 	Matrix(const Dynamic_Matrix& dynamic_matrix);
 	template <typename... Args>
 	Matrix(Args... args);
+	static Matrix diagonal_matrix(const std::array<double, num_row>& values);
+
 
 	Matrix& operator+=(const Matrix& A);
+	Matrix& operator*=(const double scalar);
 
 	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
@@ -51,14 +58,17 @@ public:
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
 	bool operator==(const Matrix & A) const;
 
+	template <size_t other_num_column>
+	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;
+
 	double at(const size_t row_index, const size_t column_index) const;
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;
 
 	//void change_column(const size_t column_index, const Euclidean_Vector<num_row>& x);
 
-//private:
-	//double& at(const size_t row_index, const size_t column_index);
+private:
+	double& at(const size_t row_index, const size_t column_index);
 };
 
 
@@ -69,7 +79,8 @@ private:
 	template<size_t num_row, size_t num_column>
 	friend class Matrix;
 
-	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* ptr);
+	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* ptr);	
+	friend void ms::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
 
 private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -94,7 +105,7 @@ public:
 
 	Dynamic_Matrix& be_transpose(void);
 	Dynamic_Matrix& be_inverse(void);
-	void change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec);
+	void change_column(const size_t column_index, const Dynamic_Euclidean_Vector& vec);
 
 	template <size_t num_row>
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
@@ -135,6 +146,16 @@ namespace ms {
 }
 
 template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column> Matrix<num_row, num_column>::diagonal_matrix(const std::array<double, num_row>& values) {
+	static_require(num_row == num_column, "It should be square matrix");
+	Matrix result;
+	for (size_t i = 0; i < num_row; ++i)
+		result.at(i, i) = values[i];
+
+	return result;
+}
+
+template<size_t num_row, size_t num_column>
 Matrix<num_row,num_column>::Matrix(const Dynamic_Matrix& dynamic_matrix) {
 	dynamic_require(num_row == dynamic_matrix.num_row_ && num_column == dynamic_matrix.num_column_, "both matrix should be same size");
 	std::copy(dynamic_matrix.values_.begin(), dynamic_matrix.values_.end(), this->values_.begin());
@@ -160,12 +181,22 @@ Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator+=(const Matri
 }
 
 template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator*=(const double scalar) {
+
+	if constexpr (this->num_value_ < ms::blas_dscal_criteria) {
+		for (size_t i = 0; i < num_row * num_column; ++i)
+			this->values_[i] *= scalar;
+	}
+	else
+		cblas_dscal(this->num_value_, scalar, this->values_.data(), 1);
+
+	return *this;
+}
+
+template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> Matrix<num_row, num_column>::operator+(const Matrix& A) const {	
 	Matrix result = *this;
 	return result += A;
-	//for (size_t i = 0; i < num_row * num_column; ++i)
-	//	result.values_[i] += A.values_[i];
-	//return result;
 }
 
 template<size_t num_row, size_t num_column>
@@ -200,6 +231,27 @@ Dynamic_Matrix Matrix<num_row, num_column>::operator*(const Dynamic_Matrix& B) c
 
 	Dynamic_Matrix result(m, n);
 	cblas_dgemm(layout, transA, transB, m, n, k, alpha, this->values_.data(), lda, B.values_.data(), ldb, beta, result.values_.data(), ldc);
+
+	return result;
+}
+
+template <size_t num_row, size_t num_column>
+template <size_t other_num_column>
+Matrix<num_row, other_num_column> Matrix<num_row, num_column>::operator*(const Matrix<num_column, other_num_column>& A) const {
+	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+	const auto transA = CBLAS_TRANSPOSE::CblasNoTrans;
+	const auto transB = CBLAS_TRANSPOSE::CblasNoTrans;
+	const auto m = static_cast<MKL_INT>(num_row);
+	const auto n = static_cast<MKL_INT>(other_num_column);
+	const auto k = static_cast<MKL_INT>(num_column);
+	const double alpha = 1;
+	const MKL_INT lda = static_cast<MKL_INT>(num_column);
+	const MKL_INT ldb = static_cast<MKL_INT>(other_num_column);
+	const double beta = 0;
+	const MKL_INT ldc = n;
+
+	Matrix<num_row, other_num_column> result;
+	cblas_dgemm(layout, transA, transB, m, n, k, alpha, this->values_.data(), lda, A.values_.data(), ldb, beta, result.values_.data(), ldc);
 
 	return result;
 }
@@ -257,11 +309,13 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 //		this->at(i, column_index) = x[i];
 //}
 //
-//template<size_t num_row, size_t num_column>
-//double& Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) {
-//	dynamic_require(row_index < num_row && column_index < num_column, "index can not exceed given range");
-//	return this->values_[row_index * num_column + column_index];
-//}
+
+template<size_t num_row, size_t num_column>
+double& Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) {
+	// we should range check before call private at!
+	// dynamic_require(row_index < num_row && column_index < num_column, "index can not exceed given range"); 
+	return this->values_[row_index * num_column + column_index];
+}
 
 template<size_t num_row, size_t num_column>
 std::ostream& operator<<(std::ostream& os, const Matrix<num_row, num_column>& m) {

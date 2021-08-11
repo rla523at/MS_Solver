@@ -2,22 +2,22 @@
 //Setting
 #define DIMENSION						2
 #define GRID_FILE_TYPE					Gmsh
-#define GRID_FILE_NAME					"Shocktube_OrthoTri_300x30"
-#define GOVERNING_EQUATION_NAME			Euler
-#define INITIAL_CONDITION_NAME			Modified_SOD
+#define GRID_FILE_NAME					"Quad50"
+#define GOVERNING_EQUATION_NAME			Linear_Advection
+#define INITIAL_CONDITION_NAME			Square_Wave
 #define SPATIAL_DISCRETE_METHOD			FVM
 #define RECONSTRUCTION_ORDER			1 
 #define RECONSTRUCTION_TYPE				MLP_u1
-#define GRADIENT_METHOD					Face_Least_Square
+#define GRADIENT_METHOD					Vertex_Least_Square
 #define NUMERICAL_FLUX_NAME				LLF
 #define TIME_INTEGRAL_METHOD			SSPRK33
 #define TIME_STEP_METHOD_NAME			CFL
 #define TIME_STEP_CONSTANT				0.9 
 #define END_CONDITION_NAME				Time
-#define	END_CONDITION_CONSTANT			0.2
+#define	END_CONDITION_CONSTANT			2.0
 #define POST_ORDER						0
 #define POST_CONDITION_NAME				Time
-#define POST_CONDITION_CONSTANT			0.02
+#define POST_CONDITION_CONSTANT			0.2
 #define PATH							"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" + GRID_FILE_NAME + "/"
 
 
@@ -43,7 +43,7 @@
 
 
 // Mode 
-	//#define POST_AI_DATA_MODE
+	#define POST_AI_DATA_MODE
 	//#define ERROR_CALCULATION_MODE
 
 // User Define Setting

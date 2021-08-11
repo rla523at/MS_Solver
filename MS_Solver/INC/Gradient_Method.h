@@ -5,8 +5,9 @@ template <ushort num_equation_, ushort space_dimension_>
 class Least_Square_Base
 {
 private:    
-    using Solution_ = Euclidean_Vector<num_equation_>;
-    using This_     = Least_Square_Base<num_equation_, space_dimension_>;
+    using This_                 = Least_Square_Base<num_equation_, space_dimension_>;
+    using Solution_             = Euclidean_Vector<num_equation_>;
+    using Solution_gradinet_    = Matrix<num_equation_, space_dimension_>;
 
 protected:
     inline static std::vector<std::vector<size_t>> near_cell_indexes_set_;
@@ -18,7 +19,7 @@ private:
 public:
     static constexpr ushort space_dimension(void) { return space_dimension_; };
     static constexpr ushort num_equation(void) { return num_equation_; };
-    static std::vector<Dynamic_Matrix> calculate_solution_gradients(const std::vector<Solution_>& solutions);
+    static std::vector<Solution_gradinet_> calculate_solution_gradients(const std::vector<Solution_>& solutions);
 
 private:
     static std::vector<Dynamic_Matrix> calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions);
@@ -36,7 +37,6 @@ private:
 
 public:
     static void initialize(const Grid<space_dimension_>& grid);
-
     static std::string name(void) { return "Vertex_Least_Square"; };
 };
 
@@ -60,16 +60,14 @@ public:
 
 //template definition part
 template <ushort num_equation_, ushort space_dimension_>
-std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
+std::vector<Matrix<num_equation_, space_dimension_>> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions) {
     const auto num_solution = solutions.size();
 
-    std::vector<Dynamic_Matrix> solution_gradients;
-    solution_gradients.reserve(num_solution);
+    std::vector<Solution_gradinet_> solution_gradients(num_solution);
 
     const auto solution_delta_matrixes = This_::calculate_solution_delta_matrixes(solutions);
-
     for (size_t i = 0; i < num_solution; ++i)
-        solution_gradients.push_back(solution_delta_matrixes[i] * This_::least_square_matrixes_[i]);
+        ms::gemm(solution_delta_matrixes[i], This_::least_square_matrixes_[i], solution_gradients[i]);
 
     return solution_gradients;
 }
@@ -107,8 +105,6 @@ void Vertex_Least_Square<num_equation_, space_dimension_>::initialize(const Grid
 
     auto set_of_vertex_share_cell_indexes = grid.calculate_set_of_vertex_share_cell_indexes();
     for (size_t i = 0; i < num_cell; ++i) {
-        //least square matrix        
-
         const auto& vertex_share_cell_indexes = set_of_vertex_share_cell_indexes[i];
         const auto num_vertex_share_cell = vertex_share_cell_indexes.size();
 

@@ -111,7 +111,7 @@ Dynamic_Matrix& Dynamic_Matrix::be_inverse(void) {
 	return *this;
 }
 
-void Dynamic_Matrix::change_column(const size_t column_index, const Dynamic_Euclidean_Vector_& vec) {
+void Dynamic_Matrix::change_column(const size_t column_index, const Dynamic_Euclidean_Vector& vec) {
 	dynamic_require(column_index < this->num_column_, "column idnex can not exceed number of column");
 	dynamic_require(this->num_row_ == vec.dimension(), "vector dimension should be matched with number of column");
 
@@ -165,18 +165,33 @@ namespace ms {
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr) {
 		dynamic_require(A.num_column_ == B.num_row_, "dimension should be matched for matrix multiplication");
 
-		const CBLAS_LAYOUT layout = CBLAS_LAYOUT::CblasRowMajor;
-		const CBLAS_TRANSPOSE transA = A.transpose_type_;
-		const CBLAS_TRANSPOSE transB = B.transpose_type_;
-		const MKL_INT m = static_cast<MKL_INT>(A.num_row_);
-		const MKL_INT n = static_cast<MKL_INT>(B.num_column_);
-		const MKL_INT k = static_cast<MKL_INT>(A.num_column_);
-		const double alpha = 1;
-		const MKL_INT lda = static_cast<MKL_INT>(A.leading_dimension());
-		const MKL_INT ldb = static_cast<MKL_INT>(B.leading_dimension());
-		const double beta = 0;
-		const MKL_INT ldc = n;
+		const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+		const auto transA = A.transpose_type_;
+		const auto transB = B.transpose_type_;
+		const auto m = static_cast<MKL_INT>(A.num_row_);
+		const auto n = static_cast<MKL_INT>(B.num_column_);
+		const auto k = static_cast<MKL_INT>(A.num_column_);
+		const auto alpha = 1.0;
+		const auto lda = static_cast<MKL_INT>(A.leading_dimension());
+		const auto ldb = static_cast<MKL_INT>(B.leading_dimension());
+		const auto beta = 0.0;
+		const auto ldc = n;
 
 		cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.values_.data(), lda, B.values_.data(), ldb, beta, output_ptr, ldc);
 	}
+
+	void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+		const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+		const auto transA = A.transpose_type_;
+		const auto m = static_cast<MKL_INT>(A.num_row_);
+		const auto n = static_cast<MKL_INT>(A.num_column_);
+		const auto alpha = 1.0;
+		const auto lda = static_cast<MKL_INT>(A.leading_dimension());		
+		const auto incx = 1;
+		const auto beta = 1.0;
+		const auto incy = 1;
+
+		cblas_dgemv(layout, transA, m, n, alpha, A.values_.data(), lda, v1.data(), incx, beta, v2.data(), incy);
+	}
+
 }
