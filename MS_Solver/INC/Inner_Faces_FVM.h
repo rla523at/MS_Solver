@@ -25,31 +25,40 @@ public:
 
 
 //FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
-template <ushort space_dimension>
-class Inner_Faces_FVM_Constant : public Inner_Faces_FVM_Base<space_dimension>
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+class Inner_Faces_FVM_Constant : public Inner_Faces_FVM_Base<Numerical_Flux_Function::space_dimension()>
 {
 private:
-    using Base_         = Inner_Faces_FVM_Base<space_dimension>;
-    using Space_Vector_ = Euclidean_Vector<space_dimension>;
+    static constexpr ushort space_dimension_    = Numerical_Flux_Function::space_dimension();
+    static constexpr ushort num_equation_       = Numerical_Flux_Function::num_equation();
+
+    using This_         = Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
+    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
+    using Solution_     = Euclidean_Vector<This_::num_equation_>;
+    using Residual_     = Euclidean_Vector< This_::num_equation_>;
 
 private:
     Inner_Faces_FVM_Constant(void) = delete;
 
-public:
-    template<typename Numerical_Flux_Function, typename Residual, typename Solution>
-    static void calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions);
+public:    
+    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions);
 };
 
 
 
 //FVM이고 Linear Reconstruction이면 공통으로 사용하는 variable & Method
-template <typename Reconstruction_Method, ushort space_dimension>
-class Inner_Faces_FVM_Linear : public Inner_Faces_FVM_Base<space_dimension>
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+class Inner_Faces_FVM_Linear : public Inner_Faces_FVM_Base<Numerical_Flux_Function::space_dimension()>
 {
 private:
-    using This_         = Inner_Faces_FVM_Linear<Reconstruction_Method, space_dimension>;
-    using Base_         = Inner_Faces_FVM_Base<space_dimension>;
-    using Space_Vector_ = Euclidean_Vector<space_dimension>;
+    static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
+    static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
+
+    using Base_         = Inner_Faces_FVM_Base<This_::space_dimension_>;
+    using This_         = Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
+    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
+    using Solution_     = Euclidean_Vector<This_::num_equation_>;
+    using Residual_     = Euclidean_Vector< This_::num_equation_>;
 
 protected:
     inline static std::vector<std::pair<Space_Vector_, Space_Vector_>> oc_nc_to_face_vector_pairs_;
@@ -58,10 +67,8 @@ private:
     Inner_Faces_FVM_Linear(void) = delete;
 
 public:
-    static void initialize(Grid<space_dimension>&& grid);
-
-    template<typename Numerical_Flux_Function, size_t num_equation>
-    static void calculate_RHS(std::vector<Euclidean_Vector<num_equation>>& RHS, const std::vector<Euclidean_Vector<num_equation>>& solutions);
+    static void initialize(Grid<space_dimension_>&& grid);
+    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions);
 };
 
 
@@ -97,34 +104,33 @@ void Inner_Faces_FVM_Base<space_dimension>::initialize(Grid<space_dimension>&& g
 }
 
 
-template <ushort space_dimension>
-template<typename Numerical_Flux_Function, typename Residual, typename Solution>
-void Inner_Faces_FVM_Constant<space_dimension>::calculate_RHS(std::vector<Residual>& RHS, const std::vector<Solution>& solutions) {    
-    const auto num_inner_face = Base_::normals_.size();
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
+    const auto num_inner_face = This_::normals_.size();
 
-    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, Base_::normals_, Base_::oc_nc_index_pairs_);
+    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, This_::normals_, This_::oc_nc_index_pairs_);
     
     for (size_t i = 0; i < num_inner_face; ++i) {
-        const auto [oc_index, nc_index] = Base_::oc_nc_index_pairs_[i];
-        const auto delta_RHS = Base_::areas_[i] * numerical_fluxes[i];
+        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
+        const auto delta_RHS = This_::areas_[i] * numerical_fluxes[i];
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }
 }
 
 
-template <typename Reconstruction_Method, ushort space_dimension>
-void Inner_Faces_FVM_Linear<Reconstruction_Method, space_dimension>::initialize(Grid<space_dimension>&& grid) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::initialize(Grid<space_dimension_>&& grid) {
     SET_TIME_POINT;
 
     Base_::initialize(std::move(grid));
 
-    const auto num_inner_face = Base_::normals_.size();
+    const auto num_inner_face = This_::normals_.size();
     This_::oc_nc_to_face_vector_pairs_.reserve(num_inner_face);
 
     const auto& cell_elements = grid.elements.cell_elements;
     for (size_t i = 0; i < num_inner_face; ++i) {
-        const auto [oc_index, nc_index] = Base_::oc_nc_index_pairs_[i];
+        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
 
         const auto& oc_geometry = cell_elements[oc_index].geometry_;
         const auto& nc_geometry = cell_elements[nc_index].geometry_;
@@ -145,15 +151,14 @@ void Inner_Faces_FVM_Linear<Reconstruction_Method, space_dimension>::initialize(
 };
 
 
-template <typename Reconstruction_Method, ushort space_dimension>
-template <typename Numerical_Flux_Function, size_t num_equation>
-void Inner_Faces_FVM_Linear<Reconstruction_Method, space_dimension>::calculate_RHS(std::vector<Euclidean_Vector<num_equation>>& RHS, const std::vector<Euclidean_Vector<num_equation>>& solutions) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
     const auto& solution_gradients = Reconstruction_Method::get_solution_gradients();
     
-    const auto num_inner_face = Base_::normals_.size();
+    const auto num_inner_face = This_::normals_.size();
 
     for (size_t i = 0; i < num_inner_face; ++i) {
-        const auto [oc_index, nc_index] = Base_::oc_nc_index_pairs_[i];
+        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
         const auto& oc_solution = solutions[oc_index];
         const auto& nc_solution = solutions[nc_index];
 
@@ -164,10 +169,10 @@ void Inner_Faces_FVM_Linear<Reconstruction_Method, space_dimension>::calculate_R
 
         const auto oc_side_solution = oc_solution + oc_solution_gradient * oc_to_face_vector;
         const auto nc_side_solution = nc_solution + nc_solution_gradient * nc_to_face_vector;
-        const auto& inner_face_normal = Base_::normals_[i];
+        const auto& inner_face_normal = This_::normals_[i];
 
         const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, inner_face_normal);
-        const auto delta_RHS = Base_::areas_[i] * numerical_flux;
+        const auto delta_RHS = This_::areas_[i] * numerical_flux;
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }

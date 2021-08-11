@@ -19,8 +19,8 @@ private:
 
     using Boundaries_           = Boundaries<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
     using Cells_                = Cells<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
-    using Periodic_Boundaries_  = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
-    using Inner_Faces_          = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, space_dimension_>;
+    using Periodic_Boundaries_  = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
+    using Inner_Faces_          = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
 
     using Solution_             = Euclidean_Vector<num_equation_>;
     using Residual_             = Euclidean_Vector<num_equation_>;

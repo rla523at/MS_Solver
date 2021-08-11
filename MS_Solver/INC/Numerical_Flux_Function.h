@@ -16,6 +16,7 @@ private:
     static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
     static constexpr ushort num_equation_       = Governing_Equation::num_equation();
 
+    using This_             = LLF<Governing_Equation>;
     using Space_Vector_     = Euclidean_Vector<space_dimension_>;
     using Solution_         = Euclidean_Vector<num_equation_>;
     using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
@@ -24,6 +25,8 @@ private:
     LLF(void) = delete;
 
 public:
+    static constexpr ushort space_dimension(void) { This_::space_dimension_; };
+    static constexpr ushort num_equation(void) { This_::num_equation_; };
     static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
     static auto calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal);
 };
@@ -36,6 +39,7 @@ private:
     static constexpr ushort space_dimension_    = Euler_2D::space_dimension();
     static constexpr ushort num_equation_       = Euler_2D::num_equation();
 
+    using This_             = LLF<Euler_2D>;
     using Space_Vector_     = Euclidean_Vector<space_dimension_>;
     using Solution_         = Euclidean_Vector<num_equation_>;
     using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
@@ -44,6 +48,8 @@ private:
     LLF(void) = delete;
 
 public:
+    static constexpr ushort space_dimension(void) { This_::space_dimension_; };
+    static constexpr ushort num_equation(void) { This_::num_equation_; };
     static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
     static Numerical_Flux_ calculate(const Solution_& oc_side_cvariable, const Solution_& nc_side_cvariable, const Space_Vector_& normal);
 };

@@ -13,12 +13,10 @@ private:
     static constexpr ushort num_equation_       = Governing_Equation::num_equation();
     static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
 
-
     using This_                 = Boundaries_HOM<Governing_Equation, Reconstruction_Method>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
     using Residual_             = Matrix<num_equation_, num_basis_>;
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
-
 
 private:
     Boundaries_HOM(void) = delete;
@@ -55,6 +53,7 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
     This_::basis_weights_.reserve(num_boundary);
 
     constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
+
     for (uint i = 0; i < num_boundary; ++i) {
         const auto& boundary_element = boundary_elements[i];
         const auto& boundary_geometry = boundary_element.geometry_;
@@ -112,130 +111,3 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         ms::gemm(numerical_flux_quadrature, basis_weights_[i], RHS[oc_index]);
     }
 }
-
-
-
-
-
-
-
-////FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
-//template <typename Governing_Equation>
-//class Boundaries_FVM_Constant : public Boundaries_HOM_Base<Governing_Equation>
-//{
-//private:
-//    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
-//    static constexpr size_t num_equation_ = Governing_Equation::num_equation();
-//
-//    using Base_ = Boundaries_HOM_Base<Governing_Equation>;
-//    using Solution_ = typename Governing_Equation::Solution_;
-//    using Boundary_Flux_ = Euclidean_Vector<num_equation_>;
-//
-//private:
-//    Boundaries_FVM_Constant(void) = delete;
-//
-//public:
-//    static void calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions);
-//};
-//
-//
-////FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
-//template <typename Governing_Equation, typename Reconstruction_Method>
-//class Boundaries_FVM_Linear : public Boundaries_HOM_Base<Governing_Equation>
-//{
-//private:
-//    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
-//    static constexpr size_t num_equation_ = Governing_Equation::num_equation();
-//
-//    using Base_ = Boundaries_HOM_Base<Governing_Equation>;
-//    using This_ = Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>;
-//    using Space_Vector_ = Euclidean_Vector <space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_equation_>;
-//    using Boundary_Flux_ = Euclidean_Vector<num_equation_>;
-//
-//private:
-//    inline static std::vector<Space_Vector_> oc_to_boundary_vectors_;
-//
-//private:
-//    Boundaries_FVM_Linear(void) = delete;
-//
-//public:
-//    static void initialize(Grid<space_dimension_>&& grid);
-//    static void calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions);
-//};
-//
-
-
-
-//
-//template <typename Governing_Equation>
-//void Boundaries_FVM_Constant<Governing_Equation>::calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions) {
-//    const auto num_boundary = Base_::normals_.size();
-//
-//    for (size_t i = 0; i < num_boundary; ++i) {
-//        const auto& boundary_flux_function = Base_::boundary_flux_functions_.at(i);
-//
-//        const auto oc_index = Base_::oc_indexes_[i];
-//        const auto& normal = Base_::normals_[i];
-//
-//        const auto boundary_flux = boundary_flux_function->calculate(solutions[oc_index], normal);
-//        const auto delta_RHS = Base_::areas_[i] * boundary_flux;
-//
-//        RHS[oc_index] -= delta_RHS;
-//    }
-//}
-//
-//template <typename Governing_Equation, typename Reconstruction_Method>
-//void Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>::initialize(Grid<space_dimension_>&& grid) {
-//    SET_TIME_POINT;
-//
-//    Base_::initialize(std::move(grid));
-//
-//    const auto num_boundary = Base_::normals_.size();
-//    This_::oc_to_boundary_vectors_.reserve(num_boundary);
-//
-//    const auto& cell_elements = grid.elements.cell_elements;
-//    const auto& boundary_elements = grid.elements.boundary_elements;
-//
-//    for (size_t i = 0; i < num_boundary; ++i) {
-//        const auto oc_index = Base_::oc_indexes_[i];
-//        const auto& oc_geometry = cell_elements[oc_index].geometry_;
-//        const auto& boundary_geometry = boundary_elements[i].geometry_;
-//
-//        const auto oc_center = oc_geometry.center_node();
-//        const auto boundary_center = boundary_geometry.center_node();
-//
-//        const auto oc_to_face_vector = boundary_center - oc_center;
-//
-//        This_::oc_to_boundary_vectors_.push_back(oc_to_face_vector);
-//    }
-//
-//    Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-//    Log::print();
-//};
-//
-//template <typename Governing_Equation, typename Reconstruction_Method>
-//void Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions) {
-//    const auto& solution_gradients = Reconstruction_Method::get_solution_gradients();
-//
-//    const auto num_boundary = Base_::normals_.size();
-//
-//    for (size_t i = 0; i < num_boundary; ++i) {
-//        const auto& boundary_flux_function = Base_::boundary_flux_functions_.at(i);
-//        const auto& normal = Base_::normals_.at(i);
-//
-//        const auto oc_index = Base_::oc_indexes_.at(i);
-//
-//        const auto& oc_solution = solutions[oc_index];
-//        const auto& oc_solution_gradient = solution_gradients[oc_index];
-//        const auto& oc_to_face_vector = This_::oc_to_boundary_vectors_[i];
-//
-//        const auto oc_side_solution = oc_solution + oc_solution_gradient * oc_to_face_vector;
-//
-//        const auto boundary_flux = boundary_flux_function->calculate(oc_side_solution, normal);
-//
-//        const auto delta_RHS = Base_::areas_[i] * boundary_flux;
-//
-//        RHS[oc_index] -= delta_RHS;
-//    }
-//}
