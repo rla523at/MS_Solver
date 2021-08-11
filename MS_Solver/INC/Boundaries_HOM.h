@@ -48,14 +48,14 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
     const auto& cell_elements = grid.elements.cell_elements;
     const auto& boundary_elements = grid.elements.boundary_elements;
 
-    const auto num_boundaries = boundary_elements.size();
-    This_::boundary_flux_functions_.reserve(num_boundaries);
-    This_::set_of_oc_side_basis_qnodes_.reserve(num_boundaries);
-    This_::set_of_normals_.reserve(num_boundaries);
-    This_::basis_weights_.reserve(num_boundaries);
+    const auto num_boundary = boundary_elements.size();
+    This_::boundary_flux_functions_.reserve(num_boundary);
+    This_::set_of_oc_side_basis_qnodes_.reserve(num_boundary);
+    This_::set_of_normals_.reserve(num_boundary);
+    This_::basis_weights_.reserve(num_boundary);
 
     constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
-    for (uint i = 0; i < num_boundaries; ++i) {
+    for (uint i = 0; i < num_boundary; ++i) {
         const auto& boundary_element = boundary_elements[i];
         const auto& boundary_geometry = boundary_element.geometry_;
 
@@ -96,16 +96,20 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         const auto oc_index = This_::oc_indexes_[i];
 
         const auto& solution_coefficient = solution_coefficients[oc_index];
-        const auto oc_side_solutions = solution_coefficient * This_::set_of_oc_side_basis_qnodes_[i];
+        const auto oc_side_cvariables = solution_coefficient * This_::set_of_oc_side_basis_qnodes_[i];
 
-        const auto [num_equation, num_qnode] = oc_side_solutions.size();
+        const auto [num_equation, num_qnode] = oc_side_cvariables.size();
 
         const auto& boundary_flux_function = *This_::boundary_flux_functions_[i];
-        
+        const auto& normals = This_::set_of_normals_[i];
+
+        Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
-            boundary_flux_function .calculate(oc_side_solutions[q],)
+            const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
+            numerical_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
         }
-        //
+
+        ms::gemm(numerical_flux_quadrature, basis_weights_[i], RHS[oc_index]);
     }
 }
 
