@@ -82,7 +82,7 @@ Euclidean_Vector<1> Sine_Wave_2D<x_wave_length, y_wave_length>::calculate_soluti
     const auto x_coord = space_vector.at(0);
     const auto y_coord = space_vector.at(1);
 
-    return { std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord) };
+     return { std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord) };
 }
 
 template <double x_wave_length, double y_wave_length>

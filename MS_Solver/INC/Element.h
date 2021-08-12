@@ -133,7 +133,7 @@ public:
 	auto initial_basis_function(void) const;
 
 	template <ushort order>
-	auto orthonormal_basis_function(void) const;
+	auto orthonormal_basis_functions(void) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_faces_nodes(void) const;
@@ -1150,7 +1150,7 @@ auto Geometry<space_dimension>::initial_basis_function(void) const {
 
 template <ushort space_dimension>
 template <ushort order>
-auto Geometry<space_dimension>::orthonormal_basis_function(void) const {
+auto Geometry<space_dimension>::orthonormal_basis_functions(void) const {
 	const auto initial_basis_set = this->initial_basis_function<order>();
 	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }

@@ -124,7 +124,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
     }
 
     static const auto solution_order = Reconstruction_Method::solution_order();
-    static const auto c = static_cast<double>(1 / (2 * solution_order - 1));
+    static const auto c = static_cast<double>(1 / (2 * solution_order + 1));
     return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
 }
 
@@ -164,16 +164,22 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
     
     for (uint i = 0; i < num_cell; ++i) {
         const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;
+        const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
+
         const auto num_qnode = qnodes.size();
 
         Dynamic_Matrix initial_solution_qnodes(This_::num_equation_, num_qnode);
+        Dynamic_Matrix basis_weight(num_qnode, This_::num_basis_);
 
-        for (ushort q = 0; q < num_qnode; ++q)
+        for (ushort q = 0; q < num_qnode; ++q) {
             initial_solution_qnodes.change_column(q, Initial_Condition::calculate_solution(qnodes[q]));
+            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(i, qnodes[q]) * qweights[q]);
+        }
+        //const auto qnodes_basis = This_::set_of_basis_qnodes_[i].transpose();        
+        //ms::gemm(initial_solution_qnodes, qnodes_basis, initial_solution_coefficients[i]);
 
-        const auto qnodes_basis = This_::set_of_basis_qnodes_[i].transpose();
-        
-        ms::gemm(initial_solution_qnodes, qnodes_basis, initial_solution_coefficients[i]);
+        ms::gemm(initial_solution_qnodes, basis_weight, initial_solution_coefficients[i]);
+
     }
 
     return initial_solution_coefficients;

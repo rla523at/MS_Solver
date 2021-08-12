@@ -720,7 +720,7 @@ GTEST_TEST(Geometry, orthonormal_basis_1) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -754,7 +754,7 @@ GTEST_TEST(Geometry, orthonormal_basis_2) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -788,7 +788,7 @@ GTEST_TEST(Geometry, orthonormal_basis_3) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -821,7 +821,7 @@ GTEST_TEST(Geometry, orthonormal_basis_4) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -854,7 +854,7 @@ GTEST_TEST(Geometry, orthonormal_basis_5) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_function<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
