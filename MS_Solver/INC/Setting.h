@@ -113,7 +113,7 @@
 
 //USER DEFINE OPTION
 #define POST_CONDITION_CONSTANT 0.1
-#define POST_ORDER 0
+#define POST_ORDER 1
 
 // ########################################## SETTING  END ##################################################################
 

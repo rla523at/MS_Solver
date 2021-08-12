@@ -264,10 +264,8 @@ template <typename Governing_Equation, typename Reconstruction_Method, ushort po
 void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
 	const auto num_cell = cell_elements.size();
 	This_::num_post_points_.resize(num_cell);
+	This_::set_of_basis_post_points_.reserve(num_cell);
 
-	std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_post_nodes;
-	set_of_post_nodes.reserve(num_cell);
-	
 	ushort str_per_line = 1;
 	size_t connectivity_start_index = 1;
 
@@ -276,6 +274,7 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 		const auto& geometry = cell_elements[i].geometry_;
 
 		auto post_nodes = geometry.post_nodes(post_order);
+		This_::set_of_basis_post_points_.push_back(Reconstruction_Method::calculate_basis_nodes(i, post_nodes));
 
 		for (const auto& node : post_nodes) {
 			for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
@@ -303,11 +302,7 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 		This_::num_node_ += num_post_node;
 		This_::num_element_ += connectivities.size();
 		This_::num_post_points_[i] = num_post_node;
-
-		set_of_post_nodes.push_back(std::move(post_nodes));
 	}	
-
-	This_::set_of_basis_post_points_ = Reconstruction_Method::calculate_set_of_basis_nodes(set_of_post_nodes);
 
 	auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
 

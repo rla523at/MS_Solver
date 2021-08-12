@@ -71,8 +71,8 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize
 
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = inner_face_element.normalized_normal_vector(oc_element, qnodes[q]);
-            oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
-            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); //수정 예정
+            oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1);    //onwercell 
+            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, qnodes[q]) * qweights[q]);         //수정 예정
         }
 
         This_::set_of_normals_.push_back(std::move(normals));

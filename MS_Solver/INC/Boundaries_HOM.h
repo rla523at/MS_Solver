@@ -75,7 +75,7 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
 
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = boundary_element.normalized_normal_vector(oc_element, qnodes[q]);
-            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
+            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1); //owner_cell
         }
 
         This_::set_of_normals_.push_back(std::move(normals));
