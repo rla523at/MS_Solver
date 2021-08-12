@@ -124,7 +124,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
     }
 
     static const auto solution_order = Reconstruction_Method::solution_order();
-    static const auto c = static_cast<double>(1 / (2 * solution_order + 1));
+    static const auto c = static_cast<double>(1.0 / (2.0 * solution_order + 1.0));
     return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
 }
 

@@ -497,16 +497,6 @@ void Polynomial_Reconstruction<space_dimension_, solution_order_>::initialize(co
         //debug
         //std::cout << set_of_basis_functions_.back()[0] << "\n";
         //basis 는 문제가 없네! 2500 / 2500 = 1이 나와줘야되니까
-
-        //const auto& basis_functions = set_of_basis_functions_.back();
-        //const auto num_basis_function = basis_functions.range_dimension();
-
-        //for (ushort j = 0; j < num_basis_function; ++j) {
-        //    for (ushort k = j; k < num_basis_function; ++k)
-        //        std::cout << ms::inner_product(basis_functions[j], basis_functions[k], cell_geometry) << "\t";
-        //    std::cout << "\n";
-        //}
-        //std::cout << "\n\n";
         //debug
     }    
 

@@ -108,6 +108,9 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
             numerical_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
         }
 
-        ms::gemm(numerical_flux_quadrature, basis_weights_[i], RHS[oc_index]);
+        This_::Residual_ owner_side_delta_rhs;
+        ms::gemm(numerical_flux_quadrature, This_::basis_weights_[i], owner_side_delta_rhs);
+
+        RHS[oc_index] += owner_side_delta_rhs;
     }
 }

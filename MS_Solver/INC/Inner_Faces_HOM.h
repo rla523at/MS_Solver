@@ -109,8 +109,12 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
             numerical_flux_quadrature.change_column(q, NUMERICAL_FLUX_FUNCTION::calculate(oc_side_cvariable, nc_side_cvariable, normals[q]));
         }
 
+        This_::Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;
         const auto& [oc_side_basis_weight, nc_side_basis_weight] = This_::oc_nc_side_basis_weight_pairs_[i];
-        ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, RHS[oc_index]);
-        ms::gemm(numerical_flux_quadrature, nc_side_basis_weight, RHS[nc_index]);
+        ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, owner_side_delta_rhs);
+        ms::gemm(numerical_flux_quadrature, nc_side_basis_weight, neighbor_side_delta_rhs);
+
+        RHS[oc_index] += owner_side_delta_rhs;
+        RHS[nc_index] += neighbor_side_delta_rhs;
     }
 }
