@@ -1,5 +1,6 @@
 #pragma once
 #include "Inner_Faces_FVM.h"
+#include "Inner_Faces_HOM.h"
 #include "Spatial_Discrete_Method.h"
 
 

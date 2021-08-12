@@ -10,8 +10,11 @@ private:
     static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
     static constexpr ushort num_equation_       = Governing_Equation::num_equation();
 
-    using This_         = Cells_FVM<Governing_Equation>;
-    using Space_Vector_  = Euclidean_Vector<space_dimension_>;    
+    using This_             = Cells_FVM<Governing_Equation>;
+    using Space_Vector_     = Euclidean_Vector<space_dimension_>;    
+
+public:
+    using Discretized_Solution_ = Euclidean_Vector<num_equation_>;
 
 protected:
     inline static std::vector<Space_Vector_> centers_;

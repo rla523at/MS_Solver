@@ -17,6 +17,9 @@ private:
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
     using Residual_             = Matrix<num_equation_, num_basis_>;
 
+public:
+    using Discretized_Solution_ = Matrix<num_equation_, num_basis_>;;
+
 protected:    
     inline static std::vector<double> volumes_;
     inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
@@ -120,7 +123,9 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
         local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
     }
 
-    return *std::min_element(local_time_step.begin(), local_time_step.end());
+    static const auto solution_order = Reconstruction_Method::solution_order();
+    static const auto c = static_cast<double>(1 / (2 * solution_order - 1));
+    return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
 }
 
 
@@ -181,7 +186,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
     
-    if constexpr (std::is_same_v<Governing_Equation, Linear_Advection_2D>) {
+    if constexpr (ms::is_Linear_Advection_2D<Governing_Equation>) {
         const auto num_cell = solution_coefficients.size();
 
         double global_L1_error = 0.0;

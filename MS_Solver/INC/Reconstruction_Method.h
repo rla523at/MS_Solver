@@ -162,6 +162,8 @@ public:
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
+    static std::string name(void) { return "P" +  std::to_string(solution_order_) + "_Reconstruction"; };
+
 };
 
 
@@ -170,7 +172,13 @@ namespace ms {
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
 
     template <typename T>
-    inline constexpr bool is_default_reconstruction = std::is_same_v<Constant_Reconstruction, T>; /*|| std::is_same_v<Polynomial_Reconstruction, T>;*/
+    inline constexpr bool is_constant_reconustruction = std::is_same_v<Constant_Reconstruction, T>;
+
+    template <typename T>
+    inline constexpr bool is_polynomial_reconustruction = std::is_same_v<Polynomial_Reconstruction<T::space_dimension(), T::solution_order()>, T>;
+
+    template <typename T>
+    inline constexpr bool is_default_reconstruction = ms::is_constant_reconustruction<T> || ms::is_polynomial_reconustruction<T>;
 }
 
 

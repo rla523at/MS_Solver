@@ -197,6 +197,7 @@
     <ClInclude Include="INC\Numerical_Flux_Function.h" />
     <ClInclude Include="INC\Periodic_Boundaries.h" />
     <ClInclude Include="INC\Periodic_Boundaries_FVM.h" />
+    <ClInclude Include="INC\Periodic_Boundaries_HOM.h" />
     <ClInclude Include="INC\Polynomial.h" />
     <ClInclude Include="INC\Post_Solution_Data.h" />
     <ClInclude Include="INC\PostAI.h" />

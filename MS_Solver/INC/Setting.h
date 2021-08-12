@@ -15,7 +15,7 @@
 #define __GMSH__
 
 // USER DEFINE OPTION
-#define GRID_FILE Quad100
+#define GRID_FILE Quad50
 
 //--------------- GOVERNING EQUATION -----------------//
 #define __LINEAR_ADVECTION__
@@ -24,13 +24,19 @@
 
 //USER DEFINE OPTION
 #ifdef __LINEAR_ADVECTION__
+
 #if DIMENSION >= 2
 #define X_ADVECTION_SPEED 1.0
 #define Y_ADVECTION_SPEED 1.0
 #elif DIMENSION >= 3
 #define Z_ADVECTION_SPEED 0.5
 #endif
+
+#define ERROR_CALCULATION_MODE
+
 #endif
+
+
 
 //--------------- INITIAL CONDITION -----------------//
 #ifndef __EULER__
@@ -53,8 +59,8 @@
 #endif
 
 //--------------- SPATIAL DISCRETE METHOD -----------------//
-#define __FVM__
-//#define __HOM__
+//#define __FVM__
+#define __HOM__
 
 //--------------- RECONSTRUCTION METHOD -----------------//
 #ifdef __FVM__
@@ -66,6 +72,11 @@
 
 #ifdef __HOM__
 #define __POLYNOMIAL_RECONSTRUCTION__
+#endif
+
+//USER DEFINE OPTION
+#ifdef __HOM__
+#define SOLUTION_ORDER 1
 #endif
 
 //--------------- GRADIENT METHOD -----------------//
@@ -105,6 +116,7 @@
 #define POST_ORDER 0
 
 // ########################################## SETTING  END ##################################################################
+
 
 
 
@@ -177,6 +189,10 @@
 #endif
 #ifdef __ANN_RECONSTRUCTION__
 #define RECONSTRUCTION_METHOD ANN_limiter<GRADIENT_METHOD>
+#endif
+
+#ifdef __POLYNOMIAL_RECONSTRUCTION__
+#define RECONSTRUCTION_METHOD Polynomial_Reconstruction<DIMENSION, SOLUTION_ORDER>
 #endif
 
 #ifdef __LLF__

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Periodic_Boundaries_FVM.h"
+#include "Periodic_Boundaries_HOM.h"
 #include "Spatial_Discrete_Method.h"
 
 
@@ -18,6 +19,13 @@ private:
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Periodic_Boundaries<FVM, Reconstruction_Method, Numerical_Flux_Function> : public Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>
+{
+private:
+    Periodic_Boundaries(void) = delete;
+};
+
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+class Periodic_Boundaries<HOM, Reconstruction_Method, Numerical_Flux_Function> : public Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>
 {
 private:
     Periodic_Boundaries(void) = delete;

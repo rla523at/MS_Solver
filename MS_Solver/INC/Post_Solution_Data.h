@@ -263,6 +263,7 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 template <typename Governing_Equation, typename Reconstruction_Method, ushort post_order>
 void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
 	const auto num_cell = cell_elements.size();
+	This_::num_post_points_.resize(num_cell);
 
 	std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_post_nodes;
 	set_of_post_nodes.reserve(num_cell);
@@ -343,7 +344,7 @@ void Post_HOM_Solution_Data<Governing_Equation, Reconstruction_Method, post_orde
 			const auto post_point_solutions = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
 
 			for (ushort j = 0; j < This_::num_post_points_[i]; ++j, ++str_per_line) {
-				const auto solution = post_point_solutions.column(j);
+				const auto solution = post_point_solutions.column<This_::num_equation_>(j);
 				solution_post_data_text[0] += ms::double_to_string(solution[0]) + " ";
 				if (str_per_line == 10) {
 					solution_post_data_text[0] += "\n";

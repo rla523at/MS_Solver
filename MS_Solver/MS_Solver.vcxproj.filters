@@ -167,5 +167,8 @@
     <ClInclude Include="INC\Inner_Faces_HOM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Periodic_Boundaries_HOM.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
