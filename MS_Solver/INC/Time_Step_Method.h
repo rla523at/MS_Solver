@@ -1,6 +1,4 @@
 #pragma once
-#include "Setting.h"
-
 #include <type_traits>
 
 template <double time_step_constant>

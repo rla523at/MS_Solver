@@ -1,6 +1,5 @@
 #pragma once
 #include "Governing_Equation.h"
-#include "Setting.h"
 
 #include <numbers>
 

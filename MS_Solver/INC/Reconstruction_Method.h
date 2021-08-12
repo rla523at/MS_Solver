@@ -4,7 +4,6 @@
 
 #include "Gradient_Method.h"
 #include "PostAI.h"
-#include "Setting.h"
 
 class RM {};	// Reconstruction Method
 

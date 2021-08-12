@@ -3,15 +3,18 @@
 #include "Reconstruction_Method.h"
 
 //HOM이면 공통으로 사용하는 variable & method
-template <typename Reconstruction_Method>
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Inner_Faces_HOM
 {
 private:
-    static constexpr ushort space_dimension_ = Reconstruction_Method::space_dimension();
-    static constexpr ushort num_basis_ = Reconstruction_Method::num_basis();
+    static constexpr ushort space_dimension_    = Reconstruction_Method::space_dimension();
+    static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
+    static constexpr ushort num_equation_       = Numerical_Flux_Function::num_equation();
     
-    using This_             = Inner_Faces_HOM<Reconstruction_Method>;
-    using Space_Vector_     = Euclidean_Vector<space_dimension_>;    
+    using This_                 = Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>;
+    using Space_Vector_         = Euclidean_Vector<space_dimension_>;
+    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
+    using Residual_             = Matrix<num_equation_, num_basis_>;
 
 protected:
     inline static std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
@@ -24,14 +27,14 @@ private:
 
 public:
     static void initialize(Grid<space_dimension_>&& grid);
-    //static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) 
+    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) 
 
 };
 
 
 // template definition part
-template<typename Reconstruction_Method>
-void Inner_Faces_HOM<Reconstruction_Method>::initialize(Grid<space_dimension_>&& grid) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize(Grid<space_dimension_>&& grid) {
     SET_TIME_POINT;
 
     This_::oc_nc_index_pairs_ = std::move(grid.connectivity.inner_face_oc_nc_index_pairs);
@@ -77,8 +80,8 @@ void Inner_Faces_HOM<Reconstruction_Method>::initialize(Grid<space_dimension_>&&
 }
 
 
-template<typename Reconstruction_Method>
-void Inner_Faces_HOM<Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) {
     const auto num_boundary = This_::boundary_flux_functions_.size();
 
     for (uint i = 0; i < num_boundary; ++i) {
