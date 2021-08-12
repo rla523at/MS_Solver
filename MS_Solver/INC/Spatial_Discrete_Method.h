@@ -11,6 +11,9 @@ namespace ms {
 
 class FVM : public SDM 
 {
+private:
+	FVM(void) = delete;
+
 public:
 	static std::string name(void) { return "FVM"; };
 };

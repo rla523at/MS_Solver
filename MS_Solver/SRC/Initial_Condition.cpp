@@ -1,48 +1,5 @@
 #include "../INC/Inital_Condition.h"
 
-Sine_Wave_2D::Solution_ Sine_Wave_2D::calculate_solution(const Space_Vector_& space_vector) {
-	const auto x_coord = space_vector.at(0);
-	const auto y_coord = space_vector.at(1);
-
-	return { std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord) };
-}
-
-
-std::vector<Sine_Wave_2D::Solution_> Sine_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
-	const auto num_cell = space_vectors.size();
-	
-	std::vector<Solution_> solutions_(num_cell);
-	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = space_vectors[i].at(0);
-		const auto y_coord = space_vectors[i].at(1);
-
-		solutions_[i] = std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord);
-	}
-
-	return solutions_;
-}
-
-std::string Sine_Wave_2D::name(void) { 
-	return "Sine_Wave_2D"; 
-};
-
-
-template <>
-std::vector<Sine_Wave_2D::Solution_> Sine_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time){
-	const auto num_cell = cell_centers.size();
-	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speed();
-
-	std::vector<Solution_> exact_solutions_(num_cell);
-	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i].at(0);
-		const auto y_coord = cell_centers[i].at(1);
-		exact_solutions_[i] = std::sin(This_::x_wave_number_ * (x_coord - x_advection_speed * end_time)) * std::sin(This_::y_wave_number_ * (y_coord - y_advection_speed * end_time));
-	}
-
-	return exact_solutions_;
-}
-
-
 std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
 	const auto num_cell = cell_centers.size();
 
@@ -61,31 +18,31 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const 
 }
 
 
-template <>
-std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
-	const auto num_cell = cell_centers.size();
-	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speed();
-
-	std::vector<Solution> exact_solutions_(num_cell);
-	for (size_t i = 0; i < num_cell; ++i) {
-		const auto x_coord = cell_centers[i].at(0);
-		const auto y_coord = cell_centers[i].at(1);
-
-		//Assume that domian [0,1] x [0,1]
-		const auto exact_x_start	= 0.25 + x_advection_speed * end_time - static_cast<int>(0.25 + x_advection_speed * end_time);
-		const auto exact_x_end		= 0.75 + x_advection_speed * end_time - static_cast<int>(0.75 + x_advection_speed * end_time);
-		const auto exact_y_start	= 0.25 + y_advection_speed * end_time - static_cast<int>(0.25 + y_advection_speed * end_time);
-		const auto exact_y_end		= 0.75 + y_advection_speed * end_time - static_cast<int>(0.75 + y_advection_speed * end_time);
-
-		if (exact_x_start <= x_coord && x_coord <= exact_x_end &&
-			exact_y_start <= y_coord && y_coord <= exact_y_end)
-			exact_solutions_[i] = 1;
-		else
-			exact_solutions_[i] = 0;
-	}
-
-	return exact_solutions_;
-}
+//template <>
+//std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
+//	const auto num_cell = cell_centers.size();
+//	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speed();
+//
+//	std::vector<Solution> exact_solutions_(num_cell);
+//	for (size_t i = 0; i < num_cell; ++i) {
+//		const auto x_coord = cell_centers[i].at(0);
+//		const auto y_coord = cell_centers[i].at(1);
+//
+//		//Assume that domian [0,1] x [0,1]
+//		const auto exact_x_start	= 0.25 + x_advection_speed * end_time - static_cast<int>(0.25 + x_advection_speed * end_time);
+//		const auto exact_x_end		= 0.75 + x_advection_speed * end_time - static_cast<int>(0.75 + x_advection_speed * end_time);
+//		const auto exact_y_start	= 0.25 + y_advection_speed * end_time - static_cast<int>(0.25 + y_advection_speed * end_time);
+//		const auto exact_y_end		= 0.75 + y_advection_speed * end_time - static_cast<int>(0.75 + y_advection_speed * end_time);
+//
+//		if (exact_x_start <= x_coord && x_coord <= exact_x_end &&
+//			exact_y_start <= y_coord && y_coord <= exact_y_end)
+//			exact_solutions_[i] = 1;
+//		else
+//			exact_solutions_[i] = 0;
+//	}
+//
+//	return exact_solutions_;
+//}
 
 std::vector<Modified_SOD_2D::Solution_> Modified_SOD_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
 	const auto num_cell = cell_centers.size();

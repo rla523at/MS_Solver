@@ -4,6 +4,7 @@
 
 #include "Gradient_Method.h"
 #include "PostAI.h"
+#include "Setting.h"
 
 class RM {};	// Reconstruction Method
 
@@ -23,6 +24,7 @@ public:
 template <typename Gradient_Method>
 class Linear_Reconstruction : public RM
 {
+    //Gradient_Method<num_equation, space_dimension>
 private:
     static constexpr size_t num_equation_       = Gradient_Method::num_equation();
     static constexpr size_t space_dimension_    = Gradient_Method::space_dimension();

@@ -25,14 +25,14 @@ public:
 
 
 //FVM이고 Constant Reconstruction이면 사용하는 variable & method
-template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+template<typename Numerical_Flux_Function>
 class Periodic_Boundaries_FVM_Constant : public Periodic_Boundaries_FVM_Base<Numerical_Flux_Function::space_dimension()>
 {
 private:
     static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
 
-    using This_         = Periodic_Boundaries_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
+    using This_         = Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>;
     using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
     using Solution_     = Euclidean_Vector<This_::num_equation_>;
     using Residual_     = Euclidean_Vector< This_::num_equation_>;
@@ -53,11 +53,11 @@ private:
     static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
 
-    using Base_ = Inner_Faces_FVM_Base<This_::space_dimension_>;
-    using This_ = Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
+    using This_         = Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>;
+    using Base_         = Periodic_Boundaries_FVM_Base<This_::space_dimension_>;
     using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
-    using Solution_ = Euclidean_Vector<This_::num_equation_>;
-    using Residual_ = Euclidean_Vector< This_::num_equation_>;
+    using Solution_     = Euclidean_Vector<This_::num_equation_>;
+    using Residual_     = Euclidean_Vector<This_::num_equation_>;
 
 protected:
     inline static std::vector<std::pair<Space_Vector_, Space_Vector_>> oc_nc_to_oc_nc_side_face_vector_pairs_;
@@ -66,7 +66,7 @@ private:
     Periodic_Boundaries_FVM_Linear(void) = delete;
 
 public:
-    static void initialize(Grid<space_dimension>&& grid);
+    static void initialize(Grid<This_::space_dimension_>&& grid);
     static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions);
 };
 
@@ -103,33 +103,33 @@ void Periodic_Boundaries_FVM_Base<space_dimension>::initialize(Grid<space_dimens
     Log::print();
 }
 
-template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-void Periodic_Boundaries_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
-    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, Base_::normals_, Base_::oc_nc_index_pairs_);
+template<typename Numerical_Flux_Function>
+void Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
+    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, This_::normals_, This_::oc_nc_index_pairs_);
 
-    const auto num_pbdry_pair = Base_::normals_.size();
+    const auto num_pbdry_pair = This_::normals_.size();
     for (size_t i = 0; i < num_pbdry_pair; ++i) {
-        const auto [oc_index, nc_index] = Base_::oc_nc_index_pairs_[i];
-        const auto delta_RHS = Base_::areas_[i] * numerical_fluxes[i];
+        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
+        const auto delta_RHS = This_::areas_[i] * numerical_fluxes[i];
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }
 }
 
-template <typename Reconstruction_Method, ushort space_dimension>
-void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, space_dimension>::initialize(Grid<space_dimension>&& grid) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::initialize(Grid<This_::space_dimension_>&& grid) {
     SET_TIME_POINT;
 
     Base_::initialize(std::move(grid));
 
-    const auto num_pbdry_pair = Base_::normals_.size();
-
-    This_::oc_nc_to_oc_nc_side_face_vector_pairs_.reserve(num_pbdry_pair);
-
     const auto& cell_elements = grid.elements.cell_elements;
     const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
+    
+    const auto num_pbdry_pair = pbdry_element_pairs.size();
+    This_::oc_nc_to_oc_nc_side_face_vector_pairs_.reserve(num_pbdry_pair);
+
     for (size_t i = 0; i < num_pbdry_pair; ++i) {
-        const auto& [oc_index, nc_index] = Base_::oc_nc_index_pairs_[i];
+        const auto& [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
         const auto& oc_geometry = cell_elements[oc_index].geometry_;
         const auto& nc_geometry = cell_elements[nc_index].geometry_;
 
@@ -152,9 +152,8 @@ void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, space_dimension>::ini
     Log::print();
 }
 
-template <typename Reconstruction_Method, ushort space_dimension>
-template <typename Numerical_Flux_Function, ushort num_equation>
-void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, space_dimension>::calculate_RHS(std::vector<Euclidean_Vector<num_equation>>& RHS, const std::vector<Euclidean_Vector<num_equation>>& solutions) {
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
     const auto& solution_gradients = Reconstruction_Method::get_solution_gradients();
     
     const auto num_pbdry_pair = Base_::normals_.size();

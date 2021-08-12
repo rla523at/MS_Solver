@@ -60,8 +60,8 @@ public:
             Reconstruction_Method::reconstruct(solutions);
 
         Boundaries_::calculate_RHS(RHS, solutions);
-        Periodic_Boundaries_::template calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
-        Inner_Faces_::template calculate_RHS<Numerical_Flux_Function>(RHS, solutions);
+        Periodic_Boundaries_::calculate_RHS(RHS, solutions);
+        Inner_Faces_::calculate_RHS(RHS, solutions);
         Cells_::calculate_RHS(RHS, solutions);
 
         return RHS;

@@ -23,9 +23,9 @@ private:
 };
 
 
-template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-class Inner_Faces<HOM, Reconstruction_Method, Numerical_Flux_Function> : public Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>
-{
-private:
-    Inner_Faces(void) = delete;
-};
+//template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+//class Inner_Faces<HOM, Reconstruction_Method, Numerical_Flux_Function> : public Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>
+//{
+//private:
+//    Inner_Faces(void) = delete;
+//};

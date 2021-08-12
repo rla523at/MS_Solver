@@ -25,14 +25,14 @@ public:
 
 
 //FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
-template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+template<typename Numerical_Flux_Function>
 class Inner_Faces_FVM_Constant : public Inner_Faces_FVM_Base<Numerical_Flux_Function::space_dimension()>
 {
 private:
     static constexpr ushort space_dimension_    = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_       = Numerical_Flux_Function::num_equation();
 
-    using This_         = Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
+    using This_         = Inner_Faces_FVM_Constant<Numerical_Flux_Function>;
     using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
     using Solution_     = Euclidean_Vector<This_::num_equation_>;
     using Residual_     = Euclidean_Vector< This_::num_equation_>;
@@ -54,11 +54,11 @@ private:
     static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
 
+    using This_         = Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>;
     using Base_         = Inner_Faces_FVM_Base<This_::space_dimension_>;
-    using This_         = Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>;
     using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
     using Solution_     = Euclidean_Vector<This_::num_equation_>;
-    using Residual_     = Euclidean_Vector< This_::num_equation_>;
+    using Residual_     = Euclidean_Vector<This_::num_equation_>;
 
 protected:
     inline static std::vector<std::pair<Space_Vector_, Space_Vector_>> oc_nc_to_face_vector_pairs_;
@@ -104,8 +104,8 @@ void Inner_Faces_FVM_Base<space_dimension>::initialize(Grid<space_dimension>&& g
 }
 
 
-template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-void Inner_Faces_FVM_Constant<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
+template<typename Numerical_Flux_Function>
+void Inner_Faces_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
     const auto num_inner_face = This_::normals_.size();
 
     const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, This_::normals_, This_::oc_nc_index_pairs_);

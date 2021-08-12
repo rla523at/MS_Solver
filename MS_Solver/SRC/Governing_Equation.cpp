@@ -1,56 +1,5 @@
 #include "../INC/Governing_Equation.h"
 
-Linear_Advection_2D::Physical_Flux_ Linear_Advection_2D::physical_flux(const Solution_& solution) {
-	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speeds_;
-	const auto sol = solution.at(0);	//scalar
-
-	Physical_Flux_ physical_flux = { x_advection_speed * sol , y_advection_speed * sol };
-	return physical_flux;
-}
-
-std::vector<Linear_Advection_2D::Physical_Flux_> Linear_Advection_2D::physical_fluxes(const std::vector<Solution_>& solutions) {
-	//static size_t num_solution = solutions.size();
-	const size_t num_solution = solutions.size();
-
-	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speeds_;
-	std::vector<Physical_Flux_> physical_fluxes(num_solution);
-	for (size_t i = 0; i < num_solution; ++i) {
-		const auto sol = solutions[i].at(0);	//scalar
-		physical_fluxes[i] = { x_advection_speed * sol , y_advection_speed * sol };
-	}
-
-	return physical_fluxes;
-}
-
-//Dynamic_Matrix_ Linear_Advection_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
-//	const auto [num_eq, num_node] = solution_nodes.size();
-//
-//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);	
-//	
-//	for (size_t i = 0; i < num_node; ++i) {
-//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
-//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
-//	}
-//
-//	return flux_nodes;
-//}
-
-std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-	//static size_t num_solution = solutions.size();
-	const size_t num_solution = solutions.size();
-
-	static double absolute_x_advection_speed = std::abs(advection_speeds_[0]);
-	static double absolute_y_advection_speed = std::abs(advection_speeds_[1]);
-
-	std::vector<std::array<double, Linear_Advection_2D::space_dimension_>> projected_maximum_lambdas(num_solution, { absolute_x_advection_speed,absolute_y_advection_speed });
-	return projected_maximum_lambdas;
-}
-
-double Linear_Advection_2D::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
-	return std::abs(nomal_vector.inner_product(advection_speeds_));
-}
-
-
 Burgers_2D::Physical_Flux_ Burgers_2D::physical_flux(const Solution_& solution) {
 	const auto sol = solution.at(0); //scalar
 
@@ -71,19 +20,6 @@ std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::v
 
 	return physical_fluxes;
 }
-
-//Dynamic_Matrix_ Burgers_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
-//	const auto [num_eq, num_node] = solution_nodes.size();
-//
-//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);
-//
-//	for (size_t i = 0; i < num_node; ++i) {
-//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
-//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
-//	}
-//
-//	return flux_nodes;
-//}
 
 std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 	static size_t num_solution = solutions.size();
@@ -181,19 +117,6 @@ std::vector<Euler_2D::Physical_Flux_> Euler_2D::physical_fluxes(const std::vecto
 	
 	return physical_fluxes;
 }
-
-//Dynamic_Matrix_ Euler_2D::flux_nodes(const Dynamic_Matrix_& solution_nodes) {
-//	const auto [num_eq, num_node] = solution_nodes.size();
-//
-//	Dynamic_Matrix_ flux_nodes(num_eq, This_::space_dimension_ * num_node);
-//
-//	for (size_t i = 0; i < num_node; ++i) {
-//		const auto physical_flux = This_::physical_flux(solution_nodes.column<This_::num_equation_>(i));
-//		flux_nodes.change_columns(i * This_::space_dimension_, physical_flux);
-//	}
-//
-//	return flux_nodes;
-//}
 
 double Euler_2D::inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector) {
 	const auto oc_u = oc_primitive_variable.at(0);

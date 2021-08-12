@@ -104,8 +104,9 @@ void Vertex_Least_Square<num_equation_, space_dimension_>::initialize(const Grid
     Base_::least_square_matrixes_.reserve(num_cell);
 
     auto set_of_vertex_share_cell_indexes = grid.calculate_set_of_vertex_share_cell_indexes();
+
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto& vertex_share_cell_indexes = set_of_vertex_share_cell_indexes[i];
+        auto& vertex_share_cell_indexes = set_of_vertex_share_cell_indexes[i];
         const auto num_vertex_share_cell = vertex_share_cell_indexes.size();
 
         const auto& element = cell_elements[i];
@@ -147,9 +148,9 @@ void Face_Least_Square<num_equation_, space_dimension_>::initialize(const Grid<s
     Base_::least_square_matrixes_.reserve(num_cell);
 
     auto set_of_face_share_cell_indexes = grid.calculate_set_of_face_share_cell_indexes();
-    for (size_t i = 0; i < num_cell; ++i) {
-        //least square matrix
-        const auto& face_share_cell_indexes = set_of_face_share_cell_indexes[i];         
+
+    for (size_t i = 0; i < num_cell; ++i) {        
+        auto& face_share_cell_indexes = set_of_face_share_cell_indexes[i];         
         const auto num_face_share_cell = face_share_cell_indexes.size();
 
         const auto target_cell_element = cell_elements[i];

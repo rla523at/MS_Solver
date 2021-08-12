@@ -6,7 +6,6 @@
 #include <unordered_set>
 
 
-template <ushort space_dimension>
 struct Grid_Connectivity
 {
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes; // vnode				:= node at vertex, 
@@ -21,7 +20,7 @@ template <ushort space_dimension>
 struct Grid
 {
 	Grid_Elements<space_dimension> elements;
-	Grid_Connectivity<space_dimension> connectivity;
+	Grid_Connectivity connectivity;
 		
 	std::vector<std::vector<size_t>> calculate_set_of_face_share_cell_indexes(void) const;
 	std::vector<std::vector<size_t>> calculate_set_of_vertex_share_cell_indexes(void) const;
@@ -39,7 +38,7 @@ public:
 	static Grid<space_dimension> build(const std::string& grid_file_name);
 
 private:
-	static Grid_Connectivity<space_dimension> make_grid_connectivity(const Grid_Elements<space_dimension>& grid_elements);
+	static Grid_Connectivity make_grid_connectivity(const Grid_Elements<space_dimension>& grid_elements);
 	static std::vector<uint> find_cell_indexes_have_these_vnodes(const std::unordered_map<uint, std::set<uint>>& vertex_node_index_to_cell_container_indexes, const std::vector<uint>& face_node_indexes);
 };
 
@@ -140,7 +139,7 @@ Grid<space_dimension> Grid_Builder<space_dimension>::build(const std::string& gr
 
 
 template <ushort space_dimension>
-Grid_Connectivity<space_dimension> Grid_Builder<space_dimension>::make_grid_connectivity(const Grid_Elements<space_dimension>& grid_elements) {
+Grid_Connectivity Grid_Builder<space_dimension>::make_grid_connectivity(const Grid_Elements<space_dimension>& grid_elements) {
 	SET_TIME_POINT;
 
 	const auto& [cell_elements, boundary_elements, periodic_boundary_element_pairs, inner_face_elements] = grid_elements;
