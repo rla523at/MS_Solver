@@ -50,6 +50,7 @@ public:
 
 
 	Matrix& operator+=(const Matrix& A);
+	Matrix& operator-=(const Matrix& A);
 	Matrix& operator*=(const double scalar);
 
 	Matrix operator+(const Matrix& A) const;
@@ -182,6 +183,18 @@ Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator+=(const Matri
 	}
 	else 
 		cblas_daxpy(this->num_value_, 1.0, A.values_.data(), 1, this->values_.data(), 1);
+
+	return *this;
+}
+
+template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator-=(const Matrix& A) {
+	if constexpr (this->num_value_ < ms::blas_axpy_criteria) {
+		for (size_t i = 0; i < this->num_value_; ++i)
+			this->values_[i] -= A.values_[i];
+	}
+	else
+		cblas_daxpy(this->num_value_, -1.0, A.values_.data(), 1, this->values_.data(), 1);
 
 	return *this;
 }

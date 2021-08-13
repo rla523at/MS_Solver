@@ -1,7 +1,5 @@
 #pragma once
-#include <type_traits>
-#include <string>
-
+#include "Spatial_Discrete_Method.h"
 #include "Gradient_Method.h"
 #include "PostAI.h"
 
@@ -177,8 +175,16 @@ namespace ms {
     template <typename T>
     inline constexpr bool is_polynomial_reconustruction = std::is_same_v<Polynomial_Reconstruction<T::space_dimension(), T::solution_order()>, T>;
 
-    template <typename T>
-    inline constexpr bool is_default_reconstruction = ms::is_constant_reconustruction<T> || ms::is_polynomial_reconustruction<T>;
+    template <typename Spatial_Discrete_Method, typename Reconstruction_Method, typename = void>
+    inline constexpr bool is_default_reconstruction;
+        
+    template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
+    inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<FVM, Spatial_Discrete_Method>>>
+        = ms::is_constant_reconustruction<Reconstruction_Method>;
+
+    template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
+    inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
+        = ms::is_polynomial_reconustruction<Reconstruction_Method>;
 }
 
 
@@ -493,11 +499,6 @@ void Polynomial_Reconstruction<space_dimension_, solution_order_>::initialize(co
         const auto& cell_geometry = cell_element.geometry_;
 
         This_::set_of_basis_functions_.push_back(cell_geometry.orthonormal_basis_functions<solution_order_>());
-
-        //debug
-        //std::cout << set_of_basis_functions_.back()[0] << "\n";
-        //basis 는 문제가 없네! 2500 / 2500 = 1이 나와줘야되니까
-        //debug
     }    
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";

@@ -170,5 +170,8 @@
     <ClInclude Include="INC\Periodic_Boundaries_HOM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Setting_Base.h">
+      <Filter>설정 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

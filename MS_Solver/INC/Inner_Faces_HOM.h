@@ -71,7 +71,8 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize
 
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = inner_face_element.normalized_normal_vector(oc_element, qnodes[q]);
-            oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1);    //onwercell 
+            //oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1);  //performance test해서 더 빠른거로 결정하기
+            oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);          
             nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, qnodes[q]) * qweights[q]);         //수정 예정
         }
 
@@ -114,7 +115,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
         ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, owner_side_delta_rhs);
         ms::gemm(numerical_flux_quadrature, nc_side_basis_weight, neighbor_side_delta_rhs);
 
-        RHS[oc_index] += owner_side_delta_rhs;
+        RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
     }
 }

@@ -25,10 +25,10 @@ protected:
     inline static std::vector<std::unique_ptr<Boundary_Flux_Function<Governing_Equation>>> boundary_flux_functions_;
 
     inline static std::vector<uint> oc_indexes_;
-    inline static std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
+    inline static std::vector<Dynamic_Matrix> oc_side_basis_qnodes_;
     inline static std::vector<std::vector<Space_Vector_>> set_of_normals_;
 
-    inline static std::vector<Dynamic_Matrix> basis_weights_;
+    inline static std::vector<Dynamic_Matrix> oc_side_basis_weights_;
 
 public:
     static void initialize(Grid<space_dimension_>&& grid);
@@ -48,9 +48,9 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
 
     const auto num_boundary = boundary_elements.size();
     This_::boundary_flux_functions_.reserve(num_boundary);
-    This_::set_of_oc_side_basis_qnodes_.reserve(num_boundary);
+    This_::oc_side_basis_qnodes_.reserve(num_boundary);
     This_::set_of_normals_.reserve(num_boundary);
-    This_::basis_weights_.reserve(num_boundary);
+    This_::oc_side_basis_weights_.reserve(num_boundary);
 
     constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
 
@@ -68,18 +68,19 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
         const auto& qweights = quadrature_rule.weights;
         const auto num_qnode = qnodes.size();
 
-        This_::set_of_oc_side_basis_qnodes_.push_back(Reconstruction_Method::calculate_basis_nodes(oc_index, qnodes));
+        This_::oc_side_basis_qnodes_.push_back(Reconstruction_Method::calculate_basis_nodes(oc_index, qnodes));
 
         std::vector<Space_Vector_> normals(num_qnode);
         Dynamic_Matrix basis_weight(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = boundary_element.normalized_normal_vector(oc_element, qnodes[q]);
-            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1); //owner_cell
+            //basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1); //performance test해서 더 빠른거로 결정하기
+            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
         }
 
         This_::set_of_normals_.push_back(std::move(normals));
-        This_::basis_weights_.push_back(std::move(basis_weight));
+        This_::oc_side_basis_weights_.push_back(std::move(basis_weight));
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -95,7 +96,7 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         const auto oc_index = This_::oc_indexes_[i];
 
         const auto& solution_coefficient = solution_coefficients[oc_index];
-        const auto oc_side_cvariables = solution_coefficient * This_::set_of_oc_side_basis_qnodes_[i];
+        const auto oc_side_cvariables = solution_coefficient * This_::oc_side_basis_qnodes_[i];
 
         const auto [num_equation, num_qnode] = oc_side_cvariables.size();
 
@@ -109,8 +110,8 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         }
 
         This_::Residual_ owner_side_delta_rhs;
-        ms::gemm(numerical_flux_quadrature, This_::basis_weights_[i], owner_side_delta_rhs);
+        ms::gemm(numerical_flux_quadrature, This_::oc_side_basis_weights_[i], owner_side_delta_rhs);
 
-        RHS[oc_index] += owner_side_delta_rhs;
+        RHS[oc_index] -= owner_side_delta_rhs;
     }
 }
