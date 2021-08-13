@@ -19,7 +19,7 @@ public:
 protected:
     inline static std::vector<Space_Vector_> centers_;
     inline static std::vector<double> volumes_;
-    inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
+    inline static std::vector<std::array<double, space_dimension_>> projected_volumes_;
     inline static std::vector<double> residual_scale_factors_;
 
 private:
@@ -48,7 +48,7 @@ void Cells_FVM<Governing_Equation>::initialize(const Grid<space_dimension_>& gri
     const auto num_cell = cell_elements.size();
     This_::centers_.reserve(num_cell);
     This_::volumes_.reserve(num_cell);
-    This_::coordinate_projected_volumes_.reserve(num_cell);
+    This_::projected_volumes_.reserve(num_cell);
     This_::residual_scale_factors_.reserve(num_cell);
 
     for (const auto& cell_elemnt : cell_elements) {
@@ -57,7 +57,7 @@ void Cells_FVM<Governing_Equation>::initialize(const Grid<space_dimension_>& gri
 
         This_::centers_.push_back(geometry.center_node());
         This_::volumes_.push_back(volume);
-        This_::coordinate_projected_volumes_.push_back(geometry.coordinate_projected_volume());
+        This_::projected_volumes_.push_back(geometry.projected_volume());
         This_::residual_scale_factors_.push_back(1.0 / volume);
     }
 
@@ -72,14 +72,18 @@ double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Eucl
 
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
+        const auto [x_projected_volume, y_projected_volume] = This_::projected_volumes_[i];
         const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = projected_maximum_lambdas[i];
 
         const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
 
-        if (!std::isnormal(x_radii) || !std::isnormal(y_radii))
-            std::cout << "not normal!";
+        ////debug
+        //const auto spectral_radii = x_radii + y_radii;
+        //const auto spectral_radii2 = y_projected_volume * x_projeced_maximum_lambda + x_projected_volume * y_projeced_maximum_lambda;
+        //if (!std::isnormal(x_radii) || !std::isnormal(y_radii))
+        //    std::cout << "not normal!";
+        ////debug
 
         local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
     }

@@ -7,28 +7,30 @@
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
-#define __GRID_FILE__					Quad20
-#define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__			__SINE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__		__HOM__
-#define __RECONSTRUCTION_METHOD__		__POLYNOMIAL_RECONSTRUCTION__
+#define __GRID_FILE__					Shocktube_Quad_100x10
+#define __GOVERNING_EQUATION__			__EULER__
+#define __INITIAL_CONDITION__			__MODIFIED_SOD__
+#define __SPATIAL_DISCRETE_METHOD__		__FVM__
+#define __RECONSTRUCTION_METHOD__		__MLP_U1_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
+#if		__RECONSTRUCTION_METHOD__	!=	__CONSTANT_RECONSTRUCTION__
 #define __GRADIENT_METHOD__				__VERTEX_LEAST_SQUARE__
+#endif
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__				1
+#define __SOLUTION_ORDER__				2
 #endif 
 
 #define __NUMERICAL_FLUX__				__LLF__
-#define __TIME_INTEGRAL_METHOD__		__SSPRK54__
+#define __TIME_INTEGRAL_METHOD__		__SSPRK33__
 #define __TIME_STEP_METHOD__			__CFL__
 #define __TIME_STEP_CONSTANT__			0.9
 #define __SOLVE_END_CONDITION__			__END_BY_TIME__
-#define __END_CONDITION_CONSTANT__		1.0
+#define __END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__		__POST_BY_TIME__
-#define __POST_CONDITION_CONSTANT__		0.1
+#define __POST_CONDITION_CONSTANT__		0.02
 #define __POST_ORDER__					1
 
 
@@ -65,7 +67,7 @@
 
 
 // Mode (comment out == turn off)
-#define ERROR_CALCULATION_MODE
+//#define ERROR_CALCULATION_MODE
 
 // ################################# USER DEFINE SETTING END #########################################################
  

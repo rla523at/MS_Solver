@@ -22,7 +22,7 @@ public:
 
 protected:    
     inline static std::vector<double> volumes_;
-    inline static std::vector<std::array<double, space_dimension_>> coordinate_projected_volumes_;
+    inline static std::vector<std::array<double, space_dimension_>> projected_volumes_;
     inline static std::vector<const Quadrature_Rule<space_dimension_>*> quadrature_rule_ptrs_;
     inline static std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
     inline static std::vector<Dynamic_Matrix> gradient_basis_weights_;
@@ -53,7 +53,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
 
     const auto num_cell = cell_elements.size();
     This_::volumes_.reserve(num_cell);
-    This_::coordinate_projected_volumes_.reserve(num_cell);
+    This_::projected_volumes_.reserve(num_cell);
     This_::quadrature_rule_ptrs_.reserve(num_cell);
     This_::set_of_basis_qnodes_.reserve(num_cell); // 2 * solution_order
     This_::gradient_basis_weights_.reserve(num_cell);
@@ -69,7 +69,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
         const auto volume = geometry.volume();
 
         This_::volumes_.push_back(volume);
-        This_::coordinate_projected_volumes_.push_back(geometry.coordinate_projected_volume());
+        This_::projected_volumes_.push_back(geometry.projected_volume());
         This_::P0_basis_values_.push_back(Reconstruction_Method::calculate_P0_basis_value(i, geometry.center_node()));
 
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
@@ -114,7 +114,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
     
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto [x_projected_volume, y_projected_volume] = This_::coordinate_projected_volumes_[i];
+        const auto [x_projected_volume, y_projected_volume] = This_::projected_volumes_[i];
         const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
 
         const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;

@@ -122,7 +122,7 @@ public:
 	Space_Vector_ center_node(void) const;
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	double volume(void) const;
-	std::array<double, space_dimension> coordinate_projected_volume(void) const;
+	std::array<double, space_dimension> projected_volume(void) const;
 	std::vector<Geometry> faces_geometry(void) const;
 	std::vector<Space_Vector_> post_nodes(const ushort post_order) const;
 	std::vector<Space_Vector_> vertex_nodes(void) const;
@@ -1017,7 +1017,7 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::reference_c
 
 
 template <ushort space_dimension>
-std::array<double, space_dimension> Geometry<space_dimension>::coordinate_projected_volume(void) const {
+std::array<double, space_dimension> Geometry<space_dimension>::projected_volume(void) const {
 	if constexpr (space_dimension == 2) {
 		double x_projected_volume = 0.0;
 		double y_projected_volume = 0.0;
@@ -1032,7 +1032,9 @@ std::array<double, space_dimension> Geometry<space_dimension>::coordinate_projec
 			y_projected_volume += std::abs(node_to_node.at(1));
 		}
 
-		return { 0.5 * x_projected_volume, 0.5 * y_projected_volume };
+		//return { 0.5 * x_projected_volume, 0.5 * y_projected_volume };
+		return { 0.5 * y_projected_volume, 0.5 * x_projected_volume };
+
 	}
 	else {
 		throw std::runtime_error("not supproted dimension");
