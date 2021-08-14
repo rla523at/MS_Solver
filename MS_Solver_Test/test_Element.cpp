@@ -581,7 +581,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_1) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.projected_volume();
 
-	const std::array<double, 2> ref = { 4.47411 - 1.524, 1 };
+	const std::array<double, 2> ref = { 1, 4.47411 - 1.524 };
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(Geometry, coordinate_projected_volume_2) {
@@ -602,7 +602,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_2) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.projected_volume();
 
-	const std::array<double, 2> ref = { 3,1 };
+	const std::array<double, 2> ref = { 1, 3 };
 	EXPECT_EQ(result, ref);
 }
 

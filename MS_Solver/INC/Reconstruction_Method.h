@@ -640,8 +640,12 @@ static void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>
         Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
         P1_projected_basis_vnode.change_rows(num_P1_projected_basis, P1_projection_matrix); 
         
-        This_::P0_basis_values_.push_back(P0_basis_value);
-        This_::P1_mode_basis_vnodes_.push_back();
+        constexpr ushort P0_basis_row_index = 0;
+        Dynamic_Matrix P1_mode_basis_vnode = P1_projected_basis_vnode;
+        P1_mode_basis_vnode.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
+
+        This_::P0_basis_values_.push_back(P1_projected_basis_vnode.at(0,0));
+        This_::P1_mode_basis_vnodes_.push_back(P1_mode_basis_vnode);
         This_::P1_projected_basis_vnodes_.push_back(P1_projected_basis_vnode);
     }
 

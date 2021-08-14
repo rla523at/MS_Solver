@@ -140,7 +140,7 @@ private:
 	bool is_in_range(const size_t irow, const size_t jcolumn) const;
 	size_t leading_dimension(void) const;
 
-	double& at(const size_t row, const size_t column);
+	double& value_at(const size_t row, const size_t column);
 	std::vector<int> PLU_decomposition(void);
 };
 
@@ -376,7 +376,7 @@ void Dynamic_Matrix::change_column(const size_t column_index, const Euclidean_Ve
 	dynamic_require(this->num_row_ == dimension,		"vector dimension should be matched with number of row");
 
 	for (size_t i = 0; i < this->num_row_; ++i)
-		this->at(i, column_index) = vec.at(i);
+		this->value_at(i, column_index) = vec.at(i);
 }
 
 template <size_t num_row, size_t num_column>
@@ -397,5 +397,5 @@ void Dynamic_Matrix::change_columns(const size_t start_column_index, const Matri
 
 	for (size_t i = 0; i < this->num_row_; ++i) 
 		for (size_t j = 0; j < num_column; ++j) 
-			this->at(i, start_column_index + j) = A.at(i, j);	
+			this->value_at(i, start_column_index + j) = A.at(i, j);
 }

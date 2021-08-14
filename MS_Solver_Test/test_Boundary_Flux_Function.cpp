@@ -4,7 +4,7 @@
 
 GTEST_TEST(Supersonic_Outlet_2D, Linear_Advection_2D_1) {
 	const auto boundary_type = ElementType::supersonic_outlet_2D;
-	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D>::make(boundary_type);				
+	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D<1.0, 0.5>>::make(boundary_type);				
 
 	const Euclidean_Vector solution = { 2 };
 	const Euclidean_Vector normal = { 1,0 };
@@ -15,7 +15,7 @@ GTEST_TEST(Supersonic_Outlet_2D, Linear_Advection_2D_1) {
 }
 GTEST_TEST(Supersonic_Outlet_2D, Linear_Advection_2D_2) {
 	const auto boundary_type = ElementType::supersonic_outlet_2D;
-	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D>::make(boundary_type);
+	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D<1.0, 0.5>>::make(boundary_type);
 
 	const Euclidean_Vector solution = { 2 };
 	const Euclidean_Vector normal = { 1,1 };
@@ -26,7 +26,7 @@ GTEST_TEST(Supersonic_Outlet_2D, Linear_Advection_2D_2) {
 }
 GTEST_TEST(Supersonic_Outlet_2D, Linear_Advection_2D_3) {
 	const auto boundary_type = ElementType::supersonic_outlet_2D;
-	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D>::make(boundary_type);
+	const auto bff = Boundary_Flux_Function_Factory<Linear_Advection_2D<1.0, 0.5>>::make(boundary_type);
 
 	const Euclidean_Vector solution = { 2 };
 	const Euclidean_Vector normal = { 1,-1 };

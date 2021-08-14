@@ -11,7 +11,7 @@ Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order, const std::vector<doub
 	this->values_.resize(matrix_order * matrix_order);
 
 	for (size_t i = 0; i < matrix_order; ++i)
-		this->at(i, i) = value[i];
+		this->value_at(i, i) = value[i];
 }
 
 Dynamic_Matrix::Dynamic_Matrix(const size_t num_row, const size_t num_column) {
@@ -103,7 +103,7 @@ void Dynamic_Matrix::change_column(const size_t column_index, const Dynamic_Eucl
 	dynamic_require(this->num_row_ == vec.dimension(), "vector dimension should be matched with number of column");
 
 	for (size_t i = 0; i < this->num_row_; ++i)
-		this->at(i, column_index) = vec.at(i);
+		this->value_at(i, column_index) = vec.at(i);
 }
 
 void Dynamic_Matrix::change_row(const size_t start_row_index, const Dynamic_Euclidean_Vector& vec) {
@@ -144,7 +144,7 @@ size_t Dynamic_Matrix::leading_dimension(void) const {
 		return this->num_column_;
 }
 
-double& Dynamic_Matrix::at(const size_t row, const size_t column) {
+double& Dynamic_Matrix::value_at(const size_t row, const size_t column) {
 	//dynamic_require(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
 		return this->values_[column * this->num_row_ + row];
