@@ -7,7 +7,7 @@
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
-#define __GRID_FILE__					Quad10
+#define __GRID_FILE__					Quad40
 #define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__			__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__		__HOM__
@@ -20,7 +20,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__				2
+#define __SOLUTION_ORDER__				3
 #endif 
 
 #define __NUMERICAL_FLUX__				__LLF__
@@ -52,7 +52,7 @@
 // #################################### USER DEFINE SETTING ############################################################
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				1.0
+#define Y_ADVECTION_SPEED				2.0
 #define Z_ADVECTION_SPEED				0.5
 
 // Sine Wave
