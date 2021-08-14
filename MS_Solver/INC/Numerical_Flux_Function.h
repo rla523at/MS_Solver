@@ -26,6 +26,7 @@ private:
     LLF(void) = delete;
 
 public:
+    static std::string name(void) { return "LLF"; };
     static constexpr ushort space_dimension(void) { return This_::space_dimension_; };
     static constexpr ushort num_equation(void) { return This_::num_equation_; };
     static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
@@ -49,6 +50,7 @@ private:
     LLF(void) = delete;
 
 public:
+    static std::string name(void) { return "LLF"; };
     static constexpr ushort space_dimension(void) { return This_::space_dimension_; };
     static constexpr ushort num_equation(void) { return This_::num_equation_; };
     static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);

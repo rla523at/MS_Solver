@@ -72,18 +72,14 @@ double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Eucl
 
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto [x_projected_volume, y_projected_volume] = This_::projected_volumes_[i];
+        const auto [y_projected_volume, x_projected_volume] = This_::projected_volumes_[i];
         const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = projected_maximum_lambdas[i];
 
-        const auto x_radii = x_projected_volume * x_projeced_maximum_lambda;
-        const auto y_radii = y_projected_volume * y_projeced_maximum_lambda;
+        const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
+        const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
 
-        ////debug
-        //const auto spectral_radii = x_radii + y_radii;
-        //const auto spectral_radii2 = y_projected_volume * x_projeced_maximum_lambda + x_projected_volume * y_projeced_maximum_lambda;
         //if (!std::isnormal(x_radii) || !std::isnormal(y_radii))
-        //    std::cout << "not normal!";
-        ////debug
+        //    std::cout << "not normal!"; throw catch 후 post하는 루틴
 
         local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
     }

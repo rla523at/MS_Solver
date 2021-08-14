@@ -14,6 +14,22 @@ int main(void) {
 	Post_Solution_Data_::set_path(PATH);
 	Post_AI_Data::set_path(PATH + "AI_Data/");
 
+	Log::content_ << "================================================================================\n";
+	Log::content_ << "\t\t\t\t SETTING \n";
+	Log::content_ << "================================================================================\n";
+	Log::content_ << std::left << std::setw(35) << "Grid " << GRID_FILE_NAME << "\n";
+	Log::content_ << std::left << std::setw(35) << "Governing Equation" << GOVERNING_EQUATION::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Initial Condtion" << INITIAL_CONDITION::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Spatial Discrete Method" << SPATIAL_DISCRETE_METHOD::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Numeraical Flux Function" << NUMERICAL_FLUX_FUNCTION::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Time Integral Method" << TIME_INTEGRAL_METHOD::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Time Step Method" << TIME_STEP_METHOD::name() << "\n";
+	Log::content_ << std::left << std::setw(35) << "Solve End Condtion" << SOLVE_END_CONDITION::name() << "\n";
+	Log::content_ << "================================================================================\n";
+	Log::content_ << "================================================================================\n\n";
+	Log::print();
+
 	auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(GRID_FILE_NAME);
 		
 	Post_AI_Data::intialize(grid);

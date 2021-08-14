@@ -160,7 +160,7 @@ public:
     static constexpr ushort num_basis(void) { return This_::num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
-    static std::string name(void) { return "P" +  std::to_string(solution_order_) + "_Reconstruction"; };
+    static std::string name(void) { return "P" +  std::to_string(solution_order_) + "_Polynomial_Reconstruction"; };
 
 };
 

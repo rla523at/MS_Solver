@@ -53,27 +53,26 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize
         const auto& inner_face_element = inner_face_elements[i];
         const auto& inner_face_geometry = inner_face_element.geometry_;
 
-        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
         const auto& quadrature_rule = inner_face_geometry.get_quadrature_rule(integrand_order);
         const auto& qnodes = quadrature_rule.points;
         const auto& qweights = quadrature_rule.weights;
-        const auto num_qnode = qnodes.size();
+
+        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
+        const auto& oc_element = cell_elements[oc_index];
 
         auto oc_side_basis_qnode = Reconstruction_Method::calculate_basis_nodes(oc_index, qnodes);
         auto nc_side_basis_qnode = Reconstruction_Method::calculate_basis_nodes(nc_index, qnodes);
         This_::oc_nc_side_basis_qnode_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
 
+        const auto num_qnode = qnodes.size();
         std::vector<Space_Vector_> normals(num_qnode);
         Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
         Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = inner_face_element.normalized_normal_vector(oc_element, qnodes[q]);
-            //oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q] * -1);  //performance test해서 더 빠른거로 결정하기
             oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);          
-            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, qnodes[q]) * qweights[q]);         //수정 예정
+            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); 
         }
 
         This_::set_of_normals_.push_back(std::move(normals));
@@ -107,7 +106,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
             const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
             const auto nc_side_cvariable = nc_side_cvariables.column<This_::num_equation_>(q);
 
-            numerical_flux_quadrature.change_column(q, NUMERICAL_FLUX_FUNCTION::calculate(oc_side_cvariable, nc_side_cvariable, normals[q]));
+            numerical_flux_quadrature.change_column(q, Numerical_Flux_Function::calculate(oc_side_cvariable, nc_side_cvariable, normals[q]));
         }
 
         This_::Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;

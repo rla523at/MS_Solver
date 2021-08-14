@@ -83,7 +83,7 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize(Grid<
         This_::oc_side_basis_weights_.push_back(std::move(basis_weight));
     }
 
-    Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::content_ << std::left << std::setw(50) << "@ Boundaries HOM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 }
 

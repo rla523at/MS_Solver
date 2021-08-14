@@ -72,7 +72,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::buil
 	const auto element_text			= read_about(grid_file_stream, "Elements");	
 	const auto physical_name_text	= read_about(grid_file_stream, "PhysicalNames");
 
-	Log::content_ << std::left << std::setw(50) << "@ Read Grid File" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+	Log::content_ << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << GET_TIME_DURATION << "s\n\n";
 	Log::print();
 
 	return make_elements(element_text, physical_name_text, node_datas);

@@ -16,6 +16,9 @@ class CFL : public TSM<time_step_constant>
 {
 private:
 	CFL(void) = delete;
+
+public:
+	static std::string name(void) { return "CFL " + std::to_string(time_step_constant); };
 };
 
 
@@ -24,6 +27,9 @@ class Constant_Dt : public TSM<time_step_constant>
 {
 private:
 	Constant_Dt(void) = delete;
+
+public:
+	static std::string name(void) { return "Constant " + std::to_string(time_step_constant) + " Time"; };
 };
 
 
