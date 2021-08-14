@@ -86,6 +86,8 @@ public:
 	bool operator==(const Dynamic_Euclidean_Vector& other) const;
 
 	double at(const size_t position) const;
+	std::vector<double>::const_iterator begin(void) const;
+	std::vector<double>::const_iterator end(void) const;
 	const double* data(void) const;
 	size_t dimension(void) const;
 	std::string to_string(void) const;

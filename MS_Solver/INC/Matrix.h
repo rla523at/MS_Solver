@@ -114,6 +114,9 @@ public:
 	Dynamic_Matrix& be_transpose(void);
 	Dynamic_Matrix& be_inverse(void);
 	void change_column(const size_t column_index, const Dynamic_Euclidean_Vector& vec);
+	void change_row(const size_t start_row_index, const Dynamic_Euclidean_Vector& vec);
+	void change_rows(const size_t start_row_index, const Dynamic_Matrix& A);
+
 
 	template <size_t num_row>
 	Euclidean_Vector<num_row> column(const size_t column_index) const;

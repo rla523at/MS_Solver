@@ -137,13 +137,13 @@ class HOM_Reconstruction : public RM {};
 template <ushort space_dimension_, ushort solution_order_>
 class Polynomial_Reconstruction : public HOM_Reconstruction
 {
-private:
+protected:
     using This_         = Polynomial_Reconstruction<space_dimension_, solution_order_>;
     using Space_Vector_ = Euclidean_Vector<space_dimension_>;
         
     static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension_, solution_order_);
 
-private:
+protected:
     inline static std::vector<Vector_Function<Polynomial<space_dimension_>, num_basis_>> set_of_basis_functions_;
 
 private:
@@ -161,6 +161,33 @@ public:
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
     static std::string name(void) { return "P" +  std::to_string(solution_order_) + "_Polynomial_Reconstruction"; };
+};
+
+
+template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
+class hMLP_Reconstruction : public Polynomial_Reconstruction<space_dimension_, solution_order_>
+{
+private:
+    using Base_                     = Polynomial_Reconstruction<space_dimension_, solution_order_>;
+    using This_                     = hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>;
+    using Solution_Coefficients_    = Matrix<num_equation, This_::num_basis_>;
+
+private:
+    inline static std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
+    inline static std::vector<Dynamic_Matrix> P1_mode_basis_vnodes_;
+    inline static std::vector<Dynamic_Matrix> P1_projected_basis_vnodes_;
+    inline static std::vector<double> P0_basis_values_;
+
+
+private:
+    hMLP_Reconstruction(void) = delete;
+
+public:
+    static void initialize(Grid<space_dimension_>&& grid);
+    static std::string name(void) { return "P" + std::to_string(solution_order_) + "_hMLP_Reconstruction"; };
+
+private:
+    static auto calculate_vertex_node_index_to_min_max_solution(const std::vector<Solution_Coefficients_>& solutions);
 
 };
 
@@ -525,25 +552,19 @@ auto Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_set
 template <ushort space_dimension_, ushort solution_order_>
 auto Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_basis_node(const uint cell_index, const Space_Vector_& node) {
     const auto& basis_functions = This_::set_of_basis_functions_[cell_index];
-
-    std::array<double, This_::num_basis_> values;
-    for (size_t i = 0; i < This_::num_basis_; ++i)
-        values[i] = basis_functions[i](node);
-
-    Euclidean_Vector<This_::num_basis_> basis_value = values;
-    return basis_value;
+    return basis_functions(node);
 }
 
 
 template <ushort space_dimension_, ushort solution_order_>
 Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) {
-    const auto& basis_function = This_::set_of_basis_functions_[cell_index];
+    const auto& basis_functions = This_::set_of_basis_functions_[cell_index];
 
     const auto num_node = nodes.size();
 
     Dynamic_Matrix basis_nodes(This_::num_basis_, num_node);
     for (size_t j = 0; j < num_node; ++j)
-        basis_nodes.change_column(j, basis_function(nodes[j]));
+        basis_nodes.change_column(j, basis_functions(nodes[j]));
 
     return basis_nodes;
 }
@@ -588,8 +609,45 @@ std::vector<double> Polynomial_Reconstruction<space_dimension_, solution_order_>
     return P0_basis_values;
 }
 
+template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
+static void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initialize(Grid<space_dimension_>&& grid) {
+    SET_TIME_POINT;
+    Base_::initialize(grid);
+    This_::vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
 
+    const auto& cell_elements = grid.elements.cell_elements;
+    const auto num_cell = cell_elements.size();
+    This_::P0_basis_values_.reserve(num_cell);
+    This_::P1_projected_basis_vnodes_.reserve(num_cell);
 
+    constexpr ushort P1_solution_order = 1;
+    constexpr auto num_P1_projected_basis = ms::combination_with_repetition(1 + space_dimension_, P1_solution_order);
+    constexpr auto num_over_P2_basis = This_::num_basis_ - num_P1_projected_basis;
+    
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& cell_element = cell_elements[i];
+        const auto& cell_geometry = cell_element.geometry_;
+
+        //const auto& basis_function = This_::set_of_basis_functions_[i];
+        //const auto& P0_basis_function = basis_function[0];
+
+        //const auto P0_basis_value = P0_basis_function(cell_geometry.center_node());
+
+        const auto vnodes = cell_geometry.vertex_nodes();
+        auto P1_projected_basis_vnode = This_::calculate_basis_nodes(i, vnodes);
+        
+        const auto num_vnode = vnodes.size();
+        Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
+        P1_projected_basis_vnode.change_rows(num_P1_projected_basis, P1_projection_matrix); 
+        
+        This_::P0_basis_values_.push_back(P0_basis_value);
+        This_::P1_mode_basis_vnodes_.push_back();
+        This_::P1_projected_basis_vnodes_.push_back(P1_projected_basis_vnode);
+    }
+
+    Log::content_ << std::left << std::setw(50) << "@ hMLP precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::print();
+}
 
 
 //template <typename Gradient_Method>

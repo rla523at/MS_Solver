@@ -14,6 +14,14 @@ double Dynamic_Euclidean_Vector::at(const size_t position) const {
 	return this->values_[position];
 }
 
+std::vector<double>::const_iterator Dynamic_Euclidean_Vector::begin(void) const {
+	return this->values_.cbegin();
+}
+
+std::vector<double>::const_iterator Dynamic_Euclidean_Vector::end(void) const {
+	return this->values_.cend();
+}
+
 const double* Dynamic_Euclidean_Vector::data(void) const {
 	return this->values_.data();
 };
