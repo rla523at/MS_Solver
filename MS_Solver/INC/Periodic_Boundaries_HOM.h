@@ -3,6 +3,13 @@
 #include "Reconstruction_Method.h"
 #include "Numerical_Flux_Function.h"
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+    for (const auto& elem : vec)
+        os << elem << "\n";
+    return os;
+}
+
 
 //HOM이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -62,12 +69,26 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::in
         const auto& nc_side_quadrature_rule = nc_side_geometry.get_quadrature_rule(integrand_order);
         const auto& nc_side_qnodes = nc_side_quadrature_rule.points;
         const auto& nc_side_qweights = nc_side_quadrature_rule.weights;
-           
+
+        //debug
+        auto re_ordered_nc_side_qnodes = nc_side_qnodes;
+        auto re_ordered_nc_side_qweights = nc_side_qweights;
+
+        const auto oc_side_normal_vector = oc_side_geometry.normalized_normal_vector(oc_side_geometry.center_node());
+        const auto nc_side_normal_vector = nc_side_geometry.normalized_normal_vector(nc_side_geometry.center_node());
+        const auto inner_product = oc_side_normal_vector.inner_product(nc_side_normal_vector);
+
+        if (inner_product < 0) {
+            std::reverse(re_ordered_nc_side_qnodes.begin(), re_ordered_nc_side_qnodes.end());
+            std::reverse(re_ordered_nc_side_qweights.begin(), re_ordered_nc_side_qweights.end());
+        }   
+        //debug
+
         const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
         const auto& oc_element = cell_elements[oc_index];
 
         auto oc_side_basis_qnode = Reconstruction_Method::calculate_basis_nodes(oc_index, oc_side_qnodes);
-        auto nc_side_basis_qnode = Reconstruction_Method::calculate_basis_nodes(nc_index, nc_side_qnodes);
+        auto nc_side_basis_qnode = Reconstruction_Method::calculate_basis_nodes(nc_index, re_ordered_nc_side_qnodes);
 
         const auto num_qnode = oc_side_qnodes.size();
         std::vector<Space_Vector_> normals(num_qnode);
@@ -77,7 +98,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::in
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
             oc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);    
-            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, nc_side_qnodes[q]) * nc_side_qweights[q]);
+            nc_side_basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(nc_index, re_ordered_nc_side_qnodes[q]) * re_ordered_nc_side_qweights[q]);
         }
         
 
