@@ -109,7 +109,7 @@ void Cells_FVM<Governing_Equation>::estimate_error(const std::vector<Euclidean_V
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
 
-    if constexpr (std::is_same_v<Governing_Equation, Linear_Advection_2D>) {
+    if constexpr (ms::is_Linear_Advection_2D<Governing_Equation>) {
         double global_L1_error = 0.0;
         double global_L2_error = 0.0;
         double global_Linf_error = 0.0;

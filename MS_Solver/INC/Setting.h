@@ -7,7 +7,7 @@
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
-#define __GRID_FILE__					Quad10
+#define __GRID_FILE__					Quad50
 #define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__			__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__		__HOM__
@@ -31,7 +31,7 @@
 #define __END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__		__POST_BY_TIME__
 #define __POST_CONDITION_CONSTANT__		0.1
-#define __POST_ORDER__					2
+#define __POST_ORDER__					1
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -61,7 +61,7 @@
 #define Z_WAVE_LENGTH					1
 
 // Mode (comment out == turn off)
-#define ERROR_CALCULATION_MODE
+//#define ERROR_CALCULATION_MODE
 
 // ################################# USER DEFINE SETTING END #########################################################
  
