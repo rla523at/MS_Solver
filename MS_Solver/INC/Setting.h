@@ -7,7 +7,7 @@
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
-#define __GRID_FILE__					Quad40
+#define __GRID_FILE__					Mix30
 #define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__			__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__		__HOM__
