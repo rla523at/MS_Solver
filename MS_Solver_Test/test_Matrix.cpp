@@ -77,6 +77,15 @@ TEST(Matrix, scalar_multiplication_2) {
 	EXPECT_EQ(result, ref);
 }
 
+TEST(Matrix, gemm_1) {
+	Matrix<1, 2> m = { 1,2 };
+	const Matrix<2, 2> m2 = { 2,2,2,2 };
+	m *= m2;
+
+	const Matrix<1, 2> ref = { 6,6 };
+	EXPECT_EQ(m, ref);
+}
+
 TEST(Matrix, column_1) {
 	const Matrix<2, 3> m = { 1,2,3,4,5,6 };
 	const auto result = m.column(0);

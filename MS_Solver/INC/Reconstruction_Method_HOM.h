@@ -273,11 +273,11 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                         if (temporal_solution_order == 1) {
                             const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_criterion_variable, P0_mode_criterion_variable, allowable_min, allowable_max);
                             
-                            std::array<double, num_basis_> limiting_values;
+                            std::array<double, This_::num_basis_> limiting_values;
                             limiting_values.fill(limiting_value);
-                            limiting_value[0] = 1.0; // keep P0
+                            limiting_values[0] = 1.0; // keep P0
                             
-                            const auto limiting_matrix = Matrix<num_basis_, num_basis_>::diagonal_matrix(limiting_values);
+                            const auto limiting_matrix = Matrix<This_::num_basis_, This_::num_basis_>::diagonal_matrix(limiting_values);
 
                             solution_coefficient *= limiting_matrix;
                             end_limiting = true;

@@ -52,6 +52,7 @@ public:
 	Matrix& operator+=(const Matrix& A);
 	Matrix& operator-=(const Matrix& A);
 	Matrix& operator*=(const double scalar);
+	Matrix& operator*=(const Matrix<num_column, num_column>& A);
 
 	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
@@ -59,8 +60,13 @@ public:
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
 	bool operator==(const Matrix & A) const;
 
+	
+	
+	
 	template <size_t other_num_column>
 	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;
+
+	
 
 	double at(const size_t row_index, const size_t column_index) const;
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
@@ -215,6 +221,12 @@ Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator*=(const doubl
 	else
 		cblas_dscal(this->num_value_, scalar, this->values_.data(), 1);
 
+	return *this;
+}
+
+template<size_t num_row, size_t num_column>
+Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator*=(const Matrix<num_column, num_column>& A) {
+	*this = (*this) * A;
 	return *this;
 }
 
