@@ -27,32 +27,40 @@ public:
         SET_TIME_POINT;
         while (true) {
             SET_TIME_POINT;
-            auto time_step = Semi_Discrete_Equation::template calculate_time_step<Time_Step_Method>(solutions);
-             
-            if (Solve_End_Condition::inspect(current_time, time_step)) {
-                Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
-                current_time += time_step;
+            try {
+                auto time_step = Semi_Discrete_Equation::template calculate_time_step<Time_Step_Method>(solutions);
+
+                if (Solve_End_Condition::inspect(current_time, time_step)) {
+                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    current_time += time_step;
+                    Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
+
+                    Log::content_ << "current time: " << std::to_string(current_time) + "s  (100.00%)\n";
+                    Post_Solution_Data::post_solution(solutions, "final");
+                    break;
+                }
+
+                if (Solve_Post_Condition::inspect(current_time, time_step)) {
+                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    current_time += time_step;
+
+                    Post_Solution_Data::post_solution(solutions);
+                }
+                else {
+                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    current_time += time_step;
+                }          
+
                 Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
-
-                Log::content_ << "current time: " << std::to_string(current_time) + "s  (100.00%)\n";
-                Post_Solution_Data::post_solution(solutions, "final");
-                break;
+                Log::print();                
             }
-
-            if (Solve_Post_Condition::inspect(current_time, time_step)) {
-                Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
-                current_time += time_step;
-
-                Post_Solution_Data::post_solution(solutions);
+            catch (...) {
+                std::cout << "Abnormal termination due to unphysical time step \n";                
+                Post_Solution_Data::post_solution(solutions, "abnormal");
+                std::exit(99);
             }
-            else {
-                Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
-                current_time += time_step;
-            }          
-
-            Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
-            Log::print();                
         }
+
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";

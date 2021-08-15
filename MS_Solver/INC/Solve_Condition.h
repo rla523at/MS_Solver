@@ -76,6 +76,22 @@ private:
     inline static size_t num_post_ = 1;
 };
 
+template<ushort post_iter>
+class Post_By_Iter : public SPC
+{
+public:
+    static bool inspect(const double current_time, double& time_step) {
+        static uint iter = 1;
+
+        if (iter++ == post_iter) {
+            iter = 1;
+            return true;
+        }
+        else
+            return false;
+    }
+};
+
 namespace ms {
     template <typename T>
     inline constexpr bool is_solve_end_condtion = std::is_base_of_v<SEC, T>;
