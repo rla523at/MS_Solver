@@ -62,6 +62,7 @@ class Modified_SOD_2D : public IC {
     using Space_Vector_ = Euclidean_Vector<dimension_>;
     using Solution_     = Euclidean_Vector<num_eqation_>;
 public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
     static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
     static std::string name(void) { return "Modifid_SOD"; };
 
@@ -81,10 +82,6 @@ template <double x_wave_length, double y_wave_length>
 Euclidean_Vector<1> Sine_Wave_2D<x_wave_length, y_wave_length>::calculate_solution(const Space_Vector_& space_vector) {
     const auto x_coord = space_vector.at(0);
     const auto y_coord = space_vector.at(1);
-
-    //debug
-    //if (x_coord > 1.0 || y_coord > 1.0)
-    //    return { 0 };
 
     return { std::sin(This_::x_wave_number_ * x_coord) * std::sin(This_::y_wave_number_ * y_coord) };
 }

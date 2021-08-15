@@ -44,6 +44,40 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const 
 //	return exact_solutions_;
 //}
 
+Modified_SOD_2D::Solution_ Modified_SOD_2D::calculate_solution(const Space_Vector_& space_vector) {
+	constexpr auto gamma = 1.4;
+	constexpr auto c = 1 / (1.4 - 1);
+
+	const auto x_coordinate = space_vector.at(0);
+
+	if (x_coordinate <= 0.3) {
+		constexpr auto rho = 1.0;
+		constexpr auto u = 0.75;
+		constexpr auto v = 0.0;
+		constexpr auto p = 1.0;
+
+		constexpr auto rhou = rho * u;
+		constexpr auto rhov = rho * v;
+		constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+	else {
+		constexpr auto rho = 0.125;
+		constexpr auto u = 0.0;
+		constexpr auto v = 0.0;
+		constexpr auto p = 0.1;
+
+		constexpr auto rhou = rho * u;
+		constexpr auto rhov = rho * v;
+		constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+
+}
+
+
 std::vector<Modified_SOD_2D::Solution_> Modified_SOD_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
 	const auto num_cell = cell_centers.size();
 	

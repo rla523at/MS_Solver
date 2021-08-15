@@ -291,9 +291,11 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                             const Dynamic_Matrix order_down_matrix(num_equation, num_delete_basis);
                             solution_coefficient.change_columns(num_Pnm1_basis, order_down_matrix);     
 
-                            //re-calculate limited solution
+                            //re-calculate limited solution                            
                             solution_vnode = solution_coefficient * This_::basis_vnodes_[i];
                             P1_projected_solution_vnode = solution_coefficient * This_::P1_projected_basis_vnodes_[i];
+
+                            temporal_solution_order--;
                         }
                     }
                 }    

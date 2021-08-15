@@ -179,8 +179,6 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
             initial_solution_qnodes.change_column(q, Initial_Condition::calculate_solution(qnodes[q]));
             basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(i, qnodes[q]) * qweights[q]);
         }
-        //const auto qnodes_basis = This_::set_of_basis_qnodes_[i].transpose();        
-        //ms::gemm(initial_solution_qnodes, qnodes_basis, initial_solution_coefficients[i]);
 
         ms::gemm(initial_solution_qnodes, basis_weight, initial_solution_coefficients[i]);
 
