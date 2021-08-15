@@ -122,7 +122,7 @@ void Dynamic_Matrix::change_row(const size_t start_row_index, const Dynamic_Eucl
 void Dynamic_Matrix::change_rows(const size_t start_row_index, const Dynamic_Matrix& A) {
 	dynamic_require(this->num_column_ == A.num_column_, "dimension should be matched");
 	dynamic_require(start_row_index + A.num_row_ <= this->num_row_, "range can't not exceed given range");
-	dynamic_require(!this->is_transposed() && A.is_transposed(), "it should be not transposed for this routine");
+	dynamic_require(!this->is_transposed() && !A.is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_column_;
 	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
