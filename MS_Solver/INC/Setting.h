@@ -61,7 +61,7 @@
 #define Z_WAVE_LENGTH					1
 
 // Mode (comment out == turn off)
-//#define ERROR_CALCULATION_MODE
+#define ERROR_CALCULATION_MODE
 
 // ################################# USER DEFINE SETTING END #########################################################
  

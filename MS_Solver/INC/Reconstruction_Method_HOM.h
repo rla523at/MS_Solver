@@ -38,6 +38,8 @@ template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
 class hMLP_Reconstruction : public Polynomial_Reconstruction<space_dimension_, solution_order_>
 {
 private:
+    static_require(1 <= solution_order_, "solution order should be greater than 1 for hMLP reconstruction");
+
     using Base_ = Polynomial_Reconstruction<space_dimension_, solution_order_>;
     using This_ = hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>;
     using Solution_Coefficients_ = Matrix<num_equation, This_::num_basis_>;
@@ -167,7 +169,7 @@ std::vector<double> Polynomial_Reconstruction<space_dimension_, solution_order_>
 }
 
 template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
-void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initialize(Grid<space_dimension_>&& grid) {
+void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initialize(Grid<space_dimension_>&& grid) {    
     SET_TIME_POINT;
     
     for (ushort i = 0; i <= solution_order_; ++i) 
@@ -202,8 +204,10 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
         auto basis_vnode = This_::calculate_basis_nodes(i, vnodes);
 
         auto P1_projected_basis_vnode = basis_vnode;
-        Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
-        P1_projected_basis_vnode.change_rows(num_P1_projected_basis, P1_projection_matrix);
+        if (solution_order_ > 1) {
+            Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
+            P1_projected_basis_vnode.change_rows(num_P1_projected_basis, P1_projection_matrix);
+        }
 
         Dynamic_Matrix P1_mode_basis_vnode = P1_projected_basis_vnode;
         P1_mode_basis_vnode.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
@@ -268,7 +272,14 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                     else {
                         if (temporal_solution_order == 1) {
                             const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_criterion_variable, P0_mode_criterion_variable, allowable_min, allowable_max);
-                            solution_coefficient *= limiting_value;
+                            
+                            std::array<double, num_basis_> limiting_values;
+                            limiting_values.fill(limiting_value);
+                            limiting_value[0] = 1.0; // keep P0
+                            
+                            const auto limiting_matrix = Matrix<num_basis_, num_basis_>::diagonal_matrix(limiting_values);
+
+                            solution_coefficient *= limiting_matrix;
                             end_limiting = true;
                             break;
                         }

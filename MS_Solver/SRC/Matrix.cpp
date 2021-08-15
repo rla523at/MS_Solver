@@ -5,6 +5,7 @@ Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order) {
 }
 
 Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order, const std::vector<double>& value) {
+	dynamic_require(matrix_order != 0, "matrix order can not be 0");
 	dynamic_require(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
 	this->num_row_ = matrix_order;
 	this->num_column_ = matrix_order;
@@ -15,12 +16,15 @@ Dynamic_Matrix::Dynamic_Matrix(const size_t matrix_order, const std::vector<doub
 }
 
 Dynamic_Matrix::Dynamic_Matrix(const size_t num_row, const size_t num_column) {
+	dynamic_require(num_row * num_column != 0, "number of row or number of column can not be 0");
+
 	this->num_row_ = num_row;
 	this->num_column_ = num_column;
 	this->values_.resize(num_row * num_column);
 }
 
 Dynamic_Matrix::Dynamic_Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) {
+	dynamic_require(num_row * num_column != 0, "number of row or number of column can not be 0");
 	dynamic_require(num_row * num_column == value.size(), "num value should be same with matrix size");
 
 	this->num_row_ = num_row;
