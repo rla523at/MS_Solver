@@ -120,7 +120,10 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
         const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
 
-        dynamic_require(std::isnormal(x_radii) && std::isnormal(y_radii), "it should be normal number");
+        //if (!(std::isnormal(x_radii) && std::isnormal(y_radii)))
+        //    std::cout << "Debug";
+
+        dynamic_require(std::isnormal(x_radii) && std::isnormal(y_radii), "time step should be normal number");
         local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
     }
 

@@ -37,17 +37,18 @@ private:
     static constexpr size_t dimension_ = 2;
 
     using Space_Vector_ = Euclidean_Vector<dimension_>;
-    using Solution = Euclidean_Vector<num_eqation_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
 
 private:
     Square_Wave_2D(void) = delete;
 
 public:
-    static std::vector<Solution> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
     static std::string name(void) { return "Square_Wave_2D"; };
     
     template <typename Governing_Equation>
-    static std::vector<Solution> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
+    static std::vector<Solution_> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 };
 
 

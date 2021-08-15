@@ -148,6 +148,9 @@ namespace ms {
 	template <typename T>
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
 
+    //template <typename T>
+    //inline constexpr bool is_HOM_reconstruction_method = std::is_base_of_v<HOM_Reconstruction, T>;
+
     template <typename T>
     inline constexpr bool is_constant_reconustruction = std::is_same_v<Constant_Reconstruction, T>;
 

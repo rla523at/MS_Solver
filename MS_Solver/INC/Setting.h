@@ -29,8 +29,8 @@
 #define __TIME_STEP_CONSTANT__			0.9
 #define __SOLVE_END_CONDITION__			__END_BY_TIME__
 #define __END_CONDITION_CONSTANT__		0.2
-#define __SOLVE_POST_CONDITION__		__POST_BY_ITER__
-#define __POST_CONDITION_CONSTANT__		1
+#define __SOLVE_POST_CONDITION__		__POST_BY_TIME__
+#define __POST_CONDITION_CONSTANT__		0.02
 #define __POST_ORDER__					2
 
 // AVAILABLE OPTIONS
@@ -62,6 +62,13 @@
 
 // Mode (comment out == turn off)
 //#define ERROR_CALCULATION_MODE
+#if __GOVERNING_EQUATION__		== 		__EULER__
+#if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
+#define PRESSURE_FIX_MODE
+#endif
+#endif
+
+
 
 // ################################# USER DEFINE SETTING END #########################################################
  

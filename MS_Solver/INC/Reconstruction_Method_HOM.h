@@ -1,6 +1,8 @@
 #pragma once
+#include "Governing_Equation.h"
 #include "Reconstruction_Method_FVM.h"
 #include "Polynomial.h"
+
 
 class HOM_Reconstruction : public RM {};
 
@@ -49,10 +51,10 @@ private:
 private:
     inline static std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
     inline static std::vector<std::vector<uint>> set_of_vnode_indexes_;
-    inline static std::vector<Dynamic_Matrix> P1_mode_basis_vnodes_;
-    inline static std::vector<Dynamic_Matrix> P1_projected_basis_vnodes_;
+    inline static std::vector<Dynamic_Matrix> set_of_P1_mode_basis_vnodes_;
+    inline static std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;
     inline static std::vector<double> P0_basis_values_;
-    inline static std::vector<Dynamic_Matrix> basis_vnodes_;
+    inline static std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     inline static std::array<ushort, solution_order_ + 1> num_Pn_basis_;
 
 private:
@@ -68,6 +70,9 @@ public:
     static bool is_satisfy_P1_projected_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max);
     static bool is_smooth_extrema(const double solution, const double higher_mode_solution, const double P1_mode_solution, const double allowable_min, const double allowable_max);
 };
+
+
+
 
 
 //template definition part
@@ -181,9 +186,9 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
     const auto& cell_elements = grid.elements.cell_elements;
     const auto num_cell = cell_elements.size();
     This_::set_of_vnode_indexes_.reserve(num_cell);
-    This_::basis_vnodes_.reserve(num_cell);
-    This_::P1_projected_basis_vnodes_.reserve(num_cell);
-    This_::P1_mode_basis_vnodes_.reserve(num_cell);
+    This_::set_of_basis_vnodes_.reserve(num_cell);
+    This_::set_of_P1_projected_basis_vnodes_.reserve(num_cell);
+    This_::set_of_P1_mode_basis_vnodes_.reserve(num_cell);
     This_::P0_basis_values_.reserve(num_cell);
 
     constexpr ushort P1_solution_order = 1;
@@ -201,22 +206,22 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
         const auto vnodes = cell_geometry.vertex_nodes();
         const auto num_vnode = vnodes.size();
 
-        auto basis_vnode = This_::calculate_basis_nodes(i, vnodes);
+        auto basis_vnodes = This_::calculate_basis_nodes(i, vnodes);
 
-        auto P1_projected_basis_vnode = basis_vnode;
+        auto P1_projected_basis_vnodes = basis_vnodes;
         if (solution_order_ > 1) {
             Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
-            P1_projected_basis_vnode.change_rows(num_P1_projected_basis, P1_projection_matrix);
+            P1_projected_basis_vnodes.change_rows(num_P1_projected_basis, P1_projection_matrix);
         }
 
-        Dynamic_Matrix P1_mode_basis_vnode = P1_projected_basis_vnode;
-        P1_mode_basis_vnode.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
+        Dynamic_Matrix P1_mode_basis_vnodes = P1_projected_basis_vnodes;
+        P1_mode_basis_vnodes.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
 
-        const auto P0_basis_value = P1_projected_basis_vnode.at(P0_basis_row_index, 0);
+        const auto P0_basis_value = P1_projected_basis_vnodes.at(P0_basis_row_index, 0);
 
-        This_::basis_vnodes_.push_back(std::move(basis_vnode));
-        This_::P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnode));
-        This_::P1_mode_basis_vnodes_.push_back(std::move(P1_mode_basis_vnode));
+        This_::set_of_basis_vnodes_.push_back(std::move(basis_vnodes));
+        This_::set_of_P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnodes));
+        This_::set_of_P1_mode_basis_vnodes_.push_back(std::move(P1_mode_basis_vnodes));
         This_::P0_basis_values_.push_back(P0_basis_value);
     }
 
@@ -239,9 +244,8 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
         auto temporal_solution_order = solution_order_;
 
         auto& solution_coefficient = solution_coefficients[i];
-
-        auto solution_vnode = solution_coefficient * This_::basis_vnodes_[i];
-        auto P1_projected_solution_vnode = solution_coefficient * This_::P1_projected_basis_vnodes_[i];
+        auto solution_vnodes = solution_coefficient * This_::set_of_basis_vnodes_[i];
+        auto P1_projected_solution_vnodes = solution_coefficient * This_::set_of_P1_projected_basis_vnodes_[i];
 
         const auto& vnode_indexes = This_::set_of_vnode_indexes_[i];
         const auto num_vnode = vnode_indexes.size();
@@ -253,20 +257,20 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
             const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_solution.at(vnode_index);
 
             while (true) {
-                const auto P1_projected_solution = P1_projected_solution_vnode.column<num_equation>(j);
-                const auto P1_projected_criterion_variable = P1_projected_solution[This_::criterion_variable_index_];
+                const auto P1_projected_solution = P1_projected_solution_vnodes.column<num_equation>(j);
+                const auto P1_projected_solution_criterion_variable = P1_projected_solution[This_::criterion_variable_index_];
 
-                if (This_::is_satisfy_P1_projected_MLP_condition(P1_projected_criterion_variable, allowable_min, allowable_max))                     
+                if (This_::is_satisfy_P1_projected_MLP_condition(P1_projected_solution_criterion_variable, allowable_min, allowable_max))                     
                     break;                    
                 else {
-                    const auto solution = solution_vnode.column<num_equation>(j);
-                    const auto solution_criterion_variable = solution[This_::criterion_variable_index_];
+                    const auto vnode_solution = solution_vnodes.column<num_equation>(j);
+                    const auto vnode_solution_criterion_variable = vnode_solution[This_::criterion_variable_index_];
 
-                    const auto higher_mode_criterion_variable = solution_criterion_variable - P1_projected_criterion_variable;
-                    const auto P1_mode_criterion_variable = P1_projected_criterion_variable - P0_solutions[i][This_::criterion_variable_index_];
+                    const auto higher_mode_criterion_variable = vnode_solution_criterion_variable - P1_projected_solution_criterion_variable;
+                    const auto P1_mode_criterion_variable = P1_projected_solution_criterion_variable - P0_solutions[i][This_::criterion_variable_index_];
                     const auto P0_mode_criterion_variable = P0_solutions[i][This_::criterion_variable_index_];
 
-                    if (This_::is_smooth_extrema(solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
+                    if (This_::is_smooth_extrema(vnode_solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
                         break;
 
                     else {
@@ -275,7 +279,7 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                             
                             std::array<double, This_::num_basis_> limiting_values;
                             limiting_values.fill(limiting_value);
-                            limiting_values[0] = 1.0; // keep P0
+                            limiting_values[0] = 1.0; // keep P0 value
                             
                             const auto limiting_matrix = Matrix<This_::num_basis_, This_::num_basis_>::diagonal_matrix(limiting_values);
 
@@ -285,15 +289,15 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                         }
                         else {
                             //limiting high order term
-                            const auto num_Pnm1_basis = This_::num_Pn_basis_[temporal_solution_order - 1];
                             const auto num_Pn_basis = This_::num_Pn_basis_[temporal_solution_order];
+                            const auto num_Pnm1_basis = This_::num_Pn_basis_[temporal_solution_order - 1];
                             const auto num_delete_basis = num_Pn_basis - num_Pnm1_basis;
                             const Dynamic_Matrix order_down_matrix(num_equation, num_delete_basis);
                             solution_coefficient.change_columns(num_Pnm1_basis, order_down_matrix);     
 
-                            //re-calculate limited solution                            
-                            solution_vnode = solution_coefficient * This_::basis_vnodes_[i];
-                            P1_projected_solution_vnode = solution_coefficient * This_::P1_projected_basis_vnodes_[i];
+                            //re-calculate limited vnode_solution                            
+                            solution_vnodes = solution_coefficient * This_::set_of_basis_vnodes_[i];
+                            P1_projected_solution_vnodes = solution_coefficient * This_::set_of_P1_projected_basis_vnodes_[i];
 
                             temporal_solution_order--;
                         }

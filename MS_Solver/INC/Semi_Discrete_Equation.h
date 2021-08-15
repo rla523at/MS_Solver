@@ -3,6 +3,7 @@
 #include "Cells.h"
 #include "Inner_Faces.h"
 #include "Periodic_Boundaries.h"
+#include "Pressure_Fix.h"
 #include "Numerical_Flux_Function.h"
 
 template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -15,7 +16,7 @@ private:
     static_require(ms::is_numeirical_flux_function<Numerical_Flux_Function>,    "It should be numerical flux function");
 
     static constexpr size_t space_dimension_    = Governing_Equation::space_dimension();
-    static constexpr size_t num_equation_       = Governing_Equation::num_equation();
+    static constexpr size_t num_equation_       = Governing_Equation::num_equation();    
 
     using Boundaries_           = Boundaries<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
     using Cells_                = Cells<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
@@ -36,6 +37,8 @@ public:
         Periodic_Boundaries_::initialize(std::move(grid));
         Inner_Faces_::initialize(std::move(grid));
 
+        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>)
+            Pressure_Fix::initialize<Reconstruction_Method>(grid);
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
@@ -60,6 +63,8 @@ public:
         if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             Reconstruction_Method::reconstruct(solutions);
 
+        Pressure_Fix::reconstruct(solutions);
+
         Boundaries_::calculate_RHS(RHS, solutions);
         Periodic_Boundaries_::calculate_RHS(RHS, solutions);
         Inner_Faces_::calculate_RHS(RHS, solutions);
@@ -67,6 +72,23 @@ public:
 
         return RHS;
     }
+
+    ////Type2
+    //static std::vector<Residual_> calculate_RHS(const std::vector<Discretized_Solution_>& solutions) {
+    //    static const auto num_solution = solutions.size();
+    //    std::vector<Residual_> RHS(num_solution);
+
+    //    //if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
+    //    auto reconstructed_solution = solutions;
+    //    Reconstruction_Method::reconstruct(reconstructed_solution);
+
+    //    Boundaries_::calculate_RHS(RHS, reconstructed_solution);
+    //    Periodic_Boundaries_::calculate_RHS(RHS, reconstructed_solution);
+    //    Inner_Faces_::calculate_RHS(RHS, reconstructed_solution);
+    //    Cells_::calculate_RHS(RHS, reconstructed_solution);
+
+    //    return RHS;
+    //}
 
     //static std::vector<Residual_> calculate_RHS(const std::vector<Discretized_Solution_>& solutions) {
     //    static const auto num_solution = solutions.size();

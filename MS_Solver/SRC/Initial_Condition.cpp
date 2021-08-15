@@ -1,9 +1,19 @@
 #include "../INC/Inital_Condition.h"
 
-std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+Square_Wave_2D::Solution_ Square_Wave_2D::calculate_solution(const Space_Vector_& space_vector) {
+	const auto x_coord = space_vector.at(0);
+	const auto y_coord = space_vector.at(1);
+
+	if (0.25 <= x_coord && x_coord <= 0.75 && 0.25 <= y_coord && y_coord <= 0.75)
+		return { 1 };
+	else
+		return { 0 };
+}
+
+std::vector<Square_Wave_2D::Solution_> Square_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
 	const auto num_cell = cell_centers.size();
 
-	std::vector<Solution> solutions_(num_cell);
+	std::vector<Solution_> solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {
 		const auto x_coord = cell_centers[i].at(0);
 		const auto y_coord = cell_centers[i].at(1);
@@ -19,14 +29,14 @@ std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_solutions(const 
 
 
 //template <>
-//std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
-//	const auto num_cell = cell_centers.size();
+//std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& space_vector, const double end_time) {
+//	const auto num_cell = space_vector.size();
 //	const auto [x_advection_speed, y_advection_speed] = Linear_Advection_2D::advection_speed();
 //
 //	std::vector<Solution> exact_solutions_(num_cell);
 //	for (size_t i = 0; i < num_cell; ++i) {
-//		const auto x_coord = cell_centers[i].at(0);
-//		const auto y_coord = cell_centers[i].at(1);
+//		const auto x_coord = space_vector[i].at(0);
+//		const auto y_coord = space_vector[i].at(1);
 //
 //		//Assume that domian [0,1] x [0,1]
 //		const auto exact_x_start	= 0.25 + x_advection_speed * end_time - static_cast<int>(0.25 + x_advection_speed * end_time);

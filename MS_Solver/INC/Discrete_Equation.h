@@ -28,6 +28,7 @@ public:
         while (true) {
             SET_TIME_POINT;
             try {
+                //debug
                 auto time_step = Semi_Discrete_Equation::template calculate_time_step<Time_Step_Method>(solutions);
 
                 if (Solve_End_Condition::inspect(current_time, time_step)) {
@@ -54,8 +55,8 @@ public:
                 Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
                 Log::print();                
             }
-            catch (...) {
-                std::cout << "Abnormal termination due to unphysical time step \n";                
+            catch (std::exception& excep) {
+                std::cout << "Abnormal termination : " << excep.what() << "\n";
                 Post_Solution_Data::post_solution(solutions, "abnormal");
                 std::exit(99);
             }
