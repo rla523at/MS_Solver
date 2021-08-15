@@ -2,6 +2,22 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Matrix.h"
 
+TEST(Matrix, construct_diagonal_matrix_1) {
+	std::array<double, 2> ar = { 2,2 };
+	Matrix<2, 2> result = ar;
+
+	Matrix<2, 2> ref = { 2,0,0,2 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Matrix, construct_diagonal_matrix_2) {
+	std::array<double, 2> ar = { 2,2 };
+	Matrix result = ar;
+
+	Matrix<2, 2> ref = { 2,0,0,2 };
+	EXPECT_EQ(result, ref);
+}
+
+
 TEST(Matrix, operator_plus_1) {
 	std::array<double, 16> ar;
 	ar.fill(1);
@@ -115,6 +131,13 @@ TEST(Matrix, change_columns_2) {
 	m.change_columns(1, m1);
 
 	const Matrix<2, 3> ref = { 1,1,1,4,4,4 };
+	EXPECT_EQ(m, ref);
+}
+
+TEST(Dynamic_Matrix, construct_diagonal_matrix_1) {
+	Dynamic_Matrix m(2, {3, 3});
+	Dynamic_Matrix ref(2, 2, { 3,0,0,3 });
+
 	EXPECT_EQ(m, ref);
 }
 

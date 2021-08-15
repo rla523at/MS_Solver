@@ -27,10 +27,10 @@ template<size_t num_row, size_t num_column>
 class Matrix
 {
 private:
+	friend Dynamic_Matrix;
+
 	template<size_t num_other_row, size_t num_other_column>
 	friend class Matrix;
-
-	friend Dynamic_Matrix;
 
 	template<size_t num_row, size_t num_column>
 	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);
@@ -42,12 +42,11 @@ private:
 
 public:
 	Matrix(void) = default;			
+	Matrix(const std::array<double, num_row>& values);
 	Matrix(const std::array<double, num_value_>& values) : values_{ values } {};
 	Matrix(const Dynamic_Matrix& dynamic_matrix);
 	template <typename... Args>
 	Matrix(Args... args);
-	static Matrix diagonal_matrix(const std::array<double, num_row>& values);
-
 
 	Matrix& operator+=(const Matrix& A);
 	Matrix& operator-=(const Matrix& A);
@@ -59,14 +58,9 @@ public:
 	Dynamic_Matrix operator*(const Dynamic_Matrix& dynamic_matrix) const;
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
 	bool operator==(const Matrix & A) const;
-
-	
-	
-	
+		
 	template <size_t other_num_column>
-	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;
-
-	
+	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;	
 
 	double at(const size_t row_index, const size_t column_index) const;
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
@@ -81,6 +75,8 @@ private:
 	double& value_at(const size_t row_index, const size_t column_index);
 };
 
+template <size_t matrix_order>
+Matrix(const std::array<double, matrix_order>& values)->Matrix<matrix_order, matrix_order>;
 
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column> operator*(const double scalar, const Matrix<num_row, num_column>& A);
@@ -165,13 +161,10 @@ namespace ms {
 }
 
 template<size_t num_row, size_t num_column>
-Matrix<num_row, num_column> Matrix<num_row, num_column>::diagonal_matrix(const std::array<double, num_row>& values) {
+Matrix<num_row, num_column>::Matrix(const std::array<double, num_row>& values) {
 	static_require(num_row == num_column, "It should be square matrix");
-	Matrix result;
 	for (size_t i = 0; i < num_row; ++i)
-		result.value_at(i, i) = values[i];
-
-	return result;
+		this->value_at(i, i) = values[i];
 }
 
 template<size_t num_row, size_t num_column>

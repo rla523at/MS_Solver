@@ -281,25 +281,26 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                             limiting_values.fill(limiting_value);
                             limiting_values[0] = 1.0; // keep P0 value
                             
-                            const auto limiting_matrix = Matrix<This_::num_basis_, This_::num_basis_>::diagonal_matrix(limiting_values);
-
+                            const Matrix limiting_matrix = limiting_values;
                             solution_coefficient *= limiting_matrix;
+
                             end_limiting = true;
                             break;
                         }
                         else {
-                            //limiting high order term
-                            const auto num_Pn_basis = This_::num_Pn_basis_[temporal_solution_order];
-                            const auto num_Pnm1_basis = This_::num_Pn_basis_[temporal_solution_order - 1];
-                            const auto num_delete_basis = num_Pn_basis - num_Pnm1_basis;
-                            const Dynamic_Matrix order_down_matrix(num_equation, num_delete_basis);
-                            solution_coefficient.change_columns(num_Pnm1_basis, order_down_matrix);     
+                            //limiting highest mode
+                            const auto num_preserve_basis = This_::num_Pn_basis_[--temporal_solution_order];
+                            
+                            std::array<double, This_::num_basis_> limiting_values = { 0 };
+                            for (ushort i = 0; i < num_preserve_basis; ++i)
+                                limiting_values[i] = 1.0; // preserve except highest mode
+
+                            const Matrix order_down_matrix = limiting_values;
+                            solution_coefficient *= order_down_matrix;
 
                             //re-calculate limited vnode_solution                            
                             solution_vnodes = solution_coefficient * This_::set_of_basis_vnodes_[i];
                             P1_projected_solution_vnodes = solution_coefficient * This_::set_of_P1_projected_basis_vnodes_[i];
-
-                            temporal_solution_order--;
                         }
                     }
                 }    
