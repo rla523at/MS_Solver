@@ -66,6 +66,8 @@ public:
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;
 
+
+	void change_columns(const size_t column_index, const Dynamic_Matrix& A);
 	template <size_t num_other_column>
 	void change_columns(const size_t column_index, const Matrix<num_row,num_other_column>& A);
 
@@ -322,6 +324,17 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 		result += "\n";
 	}
 	return result;
+}
+
+template<size_t num_row, size_t num_column>
+void Matrix<num_row, num_column>::change_columns(const size_t start_column_index, const Dynamic_Matrix& A) {
+	const auto [num_A_row, num_A_column] = A.size();
+	dynamic_require(num_A_row == num_row, "number of row should be same");
+	dynamic_require(start_column_index + num_A_column <= num_column, "index can not exceed given range");
+
+	for (size_t i = 0; i < num_row; ++i)
+		for (size_t j = 0; j < num_A_column; ++j)
+			this->value_at(i, start_column_index + j) = A.at(i, j);
 }
 
 template<size_t num_row, size_t num_column>

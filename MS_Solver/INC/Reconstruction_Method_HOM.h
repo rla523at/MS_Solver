@@ -277,7 +277,7 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                             const auto num_Pnm1_basis = This_::num_Pn_basis_[temporal_solution_order - 1];
                             const auto num_Pn_basis = This_::num_Pn_basis_[temporal_solution_order];
                             const auto num_delete_basis = num_Pn_basis - num_Pnm1_basis;
-                            const Matrix<num_equation, num_delete_basis> order_down_matrix;
+                            const Dynamic_Matrix order_down_matrix(num_equation, num_delete_basis);
                             solution_coefficient.change_columns(num_Pnm1_basis, order_down_matrix);     
 
                             //re-calculate limited solution

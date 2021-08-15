@@ -100,6 +100,14 @@ TEST(Matrix, change_columns_1){
 	const Matrix<2, 3> ref = { 1,1,1,4,4,4 };
 	EXPECT_EQ(m, ref);
 }
+TEST(Matrix, change_columns_2) {
+	Matrix<2, 3> m = { 1,2,3,4,5,6 };
+	const Dynamic_Matrix m1 = { 2,2,{ 1,1,4,4 } };
+	m.change_columns(1, m1);
+
+	const Matrix<2, 3> ref = { 1,1,1,4,4,4 };
+	EXPECT_EQ(m, ref);
+}
 
 TEST(Dynamic_Matrix, change_row_1) {
 	Dynamic_Matrix m(2, 2, { 1,2,3,4 });

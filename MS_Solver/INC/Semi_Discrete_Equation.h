@@ -52,7 +52,8 @@ public:
             return time_step_constant_;
     }
 
-    static std::vector<Residual_> calculate_RHS(const std::vector<Discretized_Solution_>& solutions) {
+    //Type1
+    static std::vector<Residual_> calculate_RHS(std::vector<Discretized_Solution_>& solutions) {
         static const auto num_solution = solutions.size();
         std::vector<Residual_> RHS(num_solution);
 
@@ -66,6 +67,21 @@ public:
 
         return RHS;
     }
+
+    //static std::vector<Residual_> calculate_RHS(const std::vector<Discretized_Solution_>& solutions) {
+    //    static const auto num_solution = solutions.size();
+    //    std::vector<Residual_> RHS(num_solution);
+
+    //    if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
+    //        Reconstruction_Method::reconstruct(solutions);
+
+    //    Boundaries_::calculate_RHS(RHS, solutions);
+    //    Periodic_Boundaries_::calculate_RHS(RHS, solutions);
+    //    Inner_Faces_::calculate_RHS(RHS, solutions);
+    //    Cells_::calculate_RHS(RHS, solutions);
+
+    //    return RHS;
+    //}
 
     template <typename Initial_Condition>
     static std::vector<Discretized_Solution_> calculate_initial_solutions(void) {

@@ -18,7 +18,7 @@ private:
     using Residual_             = Matrix<num_equation_, num_basis_>;
 
 public:
-    using Discretized_Solution_ = Matrix<num_equation_, num_basis_>;;
+    using Discretized_Solution_ = Matrix<num_equation_, num_basis_>;
 
 protected:    
     inline static std::vector<double> volumes_;
