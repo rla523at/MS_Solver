@@ -1,6 +1,6 @@
 #pragma once
 #include "Grid_Builder.h"
-#include "Reconstruction_Method.h"
+#include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
 
 template <typename T>

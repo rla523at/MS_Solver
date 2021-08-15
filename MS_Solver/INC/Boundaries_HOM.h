@@ -1,7 +1,7 @@
 #pragma once
 #include "Boundary_Flux_Function.h"
 #include "Grid_Builder.h"
-#include "Reconstruction_Method.h"
+#include "Reconstruction_Method_HOM.h"
 
 
 //HOM이면 공통으로 사용하는 variable

@@ -1,6 +1,6 @@
 #pragma once
 #include "Grid_Builder.h"
-#include "Reconstruction_Method.h"
+#include "Reconstruction_Method_FVM.h"
 
 
 //FVM이면 공통으로 사용하는 variable

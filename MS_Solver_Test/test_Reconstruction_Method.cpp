@@ -1,6 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "../MS_Solver/INC/Reconstruction_Method.h"
+#include "../MS_Solver/INC/Reconstruction_Method_FVM.h"
+#include "../MS_Solver/INC/Reconstruction_Method_HOM.h"
 
 TEST(Reconstruction_Method, activation_function_1) {
 	HardTanh f;

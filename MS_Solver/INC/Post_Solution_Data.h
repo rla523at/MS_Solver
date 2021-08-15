@@ -1,7 +1,8 @@
 #pragma once
 #include "Governing_Equation.h"
 #include "Spatial_Discrete_Method.h"
-#include "Reconstruction_Method.h"
+#include "Reconstruction_Method_FVM.h"
+#include "Reconstruction_Method_HOM.h"
 #include "Element.h"
 #include "Text.h"
 

@@ -128,7 +128,7 @@
     <ClInclude Include="INC\Profiler.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Reconstruction_Method.h">
+    <ClInclude Include="INC\Reconstruction_Method_FVM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Semi_Discrete_Equation.h">
@@ -172,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="INC\Setting_Base.h">
       <Filter>설정 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reconstruction_Method_HOM.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

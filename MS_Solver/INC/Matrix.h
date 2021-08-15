@@ -66,10 +66,11 @@ public:
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;
 
-	//void change_column(const size_t column_index, const Euclidean_Vector<num_row>& x);
+	template <size_t num_other_column>
+	void change_columns(const size_t column_index, const Matrix<num_row,num_other_column>& A);
 
 private:
-	double& at(const size_t row_index, const size_t column_index);
+	double& value_at(const size_t row_index, const size_t column_index);
 };
 
 
@@ -160,7 +161,7 @@ Matrix<num_row, num_column> Matrix<num_row, num_column>::diagonal_matrix(const s
 	static_require(num_row == num_column, "It should be square matrix");
 	Matrix result;
 	for (size_t i = 0; i < num_row; ++i)
-		result.at(i, i) = values[i];
+		result.value_at(i, i) = values[i];
 
 	return result;
 }
@@ -323,6 +324,16 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 	return result;
 }
 
+template<size_t num_row, size_t num_column>
+template <size_t num_other_column>
+void Matrix<num_row, num_column>::change_columns(const size_t start_column_index, const Matrix<num_row, num_other_column>& A) {
+	dynamic_require(start_column_index + num_other_column <= num_column, "index can not exceed given range");
+
+	for (size_t i = 0; i < num_row; ++i)
+		for (size_t j = 0; j < num_other_column; ++j)
+			this->value_at(i, start_column_index + j) = A.at(i, j);
+}
+
 //template<size_t num_row, size_t num_column>
 //void Matrix<num_row, num_column>::change_column(const size_t column_index, const Euclidean_Vector<num_row>& x) {
 //	dynamic_require(column_index < num_column, "index can not exceed given range");
@@ -333,7 +344,7 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 //
 
 template<size_t num_row, size_t num_column>
-double& Matrix<num_row, num_column>::at(const size_t row_index, const size_t column_index) {
+double& Matrix<num_row, num_column>::value_at(const size_t row_index, const size_t column_index) {
 	// we should range check before call private at!
 	// dynamic_require(row_index < num_row && column_index < num_column, "index can not exceed given range"); 
 	return this->values_[row_index * num_column + column_index];
