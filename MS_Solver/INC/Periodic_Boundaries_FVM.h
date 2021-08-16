@@ -20,6 +20,26 @@ public:
 };
 
 
+//FVM이고 Constant Reconstruction이면 사용하는 variable & method
+template<typename Numerical_Flux_Function>
+class Periodic_Boundaries_FVM_Constant : public Periodic_Boundaries_FVM_Base<Numerical_Flux_Function::space_dimension()>
+{
+private:
+    static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
+    static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
+
+    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
+    using Solution_     = Euclidean_Vector<This_::num_equation_>;
+    using Residual_     = Euclidean_Vector< This_::num_equation_>;
+
+private:
+    Periodic_Boundaries_FVM_Constant(Grid<space_dimension>&& grid) : Periodic_Boundaries_FVM_Base<space_dimension_>(std::move(grid)) {};
+
+public:
+    void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
+};
+
+
 //FVM이고 Linear Reconstruction이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Periodic_Boundaries_FVM_Linear : public Periodic_Boundaries_FVM_Base<Numerical_Flux_Function::space_dimension()>
@@ -73,6 +93,19 @@ Periodic_Boundaries_FVM_Base<space_dimension>::Periodic_Boundaries_FVM_Base(Grid
 
     Log::content_ << std::left << std::setw(50) << "@ Periodic boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
+}
+
+template<typename Numerical_Flux_Function>
+void Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const {
+    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, this->normals_, this->oc_nc_index_pairs_);
+
+    const auto num_pbdry_pair = this->normals_.size();
+    for (size_t i = 0; i < num_pbdry_pair; ++i) {
+        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
+        const auto delta_RHS = this->areas_[i] * numerical_fluxes[i];
+        RHS[oc_index] -= delta_RHS;
+        RHS[nc_index] += delta_RHS;
+    }
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -158,25 +191,7 @@ void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Functi
 //};
 //
 //
-////FVM이고 Constant Reconstruction이면 사용하는 variable & method
-//template<typename Numerical_Flux_Function>
-//class Periodic_Boundaries_FVM_Constant : public Periodic_Boundaries_FVM_Base<Numerical_Flux_Function::space_dimension()>
-//{
-//private:
-//    static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
-//    static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
-//
-//    using This_         = Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>;
-//    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
-//    using Solution_     = Euclidean_Vector<This_::num_equation_>;
-//    using Residual_     = Euclidean_Vector< This_::num_equation_>;
-//
-//private:
-//    Periodic_Boundaries_FVM_Constant(void) = delete;
-//
-//public:
-//    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions);
-//};
+
 //
 //
 ////FVM이고 Linear Reconstruction이면 공통으로 사용하는 variable & method
@@ -237,18 +252,7 @@ void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Functi
 //    Log::print();
 //}
 //
-//template<typename Numerical_Flux_Function>
-//void Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
-//    const auto numerical_fluxes = Numerical_Flux_Function::calculate(solutions, This_::normals_, This_::oc_nc_index_pairs_);
-//
-//    const auto num_pbdry_pair = This_::normals_.size();
-//    for (size_t i = 0; i < num_pbdry_pair; ++i) {
-//        const auto [oc_index, nc_index] = This_::oc_nc_index_pairs_[i];
-//        const auto delta_RHS = This_::areas_[i] * numerical_fluxes[i];
-//        RHS[oc_index] -= delta_RHS;
-//        RHS[nc_index] += delta_RHS;
-//    }
-//}
+
 //
 //template<typename Reconstruction_Method, typename Numerical_Flux_Function>
 //void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::initialize(Grid<This_::space_dimension_>&& grid) {
