@@ -4,24 +4,8 @@
 using ushort = unsigned short;
 
 
-template<size_t num_row, size_t num_column>
-class Matrix;
-
-
 class Dynamic_Matrix;
-
-
-namespace ms {
-	inline constexpr ushort blas_dscal_criteria = 10;
-	inline constexpr ushort blas_axpy_criteria = 20;
-	inline constexpr ushort blas_mv_criteria = 50;
-
-	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
-	void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2); // v2 += A*v1
-
-	template<size_t num_row, size_t num_column>	
-	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C); // C = A*B
-}
+class Matrix_OP;
 
 
 // Matrix template class
@@ -29,13 +13,10 @@ template<size_t num_row, size_t num_column>
 class Matrix
 {
 private:
-	friend Dynamic_Matrix;
-
 	template<size_t num_other_row, size_t num_other_column>
 	friend class Matrix;
-
-	template<size_t num_row, size_t num_column>
-	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);
+	friend Dynamic_Matrix;
+	friend Matrix_OP;
 
 	static constexpr size_t num_value_ = num_row * num_column;
 
@@ -43,15 +24,17 @@ private:
 	std::array<double, num_value_> values_ = { 0 };
 
 public:
-	Matrix(void) = default;			
-	
-	template<size_t temp = num_row * num_column, std::enable_if_t<temp != 1, bool> = true>
-	Matrix(const std::array<double, num_row>& values);
-
+	Matrix(void) = default;				
 	Matrix(const std::array<double, num_value_>& values) : values_{ values } {};
 	Matrix(const Dynamic_Matrix& dynamic_matrix);
+
 	template <typename... Args>
 	Matrix(Args... args);
+
+	// diagonal matrix constructor
+	// SFINAE to resolve 1x1 matrix constructor ambiguity
+	template<size_t temp = num_row * num_column, std::enable_if_t<temp != 1, bool> = true>
+	Matrix(const std::array<double, num_row>& values);
 
 	Matrix& operator+=(const Matrix& A);
 	Matrix& operator-=(const Matrix& A);
@@ -60,21 +43,21 @@ public:
 
 	Matrix operator+(const Matrix& A) const;
 	Matrix operator*(const double scalar) const;
-	Dynamic_Matrix operator*(const Dynamic_Matrix& dynamic_matrix) const;
 	Euclidean_Vector<num_row> operator*(const Euclidean_Vector<num_column>& x) const;
-	bool operator==(const Matrix & A) const;
-		
+	Dynamic_Matrix operator*(const Dynamic_Matrix& dynamic_matrix) const;
+
 	template <size_t other_num_column>
-	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;	
+	Matrix<num_row, other_num_column> operator*(const Matrix<num_column, other_num_column>& A) const;
+
+	bool operator==(const Matrix & A) const;
+
+	template <size_t num_other_column>
+	void change_columns(const size_t column_index, const Matrix<num_row, num_other_column>& A);
+	void change_columns(const size_t column_index, const Dynamic_Matrix& A);
 
 	double at(const size_t row_index, const size_t column_index) const;
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;
-
-
-	void change_columns(const size_t column_index, const Dynamic_Matrix& A);
-	template <size_t num_other_column>
-	void change_columns(const size_t column_index, const Matrix<num_row,num_other_column>& A);
 
 private:
 	double& value_at(const size_t row_index, const size_t column_index);
@@ -96,9 +79,7 @@ class Dynamic_Matrix
 private:
 	template<size_t num_row, size_t num_column>
 	friend class Matrix;
-
-	friend void ms::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* ptr);	
-	friend void ms::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+	friend Matrix_OP;
 
 private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -157,14 +138,44 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Dynamic_Matrix& m);
 
-//template definition part
+
+class Matrix_OP
+{
+private:
+	Matrix_OP(void) = delete;
+
+public:
+	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
+	static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+
+	template<size_t num_row, size_t num_column>
+	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
+		Matrix_OP::gemm(A, B, C.values_.data());
+	};
+};
+
+
 namespace ms {
+	inline constexpr ushort blas_dscal_criteria = 10;
+	inline constexpr ushort blas_axpy_criteria = 20;
+	inline constexpr ushort blas_mv_criteria = 50;
+
+	inline void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr) {
+		Matrix_OP::gemm(A, B, output_ptr);
+	}
+
+	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+		Matrix_OP::gemvpv(A, v1, v2);
+	}
+
 	template<size_t num_row, size_t num_column>
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
-		ms::gemm(A, B, C.values_.data());
+		Matrix_OP::gemm(A, B, C);
 	}
 }
 
+
+//template definition part
 template<size_t num_row, size_t num_column>
 template<size_t temp, std::enable_if_t<temp != 1, bool>>
 Matrix<num_row, num_column>::Matrix(const std::array<double, num_row>& values) {
@@ -175,14 +186,14 @@ Matrix<num_row, num_column>::Matrix(const std::array<double, num_row>& values) {
 
 template<size_t num_row, size_t num_column>
 Matrix<num_row,num_column>::Matrix(const Dynamic_Matrix& dynamic_matrix) {
-	dynamic_require(num_row == dynamic_matrix.num_row_ && num_column == dynamic_matrix.num_column_, "both matrix should be same size");
+	dynamic_require(dynamic_matrix.size() == std::make_pair(num_row, num_column), "both matrix should be same size");
 	std::copy(dynamic_matrix.values_.begin(), dynamic_matrix.values_.end(), this->values_.begin());
 }
 
 template<size_t num_row, size_t num_column>
 template <typename... Args>
 Matrix<num_row, num_column>::Matrix(Args... args) : values_{ static_cast<double>(args)... } {
-	static_require(sizeof...(Args) == this->num_value_, "Number of arguments should be less then (num row * num column)");
+	static_require(sizeof...(Args) == this->num_value_, "Number of arguments should be same with (num row * num column)");
 	static_require(ms::are_arithmetics<Args...>, "every arguments should be arithmetics");
 };
 
