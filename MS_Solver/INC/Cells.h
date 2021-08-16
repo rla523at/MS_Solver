@@ -12,7 +12,10 @@ template <typename Governing_Equation, typename Reconstruction_Method>
 class Cells<Governing_Equation, FVM, Reconstruction_Method> : public Cells_FVM<Governing_Equation>
 {   
 private:
-    Cells(void) = delete;
+    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+
+public:
+    Cells(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method) : Cells_FVM<Governing_Equation>(grid) {};
 };
 
 template <typename Governing_Equation, typename Reconstruction_Method>

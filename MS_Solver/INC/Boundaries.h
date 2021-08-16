@@ -19,7 +19,11 @@ template <typename Governing_Equation, typename Reconstruction_Method>
 class Boundaries<Governing_Equation, FVM, Reconstruction_Method> : public Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>
 {
 private:
-    Boundaries(void) = delete;
+    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+
+public:
+    Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+        : Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>(std::move(grid), reconstruction_method) {};
 };
 
 

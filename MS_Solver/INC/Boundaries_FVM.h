@@ -20,7 +20,7 @@ protected:
     std::vector<std::unique_ptr<Boundary_Flux_Function<Governing_Equation>>> boundary_flux_functions_;
 
 protected:
-    void initialize_base(Grid<space_dimension_>&& grid) {
+    Boundaries_FVM_Base(Grid<space_dimension_>&& grid) {
         SET_TIME_POINT;
 
         this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
@@ -70,10 +70,9 @@ private:
     const Reconstruction_Method& reconstruction_method_;
 
 private:
-    Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method) : reconstruction_method_(reconstruction_method) {
+    Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method) 
+        : Boundaries_FVM_Base<Governing_Equation>(std::move(grid)), reconstruction_method_(reconstruction_method) {
         SET_TIME_POINT;
-
-        this->initialize_base(std::move(grid));
 
         const auto num_boundary = this->normals_.size();
         this->oc_to_boundary_vectors_.reserve(num_boundary);
