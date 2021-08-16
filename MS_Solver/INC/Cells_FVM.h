@@ -22,10 +22,9 @@ protected:
     std::vector<std::array<double, space_dimension_>> projected_volumes_;
     std::vector<double> residual_scale_factors_;
 
-private:
+public:
     Cells_FVM(const Grid<space_dimension_>& grid);
 
-public:
     double calculate_time_step(const std::vector<Euclidean_Vector<num_equation_>>& solutions, const double cfl) const;
     void calculate_RHS(std::vector<Euclidean_Vector<num_equation_>>& RHS, const std::vector<Euclidean_Vector<num_equation_>>& solutions) const;
 

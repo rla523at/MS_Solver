@@ -33,12 +33,12 @@ int main(void) {
 	auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(GRID_FILE_NAME);
 		
 	Post_AI_Data::intialize(grid);
-	Semi_Discrete_Equation_::initialize(std::move(grid));
-
 	Post_Solution_Data_::post_grid(grid.elements.cell_elements);
 
-	auto solutions = Semi_Discrete_Equation_::calculate_initial_solutions<INITIAL_CONDITION>();
-	Discrete_Equation_::solve<Semi_Discrete_Equation_, TIME_STEP_METHOD, SOLVE_END_CONDITION, SOLVE_POST_CONDITION, Post_Solution_Data_>(solutions);
+	auto semi_discrete_equation = Semi_Discrete_Equation_(std::move(grid));
+
+	auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
+	Discrete_Equation_::solve<TIME_STEP_METHOD, SOLVE_END_CONDITION, SOLVE_POST_CONDITION, Post_Solution_Data_>(semi_discrete_equation, solutions);
 		
 #ifdef ERROR_CALCULATION
 	Semi_Discrete_Equation_::estimate_error<INITIAL_CONDITION>(solutions, __END_CONDITION_CONSTANT__);

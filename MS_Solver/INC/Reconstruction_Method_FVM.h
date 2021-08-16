@@ -46,7 +46,7 @@ public:
         const auto num_cell = cell_elements.size();
         this->vnode_indexes_set_.reserve(num_cell);
         this->center_to_vertex_matrixes_.reserve(num_cell);
-        this->solution_gradients_.reserve(num_cell);           
+        this->solution_gradients_.resize(num_cell);           
 
         for (size_t i = 0; i < num_cell; ++i) {
             const auto& element = cell_elements[i];
@@ -354,27 +354,27 @@ double MLP_u1_Limiting_Strategy::limit(const double P1_mode_solution, const doub
 //
 //
 //
-//namespace ms {
-//	template <typename T>
-//	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
-//
-//    template <typename T>
-//    inline constexpr bool is_constant_reconustruction = std::is_same_v<Constant_Reconstruction, T>;
-//
-//    template <typename T>
-//    inline constexpr bool is_polynomial_reconustruction = std::is_same_v<Polynomial_Reconstruction<T::space_dimension(), T::solution_order()>, T>;
-//
-//    template <typename Spatial_Discrete_Method, typename Reconstruction_Method, typename = void>
-//    inline constexpr bool is_default_reconstruction;
-//        
-//    template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
-//    inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<FVM, Spatial_Discrete_Method>>>
-//        = ms::is_constant_reconustruction<Reconstruction_Method>;
-//
-//    template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
-//    inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
-//        = ms::is_polynomial_reconustruction<Reconstruction_Method>;
-//}
+namespace ms {
+	template <typename T>
+	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
+
+    //template <typename T>
+    //inline constexpr bool is_constant_reconustruction = std::is_same_v<Constant_Reconstruction, T>;
+
+    //template <typename T>
+    //inline constexpr bool is_polynomial_reconustruction = std::is_same_v<Polynomial_Reconstruction<T::space_dimension(), T::solution_order()>, T>;
+
+    //template <typename Spatial_Discrete_Method, typename Reconstruction_Method, typename = void>
+    //inline constexpr bool is_default_reconstruction;
+    //    
+    //template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
+    //inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<FVM, Spatial_Discrete_Method>>>
+    //    = ms::is_constant_reconustruction<Reconstruction_Method>;
+
+    //template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
+    //inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
+    //    = ms::is_polynomial_reconustruction<Reconstruction_Method>;
+}
 //
 //
 ////template definition part

@@ -27,29 +27,16 @@ private:
     using Discretized_Solution_ = Cells_::Discretized_Solution_;
     using Residual_ = Cells_::Discretized_Solution_;
 
-private:
-    
+private:    
     Reconstruction_Method reconstruction_method_;
     Boundaries_ boundaries_;
     Cells_ cells_;
     Periodic_Boundaries_ periodic_boundaries_;
-
-
-private:
-    Semi_Discrete_Equation(void) = delete;
+    Inner_Faces_ inner_faces_;
 
 public:
-    static void initialize(Grid<space_dimension_>&& grid) 
-        : reconstruction_method_(grid), boundaries_(std::move(grid), reconstruction_method_), cells_(grid, reconstruction_method_)
-          periodic_boundaries_(std::move(grid), reconstruction_method_) {
-
-        Cells_::initialize(std::move(grid));
-        Boundaries_::initialize(std::move(grid));
-        Periodic_Boundaries_::initialize(std::move(grid));
-        Inner_Faces_::initialize(std::move(grid));
-
-        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>)
-            Pressure_Fix::initialize<Reconstruction_Method>(grid);
+    Semi_Discrete_Equation(Grid<space_dimension_>&& grid) : reconstruction_method_(std::move(grid)), boundaries_(std::move(grid), reconstruction_method_),
+        cells_(grid, reconstruction_method_), periodic_boundaries_(std::move(grid), reconstruction_method_), inner_faces_(std::move(grid), reconstruction_method_) {
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
@@ -58,38 +45,38 @@ public:
     };
 
     template <typename Time_Step_Method>
-    static double calculate_time_step(const std::vector<Discretized_Solution_>& solutions) {
+    double calculate_time_step(const std::vector<Discretized_Solution_>& solutions) const {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
         if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>)
-            return Cells_::calculate_time_step(solutions, time_step_constant_);
+            return this->cells_.calculate_time_step(solutions, time_step_constant_);
         else
             return time_step_constant_;
     }
 
     //Type1
-    static std::vector<Residual_> calculate_RHS(std::vector<Discretized_Solution_>& solutions) {
+    std::vector<Residual_> calculate_RHS(std::vector<Discretized_Solution_>& solutions) {
         const auto num_solution = solutions.size();
         std::vector<Residual_> RHS(num_solution);
 
-        if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
-            reconstruction_method_.reconstruct(solutions);
+        //if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
+            this->reconstruction_method_.reconstruct(solutions);
 
-        Boundaries_::calculate_RHS(RHS, solutions);
-        Periodic_Boundaries_::calculate_RHS(RHS, solutions);
-        Inner_Faces_::calculate_RHS(RHS, solutions);
-        Cells_::calculate_RHS(RHS, solutions);
+        this->boundaries_.calculate_RHS(RHS, solutions);
+        this->periodic_boundaries_.calculate_RHS(RHS, solutions);
+        this->inner_faces_.calculate_RHS(RHS, solutions);
+        this->cells_.calculate_RHS(RHS, solutions);
 
         return RHS;
     }
 
     template <typename Initial_Condition>
-    static std::vector<Discretized_Solution_> calculate_initial_solutions(void) {
-        return Cells_::template calculate_initial_solutions<Initial_Condition>();
+    std::vector<Discretized_Solution_> calculate_initial_solutions(void) const {
+        return this->cells_.calculate_initial_solutions<Initial_Condition>();
     }
 
     template <typename Initial_Condition>
-    static void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) {
-        Cells_::template estimate_error<Initial_Condition>(computed_solutions, time);
+    void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
+        this->cells_.estimate_error<Initial_Condition>(computed_solutions, time);
     }
 };
 

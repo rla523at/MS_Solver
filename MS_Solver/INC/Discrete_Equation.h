@@ -11,8 +11,8 @@ class Discrete_Equation
     static_require(ms::is_time_integral_method<Time_Integral_Method>, "It should be time integral method");
 
 public: 
-    template<typename Semi_Discrete_Equation, typename Time_Step_Method, typename Solve_End_Condition, typename Solve_Post_Condition, typename Post_Solution_Data, typename Solution>
-    static void solve(std::vector<Solution>& solutions) {
+    template<typename Time_Step_Method, typename Solve_End_Condition, typename Solve_Post_Condition, typename Post_Solution_Data, typename Semi_Discrete_Equation, typename Solution>
+    static void solve(Semi_Discrete_Equation& semid_discrete_equation, std::vector<Solution>& solutions) {
         static_require(ms::is_solve_end_condtion<Solve_End_Condition>,      "It should be solve end condition");
         static_require(ms::is_solve_post_condtion<Solve_Post_Condition>,    "It should be solve post condition");
          
@@ -29,10 +29,10 @@ public:
             SET_TIME_POINT;
             try {
                 //debug
-                auto time_step = Semi_Discrete_Equation::template calculate_time_step<Time_Step_Method>(solutions);
+                auto time_step = semid_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
 
                 if (Solve_End_Condition::inspect(current_time, time_step)) {
-                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    Time_Integral_Method::update_solutions(semid_discrete_equation, solutions, time_step);
                     current_time += time_step;
                     Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
 
@@ -42,13 +42,13 @@ public:
                 }
 
                 if (Solve_Post_Condition::inspect(current_time, time_step)) {
-                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    Time_Integral_Method::update_solutions(semid_discrete_equation, solutions, time_step);
                     current_time += time_step;
 
                     Post_Solution_Data::post_solution(solutions);
                 }
                 else {
-                    Time_Integral_Method::template update_solutions<Semi_Discrete_Equation>(solutions, time_step);
+                    Time_Integral_Method::update_solutions(semid_discrete_equation, solutions, time_step);
                     current_time += time_step;
                 }          
 

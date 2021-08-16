@@ -77,8 +77,8 @@ Inner_Faces_FVM_Base<space_dimension>::Inner_Faces_FVM_Base(Grid<space_dimension
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_FVM_Linear(Grid<This_::space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-    : Inner_Faces_FVM_Base<This_::space_dimension_>(std::move(grid)), reconstruction_method_(reconstruction_method) {
+Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+    : Inner_Faces_FVM_Base<space_dimension_>(std::move(grid)), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
     const auto num_inner_face = this->normals_.size();
