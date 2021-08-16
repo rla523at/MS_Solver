@@ -41,21 +41,22 @@ namespace ms {
 
 template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK33::update_solutions(std::vector<Solution>& solutions, const double time_step) {
-    static const auto num_sol = solutions.size();
-    const auto initial_solutions = solutions;
+    const auto num_sol = solutions.size();
 
     //stage1
-    const auto initial_RHS = Semi_Discrete_Equation::calculate_RHS(initial_solutions);
+    const auto initial_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
+    const auto initial_solutions = solutions;
+
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += time_step * initial_RHS[i];
+    const auto stage1_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
 
     //stage 2
-    const auto stage1_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.25 * (3 * initial_solutions[i] + solutions[i] + time_step * stage1_RHS[i]);
+    const auto stage2_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
 
     //stage3
-    const auto stage2_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = c1_3 * (initial_solutions[i] + 2 * solutions[i] + 2 * time_step * stage2_RHS[i]);
 }
@@ -63,7 +64,7 @@ static void SSPRK33::update_solutions(std::vector<Solution>& solutions, const do
 
 template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK54::update_solutions(std::vector<Solution>& solutions, const double time_step) {
-    static const auto num_sol = solutions.size();
+    const auto num_sol = solutions.size();
 
     //const auto initial_solutions = solutions;
 

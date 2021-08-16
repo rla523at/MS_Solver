@@ -3,8 +3,10 @@
 
 using ushort = unsigned short;
 
+
 template<size_t num_row, size_t num_column>
 class Matrix;
+
 
 class Dynamic_Matrix;
 
@@ -15,10 +17,10 @@ namespace ms {
 	inline constexpr ushort blas_mv_criteria = 50;
 
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
-	void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+	void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2); // v2 += A*v1
 
-	template<size_t num_row, size_t num_column>
-	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix);	
+	template<size_t num_row, size_t num_column>	
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C); // C = A*B
 }
 
 
@@ -42,7 +44,10 @@ private:
 
 public:
 	Matrix(void) = default;			
+	
+	template<size_t temp = num_row * num_column, std::enable_if_t<temp != 1, bool> = true>
 	Matrix(const std::array<double, num_row>& values);
+
 	Matrix(const std::array<double, num_value_>& values) : values_{ values } {};
 	Matrix(const Dynamic_Matrix& dynamic_matrix);
 	template <typename... Args>
@@ -155,12 +160,13 @@ std::ostream& operator<<(std::ostream& os, const Dynamic_Matrix& m);
 //template definition part
 namespace ms {
 	template<size_t num_row, size_t num_column>
-	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& output_matrix) {
-		ms::gemm(A, B, output_matrix.values_.data());
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
+		ms::gemm(A, B, C.values_.data());
 	}
 }
 
 template<size_t num_row, size_t num_column>
+template<size_t temp, std::enable_if_t<temp != 1, bool>>
 Matrix<num_row, num_column>::Matrix(const std::array<double, num_row>& values) {
 	static_require(num_row == num_column, "It should be square matrix");
 	for (size_t i = 0; i < num_row; ++i)
@@ -176,7 +182,7 @@ Matrix<num_row,num_column>::Matrix(const Dynamic_Matrix& dynamic_matrix) {
 template<size_t num_row, size_t num_column>
 template <typename... Args>
 Matrix<num_row, num_column>::Matrix(Args... args) : values_{ static_cast<double>(args)... } {
-	static_require(sizeof...(Args) <= num_row * num_column, "Number of arguments should be less then (num row * num column)");
+	static_require(sizeof...(Args) == this->num_value_, "Number of arguments should be less then (num row * num column)");
 	static_require(ms::are_arithmetics<Args...>, "every arguments should be arithmetics");
 };
 
@@ -206,7 +212,6 @@ Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator-=(const Matri
 
 template<size_t num_row, size_t num_column>
 Matrix<num_row, num_column>& Matrix<num_row, num_column>::operator*=(const double scalar) {
-
 	if constexpr (this->num_value_ < ms::blas_dscal_criteria) {
 		for (size_t i = 0; i < num_row * num_column; ++i)
 			this->values_[i] *= scalar;
@@ -289,7 +294,7 @@ Matrix<num_row, other_num_column> Matrix<num_row, num_column>::operator*(const M
 template<size_t num_row, size_t num_column>
 Euclidean_Vector<num_row> Matrix<num_row, num_column>::operator*(const Euclidean_Vector<num_column>& x) const {
 	std::array<double, num_row> result = { 0 };
-	if constexpr (num_row * num_column < ms::blas_mv_criteria) {
+	if constexpr (this->num_value_ < ms::blas_mv_criteria) {
 		for (size_t i = 0; i < num_row; ++i)
 			for (size_t j = 0; j < num_column; ++j)
 				result[i] += this->values_[i * num_column + j] * x.at(j);

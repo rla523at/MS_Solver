@@ -55,7 +55,7 @@ private:
     inline static std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;
     inline static std::vector<double> P0_basis_values_;
     inline static std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
-    inline static std::array<ushort, solution_order_ + 1> num_Pn_basis_;
+    inline static std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
 
 private:
     hMLP_Reconstruction(void) = delete;
@@ -69,10 +69,8 @@ public:
     static auto calculate_vertex_node_index_to_allowable_min_max_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions);
     static bool is_satisfy_P1_projected_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max);
     static bool is_smooth_extrema(const double solution, const double higher_mode_solution, const double P1_mode_solution, const double allowable_min, const double allowable_max);
+    static auto Pn_projection_matrix(const ushort Pn);
 };
-
-
-
 
 
 //template definition part
@@ -100,17 +98,17 @@ template <ushort space_dimension_, ushort solution_order_>
 auto Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_transposed_gradient_basis(void) {
     const auto num_cell = This_::set_of_basis_functions_.size();
 
-    std::vector<Matrix_Function<Polynomial<space_dimension_>, space_dimension_, This_::num_basis_>> transposed_basis_Jacobians(num_cell);
+    std::vector<Matrix_Function<Polynomial<space_dimension_>, space_dimension_, This_::num_basis_>> set_of_transposed_gradient_basis(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
-        auto& transposed_jacobian_basis = transposed_basis_Jacobians[i];
+        auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];
         const auto& basis_function = This_::set_of_basis_functions_[i];
 
         for (ushort j = 0; j < This_::num_basis_; ++j)
-            transposed_jacobian_basis.change_column(j, basis_function[j].gradient());
+            transposed_gradient_basis.change_column(j, basis_function[j].gradient());
     }
 
-    return transposed_basis_Jacobians;
+    return set_of_transposed_gradient_basis;
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -125,20 +123,12 @@ Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::cal
     const auto& basis_functions = This_::set_of_basis_functions_[cell_index];
 
     const auto num_node = nodes.size();
-
     Dynamic_Matrix basis_nodes(This_::num_basis_, num_node);
+
     for (size_t j = 0; j < num_node; ++j)
         basis_nodes.change_column(j, basis_functions(nodes[j]));
 
     return basis_nodes;
-}
-
-template <ushort space_dimension_, ushort solution_order_>
-double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node) {
-    const auto& basis_function = This_::set_of_basis_functions_[cell_index];
-    const auto& P0_basis_function = basis_function[0];
-
-    return P0_basis_function(center_node);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -155,6 +145,14 @@ std::vector<Dynamic_Matrix> Polynomial_Reconstruction<space_dimension_, solution
 
 
     return set_of_basis_nodes;
+}
+
+template <ushort space_dimension_, ushort solution_order_>
+double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_value(const uint cell_index, const Space_Vector_& center_node) {
+    const auto& basis_function = This_::set_of_basis_functions_[cell_index];
+    const auto& P0_basis_function = basis_function[0];
+
+    return P0_basis_function(center_node);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -178,7 +176,7 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
     SET_TIME_POINT;
     
     for (ushort i = 0; i <= solution_order_; ++i) 
-        This_::num_Pn_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
+        This_::num_Pn_projection_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
 
     Base_::initialize(grid);
     This_::vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
@@ -190,10 +188,6 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
     This_::set_of_P1_projected_basis_vnodes_.reserve(num_cell);
     This_::set_of_P1_mode_basis_vnodes_.reserve(num_cell);
     This_::P0_basis_values_.reserve(num_cell);
-
-    constexpr ushort P1_solution_order = 1;
-    constexpr auto num_P1_projected_basis = ms::combination_with_repetition(1 + space_dimension_, P1_solution_order);
-    constexpr auto num_over_P2_basis = This_::num_basis_ - num_P1_projected_basis;
 
     constexpr ushort P0_basis_row_index = 0;
 
@@ -208,11 +202,8 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
 
         auto basis_vnodes = This_::calculate_basis_nodes(i, vnodes);
 
-        auto P1_projected_basis_vnodes = basis_vnodes;
-        if (solution_order_ > 1) {
-            Dynamic_Matrix P1_projection_matrix(num_over_P2_basis, num_vnode);
-            P1_projected_basis_vnodes.change_rows(num_P1_projected_basis, P1_projection_matrix);
-        }
+        const auto P1_projection_matrix = This_::Pn_projection_matrix(1);
+        auto P1_projected_basis_vnodes = P1_projection_matrix * basis_vnodes;
 
         Dynamic_Matrix P1_mode_basis_vnodes = P1_projected_basis_vnodes;
         P1_mode_basis_vnodes.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
@@ -233,8 +224,8 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::initi
 template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
 void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::reconstruct(std::vector<Solution_Coefficients_>& solution_coefficients) {
     const auto num_cell = solution_coefficients.size();
-
     std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
+
     for (uint i = 0; i < num_cell; ++i)
         P0_solutions[i] = (solution_coefficients[i] * This_::P0_basis_values_[i]).column(0);
 
@@ -264,13 +255,13 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                     break;                    
                 else {
                     const auto vnode_solution = solution_vnodes.column<num_equation>(j);
-                    const auto vnode_solution_criterion_variable = vnode_solution[This_::criterion_variable_index_];
 
-                    const auto higher_mode_criterion_variable = vnode_solution_criterion_variable - P1_projected_solution_criterion_variable;
+                    const auto solution_criterion_variable = vnode_solution[This_::criterion_variable_index_];
+                    const auto higher_mode_criterion_variable = solution_criterion_variable - P1_projected_solution_criterion_variable;
                     const auto P1_mode_criterion_variable = P1_projected_solution_criterion_variable - P0_solutions[i][This_::criterion_variable_index_];
                     const auto P0_mode_criterion_variable = P0_solutions[i][This_::criterion_variable_index_];
 
-                    if (This_::is_smooth_extrema(vnode_solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
+                    if (This_::is_smooth_extrema(solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
                         break;
 
                     else {
@@ -289,14 +280,8 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
                         }
                         else {
                             //limiting highest mode
-                            const auto num_preserve_basis = This_::num_Pn_basis_[--temporal_solution_order];
-                            
-                            std::array<double, This_::num_basis_> limiting_values = { 0 };
-                            for (ushort i = 0; i < num_preserve_basis; ++i)
-                                limiting_values[i] = 1.0; // preserve except highest mode
-
-                            const Matrix order_down_matrix = limiting_values;
-                            solution_coefficient *= order_down_matrix;
+                            const auto Pnm1_projection_matrix = This_::Pn_projection_matrix(--temporal_solution_order);
+                            solution_coefficient *= Pnm1_projection_matrix;
 
                             //re-calculate limited vnode_solution                            
                             solution_vnodes = solution_coefficient * This_::set_of_basis_vnodes_[i];
@@ -357,3 +342,17 @@ bool hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::is_sm
     else
         return false;
 }
+
+template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
+auto hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::Pn_projection_matrix(const ushort Pn) {
+    dynamic_require(Pn <= solution_order_, "Projection order should be less then solution order");
+
+    const auto num_Pn_projection_basis = This_::num_Pn_projection_basis_[Pn];
+    
+    std::array<double, This_::num_basis_> limiting_value = { 0 };
+    for (ushort j = 0; j < num_Pn_projection_basis; ++j)
+        limiting_value[j] = 1.0; //preserve Pn_projection_basis
+
+    Matrix Pn_projection_matrix = limiting_value;
+    return Pn_projection_matrix;
+ }

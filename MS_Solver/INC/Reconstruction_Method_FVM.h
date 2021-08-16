@@ -148,9 +148,6 @@ namespace ms {
 	template <typename T>
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
 
-    //template <typename T>
-    //inline constexpr bool is_HOM_reconstruction_method = std::is_base_of_v<HOM_Reconstruction, T>;
-
     template <typename T>
     inline constexpr bool is_constant_reconustruction = std::is_same_v<Constant_Reconstruction, T>;
 
@@ -242,7 +239,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
-        const auto vertex_solution_delta_matrix = gradient * This_::center_to_vertex_matrixes_[i];
+        const auto P1_mode_solution_vnodes = gradient * This_::center_to_vertex_matrixes_[i];
 
         std::array<double, num_equation_> limiting_values;
         limiting_values.fill(1);
@@ -255,14 +252,14 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             const auto& [min_solution, max_solution] = vnode_index_to_min_max_solution.at(vnode_index);
 
             for (ushort e = 0; e < num_equation_; ++e) {
-                const auto limiting_value = MLP_u1_Limiting_Strategy::limit(vertex_solution_delta_matrix.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
+                const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
 
         Post_AI_Data::record_limiting_value(i, limiting_values);
 
-        const auto limiting_value_matrix = Matrix<num_equation_, num_equation_>::diagonal_matrix(limiting_values);
+        const Matrix limiting_value_matrix = limiting_values;
         This_::solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 
@@ -316,7 +313,7 @@ void ANN_limiter<Gradient_Method>::initialize(const Grid<space_dimension_>& grid
 
 template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
-    static const auto num_solution = solutions.size();
+    const auto num_solution = solutions.size();
 
     This_::solution_gradients_ = Gradient_Method::calculate_solution_gradients(solutions);
 
