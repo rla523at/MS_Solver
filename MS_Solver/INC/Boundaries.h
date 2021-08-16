@@ -7,12 +7,12 @@ template <typename Governing_Equation, typename Spatial_Discrete_Method, typenam
 class Boundaries;
 
 
-template <typename Governing_Equation>
-class Boundaries<Governing_Equation, FVM, Constant_Reconstruction> : public Boundaries_FVM_Constant<Governing_Equation>
-{
-private:
-    Boundaries(void) = delete;
-};
+//template <typename Governing_Equation>
+//class Boundaries<Governing_Equation, FVM, Constant_Reconstruction> : public Boundaries_FVM_Constant<Governing_Equation>
+//{
+//private:
+//    Boundaries(void) = delete;
+//};
 
 
 template <typename Governing_Equation, typename Reconstruction_Method>
