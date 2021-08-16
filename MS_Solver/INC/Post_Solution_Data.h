@@ -149,19 +149,22 @@ Text Post_Solution_Data_Base<Governing_Equation, post_order>::header_text(const 
 
 template <typename Governing_Equation, ushort post_order>
 void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_grid(const std::vector<Element<space_dimension_>>& cell_elements) {
+	This_::num_node_ = 0;
+	This_::num_element_ = 0;	
+
 	const auto num_cell = cell_elements.size();
 	This_::num_post_points_.resize(num_cell);
 
 	ushort str_per_line = 1;
 	size_t connectivity_start_index = 1;
 
-	Text grid_post_data_text(space_dimension_);
+	Text grid_post_data_text(This_::space_dimension_);
 	for (uint i = 0; i < num_cell; ++i) {
 		const auto& geometry = cell_elements[i].geometry_;
 
 		const auto post_nodes = geometry.post_nodes(post_order);
 		for (const auto& node : post_nodes) {
-			for (ushort i = 0; i < space_dimension_; ++i, ++str_per_line) {
+			for (ushort i = 0; i < This_::space_dimension_; ++i, ++str_per_line) {
 				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
 				if (str_per_line == 10) {
 					grid_post_data_text[i] += "\n";
@@ -204,6 +207,9 @@ void Post_FVM_Solution_Data<Governing_Equation, post_order>::post_solution(const
 		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
 	else
 		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+
+	if (comment == "final")
+		count = 1;
 
 	//solution post header text
 	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);

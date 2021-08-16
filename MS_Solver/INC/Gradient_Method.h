@@ -10,8 +10,8 @@ private:
     using Solution_gradinet_    = Matrix<num_equation_, space_dimension_>;
 
 protected:
-    inline static std::vector<std::vector<size_t>> near_cell_indexes_set_;
-    inline static std::vector<Dynamic_Matrix> least_square_matrixes_;
+    std::vector<std::vector<size_t>> near_cell_indexes_set_;
+    std::vector<Dynamic_Matrix> least_square_matrixes_;
 
 public:
     std::vector<Solution_gradinet_> calculate_solution_gradients(const std::vector<Solution_>& solutions) const;

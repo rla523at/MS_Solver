@@ -74,7 +74,7 @@ public:
 
     void reconstruct(const std::vector<Solution_>& solutions);
         
-    const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
+    const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return this->solution_gradients_; };
 
 protected:
     auto calculate_vertex_node_index_to_min_max_solution(const std::vector<Solution_>& solutions) const;

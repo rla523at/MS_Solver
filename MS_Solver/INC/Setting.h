@@ -3,7 +3,7 @@
 
 // ########################################## OPTION ##################################################################
 
-#define PATH							"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" + GRID_FILE_NAME + "/"
+#define PATH							"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" 
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
@@ -11,7 +11,7 @@
 #define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__			__SQUARE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__		__FVM__
-#define __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__		__MLP_u1_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=	__CONSTANT_RECONSTRUCTION__

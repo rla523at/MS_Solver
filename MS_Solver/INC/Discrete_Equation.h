@@ -8,6 +8,7 @@
 template <typename Time_Integral_Method>
 class Discrete_Equation
 {
+private:
     static_require(ms::is_time_integral_method<Time_Integral_Method>, "It should be time integral method");
 
 public: 
@@ -16,6 +17,7 @@ public:
         static_require(ms::is_solve_end_condtion<Solve_End_Condition>,      "It should be solve end condition");
         static_require(ms::is_solve_post_condtion<Solve_Post_Condition>,    "It should be solve post condition");
          
+        ushort num_post = 0;
         double current_time = 0.0;
         Post_Solution_Data::syncronize_time(current_time);
         Post_Solution_Data::post_solution(solutions, "initial");
@@ -41,7 +43,7 @@ public:
                     break;
                 }
 
-                if (Solve_Post_Condition::inspect(current_time, time_step)) {
+                if (Solve_Post_Condition::inspect(current_time, time_step, num_post)) {
                     Time_Integral_Method::update_solutions(semid_discrete_equation, solutions, time_step);
                     current_time += time_step;
 

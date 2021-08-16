@@ -59,32 +59,30 @@ template<double post_time_step>
 class Post_By_Time : public SPC
 {
 public:
-    static bool inspect(const double current_time, double& time_step) {
-        const auto target_time = num_post_ * post_time_step;
+    static bool inspect(const double current_time, double& time_step, ushort& num_post) {
+        const auto target_time = (num_post + 1) * post_time_step;
         const auto expect_time = current_time + time_step;
         if (target_time <= expect_time) {
             const auto exceed_time = expect_time - target_time;
             time_step -= exceed_time;
-            num_post_++;
+            num_post++;
             return true;
         }
         else
             return false;
     }
-
-private:
-    inline static size_t num_post_ = 1;
 };
 
 template<ushort post_iter>
 class Post_By_Iter : public SPC
 {
 public:
-    static bool inspect(const double current_time, double& time_step) {
+    static bool inspect(const double current_time, double& time_step, ushort& num_post) {
         static uint iter = 1;
 
         if (iter++ == post_iter) {
             iter = 1;
+            num_post++;
             return true;
         }
         else

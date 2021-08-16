@@ -35,5 +35,6 @@ public:
 	static void write(void) {
 		const auto file_path = Log::path_ + "_log.txt";
 		Log::log_txt_.write(file_path);
+		Log::log_txt_.clear();	
 	}
 };
