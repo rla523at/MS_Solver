@@ -21,11 +21,11 @@ template<typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Periodic_Boundaries<FVM, Reconstruction_Method, Numerical_Flux_Function> : public Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>
 {
 private:
-    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+    static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
     Periodic_Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Periodic_Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>(std::move(grid), reconstruction_method) {};
+        : Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
 };
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>

@@ -32,13 +32,16 @@ private:
     Reconstruction_Method reconstruction_method_;
     Boundaries_ boundaries_;
     Cells_ cells_;
+    Periodic_Boundaries_ periodic_boundaries_;
+
 
 private:
     Semi_Discrete_Equation(void) = delete;
 
 public:
     static void initialize(Grid<space_dimension_>&& grid) 
-        : reconstruction_method_(grid), boundaries_(std::move(grid), reconstruction_method_), cells_(grid, reconstruction_method_){
+        : reconstruction_method_(grid), boundaries_(std::move(grid), reconstruction_method_), cells_(grid, reconstruction_method_)
+          periodic_boundaries_(std::move(grid), reconstruction_method_) {
 
         Cells_::initialize(std::move(grid));
         Boundaries_::initialize(std::move(grid));

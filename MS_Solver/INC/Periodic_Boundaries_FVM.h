@@ -39,7 +39,7 @@ private:
 public:
     Periodic_Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
 
-    void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions);
+    void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
 
 
@@ -111,7 +111,7 @@ Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) {
+void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const {
     const auto& solution_gradients = this->reconstruction_method_.get_solution_gradients();
 
     const auto num_pbdry_pair = this->normals_.size();
