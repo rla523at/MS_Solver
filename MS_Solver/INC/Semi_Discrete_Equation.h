@@ -58,7 +58,7 @@ public:
         const auto num_solution = solutions.size();
         std::vector<Residual_> RHS(num_solution);
 
-        //if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
+        if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             this->reconstruction_method_.reconstruct(solutions);
 
         this->boundaries_.calculate_RHS(RHS, solutions);

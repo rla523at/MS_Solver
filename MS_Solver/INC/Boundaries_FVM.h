@@ -35,10 +35,9 @@ private:
     using Solution_         = Euclidean_Vector<num_equation_>;
     using Boundary_Flux_    = Euclidean_Vector<num_equation_>;
 
-private:
-    Boundaries_FVM_Constant(Grid<space_dimension_>&& grid) : Boundaries_FVM_Base<Governing_Equation>(std::move(grid));
-
 public:
+    Boundaries_FVM_Constant(Grid<space_dimension_>&& grid) : Boundaries_FVM_Base<Governing_Equation>(std::move(grid)) {};
+
     void calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions) const;
 };
 

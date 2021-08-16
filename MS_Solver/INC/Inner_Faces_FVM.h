@@ -28,14 +28,13 @@ private:
     static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
 
-    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
-    using Solution_ = Euclidean_Vector<This_::num_equation_>;
-    using Residual_ = Euclidean_Vector< This_::num_equation_>;
-
-private:
-    Inner_Faces_FVM_Constant(Grid<space_dimension>&& grid) : Inner_Faces_FVM_Base<space_dimension_>(std::move(grid)) {};
+    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
+    using Solution_ = Euclidean_Vector<num_equation_>;
+    using Residual_ = Euclidean_Vector< num_equation_>;
 
 public:
+    Inner_Faces_FVM_Constant(Grid<space_dimension_>&& grid) : Inner_Faces_FVM_Base<space_dimension_>(std::move(grid)) {};
+
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
 
@@ -104,7 +103,7 @@ void Inner_Faces_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vecto
 
     for (size_t i = 0; i < num_inner_face; ++i) {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto delta_RHS = This_::areas_[i] * numerical_fluxes[i];
+        const auto delta_RHS = this->areas_[i] * numerical_fluxes[i];
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }

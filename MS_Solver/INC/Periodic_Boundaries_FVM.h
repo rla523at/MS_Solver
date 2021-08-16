@@ -28,14 +28,13 @@ private:
     static constexpr ushort space_dimension_ = Numerical_Flux_Function::space_dimension();
     static constexpr ushort num_equation_ = Numerical_Flux_Function::num_equation();
 
-    using Space_Vector_ = Euclidean_Vector<This_::space_dimension_>;
-    using Solution_     = Euclidean_Vector<This_::num_equation_>;
-    using Residual_     = Euclidean_Vector< This_::num_equation_>;
-
-private:
-    Periodic_Boundaries_FVM_Constant(Grid<space_dimension>&& grid) : Periodic_Boundaries_FVM_Base<space_dimension_>(std::move(grid)) {};
+    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
+    using Solution_     = Euclidean_Vector<num_equation_>;
+    using Residual_     = Euclidean_Vector< num_equation_>;
 
 public:
+    Periodic_Boundaries_FVM_Constant(Grid<space_dimension_>&& grid) : Periodic_Boundaries_FVM_Base<space_dimension_>(std::move(grid)) {};
+
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
 
