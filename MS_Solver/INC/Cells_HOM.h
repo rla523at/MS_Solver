@@ -13,7 +13,7 @@ private:
     static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
 
     using This_                 = Cells_HOM<Governing_Equation, Reconstruction_Method>;
-    using Space_Vector_         = Euclidean_Vector<This_::space_dimension_>;
+    using Space_Vector_         = Euclidean_Vector<space_dimension_>;
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
     using Residual_             = Matrix<num_equation_, num_basis_>;
 
@@ -21,65 +21,64 @@ public:
     using Discretized_Solution_ = Matrix<num_equation_, num_basis_>;
 
 protected:    
-    inline static std::vector<double> volumes_;
-    inline static std::vector<std::array<double, space_dimension_>> projected_volumes_;
-    inline static std::vector<const Quadrature_Rule<space_dimension_>*> quadrature_rule_ptrs_;
-    inline static std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
-    inline static std::vector<Dynamic_Matrix> gradient_basis_weights_;
-    inline static std::vector<double> P0_basis_values_;
+    const Reconstruction_Method& reconstruction_method_;
 
-private:
-    Cells_HOM(void) = delete;
+    std::vector<double> volumes_;
+    std::vector<std::array<double, space_dimension_>> projected_volumes_;
+    std::vector<const Quadrature_Rule<space_dimension_>*> quadrature_rule_ptrs_;
+    std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
+    std::vector<Dynamic_Matrix> gradient_basis_weights_;
+    std::vector<double> P0_basis_values_;
 
 public:
-    static void initialize(const Grid<space_dimension_>& grid);
-    static double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl);
-    static void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients);
+    Cells_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
+
+    double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const;
+    void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
 
     template <typename Initial_Condition>
-    static auto calculate_initial_solutions(void);
+    auto calculate_initial_solutions(void) const;
 
     template <typename Initial_Condition>
-    static void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time);
+    void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const;
 };
 
 
 //template definition
 template <typename Governing_Equation, typename Reconstruction_Method>
-void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid<space_dimension_>& grid) {
+Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+    : reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
     const auto& cell_elements = grid.elements.cell_elements;
 
     const auto num_cell = cell_elements.size();
-    This_::volumes_.reserve(num_cell);
-    This_::projected_volumes_.reserve(num_cell);
-    This_::quadrature_rule_ptrs_.reserve(num_cell);
-    This_::set_of_basis_qnodes_.reserve(num_cell); // 2 * solution_order
-    This_::gradient_basis_weights_.reserve(num_cell);
-    This_::P0_basis_values_.reserve(num_cell);
+    this->volumes_.reserve(num_cell);
+    this->projected_volumes_.reserve(num_cell);
+    this->quadrature_rule_ptrs_.reserve(num_cell);
+    this->set_of_basis_qnodes_.reserve(num_cell); // 2 * solution_order
+    this->gradient_basis_weights_.reserve(num_cell);
+    this->P0_basis_values_.reserve(num_cell);
 
-    const auto set_of_transposed_gradient_basis = Reconstruction_Method::calculate_set_of_transposed_gradient_basis();
+    const auto set_of_transposed_gradient_basis = this->reconstruction_method_.calculate_set_of_transposed_gradient_basis();
     constexpr auto solution_order = Reconstruction_Method::solution_order();
     constexpr auto integrand_order = 2 * solution_order;
 
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& cell_element = cell_elements[i];
-        const auto& geometry = cell_element.geometry_;
-        const auto volume = geometry.volume();
+        const auto& geometry = cell_elements[i].geometry_;
 
-        This_::volumes_.push_back(volume);
-        This_::projected_volumes_.push_back(geometry.projected_volume());
-        This_::P0_basis_values_.push_back(Reconstruction_Method::calculate_P0_basis_value(i, geometry.center_node()));
+        this->volumes_.push_back(geometry.volume());
+        this->projected_volumes_.push_back(geometry.projected_volume());
+        this->P0_basis_values_.push_back(this->reconstruction_method_.calculate_P0_basis_value(i, geometry.center_node()));
 
         const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
-        This_::quadrature_rule_ptrs_.push_back(&quadrature_rule);
-        This_::set_of_basis_qnodes_.push_back(Reconstruction_Method::calculate_basis_nodes(i, quadrature_rule.points));
+        this->quadrature_rule_ptrs_.push_back(&quadrature_rule);
+        this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.calculate_basis_nodes(i, quadrature_rule.points));
         
         const auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];        
         const auto num_quadrature_point = quadrature_rule.points.size();
         
-        Dynamic_Matrix gradient_basis_weight(num_quadrature_point * This_::space_dimension_, This_::num_basis_);
+        Dynamic_Matrix gradient_basis_weight(num_quadrature_point * this->space_dimension_, this->num_basis_);
 
         for (ushort q = 0; q < num_quadrature_point; ++q) {
             const auto& quadrature_point = quadrature_rule.points[q];
@@ -87,10 +86,10 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
             
             const auto part_of_gradient_basis_weight = transposed_gradient_basis(quadrature_point) * quadrature_weight;
 
-            gradient_basis_weight.change_rows(q * This_::space_dimension_, part_of_gradient_basis_weight);
+            gradient_basis_weight.change_rows(q * this->space_dimension_, part_of_gradient_basis_weight);
         }
 
-        This_::gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
+        this->gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -99,22 +98,22 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize(const Grid
 
 
 template <typename Governing_Equation, typename Reconstruction_Method>
-double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) {
+double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const {
     const auto num_cell = solution_coefficients.size();
 
-    std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions;
+    std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions;       //vector array pushback vs 대입연산 performance test ㄲㄲ!
     P0_solutions.reserve(num_cell);
 
     for (size_t i = 0; i < num_cell; ++i) {
         const auto P0_coefficient = solution_coefficients[i].column(0);
-        P0_solutions.push_back(P0_coefficient * This_::P0_basis_values_[i]);
+        P0_solutions.push_back(P0_coefficient * this->P0_basis_values_[i]);
     }
 
     const auto coordinate_projected_maximum_lambdas = Governing_Equation::calculate_coordinate_projected_maximum_lambdas(P0_solutions);
     
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto [y_projected_volume, x_projected_volume] = This_::projected_volumes_[i];
+        const auto [y_projected_volume, x_projected_volume] = this->projected_volumes_[i];
         const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
 
         const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
@@ -124,7 +123,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
         //    std::cout << "Debug";
 
         dynamic_require(std::isnormal(x_radii) && std::isnormal(y_radii), "time step should be normal number");
-        local_time_step[i] = cfl * This_::volumes_[i] / (x_radii + y_radii);
+        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
     }
 
     static const auto solution_order = Reconstruction_Method::solution_order();
@@ -136,7 +135,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
 
  
 template <typename Governing_Equation, typename Reconstruction_Method>
-void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) {
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const {
     const auto num_solution = solution_coefficients.size();
         
     for (uint i = 0; i < num_solution; ++i) {

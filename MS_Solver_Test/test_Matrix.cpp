@@ -101,6 +101,26 @@ TEST(Matrix, gemm_1) {
 	const Matrix<1, 2> ref = { 6,6 };
 	EXPECT_EQ(m, ref);
 }
+TEST(Matrix, gemm_2) {
+	std::array<double, 3> ar = { 1, 0, 0 };
+	Matrix m = ar;
+
+	const Matrix<3, 3> m2 = { 1,2,3,4,5,6,7,8,9 };
+	const auto result = m * m2;
+
+	const Matrix<3, 3> ref = { 1,2,3,0,0,0,0,0,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Matrix, gemm_3) {
+	std::array<double, 3> ar = { 1, 0, 0 };
+	Matrix m = ar;
+
+	const Matrix<3, 3> m2 = { 1,2,3,4,5,6,7,8,9 };
+	const auto result = m2 * m;
+
+	const Matrix<3, 3> ref = { 1,0,0,4,0,0,7,0,0 };
+	EXPECT_EQ(result, ref);
+}
 
 TEST(Matrix, column_1) {
 	const Matrix<2, 3> m = { 1,2,3,4,5,6 };

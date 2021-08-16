@@ -23,7 +23,7 @@ TEST(Reconstruction_Method, activation_function_2) {
 }
 
 
-TEST(hMLP_Reconstruction, is_satisfy_P1_projected_MLP_condition_1) {
+TEST(hMLP_Reconstruction, P1_projected_MLP_condition_1) {
 
 	constexpr ushort num_equation = 1;
 	constexpr ushort space_dimension = 2;
@@ -33,11 +33,12 @@ TEST(hMLP_Reconstruction, is_satisfy_P1_projected_MLP_condition_1) {
 	const auto allowable_min = 0.5;
 	const auto allowable_max = 2.0;
 
-	const auto result = hMLP_Reconstruction<num_equation, space_dimension, polynomial_order>::is_satisfy_P1_projected_MLP_condition(P1_projected_solution, allowable_min, allowable_max);
+	const auto result = P1_Projected_MLP_Condition::is_satisfy(P1_projected_solution, allowable_min, allowable_max);
 	const auto ref = true;
 	EXPECT_EQ(result, ref);
 }
-TEST(hMLP_Reconstruction, is_satisfy_P1_projected_MLP_condition_2) {
+
+TEST(hMLP_Reconstruction, P1_projected_MLP_condition_2) {
 
 	constexpr ushort num_equation = 1;
 	constexpr ushort space_dimension = 2;
@@ -47,7 +48,7 @@ TEST(hMLP_Reconstruction, is_satisfy_P1_projected_MLP_condition_2) {
 	const auto allowable_min = 0.5;
 	const auto allowable_max = 2.0;
 
-	const auto result = hMLP_Reconstruction<num_equation, space_dimension, polynomial_order>::is_satisfy_P1_projected_MLP_condition(P1_projected_solution, allowable_min, allowable_max);
+	const auto result = P1_Projected_MLP_Condition::is_satisfy(P1_projected_solution, allowable_min, allowable_max);
 	const auto ref = false;
 	EXPECT_EQ(result, ref);
 }
