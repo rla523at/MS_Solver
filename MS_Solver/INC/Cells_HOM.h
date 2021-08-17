@@ -101,12 +101,10 @@ template <typename Governing_Equation, typename Reconstruction_Method>
 double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const {
     const auto num_cell = solution_coefficients.size();
 
-    std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions;       //vector array pushback vs 대입연산 performance test ㄲㄲ!
-    P0_solutions.reserve(num_cell);
-
+    std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
         const auto P0_coefficient = solution_coefficients[i].column(0);
-        P0_solutions.push_back(P0_coefficient * this->P0_basis_values_[i]);
+        P0_solutions[i] = P0_coefficient * this->P0_basis_values_[i];
     }
 
     const auto coordinate_projected_maximum_lambdas = Governing_Equation::calculate_coordinate_projected_maximum_lambdas(P0_solutions);
@@ -161,13 +159,13 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
 
 template <typename Governing_Equation, typename Reconstruction_Method>
 template <typename Initial_Condition>
-auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_solutions(void) {
-    const auto num_cell = This_::quadrature_rule_ptrs_.size();
+auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_solutions(void) const {
+    const auto num_cell = this->quadrature_rule_ptrs_.size();
     std::vector<Matrix<This_::num_equation_, This_::num_basis_>> initial_solution_coefficients(num_cell);
     
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;
-        const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
+        const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
+        const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
 
         const auto num_qnode = qnodes.size();
 
@@ -180,7 +178,6 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
         }
 
         ms::gemm(initial_solution_qnodes, basis_weight, initial_solution_coefficients[i]);
-
     }
 
     return initial_solution_coefficients;
@@ -188,7 +185,7 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
 
 template <typename Governing_Equation, typename Reconstruction_Method>
 template <typename Initial_Condition>
-void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) {
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const {
     Log::content_ << "================================================================================\n";
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
@@ -201,11 +198,11 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
         double global_Linf_error = 0.0;
 
         for (size_t i = 0; i < num_cell; ++i) {
-            const auto& qnodes = This_::quadrature_rule_ptrs_[i]->points;
+            const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
             const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(qnodes, time);
-            const auto computed_solutions = solution_coefficients[i] * This_::set_of_basis_qnodes_[i];
+            const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
 
-            const auto& qweights = This_::quadrature_rule_ptrs_[i]->weights;
+            const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
 
             const auto num_qnode = qnodes.size();
 
