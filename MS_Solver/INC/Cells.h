@@ -25,5 +25,5 @@ private:
     static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
 
 public:
-    Cells(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method) : Cells_HOM<Governing_Equation>(grid, reconstruction_method) {};
+    Cells(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method) : Cells_HOM<Governing_Equation, Reconstruction_Method>(grid, reconstruction_method) {};
 };

@@ -34,7 +34,7 @@ void Post_AI_Data::post(void) {
 		}
 	}
 
-	target_cell_indexes_.clear();
+	target_cell_indexes_.reset();
 
 #endif
 }

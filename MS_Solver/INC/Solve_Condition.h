@@ -25,6 +25,7 @@ public:
         if (target_time <= expect_time) {
             const auto exceed_time = expect_time - target_time;
             time_step -= exceed_time;
+            current_iter = 0;
             return true;
         }
         else
@@ -45,8 +46,10 @@ public:
         Log::content_ << std::fixed << std::setprecision(3) << "(" << current_iter++ * 100 / target_iter << "%)\n" << std::defaultfloat << std::setprecision(6);
         Log::content_ << "Iter:" << std::left << std::setw(5) << current_iter << "\t";
                 
-        if (current_iter == target_iter) 
+        if (current_iter == target_iter) {
+            current_iter = 0;
             return true;
+        }
         else
             return false;
     }

@@ -32,7 +32,7 @@ public:
     static constexpr ushort num_basis(void) { return num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
-    static std::string name(void) { return "P" + std::to_string(solution_order_) + "_Polynomial_Reconstruction"; };
+    static std::string name(void) { return "Polynomial_Reconstruction_P" + std::to_string(solution_order_); };
 };
 
 
@@ -88,8 +88,21 @@ private:
     auto Pn_projection_matrix(const ushort Pn) const;
 
 public:
-    static std::string name(void) { return "P" + std::to_string(solution_order_) + "_hMLP_Reconstruction"; };
+    static std::string name(void) { return "hMLP_Reconstruction_P" + std::to_string(solution_order_); };
 };
+
+
+namespace ms {
+    template <typename T>
+    inline constexpr bool is_HOM_reconsturction_method = std::is_base_of_v<HOM_Reconstruction, T>;
+
+    template <typename T>
+    inline constexpr bool is_polynomial_reconustruction = std::is_same_v<Polynomial_Reconstruction<T::space_dimension(), T::solution_order()>, T>;
+
+    template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
+    inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
+        = ms::is_polynomial_reconustruction<Reconstruction_Method>;
+}
 
 
 //template definition part

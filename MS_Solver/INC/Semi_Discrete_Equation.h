@@ -5,6 +5,7 @@
 #include "Periodic_Boundaries.h"
 #include "Pressure_Fix.h"
 #include "Numerical_Flux_Function.h"
+#include "Post_Solution_Data.h"
 
 
 template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -37,6 +38,9 @@ private:
 public:
     Semi_Discrete_Equation(Grid<space_dimension_>&& grid) : reconstruction_method_(std::move(grid)), boundaries_(std::move(grid), reconstruction_method_),
         cells_(grid, reconstruction_method_), periodic_boundaries_(std::move(grid), reconstruction_method_), inner_faces_(std::move(grid), reconstruction_method_) {
+
+        if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
+            Post_Solution_Data::initialize_HOM(grid, this->reconstruction_method_);
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";

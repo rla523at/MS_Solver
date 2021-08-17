@@ -3,15 +3,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__				"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" 
+#define __DEFAULT_PATH__				"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/" + "Error_test/" 
 
 #define __DIMENSION__					2
 #define __GRID_FILE_TYPE__				__GMSH__
-#define __GRID_FILE__					Quad50
+//#define __GRID_FILE__					-
 #define __GOVERNING_EQUATION__			__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__			__SQUARE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__		__FVM__
-#define __RECONSTRUCTION_METHOD__		__MLP_u1_RECONSTRUCTION__
+#define __INITIAL_CONDITION__			__SINE_WAVE__
+#define __SPATIAL_DISCRETE_METHOD__		__HOM__
+#define __RECONSTRUCTION_METHOD__		__POLYNOMIAL_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=	__CONSTANT_RECONSTRUCTION__
@@ -20,18 +20,18 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__				2
+#define __SOLUTION_ORDER__				3
 #endif 
 
 #define __NUMERICAL_FLUX__				__LLF__
-#define __TIME_INTEGRAL_METHOD__		__SSPRK33__
+#define __TIME_INTEGRAL_METHOD__		__SSPRK54__
 #define __TIME_STEP_METHOD__			__CFL__
 #define __TIME_STEP_CONSTANT__			0.9
 #define __SOLVE_END_CONDITION__			__END_BY_TIME__
-#define __END_CONDITION_CONSTANT__		2.0
+#define __END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__		__POST_BY_TIME__
 #define __POST_CONDITION_CONSTANT__		0.2
-#define __POST_ORDER__					1
+#define __POST_ORDER__					2
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -52,7 +52,7 @@
 // #################################### USER DEFINE SETTING ############################################################
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				0.5
+#define Y_ADVECTION_SPEED				2.0
 #define Z_ADVECTION_SPEED				0.5
 
 // Sine Wave
@@ -61,7 +61,7 @@
 #define Z_WAVE_LENGTH					1
 
 // Mode (comment out == turn off)
-//#define ERROR_CALCULATION_MODE
+#define ERROR_CALCULATION_MODE
 #if __GOVERNING_EQUATION__		== 		__EULER__
 #if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
 #define PRESSURE_FIX_MODE

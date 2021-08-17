@@ -174,7 +174,7 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
 
         for (ushort q = 0; q < num_qnode; ++q) {
             initial_solution_qnodes.change_column(q, Initial_Condition::calculate_solution(qnodes[q]));
-            basis_weight.change_row(q, Reconstruction_Method::calculate_basis_node(i, qnodes[q]) * qweights[q]);
+            basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(i, qnodes[q]) * qweights[q]);
         }
 
         ms::gemm(initial_solution_qnodes, basis_weight, initial_solution_coefficients[i]);
@@ -191,6 +191,46 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
     Log::content_ << "================================================================================\n";
     
     if constexpr (ms::is_Linear_Advection_2D<Governing_Equation>) {
+        ////Version 1
+        //const auto num_cell = solution_coefficients.size();
+
+        //double global_L1_error = 0.0;
+        //double global_L2_error = 0.0;
+        //double global_Linf_error = 0.0;
+
+        //for (size_t i = 0; i < num_cell; ++i) {
+        //    const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
+        //    const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(qnodes, time);
+        //    const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
+
+        //    const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
+
+        //    const auto num_qnode = qnodes.size();
+
+        //    double local_error = 0.0;
+        //    double volume = 0.0;
+        //    for (size_t q = 0; q < num_qnode; ++q) {
+        //        local_error += (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm() * qweights[q];
+        //        volume += qweights[q];
+        //    }
+        //    local_error = local_error / volume;
+
+        //    global_L1_error += local_error;
+        //    global_L2_error += local_error * local_error;
+        //    global_Linf_error = max(global_Linf_error, local_error);
+
+        //}
+
+        //global_L1_error = global_L1_error / num_cell;
+        //global_L2_error = global_L2_error / num_cell;
+
+        //global_L2_error = std::sqrt(global_L2_error);
+
+        //Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
+        //Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
+
+
+        //Version 2
         const auto num_cell = solution_coefficients.size();
 
         double global_L1_error = 0.0;
@@ -206,27 +246,35 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 
             const auto num_qnode = qnodes.size();
 
-            double local_error = 0.0;
+            double local_L1_error = 0.0;
+            double local_L2_error = 0.0;
+            double local_Linf_error = 0.0;
+
             double volume = 0.0;
             for (size_t q = 0; q < num_qnode; ++q) {
-                local_error += (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm() * qweights[q];
+                const auto local_diff = (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm();
+                local_L1_error += local_diff * qweights[q];
+                local_L2_error += local_diff * local_diff * qweights[q];
+                local_Linf_error = max(local_Linf_error, local_diff);
+
                 volume += qweights[q];
             }
-            local_error = local_error / volume;
 
-            global_L1_error += local_error;
-            global_L2_error += local_error * local_error;
-            global_Linf_error = max(global_Linf_error, local_error);
+            local_L1_error = local_L1_error / volume;
+            local_L2_error = std::sqrt(local_L2_error / volume);
 
+
+            global_L1_error += local_L1_error;
+            global_L2_error += local_L2_error;
+            global_Linf_error += local_Linf_error;
         }
 
         global_L1_error = global_L1_error / num_cell;
         global_L2_error = global_L2_error / num_cell;
-
-        global_L2_error = std::sqrt(global_L2_error);
+        global_Linf_error = global_Linf_error / num_cell;
 
         Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
-        Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
+        Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error);
     }
     else
         Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
