@@ -31,9 +31,13 @@ public:
 };
 
 
-//template <typename Governing_Equation, typename Reconstruction_Method>
-//class Boundaries<Governing_Equation, HOM, Reconstruction_Method> : public Boundaries_HOM<Governing_Equation, Reconstruction_Method>
-//{
-//private:
-//    Boundaries(void) = delete;
-//};
+template <typename Governing_Equation, typename Reconstruction_Method>
+class Boundaries<Governing_Equation, HOM, Reconstruction_Method> : public Boundaries_HOM<Governing_Equation, Reconstruction_Method>
+{
+private:
+    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+
+public:
+    Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+        : Boundaries_HOM<Governing_Equation, Reconstruction_Method>(std::move(grid), reconstruction_method) {};
+};
