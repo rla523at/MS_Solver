@@ -102,15 +102,18 @@ public:
 	Dynamic_Matrix inverse(void) const;
 	std::pair<size_t, size_t> size(void) const;
 
+public:
 	Dynamic_Matrix& be_transpose(void);
 	Dynamic_Matrix& be_inverse(void);
 	void change_column(const size_t column_index, const Dynamic_Euclidean_Vector& vec);
 	void change_row(const size_t start_row_index, const Dynamic_Euclidean_Vector& vec);
 	void change_rows(const size_t start_row_index, const Dynamic_Matrix& A);
 
-
+public:
 	template <size_t num_row>
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
+
+	Dynamic_Euclidean_Vector row(const size_t row_index) const;
 
 	template <size_t dimension>
 	void change_row(const size_t row_index, const Euclidean_Vector<dimension>& vec);

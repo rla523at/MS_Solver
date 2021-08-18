@@ -149,7 +149,7 @@
 #define RECONSTRUCTION_METHOD Polynomial_Reconstruction<__DIMENSION__, __SOLUTION_ORDER__>
 #endif
 #if		__RECONSTRUCTION_METHOD__ == __hMLP_RECONSTRUCTION__
-#define RECONSTRUCTION_METHOD hMLP_Reconstruction<GOVERNING_EQUATION::num_equation(), __DIMENSION__, __SOLUTION_ORDER__>
+#define RECONSTRUCTION_METHOD hMLP_Reconstruction<__DIMENSION__, __SOLUTION_ORDER__>
 #endif
 
 #if		__NUMERICAL_FLUX__ == __LLF__

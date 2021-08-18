@@ -199,3 +199,11 @@ TEST(Dynamic_Matrix, change_columns_1) {
 	const Dynamic_Matrix ref(2, 4, { 1,2,0,0,3,4,0,0 });
 	EXPECT_EQ(dm, ref);
 }
+
+TEST(Dynamic_Matrix, row_1) {
+	Dynamic_Matrix dm(2, 3, { 1,2,3,4,5,6 });
+	const auto result = dm.row(0);
+
+	const Dynamic_Euclidean_Vector ref = { 1,2,3 };
+	EXPECT_EQ(result, ref);
+}

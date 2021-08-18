@@ -112,7 +112,7 @@ void Dynamic_Matrix::change_column(const size_t column_index, const Dynamic_Eucl
 
 void Dynamic_Matrix::change_row(const size_t start_row_index, const Dynamic_Euclidean_Vector& vec) {
 	dynamic_require(this->num_column_ == vec.dimension(), "dimension should be matched");
-	dynamic_require(start_row_index <= this->num_row_, "range can't not exceed given range");
+	dynamic_require(start_row_index <= this->num_row_, "index can not exceed given range");
 	dynamic_require(!this->is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_column_;
@@ -121,11 +121,29 @@ void Dynamic_Matrix::change_row(const size_t start_row_index, const Dynamic_Eucl
 
 void Dynamic_Matrix::change_rows(const size_t start_row_index, const Dynamic_Matrix& A) {
 	dynamic_require(this->num_column_ == A.num_column_, "dimension should be matched");
-	dynamic_require(start_row_index + A.num_row_ <= this->num_row_, "range can't not exceed given range");
+	dynamic_require(start_row_index + A.num_row_ <= this->num_row_, "index can not exceed given range");
 	dynamic_require(!this->is_transposed() && !A.is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_column_;
 	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
+}
+
+Dynamic_Euclidean_Vector Dynamic_Matrix::row(const size_t row_index) const {
+	dynamic_require(row_index < this->num_row_, "index can not exceed given range");
+
+	std::vector<double> row_values(this->num_column_);
+
+	if (this->is_transposed()) {
+		for (size_t i = 0; i < this->num_column_; ++i)
+			row_values[i] = this->at(row_index, i);
+	}
+	else {
+		const auto start_index = row_index * this->num_column_;
+		const auto start_iter = this->values_.begin() + start_index;		
+		std::copy(start_iter, start_iter + this->num_column_, row_values.begin());
+	}
+
+	return row_values;
 }
 
 bool Dynamic_Matrix::is_square_matrix(void) const {
