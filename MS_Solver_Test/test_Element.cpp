@@ -584,6 +584,41 @@ GTEST_TEST(Geometry, faces_nodes_2) {
 	EXPECT_EQ(result, ref);
 }
 
+
+TEST(Geometry, sub_simplex_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	const Euclidean_Vector n3 = { 4,2 };
+	const Euclidean_Vector n4 = { 1,2 };
+	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
+
+	Geometry<space_dimension> geometry(ref_geometry, std::move(nodes));
+	
+	const auto result = geometry.sub_simplex_geometries();
+
+	const auto ref_fig = Figure::triangle;
+	const ReferenceGeometry<space_dimension> simplex_ref_geometry(ref_fig, fig_order);
+
+	std::vector<Euclidean_Vector<2>> simplex_nodes1 = { n1,n2,n4 };
+	std::vector<Euclidean_Vector<2>> simplex_nodes2 = { n2,n3,n1 };
+	std::vector<Euclidean_Vector<2>> simplex_nodes3 = { n3,n4,n2 };
+	std::vector<Euclidean_Vector<2>> simplex_nodes4 = { n4,n1,n3 };
+
+	const Geometry simplex1(simplex_ref_geometry, std::move(simplex_nodes1));
+	const Geometry simplex2(simplex_ref_geometry, std::move(simplex_nodes2));
+	const Geometry simplex3(simplex_ref_geometry, std::move(simplex_nodes3));
+	const Geometry simplex4(simplex_ref_geometry, std::move(simplex_nodes4));
+
+	std::vector<Geometry<space_dimension>> ref = { simplex1,simplex2,simplex3,simplex4 };
+	EXPECT_EQ(result, ref);
+}
+
 GTEST_TEST(Geometry, coordinate_projected_volume_1) {
 	constexpr size_t space_dimension = 2;
 
@@ -739,7 +774,7 @@ GTEST_TEST(Geometry, orthonormal_basis_1) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -773,7 +808,7 @@ GTEST_TEST(Geometry, orthonormal_basis_2) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -807,7 +842,7 @@ GTEST_TEST(Geometry, orthonormal_basis_3) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -840,7 +875,7 @@ GTEST_TEST(Geometry, orthonormal_basis_4) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
@@ -873,7 +908,7 @@ GTEST_TEST(Geometry, orthonormal_basis_5) {
 	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
-	const auto orthonormal_basis = geometry.orthonormal_basis_functions<polynomial_order>();
+	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function<polynomial_order>();
 
 	double max_error = 0.0;
 	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {

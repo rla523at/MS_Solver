@@ -87,6 +87,8 @@ public:
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
 	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	bool is_simplex(void) const;
+	std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const;
+	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const;
 
 	//private: for test
 	std::vector<Space_Vector_> mapping_nodes(void) const;
@@ -119,12 +121,15 @@ private:
 public:
 	Geometry(const ReferenceGeometry<space_dimension> reference_geometry, std::vector<Space_Vector_>&& consisting_nodes)
 		: reference_geometry_(reference_geometry), nodes_(std::move(consisting_nodes)), mapping_function_(this->reference_geometry_.mapping_function(this->nodes_)) {};
+
+	bool operator==(const Geometry& other) const;
 		
 	Space_Vector_ center_node(void) const;
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	double volume(void) const;
 	std::array<double, space_dimension> projected_volume(void) const;
 	std::vector<Geometry> faces_geometry(void) const;
+	std::vector<Geometry> sub_simplex_geometries(void) const;
 	std::vector<Space_Vector_> post_nodes(const ushort post_order) const;
 	std::vector<Space_Vector_> vertex_nodes(void) const;
 	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
@@ -134,7 +139,7 @@ public:
 	auto initial_basis_function(void) const;
 
 	template <ushort order>
-	auto orthonormal_basis_functions(void) const;
+	auto orthonormal_basis_vector_function(void) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_faces_nodes(void) const;
@@ -638,6 +643,57 @@ bool ReferenceGeometry<space_dimension>::is_simplex(void) const {
 
 
 template <ushort space_dimension>
+std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimension>::sub_simplex_reference_geometries(void) const {
+	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
+	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
+
+	switch (this->figure_)
+	{
+	case Figure::quadrilateral: {
+		//   3式式式式式2
+		//   弛     弛   
+		//   0式式式式式1
+
+		ReferenceGeometry<space_dimension> simplex1(Figure::triangle, this->figure_order_);
+		ReferenceGeometry<space_dimension> simplex2(Figure::triangle, this->figure_order_);
+		ReferenceGeometry<space_dimension> simplex3(Figure::triangle, this->figure_order_);
+		ReferenceGeometry<space_dimension> simplex4(Figure::triangle, this->figure_order_);
+
+		return { simplex1, simplex2, simplex3, simplex4 };
+	}
+	default:
+		throw std::runtime_error("not supported figure");
+	}
+
+}
+
+template <ushort space_dimension>
+std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_sub_simplex_vertex_node_index_orders(void) const {
+	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
+	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
+
+	switch (this->figure_)
+	{
+	case Figure::quadrilateral: {
+		//   3式式式式式2
+		//   弛     弛   
+		//   0式式式式式1
+
+		const std::vector<ushort> simplex1 = { 0,1,3 };
+		const std::vector<ushort> simplex2 = { 1,2,0 };
+		const std::vector<ushort> simplex3 = { 2,3,1 };
+		const std::vector<ushort> simplex4 = { 3,0,2 };
+
+		return { simplex1, simplex2, simplex3, simplex4 };
+	}
+	default:
+		throw std::runtime_error("not supported figure");
+	}
+
+}
+
+
+template <ushort space_dimension>
 std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
 	if constexpr (space_dimension == 2) {
 		switch (this->figure_) {
@@ -1057,6 +1113,32 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::faces_geometry
 }
 
 template <ushort space_dimension>
+std::vector<Geometry<space_dimension>> Geometry<space_dimension>::sub_simplex_geometries(void) const {
+	const auto sub_simplex_reference_geometries = this->reference_geometry_.sub_simplex_reference_geometries();
+	const auto set_of_sub_simplex_vnode_index_orders = this->reference_geometry_.set_of_sub_simplex_vertex_node_index_orders();
+	const auto num_sub_simplex = set_of_sub_simplex_vnode_index_orders.size();
+
+	std::vector<Geometry> sub_simplex_geometries;
+	sub_simplex_geometries.reserve(num_sub_simplex);
+
+	for (ushort i = 0; i < num_sub_simplex; ++i) {
+		const auto& reference_geometry = sub_simplex_reference_geometries[i];
+
+		const auto& vnode_index_orders = set_of_sub_simplex_vnode_index_orders[i];
+		const auto num_node = vnode_index_orders.size();
+
+		std::vector<Space_Vector_> sub_simplex_vnodes(num_node);
+		for (size_t j = 0; j < num_node; ++j)
+			sub_simplex_vnodes[j] = this->nodes_[vnode_index_orders[j]];
+
+		sub_simplex_geometries.push_back({ reference_geometry,std::move(sub_simplex_vnodes) });
+	}
+
+	return sub_simplex_geometries;
+}
+
+
+template <ushort space_dimension>
 std::vector<Euclidean_Vector<space_dimension>> Geometry<space_dimension>::post_nodes(const ushort post_order) const {
 	return this->reference_geometry_.post_nodes(this->mapping_function_, post_order);
 }
@@ -1141,7 +1223,7 @@ auto Geometry<space_dimension>::initial_basis_function(void) const {
 
 template <ushort space_dimension>
 template <ushort order>
-auto Geometry<space_dimension>::orthonormal_basis_functions(void) const {
+auto Geometry<space_dimension>::orthonormal_basis_vector_function(void) const {
 	const auto initial_basis_set = this->initial_basis_function<order>();
 	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }
@@ -1161,6 +1243,11 @@ bool Geometry<space_dimension>::is_axis_parallel_node(const Space_Vector_& node,
 			return true;
 	}
 	return false;
+}
+
+template <ushort space_dimension>
+bool Geometry<space_dimension>::operator==(const Geometry& other) const {
+	return this->reference_geometry_ == other.reference_geometry_ && this->nodes_ == other.nodes_;
 }
 
 template <ushort space_dimension>

@@ -48,7 +48,7 @@ private:
     MLP_u1_Limiting_Strategy(void) = delete;
 
 public:
-    static double limit(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max);
+    static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max);
 };
 
 
@@ -168,7 +168,7 @@ void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solut
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
 }
 
-double MLP_u1_Limiting_Strategy::limit(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
+double MLP_u1_Limiting_Strategy::calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
     if (P1_mode_solution < 0)
         return min((allowable_min - P0_solution) / P1_mode_solution, 1);
     else
@@ -239,7 +239,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             const auto& [min_solution, max_solution] = vnode_index_to_min_max_solution.at(vnode_index);
 
             for (ushort e = 0; e < num_equation_; ++e) {
-                const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
+                const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
