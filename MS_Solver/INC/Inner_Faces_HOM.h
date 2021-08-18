@@ -2,6 +2,7 @@
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
+#include "Pressure_Fix.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>

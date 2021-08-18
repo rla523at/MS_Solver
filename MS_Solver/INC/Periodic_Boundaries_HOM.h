@@ -2,6 +2,7 @@
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
+#include "Pressure_Fix.h"
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {

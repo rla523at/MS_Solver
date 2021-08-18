@@ -2,6 +2,7 @@
 #include "Governing_Equation.h"
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
+#include "Pressure_Fix.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template <typename Governing_Equation, typename Reconstruction_Method>

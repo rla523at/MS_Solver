@@ -43,10 +43,15 @@ public:
             Post_Solution_Data::initialize_HOM(grid, this->reconstruction_method_);
 
         if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>) {
+            SET_TIME_POINT;
+
             this->boundaries_.initialize_pressure_fix();
             this->cells_.initialize_pressure_fix();
             this->periodic_boundaries_.initialize_pressure_fix();
             this->inner_faces_.initialize_pressure_fix();
+
+            Log::content_ << std::left << std::setw(50) << "@ Pressure Fix precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+            Log::print();
         }
 
         Log::content_ << "================================================================================\n";
@@ -73,8 +78,8 @@ public:
         if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             this->reconstruction_method_.reconstruct(solutions);
 
-        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>) 
-            Pressure_Fix::inspect_and_fix(solutions)
+        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>)
+            Pressure_Fix::inspect_and_fix(solutions);
         
         this->boundaries_.calculate_RHS(RHS, solutions);
         this->periodic_boundaries_.calculate_RHS(RHS, solutions);
