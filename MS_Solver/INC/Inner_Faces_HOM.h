@@ -20,7 +20,7 @@ private:
 protected:
     const Reconstruction_Method& reconstruction_method_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnode_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
 
@@ -28,6 +28,9 @@ public:
     Inner_Faces_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
 
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
+
+public:
+    void initialize_pressure_fix(void) const;
 };
 
 
@@ -43,7 +46,7 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
     const auto& inner_face_elements = grid.elements.inner_face_elements;
 
     const auto num_inner_face = inner_face_elements.size();
-    this->oc_nc_side_basis_qnode_pairs_.reserve(num_inner_face);
+    this->oc_nc_side_basis_qnodes_pairs_.reserve(num_inner_face);
     this->set_of_normals_.reserve(num_inner_face);
     this->oc_nc_side_basis_weight_pairs_.reserve(num_inner_face);
 
@@ -62,7 +65,7 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
 
         auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
         auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
-        this->oc_nc_side_basis_qnode_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
+        this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
 
         const auto num_qnode = qnodes.size();
         std::vector<Space_Vector_> normals(num_qnode);
@@ -94,7 +97,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
         const auto& oc_solution_coefficient = solution_coefficients[oc_index];
         const auto& nc_solution_coefficient = solution_coefficients[nc_index];
 
-        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnode_pairs_[i];
+        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnodes_pairs_[i];
         const auto oc_side_cvariables = oc_solution_coefficient * oc_side_basis_qnode;
         const auto nc_side_cvariables = nc_solution_coefficient * nc_side_basis_qnode;
 
@@ -116,5 +119,18 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
+    }
+}
+
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_pressure_fix(void) const {
+    const auto num_inner_face = this->oc_nc_index_pairs_.size();
+
+    for (uint i = 0; i < num_inner_face; ++i) {
+        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
+        const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
+
+        Pressure_Fix::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
+        Pressure_Fix::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
     }
 }

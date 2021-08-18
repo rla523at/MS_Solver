@@ -42,6 +42,13 @@ public:
         if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
             Post_Solution_Data::initialize_HOM(grid, this->reconstruction_method_);
 
+        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>) {
+            this->boundaries_.initialize_pressure_fix();
+            this->cells_.initialize_pressure_fix();
+            this->periodic_boundaries_.initialize_pressure_fix();
+            this->inner_faces_.initialize_pressure_fix();
+        }
+
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
         Log::content_ << "================================================================================\n\n";
@@ -51,6 +58,7 @@ public:
     template <typename Time_Step_Method>
     double calculate_time_step(const std::vector<Discretized_Solution_>& solutions) const {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
+
         if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>)
             return this->cells_.calculate_time_step(solutions, time_step_constant_);
         else
@@ -65,6 +73,9 @@ public:
         if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             this->reconstruction_method_.reconstruct(solutions);
 
+        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>) 
+            Pressure_Fix::inspect_and_fix(solutions)
+        
         this->boundaries_.calculate_RHS(RHS, solutions);
         this->periodic_boundaries_.calculate_RHS(RHS, solutions);
         this->inner_faces_.calculate_RHS(RHS, solutions);

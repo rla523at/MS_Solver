@@ -47,7 +47,6 @@ public:
                     Time_Integral_Method::update_solutions(semi_discrete_equation, solutions, time_step);
                     current_time += time_step;
 
-
                     Post_Solution_Data::post_solution(solutions);
                 }
                 else {

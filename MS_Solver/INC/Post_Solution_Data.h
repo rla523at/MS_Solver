@@ -56,6 +56,9 @@ private:
 	static Text header_text(const Post_File_Type file_type);
 	static constexpr bool is_scalar_equation(const ushort num_equation) { return num_equation == 1; };
 	static void reset(void);
+
+	template <ushort num_equation>
+	static void write_solution_post_file(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
 };
 
 
@@ -141,86 +144,36 @@ void Post_Solution_Data::post_grid(const std::vector<Element<space_dimension>>& 
 
 
 template <ushort num_equation>
-void Post_Solution_Data::post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {
-	static size_t count = 1;
+void Post_Solution_Data::post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {	
+	//FVM solutions post processing
+	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
+	post_point_solutions.reserve(This_::num_node_);
 
-	std::string solution_file_path;
-	if (comment.empty())
-		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
-	else
-		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+	const auto num_solution = solutions.size();
 
-	//solution post header text
-	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
-	solution_post_header_text.write(solution_file_path);
-
-
-	//solution post data text
-	size_t str_per_line = 1;
-
-	Text solution_post_data_text;
-
-	if constexpr (This_::is_scalar_equation(num_equation)) {
-		solution_post_data_text.resize(num_equation);
-
-		const auto num_solution = solutions.size();
-		for (size_t i = 0; i < num_solution; ++i, ++str_per_line) {
-			const auto& solution = solutions[i];
-			solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
-			if (str_per_line == 10) {
-				solution_post_data_text[0] += "\n";
-				str_per_line = 1;
-			}
-		}
-	}
-	else {
-		solution_post_data_text.resize(2 * num_equation);
-
-		const auto num_solution = solutions.size();
-		for (size_t i = 0; i < num_solution; ++i, ++str_per_line) {
-			const auto& cvariable = solutions[i];
-			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
-
-			//write conservative variable
-			for (size_t k = 0; k < num_equation; ++k)
-				solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-
-			//write primitive variable
-			for (size_t k = 0; k < num_equation; ++k)
-				solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-
-			if (str_per_line == 10) {
-				for (auto& sentence : solution_post_data_text)
-					sentence += "\n";
-
-				str_per_line = 1;
-			}
-		}
+	for (uint i = 0; i < num_solution; ++i) {
+		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
+			post_point_solutions.push_back(solutions[i]);
 	}
 
-	solution_post_data_text.add_write(solution_file_path);
-
-	if (comment == "final") {
-		count = 1;
-		This_::reset();
-	}
+	This_::write_solution_post_file(post_point_solutions, comment);
 }
 
 
 template <ushort num_equation, ushort num_basis>
 void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment) {
-	const auto num_solution = solution_coefficients.size();
-	
+	//HOM solution coefficients post processing
 	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
 	post_point_solutions.reserve(This_::num_node_);
 
-	for (uint i = 0; i < num_solution; ++i) {
+	const auto num_solution_coefficient = solution_coefficients.size();
+	for (uint i = 0; i < num_solution_coefficient; ++i) {
 		const auto solution_post_points = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
 		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
 			post_point_solutions.push_back(solution_post_points.column<num_equation>(j));
 	}
 
-	This_::post_solution(post_point_solutions, comment);
+	This_::write_solution_post_file(post_point_solutions, comment);
 }
 
 
@@ -272,6 +225,70 @@ void Post_Solution_Data::reset(void) {
 }
 
 
+
+template <ushort num_equation>
+void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Vector<num_equation>>& post_point_solutions, const std::string& comment) {
+	static size_t count = 1;
+
+	std::string solution_file_path;
+	if (comment.empty())
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
+	else
+		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+
+	//solution post header text
+	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
+	solution_post_header_text.write(solution_file_path);
+
+
+	//solution post data text
+	size_t str_per_line = 1;
+
+	Text solution_post_data_text;
+
+	if constexpr (This_::is_scalar_equation(num_equation)) {
+		solution_post_data_text.resize(num_equation);
+
+		for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
+			const auto& solution = post_point_solutions[i];
+			solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+			if (str_per_line == 10) {
+				solution_post_data_text[0] += "\n";
+				str_per_line = 1;
+			}
+		}
+	}
+	else {
+		solution_post_data_text.resize(2 * num_equation);
+
+		for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
+			const auto& cvariable = post_point_solutions[i];
+			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+
+			//write conservative variable
+			for (size_t k = 0; k < num_equation; ++k)
+				solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
+
+			//write primitive variable
+			for (size_t k = 0; k < num_equation; ++k)
+				solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
+
+			if (str_per_line == 10) {
+				for (auto& sentence : solution_post_data_text)
+					sentence += "\n";
+
+				str_per_line = 1;
+			}
+		}
+	}
+
+	solution_post_data_text.add_write(solution_file_path);
+
+	if (comment == "final") {
+		count = 1;
+		This_::reset();
+	}
+}
 
 //static inline std::string path_;
 //static inline ushort post_order_ = 0;

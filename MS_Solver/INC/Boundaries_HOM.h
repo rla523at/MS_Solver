@@ -22,14 +22,18 @@ protected:
     const Reconstruction_Method& reconstruction_method_;
     std::vector<std::unique_ptr<Boundary_Flux_Function<Governing_Equation>>> boundary_flux_functions_;
     std::vector<uint> oc_indexes_;
-    std::vector<Dynamic_Matrix> oc_side_basis_qnodes_;
+    std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
     std::vector<Dynamic_Matrix> oc_side_basis_weights_;
 
 public:
     Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
 
+public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
+
+public:
+    void initialize_pressure_fix(void) const;
 };
 
 
@@ -46,7 +50,7 @@ Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<s
 
     const auto num_boundary = boundary_elements.size();
     this->boundary_flux_functions_.reserve(num_boundary);
-    this->oc_side_basis_qnodes_.reserve(num_boundary);
+    this->set_of_oc_side_basis_qnodes_.reserve(num_boundary);
     this->set_of_normals_.reserve(num_boundary);
     this->oc_side_basis_weights_.reserve(num_boundary);
 
@@ -66,7 +70,7 @@ Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<s
         const auto& qweights = quadrature_rule.weights;
         const auto num_qnode = qnodes.size();
 
-       this->oc_side_basis_qnodes_.push_back(reconstruction_method.calculate_basis_nodes(oc_index, qnodes));
+       this->set_of_oc_side_basis_qnodes_.push_back(reconstruction_method.calculate_basis_nodes(oc_index, qnodes));
 
        std::vector<Space_Vector_> normals(num_qnode);
        Dynamic_Matrix basis_weight(num_qnode, This_::num_basis_);
@@ -84,7 +88,6 @@ Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<s
     Log::print();
 }
 
-
 template <typename Governing_Equation, typename Reconstruction_Method>
 void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const {
     const auto num_boundary = this->boundary_flux_functions_.size();
@@ -93,7 +96,7 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         const auto oc_index = this->oc_indexes_[i];
 
         const auto& solution_coefficient = solution_coefficients[oc_index];
-        const auto oc_side_cvariables = solution_coefficient * this->oc_side_basis_qnodes_[i];
+        const auto oc_side_cvariables = solution_coefficient * this->set_of_oc_side_basis_qnodes_[i];
 
         const auto [num_equation, num_qnode] = oc_side_cvariables.size();
 
@@ -111,4 +114,12 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
 
         RHS[oc_index] -= owner_side_delta_rhs;
     }
+}
+
+
+template <typename Governing_Equation, typename Reconstruction_Method>
+void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize_pressure_fix(void) const {
+    const auto num_boundary = this->oc_indexes_.size();
+    for (uint i = 0; i < num_boundary; ++i) 
+        Pressure_Fix::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    
 }

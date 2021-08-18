@@ -33,6 +33,7 @@ protected:
 public:
     Cells_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
+public:
     double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const;
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
 
@@ -41,6 +42,9 @@ public:
 
     template <typename Initial_Condition>
     void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const;
+
+public:
+    void initialize_pressure_fix(void) const;
 };
 
 
@@ -280,4 +284,9 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
         Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
 
     Log::print();
+}
+
+template <typename Governing_Equation, typename Reconstruction_Method>
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize_pressure_fix(void) const {
+    Pressure_Fix::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
 }

@@ -28,14 +28,18 @@ private:
 protected:
     const Reconstruction_Method& reconstruction_method_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnode_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
 
 public:
     Periodic_Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
 
+public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
+
+public:
+    void initialize_pressure_fix(void) const;
 };
 
 
@@ -51,7 +55,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
     const auto& periodic_boundary_element_pairs = grid.elements.periodic_boundary_element_pairs;
 
     const auto num_periodic_pair = periodic_boundary_element_pairs.size();
-    this->oc_nc_side_basis_qnode_pairs_.reserve(num_periodic_pair);
+    this->oc_nc_side_basis_qnodes_pairs_.reserve(num_periodic_pair);
     this->set_of_normals_.reserve(num_periodic_pair);
     this->oc_nc_side_basis_weight_pairs_.reserve(num_periodic_pair);
 
@@ -100,7 +104,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
         }
         
 
-       this->oc_nc_side_basis_qnode_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
+       this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
        this->set_of_normals_.push_back(std::move(normals));
        this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
     }
@@ -119,7 +123,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
         const auto& oc_solution_coefficient = solution_coefficients[oc_index];
         const auto& nc_solution_coefficient = solution_coefficients[nc_index];
 
-        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnode_pairs_[i];
+        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnodes_pairs_[i];
         const auto oc_side_cvariables = oc_solution_coefficient * oc_side_basis_qnode;
         const auto nc_side_cvariables = nc_solution_coefficient * nc_side_basis_qnode;
 
@@ -141,5 +145,18 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
+    }
+}
+
+template<typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_pressure_fix(void) const {
+    const auto num_pbdry_pair = this->oc_nc_index_pairs_.size();
+
+    for (uint i = 0; i < num_pbdry_pair; ++i) {
+        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
+        const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
+
+        Pressure_Fix::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
+        Pressure_Fix::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
     }
 }

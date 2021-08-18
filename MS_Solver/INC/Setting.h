@@ -20,7 +20,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__				3
+#define __SOLUTION_ORDER__				1
 #endif 
 
 #define __NUMERICAL_FLUX__				__LLF__
