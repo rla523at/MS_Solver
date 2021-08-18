@@ -50,6 +50,13 @@ std::string Dynamic_Euclidean_Vector::to_string(void) const {
 	return result;
 }
 
+double Dynamic_Euclidean_Vector::inner_product(const Dynamic_Euclidean_Vector& other) const {
+	dynamic_require(this->dimension() == other.dimension(), "dimension should be matched");
+
+	return cblas_ddot(static_cast<MKL_INT>(this->dimension()), this->values_.data(), 1, other.values_.data(), 1);
+}
+
+
 void Dynamic_Euclidean_Vector::be_absolute(void){
 	for (auto& value : this->values_)
 		value = std::abs(value);	

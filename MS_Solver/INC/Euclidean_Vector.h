@@ -20,6 +20,7 @@ using ushort = unsigned short;
 
 namespace ms {
 	inline constexpr ushort blas_axpy_criteria = 20;
+	inline constexpr ushort blas_dot_criteria = 15;
 	
 	template <typename... Args>
 	inline constexpr bool are_arithmetics = (... && std::is_arithmetic_v<Args>);
@@ -108,7 +109,7 @@ public:
 	std::vector<double>::const_iterator end(void) const;
 	const double* data(void) const;
 	size_t dimension(void) const;
-	double inner_product(void) const;
+	double inner_product(const Dynamic_Euclidean_Vector& other) const;
 	std::string to_string(void) const;
 };
 
@@ -245,10 +246,14 @@ double* Euclidean_Vector<dimension_>::data(void) {
 
 template <size_t dimension_>
 double Euclidean_Vector<dimension_>::inner_product(const Euclidean_Vector& y) const {
-	double result = 0;
-	for (size_t i = 0; i < dimension_; ++i)
-		result += this->values_[i] * y.values_[i];
-	return result;
+	if constexpr (dimension_ < ms::blas_dot_criteria) {
+		double result = 0;
+		for (size_t i = 0; i < dimension_; ++i)
+			result += this->values_[i] * y.values_[i];
+		return result;
+	}
+	else
+		return cblas_ddot(static_cast<MKL_INT>(dimension_), this->values_.data(), 1, y.values_.data(), 1);
 }
 
 template <size_t dimension_>

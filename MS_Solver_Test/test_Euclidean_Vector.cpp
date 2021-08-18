@@ -74,3 +74,11 @@ TEST(Dynamic_Euclidean_Vector, be_absolute_1) {
 	const Dynamic_Euclidean_Vector ref = { 1,2,3,4,5 };
 	EXPECT_EQ(v1, ref);
 }
+
+TEST(Dynamic_Euclidean_Vector, inner_product_1) {
+	Dynamic_Euclidean_Vector v1 = { 3,4 };
+	const auto result = v1.inner_product(v1);
+
+	const auto ref = 25;
+	EXPECT_EQ(result, ref);
+}
