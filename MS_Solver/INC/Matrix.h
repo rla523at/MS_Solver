@@ -149,7 +149,7 @@ private:
 
 public:
 	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
-	static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+	static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2);
 
 	template<size_t num_row, size_t num_column>
 	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
@@ -160,14 +160,13 @@ public:
 
 namespace ms {
 	inline constexpr ushort blas_dscal_criteria = 10;
-	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_mv_criteria = 50;
 
 	inline void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr) {
 		Matrix_OP::gemm(A, B, output_ptr);
 	}
 
-	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
 		Matrix_OP::gemvpv(A, v1, v2);
 	}
 

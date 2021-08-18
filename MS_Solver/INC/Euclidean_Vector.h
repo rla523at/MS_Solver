@@ -14,7 +14,13 @@
 #define static_require static_assert
 #define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
 
+
+using ushort = unsigned short;
+
+
 namespace ms {
+	inline constexpr ushort blas_axpy_criteria = 20;
+	
 	template <typename... Args>
 	inline constexpr bool are_arithmetics = (... && std::is_arithmetic_v<Args>);
 }
@@ -83,19 +89,27 @@ public:
 	Dynamic_Euclidean_Vector(std::vector<double>&& values) : values_(std::move(values)) {};
 	Dynamic_Euclidean_Vector(const std::vector<double>& values) : values_(values) {};
 
+public:
+	Dynamic_Euclidean_Vector& operator-=(const Dynamic_Euclidean_Vector& other);
+
+	Dynamic_Euclidean_Vector operator-(const Dynamic_Euclidean_Vector& other) const;
 	double operator[](const size_t position) const;
 	bool operator==(const Dynamic_Euclidean_Vector& other) const;
 
+public:
+	template <typename Function>
+	void apply(const Function& f);
+
+	void be_absolute(void);
+
+public:
 	double at(const size_t position) const;
 	std::vector<double>::const_iterator begin(void) const;
 	std::vector<double>::const_iterator end(void) const;
 	const double* data(void) const;
 	size_t dimension(void) const;
+	double inner_product(void) const;
 	std::string to_string(void) const;
-
-	template <typename Function>
-	void apply(const Function& f);
-	double* data(void);
 };
 
 std::ostream& operator<<(std::ostream& os, const Dynamic_Euclidean_Vector& x);

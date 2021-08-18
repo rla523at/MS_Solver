@@ -66,3 +66,11 @@ GTEST_TEST(Euclidean_Vector, norm_1) {
 	const auto ref = 5;
 	EXPECT_EQ(result, ref);
 }
+
+TEST(Dynamic_Euclidean_Vector, be_absolute_1) {
+	Dynamic_Euclidean_Vector v1 = { -1, -2 ,3 ,-4 ,5 };
+	v1.be_absolute();
+
+	const Dynamic_Euclidean_Vector ref = { 1,2,3,4,5 };
+	EXPECT_EQ(v1, ref);
+}

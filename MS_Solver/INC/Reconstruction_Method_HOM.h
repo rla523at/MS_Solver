@@ -549,7 +549,13 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
 
         const auto oc_side_solution_jump_qnodes = solution_coefficients[oc_index] * oc_side_basis_jump_qnodes;
         const auto nc_side_solution_jump_qnodes = solution_coefficients[nc_index] * nc_side_basis_jump_qnodes;
-        const auto solution_diff_jump_qnodes = oc_side_solution_jump_qnodes - nc_side_solution_jump_qnodes;
-        
+
+        const auto oc_side_cirterion_solution_jump_qnodes = oc_side_basis_jump_qnodes.row(This_::criterion_variable_index_);
+        const auto nc_side_cirterion_solution_jump_qnodes = nc_side_basis_jump_qnodes.row(This_::criterion_variable_index_);
+        auto criterion_solution_diff_jump_qnodes = oc_side_cirterion_solution_jump_qnodes - nc_side_cirterion_solution_jump_qnodes;
+        criterion_solution_diff_jump_qnodes.be_absolute();
+
+        const auto jump = criterion_solution_diff_jump_qnodes.inner_product(this->set_of_jump_qweights_[i]);
+
     }
 }

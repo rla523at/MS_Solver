@@ -1,5 +1,17 @@
 #include "../INC/Euclidean_Vector.h"
 
+Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator-=(const Dynamic_Euclidean_Vector& other) {
+	dynamic_require(this->dimension() == other.dimension(), "dimension should be matched");
+
+	cblas_daxpy(static_cast<MKL_INT>(this->dimension()), -1.0, other.values_.data(), 1, this->values_.data(), 1);
+	return *this;
+}
+
+Dynamic_Euclidean_Vector Dynamic_Euclidean_Vector::operator-(const Dynamic_Euclidean_Vector& other) const {
+	auto result = *this;
+	return result -= other;
+}
+
 double Dynamic_Euclidean_Vector::operator[](const size_t position) const {
 	dynamic_require(position < this->dimension(), "position should be less then dimension");
 	return this->values_[position];
@@ -38,8 +50,9 @@ std::string Dynamic_Euclidean_Vector::to_string(void) const {
 	return result;
 }
 
-double* Dynamic_Euclidean_Vector::data(void) {
-	return this->values_.data(); 
+void Dynamic_Euclidean_Vector::be_absolute(void){
+	for (auto& value : this->values_)
+		value = std::abs(value);	
 };
 
 std::ostream& operator<<(std::ostream& os, const Dynamic_Euclidean_Vector& x) {

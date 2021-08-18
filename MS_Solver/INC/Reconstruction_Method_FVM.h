@@ -87,7 +87,7 @@ public:
 struct ANN_Model
 {
     std::vector<Dynamic_Matrix> weights;
-    std::vector<Dynamic_Euclidean_Vector> biases;
+    std::vector<std::vector<double>> biases;
 };
 
 
@@ -402,7 +402,7 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
     static const HardTanh output_function;
 
     for (ushort i = 0; i < num_layer; ++i) {
-        Dynamic_Euclidean_Vector new_feature = model.biases[i];
+        std::vector<double> new_feature = model.biases[i];
 
         ms::gemvpv(model.weights[i], feature, new_feature);
         new_feature.apply(activation_function);

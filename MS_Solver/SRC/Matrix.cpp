@@ -211,7 +211,7 @@ void Matrix_OP::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* o
 	cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.values_.data(), lda, B.values_.data(), ldb, beta, output_ptr, ldc);
 }
 
-void Matrix_OP::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+void Matrix_OP::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
 	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
 	const auto transA = A.transpose_type_;
 	const auto m = static_cast<MKL_INT>(A.num_row_);
