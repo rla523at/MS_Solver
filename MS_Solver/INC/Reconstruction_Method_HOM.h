@@ -72,9 +72,9 @@ protected:
     std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
+
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;
-    std::vector<Dynamic_Matrix> set_of_P1_mode_basis_vnodes_;
     std::vector<double> P0_basis_values_;    
     
 public:
@@ -94,7 +94,7 @@ public:
 };
 
 template <ushort space_dimension_, ushort solution_order_>
-class hMLP_BD_Reconstruction : public hMLP_Reconstruction<space_dimension_, solution_order_>
+class hMLP_BD_Reconstruction : public Polynomial_Reconstruction<space_dimension_, solution_order_>
 {
 private:
     static_require(1 <= solution_order_, "solution order should be greater than 1 for hMLP reconstruction");
@@ -105,6 +105,14 @@ private:
     using This_ = hMLP_BD_Reconstruction<space_dimension_, solution_order_>;
 
 private:
+    std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
+    std::vector<std::vector<uint>> set_of_vnode_indexes_;
+    std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
+
+    std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
+    std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
+    std::vector<double> simplex_P0_basis_values_;
+
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;
@@ -220,7 +228,6 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid
     this->set_of_vnode_indexes_.reserve(num_cell);
     this->set_of_basis_vnodes_.reserve(num_cell);
     this->set_of_P1_projected_basis_vnodes_.reserve(num_cell);
-    this->set_of_P1_mode_basis_vnodes_.reserve(num_cell);
     this->P0_basis_values_.reserve(num_cell);
 
     constexpr ushort P0_basis_row_index = 0;
@@ -246,7 +253,6 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid
 
         this->set_of_basis_vnodes_.push_back(std::move(basis_vnodes));
         this->set_of_P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnodes));
-        this->set_of_P1_mode_basis_vnodes_.push_back(std::move(P1_mode_basis_vnodes));
         this->P0_basis_values_.push_back(P0_basis_value);
     }
 
@@ -386,66 +392,109 @@ auto hMLP_Reconstruction<space_dimension_, solution_order_>::Pn_projection_matri
 
 template <ushort space_dimension_, ushort solution_order_>
 hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid) 
-    : hMLP_Reconstruction<space_dimension_, solution_order_>(std::move(grid)) {
-    SET_TIME_POINT;
+    : Polynomial_Reconstruction<space_dimension_, solution_order_>(std::move(grid)) {
+    //SET_TIME_POINT;
 
-    const auto& inner_face_elements = grid.elements.inner_face_elements;
-    const auto& inner_face_oc_nc_index_pairs = grid.connectivity.inner_face_oc_nc_index_pairs;
-    const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
-    const auto& pbdry_oc_nc_index_pairs = grid.connectivity.periodic_boundary_oc_nc_index_pairs;
-    
-    const auto num_inner_face = inner_face_elements.size();
-    const auto num_pbdry_pair = pbdry_element_pairs.size();
+    //for (ushort i = 0; i <= solution_order_; ++i)
+    //    this->num_Pn_projection_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
 
-    const auto num_face_without_bdry = num_inner_face + num_pbdry_pair;
-    this->face_characteristic_lengths_.reserve(num_face_without_bdry);
-    this->face_oc_nc_index_pairs_.reserve(num_face_without_bdry);
-    this->face_oc_nc_side_basis_jump_qnodes_pairs_.reserve(num_face_without_bdry);
-    this->set_of_jump_qweights_.reserve(num_face_without_bdry);
+    //this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
 
-    for (uint i = 0; i < num_inner_face; ++i) {
-        const auto& geometry = inner_face_elements[i].geometry_;
-        
-        const auto charactersitic_length = std::pow(geometry.volume(), 1.0 / (space_dimension_ - 1));
-        this->face_characteristic_lengths_.push_back(charactersitic_length);
-        
-        const auto [oc_index, nc_index] = inner_face_oc_nc_index_pairs[i];
-        this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
-        
-        const auto& quadrature_rule = geometry.get_quadrature_rule(solution_order_);
-        auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, quadrature_rule.points);
-        auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, quadrature_rule.points);
-        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
-        this->set_of_jump_qweights_.push_back(quadrature_rule.weights);        
-    }
+    //const auto& cell_elements = grid.elements.cell_elements;
 
-    for (uint i = 0; i < num_pbdry_pair; ++i) {
-        const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
-        const auto& oc_side_geometry = oc_side_element.geometry_;
-        const auto& nc_side_geometry = nc_side_element.geometry_;
+    //const auto num_cell = cell_elements.size();
+    //this->set_of_vnode_indexes_.reserve(num_cell);
+    //this->set_of_basis_vnodes_.reserve(num_cell);
+    //this->set_of_simplex_P1_projected_basis_vnodes_.reserve(num_cell);
+    //this->simplex_P0_basis_values_.reserve(num_cell);
 
-        const auto characteristic_length = std::pow(oc_side_geometry.volume(), 1.0 / (space_dimension_ - 1));
-        this->face_characteristic_lengths_.push_back(characteristic_length);
+    ////constexpr ushort P0_basis_row_index = 0;
 
-        const auto [oc_index, nc_index] = pbdry_oc_nc_index_pairs[i];
-        this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
+    //for (uint i = 0; i < num_cell; ++i) {
+    //    const auto& cell_element = cell_elements[i];
+    //    this->set_of_vnode_indexes_.push_back(cell_element.vertex_node_indexes());
+
+    //    const auto& cell_geometry = cell_element.geometry_;
+
+    //    const auto vnodes = cell_geometry.vertex_nodes();
+    //    auto basis_vnodes = this->calculate_basis_nodes(i, vnodes);
 
 
-        const auto& oc_side_quadrature_rule = oc_side_geometry.get_quadrature_rule(solution_order_);
-        const auto& oc_side_qnodes = oc_side_quadrature_rule.points;
-        const auto& oc_side_qweights = oc_side_quadrature_rule.weights;
 
-        const auto& nc_side_quadrature_rule = nc_side_geometry.get_quadrature_rule(solution_order_);
-        const auto& nc_side_qnodes = nc_side_quadrature_rule.points;
+    //    const auto P1_projection_matrix = this->Pn_projection_matrix(1);
+    //    auto P1_projected_basis_vnodes = P1_projection_matrix * basis_vnodes;
 
-        auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, oc_side_qnodes);
-        auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, nc_side_qnodes);
-        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
-        this->set_of_jump_qweights_.push_back(oc_side_qweights); // oc side qweights == nc side qweights
-    }
+    //    const auto num_vnode = vnodes.size();
 
-    Log::content_ << std::left << std::setw(50) << "@ hMLP_BD precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    Log::print();
+    //    Dynamic_Matrix P1_mode_basis_vnodes = P1_projected_basis_vnodes;
+    //    P1_mode_basis_vnodes.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
+
+    //    const auto P0_basis_value = P1_projected_basis_vnodes.at(P0_basis_row_index, 0);
+
+    //    this->set_of_basis_vnodes_.push_back(std::move(basis_vnodes));
+    //    this->set_of_P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnodes));
+    //    this->P0_basis_values_.push_back(P0_basis_value);
+    //}
+
+
+
+    //const auto& inner_face_elements = grid.elements.inner_face_elements;
+    //const auto& inner_face_oc_nc_index_pairs = grid.connectivity.inner_face_oc_nc_index_pairs;
+    //const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
+    //const auto& pbdry_oc_nc_index_pairs = grid.connectivity.periodic_boundary_oc_nc_index_pairs;
+    //
+    //const auto num_inner_face = inner_face_elements.size();
+    //const auto num_pbdry_pair = pbdry_element_pairs.size();
+
+    //const auto num_face_without_bdry = num_inner_face + num_pbdry_pair;
+    //this->face_characteristic_lengths_.reserve(num_face_without_bdry);
+    //this->face_oc_nc_index_pairs_.reserve(num_face_without_bdry);
+    //this->face_oc_nc_side_basis_jump_qnodes_pairs_.reserve(num_face_without_bdry);
+    //this->set_of_jump_qweights_.reserve(num_face_without_bdry);
+
+    //for (uint i = 0; i < num_inner_face; ++i) {
+    //    const auto& geometry = inner_face_elements[i].geometry_;
+    //    
+    //    const auto charactersitic_length = std::pow(geometry.volume(), 1.0 / (space_dimension_ - 1));
+    //    this->face_characteristic_lengths_.push_back(charactersitic_length);
+    //    
+    //    const auto [oc_index, nc_index] = inner_face_oc_nc_index_pairs[i];
+    //    this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
+    //    
+    //    const auto& quadrature_rule = geometry.get_quadrature_rule(solution_order_);
+    //    auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, quadrature_rule.points);
+    //    auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, quadrature_rule.points);
+    //    this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
+    //    this->set_of_jump_qweights_.push_back(quadrature_rule.weights);        
+    //}
+
+    //for (uint i = 0; i < num_pbdry_pair; ++i) {
+    //    const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
+    //    const auto& oc_side_geometry = oc_side_element.geometry_;
+    //    const auto& nc_side_geometry = nc_side_element.geometry_;
+
+    //    const auto characteristic_length = std::pow(oc_side_geometry.volume(), 1.0 / (space_dimension_ - 1));
+    //    this->face_characteristic_lengths_.push_back(characteristic_length);
+
+    //    const auto [oc_index, nc_index] = pbdry_oc_nc_index_pairs[i];
+    //    this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
+
+
+    //    const auto& oc_side_quadrature_rule = oc_side_geometry.get_quadrature_rule(solution_order_);
+    //    const auto& oc_side_qnodes = oc_side_quadrature_rule.points;
+    //    const auto& oc_side_qweights = oc_side_quadrature_rule.weights;
+
+    //    const auto& nc_side_quadrature_rule = nc_side_geometry.get_quadrature_rule(solution_order_);
+    //    const auto& nc_side_qnodes = nc_side_quadrature_rule.points;
+
+    //    auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, oc_side_qnodes);
+    //    auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, nc_side_qnodes);
+    //    this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
+    //    this->set_of_jump_qweights_.push_back(oc_side_qweights); // oc side qweights == nc side qweights
+    //}
+
+    //Log::content_ << std::left << std::setw(50) << "@ hMLP_BD precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    //Log::print();
 }
 
 
@@ -453,83 +502,84 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
 void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, num_basis_>>& solution_coefficients) {
-    const auto num_cell = solution_coefficients.size();
-    std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
+    //const auto num_cell = solution_coefficients.size();
+    //std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
 
-    for (uint i = 0; i < num_cell; ++i) {
-        const auto P0_coefficient = solution_coefficients[i].column(0);
-        P0_solutions[i] = P0_coefficient * this->P0_basis_values_[i];
-    }
+    //for (uint i = 0; i < num_cell; ++i) {
+    //    const auto P0_coefficient = solution_coefficients[i].column(0);
+    //    P0_solutions[i] = P0_coefficient * this->P0_basis_values_[i];
+    //}
 
-    const auto vnode_index_to_allowable_min_max_solution = this->calculate_vertex_node_index_to_allowable_min_max_solution(P0_solutions);
+    //const auto vnode_index_to_allowable_min_max_solution = this->calculate_vertex_node_index_to_allowable_min_max_solution(P0_solutions);
+    //const auto set_of_num_trobule_boundary = this->calculate_set_of_num_trouble_boundary(solution_coefficients);
 
-    for (uint i = 0; i < num_cell; ++i) {
-        auto temporal_solution_order = solution_order_;
+    //for (uint i = 0; i < num_cell; ++i) {
+    //    auto temporal_solution_order = solution_order_;
 
-        auto& solution_coefficient = solution_coefficients[i];
-        const auto& basis_vnodes = this->set_of_basis_vnodes_[i];
-        const auto& P1_projected_basis_vnodes = this->set_of_P1_projected_basis_vnodes_[i];
+    //    auto& solution_coefficient = solution_coefficients[i];
+    //    const auto& basis_vnodes = this->set_of_basis_vnodes_[i];
+    //    const auto& P1_projected_basis_vnodes = this->set_of_P1_projected_basis_vnodes_[i];
 
-        auto solution_vnodes = solution_coefficient * basis_vnodes;
-        auto P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
+    //    auto solution_vnodes = solution_coefficient * basis_vnodes;
+    //    auto P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
 
-        const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
-        const auto num_vnode = vnode_indexes.size();
+    //    const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
+    //    const auto num_vnode = vnode_indexes.size();
 
-        bool end_limiting = false;
+    //    bool end_limiting = false;
 
-        for (ushort j = 0; j < num_vnode; ++j) {
-            const auto vnode_index = vnode_indexes[j];
-            const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_solution.at(vnode_index);
+    //    for (ushort j = 0; j < num_vnode; ++j) {
+    //        const auto vnode_index = vnode_indexes[j];
+    //        const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_solution.at(vnode_index);
 
-            while (true) {
-                const auto P1_projected_solution = P1_projected_solution_vnodes.column<num_equation>(j);
-                const auto P1_projected_solution_criterion_variable = P1_projected_solution[This_::criterion_variable_index_];
+    //        while (true) {
+    //            const auto P1_projected_solution = P1_projected_solution_vnodes.column<num_equation>(j);
+    //            const auto P1_projected_solution_criterion_variable = P1_projected_solution[This_::criterion_variable_index_];
 
-                if (P1_Projected_MLP_Condition::is_satisfy(P1_projected_solution_criterion_variable, allowable_min, allowable_max))
-                    break;
-                else {
-                    const auto solution = solution_vnodes.column<num_equation>(j);
+    //            if (P1_Projected_MLP_Condition::is_satisfy(P1_projected_solution_criterion_variable, allowable_min, allowable_max))
+    //                break;
+    //            else {
+    //                const auto solution = solution_vnodes.column<num_equation>(j);
 
-                    const auto solution_criterion_variable = solution[This_::criterion_variable_index_];
-                    const auto higher_mode_criterion_variable = solution_criterion_variable - P1_projected_solution_criterion_variable;
-                    const auto P1_mode_criterion_variable = P1_projected_solution_criterion_variable - P0_solutions[i][This_::criterion_variable_index_];
+    //                const auto solution_criterion_variable = solution[This_::criterion_variable_index_];
+    //                const auto higher_mode_criterion_variable = solution_criterion_variable - P1_projected_solution_criterion_variable;
+    //                const auto P1_mode_criterion_variable = P1_projected_solution_criterion_variable - P0_solutions[i][This_::criterion_variable_index_];
 
-                    if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
-                        break;
-                    else {
-                        if (temporal_solution_order == 1) {
-                            const auto P0_mode_criterion_variable = P0_solutions[i][This_::criterion_variable_index_];
+    //                if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(solution_criterion_variable, higher_mode_criterion_variable, P1_mode_criterion_variable, allowable_min, allowable_max))
+    //                    break;
+    //                else {
+    //                    if (temporal_solution_order == 1) {
+    //                        const auto P0_mode_criterion_variable = P0_solutions[i][This_::criterion_variable_index_];
 
-                            const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_criterion_variable, P0_mode_criterion_variable, allowable_min, allowable_max);
+    //                        const auto limiting_value = MLP_u1_Limiting_Strategy::limit(P1_mode_criterion_variable, P0_mode_criterion_variable, allowable_min, allowable_max);
 
-                            std::array<double, This_::num_basis_> limiting_values;
-                            limiting_values.fill(limiting_value);
-                            limiting_values[0] = 1.0; // keep P0 coefficient
+    //                        std::array<double, This_::num_basis_> limiting_values;
+    //                        limiting_values.fill(limiting_value);
+    //                        limiting_values[0] = 1.0; // keep P0 coefficient
 
-                            const Matrix limiting_matrix = limiting_values;
-                            solution_coefficient *= limiting_matrix;
+    //                        const Matrix limiting_matrix = limiting_values;
+    //                        solution_coefficient *= limiting_matrix;
 
-                            end_limiting = true;
-                            break;
-                        }
-                        else {
-                            //limiting highest mode
-                            const auto Pnm1_projection_matrix = this->Pn_projection_matrix(--temporal_solution_order);
-                            solution_coefficient *= Pnm1_projection_matrix;
+    //                        end_limiting = true;
+    //                        break;
+    //                    }
+    //                    else {
+    //                        //limiting highest mode
+    //                        const auto Pnm1_projection_matrix = this->Pn_projection_matrix(--temporal_solution_order);
+    //                        solution_coefficient *= Pnm1_projection_matrix;
 
-                            //re-calculate limited vnode_solution                            
-                            solution_vnodes = solution_coefficient * basis_vnodes;
-                            P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
-                        }
-                    }
-                }
-            }
+    //                        //re-calculate limited vnode_solution                            
+    //                        solution_vnodes = solution_coefficient * basis_vnodes;
+    //                        P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
+    //                    }
+    //                }
+    //            }
+    //        }
 
-            if (end_limiting == true)
-                break;
-        }
-    }
+    //        if (end_limiting == true)
+    //            break;
+    //    }
+    //}
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -557,5 +607,11 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
 
         const auto jump = criterion_solution_diff_jump_qnodes.inner_product(this->set_of_jump_qweights_[i]);
 
+        if (jump > jump_criterion) {
+            set_of_num_trouble_boundary[oc_index]++;
+            set_of_num_trouble_boundary[nc_index]++;
+        }
     }
+
+    return set_of_num_trouble_boundary;
 }

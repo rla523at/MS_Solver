@@ -2,6 +2,25 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Element.h"
 
+TEST(ReferenceGeometry, is_simplex_1) {
+	constexpr ushort space_dimension = 2;
+
+	const auto fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	EXPECT_TRUE(ref_geometry.is_simplex());
+}
+TEST(ReferenceGeometry, is_simplex_2) {
+	constexpr ushort space_dimension = 2;
+
+	const auto fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	EXPECT_FALSE(ref_geometry.is_simplex());
+}
+
 GTEST_TEST(ReferenceGeometry, nodes_1) {
 	constexpr size_t space_dimension = 2;
 	

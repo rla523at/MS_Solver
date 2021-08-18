@@ -86,6 +86,7 @@ public:
 	Quadrature_Rule<space_dimension> quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const;
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
 	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
+	bool is_simplex(void) const;
 
 	//private: for test
 	std::vector<Space_Vector_> mapping_nodes(void) const;
@@ -624,29 +625,17 @@ std::vector<std::vector<size_t>> ReferenceGeometry<space_dimension>::post_connec
 	return connectivities;
 }
 
-//template <ushort space_dimension>
-//std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::local_connectivities(void) const {
-//	switch (this->figure_) {
-//	case Figure::triangle: {
-//		//  2
-//		//  弛 \ 
-//		//  弛  \
-//		//  0式式式1
-//		return { { 0,1,2 } };
-//	}
-//	case Figure::quadrilateral: {
-//		//  3式式式式式2
-//		//  弛     弛
-//		//  弛     弛 
-//		//  0式式式式式1
-//
-//		return { {0,1,2},{0,2,3} };
-//	}
-//	default:
-//		throw std::runtime_error("wrong element figure");
-//		return {};
-//	}
-//}
+template <ushort space_dimension>
+bool ReferenceGeometry<space_dimension>::is_simplex(void) const {
+	switch (this->figure_)
+	{
+	case Figure::triangle:
+	case Figure::tetrahedral:	return true;		
+	default:
+		return false;
+	}
+}
+
 
 template <ushort space_dimension>
 std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
