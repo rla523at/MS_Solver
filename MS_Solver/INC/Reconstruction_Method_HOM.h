@@ -57,7 +57,7 @@ public:
     }
 };
 
-template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
+template <ushort space_dimension_, ushort solution_order_>
 class hMLP_Reconstruction : public Polynomial_Reconstruction<space_dimension_, solution_order_>
 {
 private:
@@ -66,10 +66,9 @@ private:
     static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension_, solution_order_);
     static constexpr ushort criterion_variable_index_ = 0; //rho
 
-    using This_                     = hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>;
-    using Solution_Coefficients_    = Matrix<num_equation, num_basis_>;
+    using This_                     = hMLP_Reconstruction<space_dimension_, solution_order_>;
 
-private:
+protected:
     std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
@@ -81,11 +80,45 @@ private:
 public:
     hMLP_Reconstruction(Grid<space_dimension_>&& grid);
 
-    void reconstruct(std::vector<Solution_Coefficients_>& solutions);
+public:
+    template <ushort num_equation>
+    void reconstruct(std::vector<Matrix<num_equation,num_basis_>>& solution_coefficients);
     
-private:
+protected:
+    template <ushort num_equation>
     auto calculate_vertex_node_index_to_allowable_min_max_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions) const;
     auto Pn_projection_matrix(const ushort Pn) const;
+
+public:
+    static std::string name(void) { return "hMLP_Reconstruction_P" + std::to_string(solution_order_); };
+};
+
+template <ushort space_dimension_, ushort solution_order_>
+class hMLP_BD_Reconstruction : public hMLP_Reconstruction<space_dimension_, solution_order_>
+{
+private:
+    static_require(1 <= solution_order_, "solution order should be greater than 1 for hMLP reconstruction");
+
+    static constexpr ushort num_basis_ = ms::combination_with_repetition(1 + space_dimension_, solution_order_);
+    static constexpr ushort criterion_variable_index_ = 0; //rho
+
+    using This_ = hMLP_BD_Reconstruction<space_dimension_, solution_order_>;
+
+private:
+    std::vector<double> face_characteristic_lengths_;
+    std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> set_of_oc_nc_side_basis_jump_qnodes_;
+    std::vector<Dynamic_Euclidean_Vector> set_of_jump_qweights_;
+
+public:
+    hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid);
+
+public:
+    template <ushort num_equation>
+    void reconstruct(std::vector<Matrix<num_equation, num_basis_>>& solution_coefficients);
+
+private:
+
 
 public:
     static std::string name(void) { return "hMLP_Reconstruction_P" + std::to_string(solution_order_); };
@@ -170,40 +203,8 @@ double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P
     return P0_basis_function(node);
 }
 
-//template <ushort space_dimension_, ushort solution_order_>
-//std::vector<Dynamic_Matrix> Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) const {
-//    const auto num_cell = this->set_of_basis_functions_.size();
-//
-//    dynamic_require(set_of_nodes.size() == num_cell, "set size should be same with num cell");
-//
-//    std::vector<Dynamic_Matrix> set_of_basis_nodes;
-//    set_of_basis_nodes.reserve(num_cell);
-//
-//    for (uint i = 0; i < num_cell; ++i)
-//        set_of_basis_nodes.push_back(this->calculate_basis_nodes(i, set_of_nodes[i]));
-//
-//    return set_of_basis_nodes;
-//}
-
-//template <ushort space_dimension_, ushort solution_order_>
-//std::vector<double> Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_values(const std::vector<Space_Vector_>& nodes) const {
-//    const auto num_nodes = nodes.size();
-//    std::vector<double> P0_basis_values(num_nodes);
-//
-//    for (uint i = 0; i < num_nodes; ++i) {
-//        const auto& basis_function = this->set_of_basis_functions_[i];
-//        const auto& P0_basis_function = basis_function[0];
-//        const auto& cell_center = nodes[i];
-//
-//        P0_basis_values[i] = P0_basis_function(cell_center);
-//    }
-//
-//    return P0_basis_values;
-//}
-
-
-template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
-hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::hMLP_Reconstruction(Grid<space_dimension_>&& grid) 
+template <ushort space_dimension_, ushort solution_order_>
+hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid<space_dimension_>&& grid) 
     : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid){
     SET_TIME_POINT;
     
@@ -253,8 +254,9 @@ hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::hMLP_Recon
 }
 
 
-template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
-void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::reconstruct(std::vector<Solution_Coefficients_>& solution_coefficients) {
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, num_basis_>>& solution_coefficients) {
     const auto num_cell = solution_coefficients.size();
     std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
 
@@ -335,8 +337,9 @@ void hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::recon
 }
 
 
-template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
-auto hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_solution(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_solution(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {
     const auto num_solution = P0_solutions.size();
     std::vector<double> criterion_variables(num_solution);
 
@@ -365,8 +368,8 @@ auto hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::calcu
     return vnode_index_to_allowable_min_max_solution;
 }
 
-template <ushort num_equation, ushort space_dimension_, ushort solution_order_>
-auto hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::Pn_projection_matrix(const ushort Pn) const {
+template <ushort space_dimension_, ushort solution_order_>
+auto hMLP_Reconstruction<space_dimension_, solution_order_>::Pn_projection_matrix(const ushort Pn) const {
     dynamic_require(Pn <= solution_order_, "Projection order should be less then solution order");
 
     const auto num_Pn_projection_basis = this->num_Pn_projection_basis_[Pn];
@@ -378,3 +381,51 @@ auto hMLP_Reconstruction<num_equation, space_dimension_, solution_order_>::Pn_pr
     Matrix Pn_projection_matrix = limiting_value;
     return Pn_projection_matrix;
  }
+
+
+template <ushort space_dimension_, ushort solution_order_>
+hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid) 
+    : hMLP_Reconstruction<space_dimension_, solution_order_>(std::move(grid)) {
+    SET_TIME_POINT;
+
+    const auto& inner_face_elements = grid.elements.inner_face_elements;
+    const auto& periodic_boundary_element_pairs = grid.elements.periodic_boundary_element_pairs;
+
+    const auto num_face_without_bdry = inner_face_elements.size() + periodic_boundary_element_pairs.size() * 2;
+    this->face_characteristic_lengths_.reserve(num_face_without_bdry);
+
+    for (const auto& inner_face_element : inner_face_elements) {
+        const auto& geometry = inner_face_element.geometry_;
+        const auto& quadrature_rule = geometry.get_quadrature_rule(solution_order_);
+
+        const auto charactersitic_length = std::pow(geometry.volume(), 1.0 / (space_dimension_ - 1));
+    }
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& cell_element = cell_elements[i];
+        const auto& cell_geometry = cell_element.geometry_;
+
+        this->set_of_vnode_indexes_.push_back(cell_element.vertex_node_indexes());
+
+        const auto vnodes = cell_geometry.vertex_nodes();
+        const auto num_vnode = vnodes.size();
+
+        auto basis_vnodes = this->calculate_basis_nodes(i, vnodes);
+
+        const auto P1_projection_matrix = this->Pn_projection_matrix(1);
+        auto P1_projected_basis_vnodes = P1_projection_matrix * basis_vnodes;
+
+        Dynamic_Matrix P1_mode_basis_vnodes = P1_projected_basis_vnodes;
+        P1_mode_basis_vnodes.change_row(P0_basis_row_index, Dynamic_Euclidean_Vector(num_vnode));
+
+        const auto P0_basis_value = P1_projected_basis_vnodes.at(P0_basis_row_index, 0);
+
+        this->set_of_basis_vnodes_.push_back(std::move(basis_vnodes));
+        this->set_of_P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnodes));
+        this->set_of_P1_mode_basis_vnodes_.push_back(std::move(P1_mode_basis_vnodes));
+        this->P0_basis_values_.push_back(P0_basis_value);
+    }
+
+    Log::content_ << std::left << std::setw(50) << "@ hMLP precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::print();
+}
