@@ -85,6 +85,10 @@ void Text::make_path(std::string_view file_path) const {
 		std::filesystem::create_directories(p);	
 }
 
+void Text::merge(Text&& other) {
+	this->insert(this->end(), std::make_move_iterator(other.begin()), std::make_move_iterator(other.end()));
+}
+
 namespace ms {
 	std::vector<std::string> parse(const std::string& str, const char delimiter) {
 		if (str.empty())

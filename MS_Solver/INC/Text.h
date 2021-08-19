@@ -28,6 +28,9 @@ public:
 	Text& remove_empty_line(void);
 	void write(const std::string& write_file_path) const;
 
+public:
+	void merge(Text&& other);
+
 private:
 	void make_path(std::string_view file_path) const;
 };

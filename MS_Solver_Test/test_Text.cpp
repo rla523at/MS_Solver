@@ -1,6 +1,14 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Text.h"
 
+TEST(Text, merge_1) {
+	Text txt = { "abc"};
+	Text txt2 = { "def"};
+	txt.merge(std::move(txt2));
+
+	Text ref = { "abc", "def" };
+	EXPECT_EQ(txt, ref);
+}
 
 GTEST_TEST(Text, write) {
 	Text txt;

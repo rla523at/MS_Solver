@@ -183,7 +183,7 @@ Polynomial_Reconstruction<space_dimension_, solution_order_>::Polynomial_Reconst
         const auto& cell_element = cell_elements[i];
         const auto& cell_geometry = cell_element.geometry_;
 
-        this->basis_vector_functions_.push_back(cell_geometry.orthonormal_basis_functions<solution_order_>());
+        this->basis_vector_functions_.push_back(cell_geometry.orthonormal_basis_vector_function<solution_order_>());
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";

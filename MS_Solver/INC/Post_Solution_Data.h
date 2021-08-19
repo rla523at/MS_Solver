@@ -27,6 +27,7 @@ private:
 	static inline size_t num_node_ = 0;
 	static inline const double* time_ptr_ = nullptr;
 	static inline std::vector<size_t> num_post_points_;
+	static inline std::map<std::string_view, std::vector<double>> additioinal_data_name_to_values_;
 
 	//For HOM 
 	static inline std::vector<Dynamic_Matrix> set_of_basis_post_points_;
@@ -34,18 +35,22 @@ private:
 public:
 	static void set_path(const std::string& path) { This_::path_ = path; };
 
-	static void syncronize_time(const double& current_time) { This_::time_ptr_ = &current_time; };
-
 	template <typename Governing_Equation>
 	static void initialize(const ushort post_order);
+
+	static void syncronize_time(const double& current_time) { This_::time_ptr_ = &current_time; };
 
 	template <ushort space_dimension>
 	static void post_grid(const std::vector<Element<space_dimension>>& cell_elements);
 
-	template <ushort num_equation>
+	template <ushort num_equation>	
 	static void post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
 
-	//For HOM
+	template <typename T>
+	static void post_cell_variables(const std::string_view variable_name, const std::vector<T>& variables);
+
+//For HOM
+public:	
 	template <ushort space_dimension, typename Reconstruction_Method>
 	static void initialize_HOM(const Grid<space_dimension>& grid, const Reconstruction_Method& reconstruct_method);
 
@@ -176,6 +181,28 @@ void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, nu
 	This_::write_solution_post_file(post_point_solutions, comment);
 }
 
+template <typename T>
+void Post_Solution_Data::post_cell_variables(const std::string_view variable_name, const std::vector<T>& variables) {
+	const auto num_cell = This_::num_post_points_.size();	
+	dynamic_require(variables.size() == num_cell, "number of variable should be same with number of cell");
+
+	std::vector<double> converted_variables;
+	converted_variables.reserve(This_::num_node_);
+
+	for (uint i = 0; i < num_cell; ++i) {
+		const auto converted_variable = static_cast<double>(variables[i]);
+
+		for (ushort j = 0; j < num_post_points_[i]; ++j)
+			converted_variables.push_back(converted_variable);
+	}
+
+	if (This_::additioinal_data_name_to_values_.find(variable_name) == This_::additioinal_data_name_to_values_.end())
+		This_::additioinal_data_name_to_values_.emplace(variable_name, std::vector<double>());
+
+	This_::additioinal_data_name_to_values_.at(variable_name) = std::move(converted_variables);
+}
+
+
 
 Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 	static size_t strand_id = 0;
@@ -189,11 +216,18 @@ Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 		header << "Zone T = Grid";
 	}
 	else {
+		std::string solution_variable_str = This_::solution_variable_str_;
+		if (!This_::additioinal_data_name_to_values_.empty()) {
+			for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
+				solution_variable_str += info_name;
+		}
+
 		header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
 		header << "FileType = Solution";
-		header << This_::solution_variable_str_;
-		strand_id++;
+		header << solution_variable_str;
 		header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
+
+		strand_id++;
 	}
 
 	header << This_::zone_type_str_;
@@ -281,6 +315,30 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 			}
 		}
 	}
+
+	//additional data
+	str_per_line = 1;
+	
+	const auto num_additional_data = This_::additioinal_data_name_to_values_.size();
+	Text additional_data_text;
+	additional_data_text.reserve(num_additional_data);
+
+	std::string data_str;
+	for (const auto& [name, values] : This_::additioinal_data_name_to_values_) {
+		for (size_t j = 0; j < This_::num_node_; ++j, ++str_per_line) {
+			data_str += ms::double_to_string(values[j]) + " ";
+
+			if (str_per_line == 10) {
+					data_str += "\n";
+
+				str_per_line = 1;
+			}
+		}
+
+		additional_data_text << std::move(data_str);
+	}
+
+	solution_post_data_text.merge(std::move(additional_data_text));
 
 	solution_post_data_text.add_write(solution_file_path);
 
