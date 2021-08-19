@@ -2,6 +2,7 @@
 #include "Spatial_Discrete_Method.h"
 #include "Gradient_Method.h"
 #include "PostAI.h"
+#include "Post_Solution_Data.h"
 
 
 class RM {};
@@ -120,8 +121,8 @@ private:
 
 private:
     Gradient_Method gradient_method_;
-    std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes;
-    std::vector<std::vector<size_t>> set_of_face_share_cell_indexes;
+    std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes_;
+    std::vector<std::vector<size_t>> set_of_face_share_cell_indexes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
 public:
@@ -139,7 +140,7 @@ private:
     ANN_Model read_model(void) const;
 
 public:
-    std::string name(void) { return "ANN_Reconstruction_" + Gradient_Method::name(); };
+    static std::string name(void) { return "ANN_Reconstruction_" + Gradient_Method::name(); };
 };
 
 
@@ -222,9 +223,9 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
 
     const auto num_cell = solutions.size();
-
-    //post addition data
-    std::vector<double> additional_datas(num_cell);
+        
+    std::vector<double> values1(num_cell);//post
+    //std::vector<double> values2(num_cell);//post
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
@@ -243,19 +244,19 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             for (ushort e = 0; e < num_equation_; ++e) {
                 const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
                 limiting_values[e] = min(limiting_values[e], limiting_value);
-
-                //post additional data
-                additional_datas[i] = limiting_value;
             }
         }
+                
+        values1[i] = limiting_values[0];//post
+        //values2[i] = i;//post
 
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 
-    //post additional data
-    Post_Solution_Data::record_cell_variables("limiting_value", additional_datas);
-    Post_Solution_Data::post_solution(solutions);
+    Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
+    //Post_Solution_Data::record_cell_variables("cell_index", values2);//post
+    Post_Solution_Data::post_solution(solutions);//post
 
 
     Post_AI_Data::post();
@@ -299,15 +300,25 @@ auto MLP_u1<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(co
 
 template <typename Gradient_Method>
 ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :gradient_method_(grid) {
-    this->set_of_face_share_cell_indexes    = grid.calculate_set_of_face_share_cell_indexes();
-    this->set_of_vertex_share_cell_indexes  = grid.calculate_set_of_vertex_share_cell_indexes();
+    this->set_of_face_share_cell_indexes_    = grid.calculate_set_of_face_share_cell_indexes();
+    this->set_of_vertex_share_cell_indexes_  = grid.calculate_set_of_vertex_share_cell_indexes();
+
+    //sorting
+    for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
+        std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
+    for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
+        std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
+
 }
 
 template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
-    
+
     const auto num_solution = solutions.size();    
+
+    
+    std::vector<double> values1(num_solution);//post
 
     for (size_t i = 0; i < num_solution; ++i) {
         if (this->is_constant_region(solutions, i))
@@ -315,7 +326,7 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         const auto ordered_indexes = this->ordering_function(solutions, i);
 
-        const auto num_vertex_share_cell = this->set_of_vertex_share_cell_indexes.at(i).size();
+        const auto num_vertex_share_cell = this->set_of_vertex_share_cell_indexes_.at(i).size();
         std::vector<double> input_values(num_vertex_share_cell * 3);
 
         for (size_t j = 0; j < num_equation_; ++j) {
@@ -339,13 +350,19 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
         this->limit(input);
 
         this->solution_gradients_[i] *= input[0]; //temporal code
+
+        
+        values1[i] = input[0];//post
     }
+
+    Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
+    Post_Solution_Data::post_solution(solutions);//post
 }
 
 
 template <typename Gradient_Method>
 bool ANN_limiter<Gradient_Method>::is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
-    const auto& vertex_share_cell_index_set = this->set_of_vertex_share_cell_indexes.at(target_cell_index);
+    const auto& vertex_share_cell_index_set = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
     const auto num_vertex_share_cell = vertex_share_cell_index_set.size();
 
     std::vector<double> vertex_share_cell_solutions;
@@ -364,7 +381,7 @@ bool ANN_limiter<Gradient_Method>::is_constant_region(const std::vector<Solution
 
 template <typename Gradient_Method>
 std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
-    const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes.at(target_cell_index);
+    const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
 
     const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
     std::vector<size_t> ordered_indexes;
@@ -373,7 +390,7 @@ std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::v
     ordered_indexes.push_back(target_cell_index);
 
     while (ordered_indexes.size() != num_vnode_share_cell) {
-        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes.at(ordered_indexes.back());
+        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_.at(ordered_indexes.back());
 
         std::vector<size_t> face_share_cell_indexes_in_chunk;
         std::set_intersection(vnode_share_cell_indexes.begin(), vnode_share_cell_indexes.end(), face_share_cell_indexes.begin(), face_share_cell_indexes.end(), std::back_inserter(face_share_cell_indexes_in_chunk));
@@ -413,8 +430,11 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
         std::vector<double> new_feature = model.biases[i];
 
         ms::gemvpv(model.weights[i], feature, new_feature);
-        new_feature.apply(activation_function);
         feature = std::move(new_feature);
+        feature.apply(activation_function);
+
+        //new_feature.apply(activation_function);
+        //feature = std::move(new_feature);
     }
     feature.apply(output_function);
 }

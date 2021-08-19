@@ -9,7 +9,7 @@ using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATI
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
 int main(void) {
-	std::vector<std::string> grid_file_names = { "Shocktube_Quad_100x10" };
+	std::vector<std::string> grid_file_names = { "Quad40" };
 
 	for (const auto& grid_file_name : grid_file_names) {
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "/");

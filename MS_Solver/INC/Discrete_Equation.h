@@ -14,11 +14,9 @@ private:
 public: 
     template<typename Time_Step_Method, typename Semi_Discrete_Equation, typename Solution>
     static void solve(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions) {
-        static_require(ms::is_solve_end_condtion<Solve_End_Condition>, "It should be solve end condition");
-        static_require(ms::is_solve_post_condtion<Solve_Post_Condition>, "It should be solve post condition");
-
         double current_time = 0.0;
         Post_Solution_Data::syncronize_time(current_time);
+        Post_Solution_Data::is_time_to_post_ = true;
         Post_Solution_Data::post_solution(solutions, "initial");
 
         Log::content_ << "================================================================================\n";
@@ -37,18 +35,19 @@ public:
                 break;
             }
 
-            if (Solve_Controller::is_time_to_post(current_time))
-                Post_Solution_Data::is_time_to_post_ = true;
-
             Time_Integral_Method::update_solutions(semi_discrete_equation, solutions, time_step);
             current_time += time_step;
 
-            Log::content_ << "time/update: " << std::to_string(GET_TIME_DURATION) << "s   \t";
+            if (Solve_Controller::is_time_to_post(current_time))
+                Post_Solution_Data::is_time_to_post_ = true;
+
+
+            Log::content_ << "computation cost: " << std::to_string(GET_TIME_DURATION) << "s \n";
             Log::print();
         }
 
 
-        Log::content_ << "================================================================================\n";
+        Log::content_ << "\n================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
         Log::content_ << "================================================================================\n\n";
         Log::print();

@@ -12,6 +12,7 @@
 #define __SINE_WAVE__					30
 #define __SQUARE_WAVE__					31
 #define __MODIFIED_SOD__				32
+#define __CONSTANT1__					33
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41

@@ -6,6 +6,30 @@
 
 class IC {}; //Initial Condition
 
+class Constant1_2D : public IC {
+private:
+    static constexpr ushort num_eqation_ = 1;
+    static constexpr ushort dimension_ = 2;
+
+    using This_ = Constant1_2D;
+    using Space_Vector_ = Euclidean_Vector<dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+private:
+    Constant1_2D(void) = delete;
+
+public:
+    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector) { return { 1 }; };
+    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
+        std::vector<Euclidean_Vector<1>> result(space_vectors.size(), { 1 });
+        return result;
+    };
+    static std::string name(void) {
+        return "Constant_2D";
+    }
+
+};
+
 template <double x_wave_length, double y_wave_length>
 class Sine_Wave_2D : public IC {
 private:

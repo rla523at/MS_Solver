@@ -1,10 +1,6 @@
 #pragma once
 #include "Governing_Equation.h"
-#include "Spatial_Discrete_Method.h"
-#include "Reconstruction_Method_FVM.h"
-#include "Reconstruction_Method_HOM.h"
-#include "Element.h"
-#include "Text.h"
+#include "Grid_Builder.h"
 
 
 enum class Post_File_Type {
@@ -30,7 +26,7 @@ private:
 	static inline size_t num_node_ = 0;
 	static inline const double* time_ptr_ = nullptr;
 	static inline std::vector<size_t> num_post_points_;
-	static inline std::map<std::string_view, std::vector<double>> additioinal_data_name_to_values_;
+	static inline std::map<std::string, std::vector<double>> additioinal_data_name_to_values_;
 
 	//For HOM 
 	static inline std::vector<Dynamic_Matrix> set_of_basis_post_points_;
@@ -53,7 +49,7 @@ public:
 	static void post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
 
 	template <typename T>
-	static void record_cell_variables(const std::string_view variable_name, const std::vector<T>& variables);
+	static void record_cell_variables(const std::string& variable_name, const std::vector<T>& variables);
 
 //For HOM
 public:	
@@ -92,8 +88,6 @@ void Post_Solution_Data::initialize(const ushort post_order) {
 
 template <ushort space_dimension, typename Reconstruction_Method>
 void Post_Solution_Data::initialize_HOM(const Grid<space_dimension>& grid, const Reconstruction_Method& reconstruct_method) {
-	static_require(ms::is_HOM_reconsturction_method<Reconstruction_Method>, "This routine should be called HOM");
-
 	const auto& cell_elements = grid.elements.cell_elements;
 	const auto num_cell = cell_elements.size();
 	This_::set_of_basis_post_points_.reserve(num_cell);
@@ -194,7 +188,10 @@ void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, nu
 }
 
 template <typename T>
-void Post_Solution_Data::record_cell_variables(const std::string_view variable_name, const std::vector<T>& variables) {
+void Post_Solution_Data::record_cell_variables(const std::string& variable_name, const std::vector<T>& variables) {
+	if (!This_::is_time_to_post_)
+		return;
+	
 	const auto num_cell = This_::num_post_points_.size();	
 	dynamic_require(variables.size() == num_cell, "number of variable should be same with number of cell");
 
@@ -208,10 +205,7 @@ void Post_Solution_Data::record_cell_variables(const std::string_view variable_n
 			converted_variables.push_back(converted_variable);
 	}
 
-	if (This_::additioinal_data_name_to_values_.find(variable_name) == This_::additioinal_data_name_to_values_.end())
-		This_::additioinal_data_name_to_values_.emplace(variable_name, std::vector<double>());
-
-	This_::additioinal_data_name_to_values_.at(variable_name) = std::move(converted_variables);
+	This_::additioinal_data_name_to_values_.emplace(variable_name, std::move(converted_variables));
 }
 
 
@@ -231,7 +225,7 @@ Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 		std::string solution_variable_str = This_::solution_variable_str_;
 		if (!This_::additioinal_data_name_to_values_.empty()) {
 			for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
-				solution_variable_str += info_name;
+				solution_variable_str += ", " + info_name;
 		}
 
 		header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
@@ -254,7 +248,6 @@ Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
 
 	return header;
-
 }
 
 void Post_Solution_Data::reset(void) {
@@ -343,7 +336,7 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 
 			if (str_per_line == 10) {
 					data_str += "\n";
-
+					 
 				str_per_line = 1;
 			}
 		}
@@ -351,14 +344,15 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 		additional_data_text << std::move(data_str);
 	}
 
+	//merge & wirte
 	solution_post_data_text.merge(std::move(additional_data_text));
-
 	solution_post_data_text.add_write(solution_file_path);
 
+
+	This_::additioinal_data_name_to_values_.clear();
+	This_::is_time_to_post_ = false;
 	if (comment == "final") {
 		count = 1;
 		This_::reset();
 	}
-
-	This_::is_time_to_post_ = false;
 }
