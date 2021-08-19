@@ -74,6 +74,7 @@ public:
 
     void reconstruct(const std::vector<Solution_>& solutions);
         
+public:
     const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return this->solution_gradients_; };
 
 protected:
@@ -220,9 +221,10 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
     const auto solution_gradients = this->gradient_method_.calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
 
-    Post_AI_Data::record_solution_datas(solutions, solution_gradients);
-
     const auto num_cell = solutions.size();
+
+    //post addition data
+    std::vector<double> additional_datas(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
@@ -241,14 +243,20 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             for (ushort e = 0; e < num_equation_; ++e) {
                 const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
                 limiting_values[e] = min(limiting_values[e], limiting_value);
+
+                //post additional data
+                additional_datas[i] = limiting_value;
             }
         }
-
-        Post_AI_Data::record_limiting_value(i, limiting_values);
 
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
+
+    //post additional data
+    Post_Solution_Data::record_cell_variables("limiting_value", additional_datas);
+    Post_Solution_Data::post_solution(solutions);
+
 
     Post_AI_Data::post();
 };

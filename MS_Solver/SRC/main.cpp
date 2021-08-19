@@ -16,6 +16,7 @@ int main(void) {
 		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
 		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
 		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/" + "AI_Data/");
+		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "\t\t\t\t SETTING \n";
@@ -28,7 +29,7 @@ int main(void) {
 		Log::content_ << std::left << std::setw(35) << "Numeraical Flux Function" << NUMERICAL_FLUX_FUNCTION::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Integral Method" << TIME_INTEGRAL_METHOD::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Step Method" << TIME_STEP_METHOD::name() << "\n";
-		Log::content_ << std::left << std::setw(35) << "Solve End Condtion" << SOLVE_END_CONDITION::name() << "\n";
+		Log::content_ << std::left << std::setw(35) << "Solve End Condtion" << Solve_Controller::solve_end_condition_name() << "\n";
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
@@ -41,10 +42,10 @@ int main(void) {
 		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
 
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
-		Discrete_Equation_::solve<TIME_STEP_METHOD, SOLVE_END_CONDITION, SOLVE_POST_CONDITION>(semi_discrete_equation, solutions);
+		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
 
 #ifdef ERROR_CALCULATION
-		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __END_CONDITION_CONSTANT__);
+		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
 #endif
 
 		Log::write();

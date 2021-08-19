@@ -1,4 +1,6 @@
 #pragma once
+#include "Post_Solution_Data.h"
+
 #include <vector>
 
 class TIM {};
@@ -64,39 +66,7 @@ static void SSPRK33::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
 
 template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions, const double time_step) {
-    const auto num_sol = solutions.size();
-
-    //const auto initial_solutions = solutions;
-
-    ////stage1
-    //const auto initial_RHS = Semi_Discrete_Equation::calculate_RHS(initial_solutions);
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] += 0.391752226571890 * time_step * initial_RHS[i];
-
-    ////stage2
-    //const auto stage1_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = 0.444370493651235 * initial_solutions[i] + 0.555629506348765 * solutions[i] + 0.368410593050371 * time_step * stage1_RHS[i];
-
-    //const auto stage2_solutions = solutions;
-
-    ////stage3
-    //const auto stage2_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = 0.620101851488403 * initial_solutions[i] + 0.379898148511597 * solutions[i] + 0.251891774271694 * time_step * stage2_RHS[i];
-
-    //const auto stage3_solutions = solutions;
-
-    ////stage4
-    //const auto stage3_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = 0.178079954393132 * initial_solutions[i] + 0.821920045606868 * solutions[i] + 0.544974750228521 * time_step * stage3_RHS[i];
-
-    ////stage5
-    //const auto stage4_RHS = Semi_Discrete_Equation::calculate_RHS(solutions);
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = 0.517231671970585 * stage2_solutions[i] + 0.096059710526147 * stage3_solutions[i] + 0.063692468666290 * time_step * stage3_RHS[i] + 0.386708617503269 * solutions[i] + 0.226007483236906 * time_step * stage4_RHS[i];
-
+    const auto num_sol = solutions.size();  
 
     //Type1
     //stage1
