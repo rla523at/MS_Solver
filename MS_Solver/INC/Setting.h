@@ -27,7 +27,7 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		1.0
+#define __SOLVE_END_CONDITION_CONSTANT__		2.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							0
@@ -51,7 +51,7 @@
 // #################################### USER DEFINE SETTING ############################################################
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				1.0
+#define Y_ADVECTION_SPEED				0.5
 #define Z_ADVECTION_SPEED				0.5
 
 // Sine Wave
@@ -174,17 +174,17 @@
 #endif
 
 #if		__SOLVE_END_CONDITION__ == __END_BY_TIME__
-#define SOLVE_END_CONDITION		controll_condition::by_time, __SOLVE_END_CONDITION_CONSTANT__
+#define SOLVE_END_CONDITION		Controll_Condition::by_time, __SOLVE_END_CONDITION_CONSTANT__
 #endif
 #if		__SOLVE_END_CONDITION__ == __END_BY_ITER__
-#define SOLVE_END_CONDITION		controll_condition::by_iter, __SOLVE_END_CONDITION_CONSTANT__
+#define SOLVE_END_CONDITION		Controll_Condition::by_iter, __SOLVE_END_CONDITION_CONSTANT__
 #endif
 
 #if		__SOLVE_POST_CONDITION__ == __POST_BY_TIME__
-#define SOLVE_POST_CONDITION	controll_condition::by_time, __SOLVE_POST_CONDITION_CONSTANT__
+#define SOLVE_POST_CONDITION	Controll_Condition::by_time, __SOLVE_POST_CONDITION_CONSTANT__
 #endif
 #if		__SOLVE_POST_CONDITION__ == __POST_BY_ITER__
-#define SOLVE_POST_CONDITION	controll_condition::by_iter, __SOLVE_POST_CONDITION_CONSTANT__
+#define SOLVE_POST_CONDITION	Controll_Condition::by_iter, __SOLVE_POST_CONDITION_CONSTANT__
 #endif
 
 // ########################################## MACRO SETTING END ##################################################################

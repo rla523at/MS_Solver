@@ -9,7 +9,7 @@ using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATI
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
 int main(void) {
-	std::vector<std::string> grid_file_names = { "Quad40" };
+	std::vector<std::string> grid_file_names = { "Quad50" };
 
 	for (const auto& grid_file_name : grid_file_names) {
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
@@ -29,7 +29,7 @@ int main(void) {
 		Log::content_ << std::left << std::setw(35) << "Numeraical Flux Function" << NUMERICAL_FLUX_FUNCTION::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Integral Method" << TIME_INTEGRAL_METHOD::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Step Method" << TIME_STEP_METHOD::name() << "\n";
-		Log::content_ << std::left << std::setw(35) << "Solve End Condtion" << Solve_Controller::solve_end_condition_name() << "\n";
+		Log::content_ << std::left << std::setw(35) << "Solve End Condtion" << Solve_Controller::end_condition_name() << "\n";
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
