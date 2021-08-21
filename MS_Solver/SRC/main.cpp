@@ -21,6 +21,7 @@ int main(void) {
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
 		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
 
+		Log::content_ << "current date : " << date_str << "\n\n";
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "\t\t\t\t SETTING \n";
 		Log::content_ << "================================================================================\n";
