@@ -37,4 +37,14 @@ public:
 		Log::log_txt_.write(file_path);
 		Log::log_txt_.clear();	
 	}
+
+	static std::string date_string(void) {
+		time_t date_calculator = time(nullptr);
+		tm date;
+		localtime_s(&date, &date_calculator);
+
+		return std::to_string(date.tm_year + 1900) + "." + std::to_string(date.tm_mon + 1) + "." + std::to_string(date.tm_mday) 
+			+ "_" + std::to_string(date.tm_hour) + "h" + std::to_string(date.tm_min) + "m";		
+	}
 };
+

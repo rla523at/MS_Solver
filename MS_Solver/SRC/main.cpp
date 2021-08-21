@@ -16,9 +16,10 @@ int main(void) {
 	for (auto& grid_file_name : grid_file_names) {
 		ms::erase(grid_file_name, " ");
 
-		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
-		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
-		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/" + "AI_Data/");
+		const auto date_str = Log::date_string();
+
+		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
+		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
 
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "\t\t\t\t SETTING \n";
@@ -41,7 +42,6 @@ int main(void) {
 
 		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
 
-		Post_AI_Data::intialize(grid);
 		Post_Solution_Data::post_grid(grid.elements.cell_elements);
 
 		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
