@@ -3,7 +3,7 @@
 #include "Cells.h"
 #include "Inner_Faces.h"
 #include "Periodic_Boundaries.h"
-#include "Pressure_Fix.h"
+#include "Solution_Scaling_Method.h"
 #include "Numerical_Flux_Function.h"
 #include "Post_Solution_Data.h"
 
@@ -42,13 +42,13 @@ public:
         if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
             Post_Solution_Data::initialize_HOM(grid, this->reconstruction_method_);
 
-        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>) {
+        if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>) {
             SET_TIME_POINT;
 
-            this->boundaries_.initialize_pressure_fix();
-            this->cells_.initialize_pressure_fix();
-            this->periodic_boundaries_.initialize_pressure_fix();
-            this->inner_faces_.initialize_pressure_fix();
+            this->boundaries_.initialize_scaling_method();
+            this->cells_.initialize_scaling_method();
+            this->periodic_boundaries_.initialize_scaling_method();
+            this->inner_faces_.initialize_scaling_method();
 
             Log::content_ << std::left << std::setw(50) << "@ Pressure Fix precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
             Log::print();
@@ -96,7 +96,7 @@ public:
         if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             this->reconstruction_method_.reconstruct(solutions);
 
-        if constexpr (ms::can_use_scaliling_technique<Governing_Equation, Spatial_Discrete_Method>)
+        if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
             Solution_Scaler::inspect_and_scale(solutions);
     }
 

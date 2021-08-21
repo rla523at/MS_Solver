@@ -2,7 +2,7 @@
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
-#include "Pressure_Fix.h"
+#include "Solution_Scaling_Method.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -31,7 +31,7 @@ public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
 
 public:
-    void initialize_pressure_fix(void) const;
+    void initialize_scaling_method(void) const;
 };
 
 
@@ -124,7 +124,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_pressure_fix(void) const {
+void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_scaling_method(void) const {
     const auto num_inner_face = this->oc_nc_index_pairs_.size();
 
     for (uint i = 0; i < num_inner_face; ++i) {

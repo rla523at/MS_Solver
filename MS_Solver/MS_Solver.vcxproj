@@ -201,7 +201,7 @@
     <ClInclude Include="INC\Polynomial.h" />
     <ClInclude Include="INC\Post_Solution_Data.h" />
     <ClInclude Include="INC\PostAI.h" />
-    <ClInclude Include="INC\Pressure_Fix.h" />
+    <ClInclude Include="INC\Solution_Scaling_Method.h" />
     <ClInclude Include="INC\Profiler.h" />
     <ClInclude Include="INC\Reconstruction_Method_FVM.h" />
     <ClInclude Include="INC\Reconstruction_Method_HOM.h" />

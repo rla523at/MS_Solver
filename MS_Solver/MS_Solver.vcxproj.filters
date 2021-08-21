@@ -176,7 +176,7 @@
     <ClInclude Include="INC\Reconstruction_Method_HOM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Pressure_Fix.h">
+    <ClInclude Include="INC\Solution_Scaling_Method.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

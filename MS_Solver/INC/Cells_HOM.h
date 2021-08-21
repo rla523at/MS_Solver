@@ -2,7 +2,7 @@
 #include "Governing_Equation.h"
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
-#include "Pressure_Fix.h"
+#include "Solution_Scaling_Method.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template <typename Governing_Equation, typename Reconstruction_Method>
@@ -45,7 +45,7 @@ public:
     void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const;
 
 public:
-    void initialize_pressure_fix(void) const;
+    void initialize_scaling_method(void) const;
 };
 
 
@@ -288,6 +288,6 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 }
 
 template <typename Governing_Equation, typename Reconstruction_Method>
-void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize_pressure_fix(void) const {
+void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize_scaling_method(void) const {
     Solution_Scaler::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
 }
