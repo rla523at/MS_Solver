@@ -9,15 +9,16 @@ using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATI
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
 int main(void) {
-	std::vector<std::string> grid_file_names = { "Quad50" };
-	//std::vector<std::string> grid_file_names = { "Shocktube_OrthoTri_100x10" };
+	const char delimiter = ',';
+	std::string grid_file_names_str = GRID_FILE_NAMES;
+	auto grid_file_names = ms::parse(grid_file_names_str, delimiter);
+	
+	for (auto& grid_file_name : grid_file_names) {
+		ms::erase(grid_file_name, " ");
 
-	for (const auto& grid_file_name : grid_file_names) {
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
 		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/");
-		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
 		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "/" + "AI_Data/");
-		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "\t\t\t\t SETTING \n";
@@ -34,6 +35,9 @@ int main(void) {
 		Log::content_ << "================================================================================\n";
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
+
+		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
+		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
 		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
 

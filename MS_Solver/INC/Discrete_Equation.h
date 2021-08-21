@@ -21,30 +21,20 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-        //const auto num_cell = solutions.size();
-        //std::vector<uint> cell_index(num_cell);
-        //for (uint i = 0; i < num_cell; ++i)
-        //    cell_index[i] = i;
 
-        //Post_Solution_Data::record_cell_variables("cell_index", cell_index);
+        Post_Solution_Data::post_solution(solutions, "initial");//post
 
-
-        //Post_Solution_Data::post_solution(solutions, "initial");//post
-
-        Post_Solution_Data::is_time_to_post_ = true; // post
         semi_discrete_equation.reconstruct(solutions);
 
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
                 Post_Solution_Data::post_solution(solutions, "final");//post
-
                 break;
             }
 
             if (Solve_Controller::is_time_to_post(current_time))
-                Post_Solution_Data::is_time_to_post_ = true; // post
-                //Post_Solution_Data::post_solution(solutions); // post
+                Post_Solution_Data::post_solution(solutions); // post
             
 
             SET_TIME_POINT;

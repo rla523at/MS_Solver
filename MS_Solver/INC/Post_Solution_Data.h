@@ -48,8 +48,12 @@ public:
 	template <typename T>
 	static void conditionally_record_cell_variables(const std::string& variable_name, const std::vector<T>& variables);
 
+	static void conditionally_record_cell_indexes(void);
+
 	template <typename T>
 	static void record_cell_variables(const std::string& variable_name, const std::vector<T>& variables);
+
+	static void record_cell_indexes(void);
 
 
 public: //for FVM
@@ -179,11 +183,26 @@ void Post_Solution_Data::record_cell_variables(const std::string& variable_name,
 }
 
 
+void Post_Solution_Data::record_cell_indexes(void) {
+	const auto num_cell = num_post_points_.size();
+	std::vector<uint> cell_index(num_cell);
+	for (uint i = 0; i < num_cell; ++i)
+		cell_index[i] = i;
+
+	This_::record_cell_variables("cell_index", cell_index);
+}
+
 template <typename T>
 void Post_Solution_Data::conditionally_record_cell_variables(const std::string& variable_name, const std::vector<T>& variables) {
 	if (This_::is_time_to_post_)
-		record_cell_variables(variable_name, variables);	
+		This_::record_cell_variables(variable_name, variables);
 }
+
+void Post_Solution_Data::conditionally_record_cell_indexes(void) {
+	if (This_::is_time_to_post_)
+		This_::record_cell_indexes();
+}
+
 
 template <ushort num_equation>
 void Post_Solution_Data::conditionally_post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {
