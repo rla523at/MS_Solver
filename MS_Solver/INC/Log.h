@@ -44,7 +44,7 @@ public:
 		localtime_s(&date, &date_calculator);
 		
 		return std::to_string(date.tm_year + 1900) + "." + std::to_string(date.tm_mon + 1) + "." + std::to_string(date.tm_mday) 
-			+ "_" + std::to_string(date.tm_hour) + "£º" + std::to_string(date.tm_min);		
+			+ "__(" + std::to_string(date.tm_hour) + "£º" + std::to_string(date.tm_min) + ")";
 	}
 };
 

@@ -351,8 +351,8 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 			for (size_t k = 0; k < num_equation; ++k)
 				solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
 
-			//write primitive variable
-			for (size_t k = 0; k < num_equation; ++k)
+			//write primitive variable without a
+			for (size_t k = 0; k < num_equation - 1; ++k)
 				solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
 
 			if (str_per_line == 10) {
