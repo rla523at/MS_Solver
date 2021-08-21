@@ -97,7 +97,7 @@ void Post_Solution_Data::initialize(const ushort post_order) {
 	}
 	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
 		This_::grid_variable_str_ = "Variables = X Y";
-		This_::solution_variable_str_ = "Variables = rho rhou rhov rhoE u v p a";
+		This_::solution_variable_str_ = "Variables = rho rhou rhov rhoE u v p";
 		This_::zone_type_str_ = "ZoneType = FETriangle";
 	}
 };

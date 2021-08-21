@@ -46,12 +46,21 @@ class MLP_Smooth_Extrema_Detector
 {
 public:
     static bool is_smooth_extrema(const double solution, const double higher_mode_solution, const double P1_mode_solution, const double allowable_min, const double allowable_max) {
-        if (P1_mode_solution > 0 && higher_mode_solution < 0 && solution > allowable_min)
+        
+        constexpr double eps = (std::numeric_limits<double>::min)();
+        if (P1_mode_solution > -eps && higher_mode_solution < eps && solution > allowable_min)
             return true;
-        else if (P1_mode_solution < 0 && higher_mode_solution > 0 && solution < allowable_max)
+        else if (P1_mode_solution < eps && higher_mode_solution > -eps && solution < allowable_max)
             return true;
         else
             return false;
+         
+        //if (P1_mode_solution > 0 && higher_mode_solution < 0 && solution > allowable_min)
+        //    return true;
+        //else if (P1_mode_solution < 0 && higher_mode_solution > 0 && solution < allowable_max)
+        //    return true;
+        //else
+        //    return false;
     }
 };
 
@@ -330,68 +339,6 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid
 }
 
 
-template <ushort space_dimension_, ushort solution_order_>
-template <ushort num_equation>
-void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
-    const auto P0_criterion_values = this->calculate_P0_criterion_values(solution_coefficients);
-    const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(P0_criterion_values);
-
-    const auto num_cell = solution_coefficients.size();
-
-    for (uint i = 0; i < num_cell; ++i) {
-        auto temporal_solution_order = solution_order_;
-
-        auto& solution_coefficient = solution_coefficients[i];
-        const auto& basis_vnodes = this->set_of_basis_vnodes_[i];
-        const auto& P1_projected_basis_vnodes = this->set_of_P1_projected_basis_vnodes_[i];
-
-        auto solution_vnodes = solution_coefficient * basis_vnodes;
-        auto P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
-
-        const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
-        const auto num_vnode = vnode_indexes.size();
-
-        const auto P0_criterion_value = P0_criterion_values[i];
-
-        for (ushort j = 0; j < num_vnode; ++j) {
-            const auto vnode_index = vnode_indexes[j];
-            const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
-
-            const auto criterion_value = solution_vnodes.at(This_::criterion_variable_index_, j);
-            const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
-
-            const auto higher_mode_criterion_value = criterion_value - P1_projected_criterion_value;
-            const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
-
-            while (true) {
-                if (P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max))
-                    break;
-                else {
-                    if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, higher_mode_criterion_value, P1_mode_criterion_value, allowable_min, allowable_max))
-                        break;
-                    else {
-                        if (temporal_solution_order == 1) {
-                            const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max);
-                            solution_coefficient *= this->limiting_matrix(limiting_value);
-
-                            break;
-                        }
-                        else {
-                            //limiting highest mode
-                            solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order);
-
-                            //re-calculate limited vnode_solution                            
-                            solution_vnodes = solution_coefficient * basis_vnodes;
-                            P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
-                        }
-                    }
-                }    
-            }
-
-        }
-    }
-}
-
 //template <ushort space_dimension_, ushort solution_order_>
 //template <ushort num_equation>
 //void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
@@ -419,14 +366,13 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 //            const auto vnode_index = vnode_indexes[j];
 //            const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
 //
-//            const auto criterion_value = solution_vnodes.at(This_::criterion_variable_index_, j);
-//            const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
-//
-//            const auto higher_mode_criterion_value = criterion_value - P1_projected_criterion_value;
-//            const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
-//            
-//            bool MLP_u1_flag = false;
 //            while (true) {
+//                const auto criterion_value = solution_vnodes.at(This_::criterion_variable_index_, j);
+//                const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
+//
+//                const auto higher_mode_criterion_value = criterion_value - P1_projected_criterion_value;
+//                const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
+//
 //                if (P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max))
 //                    break;
 //                else {
@@ -434,7 +380,9 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 //                        break;
 //                    else {
 //                        if (temporal_solution_order == 1) {
-//                            MLP_u1_flag = true;
+//                            const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max);
+//                            solution_coefficient *= this->limiting_matrix(limiting_value);
+//
 //                            break;
 //                        }
 //                        else {
@@ -446,27 +394,88 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 //                            P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
 //                        }
 //                    }
-//                }
+//                }    
 //            }
 //
-//            if (MLP_u1_flag) {
-//                double limiting_value = 1.0;
-//                for (ushort k = 0; k < num_vnode; ++k) {
-//                    const auto vnode_index = vnode_indexes[k];
-//                    const auto [allowable_min2, allowable_max2] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
-//
-//                    const auto P1_projected_criterion_value2 = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, k);
-//                    const auto P1_mode_criterion_value2 = P1_projected_criterion_value2 - P0_criterion_value;
-//
-//                    limiting_value = min(limiting_value, MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value2, P0_criterion_value, allowable_min2, allowable_max2));
-//                }
-//
-//                solution_coefficient *= this->limiting_matrix(limiting_value);
-//                break;
-//            }
 //        }
 //    }
 //}
+
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+    const auto P0_criterion_values = this->calculate_P0_criterion_values(solution_coefficients);
+    const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(P0_criterion_values);
+
+    const auto num_cell = solution_coefficients.size();
+
+    for (uint i = 0; i < num_cell; ++i) {
+        auto temporal_solution_order = solution_order_;
+
+        auto& solution_coefficient = solution_coefficients[i];
+        const auto& basis_vnodes = this->set_of_basis_vnodes_[i];
+        const auto& P1_projected_basis_vnodes = this->set_of_P1_projected_basis_vnodes_[i];
+
+        auto solution_vnodes = solution_coefficient * basis_vnodes;
+        auto P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
+
+        const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
+        const auto num_vnode = vnode_indexes.size();
+
+        const auto P0_criterion_value = P0_criterion_values[i];
+
+        for (ushort j = 0; j < num_vnode; ++j) {
+            const auto vnode_index = vnode_indexes[j];
+            const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
+            
+            bool MLP_u1_flag = false;
+            while (true) {
+                const auto criterion_value = solution_vnodes.at(This_::criterion_variable_index_, j);
+                const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
+
+                const auto higher_mode_criterion_value = criterion_value - P1_projected_criterion_value;
+                const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
+
+                if (P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max))
+                    break;
+                else {
+                    if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, higher_mode_criterion_value, P1_mode_criterion_value, allowable_min, allowable_max))
+                        break;
+                    else {
+                        if (temporal_solution_order == 1) {
+                            MLP_u1_flag = true;
+                            break;
+                        }
+                        else {
+                            //limiting highest mode
+                            solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order);
+
+                            //re-calculate limited vnode_solution                            
+                            solution_vnodes = solution_coefficient * basis_vnodes;
+                            P1_projected_solution_vnodes = solution_coefficient * P1_projected_basis_vnodes;
+                        }
+                    }
+                }
+            }
+
+            if (MLP_u1_flag) {
+                double limiting_value = 1.0;
+                for (ushort k = 0; k < num_vnode; ++k) {
+                    const auto vnode_index = vnode_indexes[k];
+                    const auto [allowable_min2, allowable_max2] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
+
+                    const auto P1_projected_criterion_value2 = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, k);
+                    const auto P1_mode_criterion_value2 = P1_projected_criterion_value2 - P0_criterion_value;
+
+                    limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value2, P0_criterion_value, allowable_min2, allowable_max2));
+                }
+
+                solution_coefficient *= this->limiting_matrix(limiting_value);
+                break;
+            }
+        }
+    }
+}
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
@@ -647,9 +656,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
         const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
         const auto num_vnode = vnode_indexes.size();
 
-        bool end_limiting = false;
-
-
         const auto num_trouble_boundary = set_of_num_trobule_boundary[i];
 
         const auto& vnode_index_to_simplex_P0_criterion_value = set_of_vnode_index_to_simplex_P0_criterion_value[i];
@@ -669,8 +675,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     if (this->is_typeI_subcell_oscillation(num_trouble_boundary)) {
                         const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(simplex_P1_mode_criterion_value, simplex_P0_criterion_value, allowable_min, allowable_max);
                         solution_coefficient *= this->limiting_matrix(limiting_value);
-
-                        end_limiting = true;
                     }
                     break;
                 }
@@ -687,14 +691,11 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         if (temporal_solution_order == 1) {
                             const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(simplex_P1_mode_criterion_value, simplex_P0_criterion_value, allowable_min, allowable_max);
                             solution_coefficient *= this->limiting_matrix(limiting_value);
-
-                            end_limiting = true;
                             break;
                         }
                         else {
                             //limiting highest mode
-                            const auto Pnm1_projection_matrix = this->Pn_projection_matrix(--temporal_solution_order);
-                            solution_coefficient *= Pnm1_projection_matrix;
+                            solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order);
 
                             //re-calculate limited vnode_solution                            
                             solution_vnodes = solution_coefficient * basis_vnodes;
@@ -703,9 +704,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     }
                 }
             }
-
-            if (end_limiting == true)
-                break;
         }
     }
 }
