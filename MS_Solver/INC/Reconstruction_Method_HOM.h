@@ -383,8 +383,6 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
         const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
         const auto num_vnode = vnode_indexes.size();
 
-        bool end_limiting = false;
-
         for (ushort j = 0; j < num_vnode; ++j) {
             const auto vnode_index = vnode_indexes[j];
             const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_solution.at(vnode_index);
@@ -412,7 +410,6 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                             const auto limiting_matrix = this->limiting_matrix(limiting_value);
                             solution_coefficient *= limiting_matrix;
 
-                            end_limiting = true;
                             break;
                         }
                         else {
@@ -428,8 +425,6 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                 }    
             }
 
-            if (end_limiting == true)
-                break;
         }
     }
 }
