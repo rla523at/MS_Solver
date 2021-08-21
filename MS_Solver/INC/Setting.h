@@ -20,7 +20,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						3
+#define __SOLUTION_ORDER__						2
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
@@ -61,7 +61,11 @@
 #define Z_WAVE_LENGTH					1
 
 // Mode (comment out == turn off)
-//#define ERROR_CALCULATION_MODE
+
+#if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
+#define ERROR_CALCULATION_MODE
+#endif
+
 #if __GOVERNING_EQUATION__		== 		__EULER__
 #if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
 #define PRESSURE_FIX_MODE

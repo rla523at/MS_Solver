@@ -4,7 +4,7 @@
 
 namespace ms {
 	template <typename Governing_Equation, typename Spatial_Discrete_Method>
-	inline constexpr bool can_use_pressure_fix = std::is_same_v<Governing_Equation, Euler_2D> && std::is_same_v<Spatial_Discrete_Method, HOM>;
+	inline constexpr bool can_use_scaliling_technique = std::is_same_v<Governing_Equation, Euler_2D> && std::is_same_v<Spatial_Discrete_Method, HOM>;
 }
 
 class Solution_Scaler
