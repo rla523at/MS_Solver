@@ -32,7 +32,7 @@ public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
 
 public:
-    void initialize_scailing_method(void) const;
+    void initialize_scaling_method(void) const;
 };
 
 
@@ -142,7 +142,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_scailing_method(void) const {
+void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_scaling_method(void) const {
     const auto num_pbdry_pair = this->oc_nc_index_pairs_.size();
 
     for (uint i = 0; i < num_pbdry_pair; ++i) {
