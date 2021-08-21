@@ -122,5 +122,5 @@ template <typename Governing_Equation, typename Reconstruction_Method>
 void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize_pressure_fix(void) const {
     const auto num_boundary = this->oc_indexes_.size();
     for (uint i = 0; i < num_boundary; ++i) 
-        Pressure_Fix::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    
+        Solution_Scaler::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    
 }

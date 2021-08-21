@@ -71,16 +71,10 @@ public:
     }
 
     //Type1
-    std::vector<Residual_> calculate_RHS(std::vector<Discretized_Solution_>& solutions) {
+    std::vector<Residual_> calculate_RHS(const std::vector<Discretized_Solution_>& solutions) {
         const auto num_solution = solutions.size();
         std::vector<Residual_> RHS(num_solution);
 
-        if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
-            this->reconstruction_method_.reconstruct(solutions);
-
-        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>)
-            Pressure_Fix::inspect_and_fix(solutions);
-        
         this->boundaries_.calculate_RHS(RHS, solutions);
         this->periodic_boundaries_.calculate_RHS(RHS, solutions);
         this->inner_faces_.calculate_RHS(RHS, solutions);
@@ -98,6 +92,15 @@ public:
     void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
         this->cells_.estimate_error<Initial_Condition>(computed_solutions, time);
     }
+
+    void reconstruct(std::vector<Discretized_Solution_>& solutions) {
+        if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
+            this->reconstruction_method_.reconstruct(solutions);
+
+        if constexpr (ms::can_use_pressure_fix<Governing_Equation, Spatial_Discrete_Method>)
+            Solution_Scaler::inspect_and_scale(solutions);
+    }
+
 };
 
 

@@ -289,5 +289,5 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 
 template <typename Governing_Equation, typename Reconstruction_Method>
 void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize_pressure_fix(void) const {
-    Pressure_Fix::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
+    Solution_Scaler::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
 }

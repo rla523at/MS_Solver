@@ -157,7 +157,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::in
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
         const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
 
-        Pressure_Fix::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
-        Pressure_Fix::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
+        Solution_Scaler::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
+        Solution_Scaler::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
     }
 }

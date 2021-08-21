@@ -7,10 +7,10 @@ namespace ms {
 	inline constexpr bool can_use_pressure_fix = std::is_same_v<Governing_Equation, Euler_2D> && std::is_same_v<Spatial_Discrete_Method, HOM>;
 }
 
-class Pressure_Fix
+class Solution_Scaler
 {
 private:
-	using This_ = Pressure_Fix;
+	using This_ = Solution_Scaler;
 
 private:
 	inline static double fix_rate = 0.5;
@@ -18,7 +18,7 @@ private:
 	inline static std::vector<std::pair<uint, Dynamic_Matrix>> cell_index_basis_qnodes_pairs;
 
 private:
-	Pressure_Fix(void) = delete;	
+	Solution_Scaler(void) = delete;	
 
 public:
 	static void record_cell_basis_qnodes(const std::vector<Dynamic_Matrix>& set_of_cell_basis_qnodes) {
@@ -30,7 +30,7 @@ public:
 	}
 
 	template <ushort num_equation, ushort num_basis>
-	static void inspect_and_fix(std::vector<Matrix<num_equation, num_basis>>& solution_coefficients) {
+	static void inspect_and_scale(std::vector<Matrix<num_equation, num_basis>>& solution_coefficients) {
 		//check cell
 		const auto num_cell = This_::set_of_cell_basis_qnodes_.size();
 
@@ -46,9 +46,10 @@ public:
 
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
 					const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
-					if (pressure < 0.0) {
+					if (rho < 0.0 || pressure < 0.0) {
 						fix_count++;
 						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
 						solution_coefficients[i] *= fix_matrix;
@@ -76,9 +77,10 @@ public:
 
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
 					const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
-					if (pressure < 0.0) {
+					if (rho < 0.0 || pressure < 0.0) {
 						fix_count++;
 						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
 						solution_coefficients[cell_index] *= fix_matrix;

@@ -20,13 +20,11 @@ protected:
 public:
     Polynomial_Reconstruction(const Grid<space_dimension_>& grid);
 
+public:
     auto calculate_set_of_transposed_gradient_basis(void) const;
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
     Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
     double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& node) const;
-
-    //std::vector<Dynamic_Matrix> calculate_set_of_basis_nodes(const std::vector<std::vector<Space_Vector_>>& set_of_nodes) const;
-    //std::vector<double> calculate_P0_basis_values(const std::vector<Space_Vector_>& nodes) const;
 
 public:
     static constexpr ushort num_basis(void) { return num_basis_; };
@@ -103,7 +101,7 @@ public:
 
 public:
     template <ushort num_equation>
-    void reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients);
+    void reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
 
 public:
     static std::string name(void) { return "hMLP_Reconstruction_P" + std::to_string(solution_order_); };
@@ -252,7 +250,7 @@ hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(Grid<space_dimension_>&&
         this->set_of_vnode_indexes_.push_back(cell_element.vertex_node_indexes());
 
 
-    Log::content_ << std::left << std::setw(50) << "@ hMLP precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::content_ << std::left << std::setw(50) << "@ hMLP Base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 }
 
@@ -322,9 +320,8 @@ auto hMLP_Base<space_dimension_, solution_order_>::limiting_matrix(const double 
     std::array<double, This_::num_basis_> limiting_values;
     limiting_values.fill(limiting_value);
     limiting_values[0] = 1.0; // keep P0 coefficient
-
-    const Matrix limiting_matrix = limiting_values;
-    return limiting_matrix;
+        
+    return Matrix(limiting_values);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -362,7 +359,7 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) {
+void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
     std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
 
@@ -584,6 +581,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
 
         const auto num_trouble_boundary = set_of_num_trobule_boundary[i];
+
         const auto& vnode_index_to_simplex_P0_criterion_value = set_of_vnode_index_to_simplex_P0_criterion_value[i];
 
         for (ushort j = 0; j < num_vnode; ++j) {
@@ -603,10 +601,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         solution_coefficient *= this->limiting_matrix(limiting_value);
 
                         end_limiting = true;
-                        break;
                     }
-                    else
-                        break;
+                    break;
                 }
                 else {
                     const auto solution = solution_vnodes.column<num_equation>(j);
@@ -718,8 +714,8 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
         const auto oc_side_solution_jump_qnodes = solution_coefficients[oc_index] * oc_side_basis_jump_qnodes;
         const auto nc_side_solution_jump_qnodes = solution_coefficients[nc_index] * nc_side_basis_jump_qnodes;
 
-        const auto oc_side_cirterion_solution_jump_qnodes = oc_side_basis_jump_qnodes.row(This_::criterion_variable_index_);
-        const auto nc_side_cirterion_solution_jump_qnodes = nc_side_basis_jump_qnodes.row(This_::criterion_variable_index_);
+        const auto oc_side_cirterion_solution_jump_qnodes = oc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
+        const auto nc_side_cirterion_solution_jump_qnodes = nc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
         auto criterion_solution_diff_jump_qnodes = oc_side_cirterion_solution_jump_qnodes - nc_side_cirterion_solution_jump_qnodes;
         criterion_solution_diff_jump_qnodes.be_absolute();
 

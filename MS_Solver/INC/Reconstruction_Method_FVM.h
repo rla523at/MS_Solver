@@ -224,7 +224,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
     const auto num_cell = solutions.size();
         
-    std::vector<double> values1(num_cell);//post
+    //std::vector<double> values1(num_cell);//post
     //std::vector<double> values2(num_cell);//post
 
     for (uint i = 0; i < num_cell; ++i) {
@@ -247,16 +247,16 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             }
         }
                 
-        values1[i] = limiting_values[0];//post
+        //values1[i] = limiting_values[0];//post
         //values2[i] = i;//post
 
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 
-    Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
+    //Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
     //Post_Solution_Data::record_cell_variables("cell_index", values2);//post
-    Post_Solution_Data::post_solution(solutions);//post
+    //Post_Solution_Data::post_solution(solutions);//post
 
 
     Post_AI_Data::post();
@@ -318,27 +318,32 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
     const auto num_solution = solutions.size();    
 
     
-    std::vector<double> values1(num_solution);//post
+    std::vector<uint> cell_indexes(num_solution);
+    for (uint i = 0; i < num_solution; ++i)
+        cell_indexes[i] = i;    //post
+
+    std::vector<double> ANN_limiter_values(num_solution, 1);//post
 
     for (size_t i = 0; i < num_solution; ++i) {
         if (this->is_constant_region(solutions, i))
             continue;
 
         const auto ordered_indexes = this->ordering_function(solutions, i);
+        const auto num_ordered_index = ordered_indexes.size();
 
-        const auto num_vertex_share_cell = this->set_of_vertex_share_cell_indexes_.at(i).size();
-        std::vector<double> input_values(num_vertex_share_cell * 3);
+        const auto num_input_values = 3 * num_ordered_index;
+        std::vector<double> input_values(num_input_values);
 
         for (size_t j = 0; j < num_equation_; ++j) {
-            for (size_t k = 0; k < num_vertex_share_cell; ++k) {
+            for (size_t k = 0; k < num_ordered_index; ++k) {
                 const auto index = ordered_indexes[k];
 
                 const auto& solution = solutions[index];
                 const auto& solution_gradient = solution_gradients_[index];
 
                 const auto solution_start_index = 0;
-                const auto solution_gradient_x_start_index = num_vertex_share_cell;
-                const auto solution_gradient_y_start_index = 2 * num_vertex_share_cell;
+                const auto solution_gradient_x_start_index = num_ordered_index;
+                const auto solution_gradient_y_start_index = 2 * num_ordered_index;
 
                 input_values[solution_start_index + k] = solution.at(j);
                 input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0);
@@ -348,15 +353,14 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-
         this->solution_gradients_[i] *= input[0]; //temporal code
-
-        
-        values1[i] = input[0];//post
+                
+        ANN_limiter_values[i] = input[0];//post
     }
 
-    Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
-    Post_Solution_Data::post_solution(solutions);//post
+    Post_Solution_Data::conditionally_record_cell_variables("cell_index", cell_indexes);//post
+    Post_Solution_Data::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
+    Post_Solution_Data::conditionally_post_solution(solutions);//post
 }
 
 
@@ -384,12 +388,14 @@ std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::v
     const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
 
     const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
+    const auto num_ordered_indexes = num_vnode_share_cell + 1; // include target cell
+
     std::vector<size_t> ordered_indexes;
-    ordered_indexes.reserve(num_vnode_share_cell);
+    ordered_indexes.reserve(num_ordered_indexes);
 
     ordered_indexes.push_back(target_cell_index);
 
-    while (ordered_indexes.size() != num_vnode_share_cell) {
+    while (ordered_indexes.size() != num_ordered_indexes) {
         const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_.at(ordered_indexes.back());
 
         std::vector<size_t> face_share_cell_indexes_in_chunk;

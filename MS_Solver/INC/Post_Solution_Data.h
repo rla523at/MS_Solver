@@ -45,16 +45,28 @@ public:
 	template <ushort space_dimension>
 	static void post_grid(const std::vector<Element<space_dimension>>& cell_elements);
 
-	template <ushort num_equation>	
-	static void post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
+	template <typename T>
+	static void conditionally_record_cell_variables(const std::string& variable_name, const std::vector<T>& variables);
 
 	template <typename T>
 	static void record_cell_variables(const std::string& variable_name, const std::vector<T>& variables);
 
-//For HOM
-public:	
+
+public: //for FVM
+	template <ushort num_equation>
+	static void conditionally_post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
+
+	template <ushort num_equation>	
+	static void post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
+
+
+
+public:	//for HOM
 	template <ushort space_dimension, typename Reconstruction_Method>
 	static void initialize_HOM(const Grid<space_dimension>& grid, const Reconstruction_Method& reconstruct_method);
+
+	template <ushort num_equation, ushort num_basis>
+	static void conditionally_post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment = "");
 
 	template <ushort num_equation, ushort num_basis>
 	static void post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment = "");
@@ -148,51 +160,9 @@ void Post_Solution_Data::post_grid(const std::vector<Element<space_dimension>>& 
 }
 
 
-template <ushort num_equation>
-void Post_Solution_Data::post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {	
-	if (!This_::is_time_to_post_)
-		return;
-
-	//FVM solutions post processing
-	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
-	post_point_solutions.reserve(This_::num_node_);
-
-	const auto num_solution = solutions.size();
-
-	for (uint i = 0; i < num_solution; ++i) {
-		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
-			post_point_solutions.push_back(solutions[i]);
-	}
-
-	This_::write_solution_post_file(post_point_solutions, comment);
-}
-
-
-template <ushort num_equation, ushort num_basis>
-void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment) {
-	if (!This_::is_time_to_post_)
-		return;
-
-	//HOM solution coefficients post processing
-	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
-	post_point_solutions.reserve(This_::num_node_);
-
-	const auto num_solution_coefficient = solution_coefficients.size();
-	for (uint i = 0; i < num_solution_coefficient; ++i) {
-		const auto solution_post_points = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
-		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
-			post_point_solutions.push_back(solution_post_points.column<num_equation>(j));
-	}
-
-	This_::write_solution_post_file(post_point_solutions, comment);
-}
-
 template <typename T>
 void Post_Solution_Data::record_cell_variables(const std::string& variable_name, const std::vector<T>& variables) {
-	if (!This_::is_time_to_post_)
-		return;
-	
-	const auto num_cell = This_::num_post_points_.size();	
+	const auto num_cell = This_::num_post_points_.size();
 	dynamic_require(variables.size() == num_cell, "number of variable should be same with number of cell");
 
 	std::vector<double> converted_variables;
@@ -207,6 +177,59 @@ void Post_Solution_Data::record_cell_variables(const std::string& variable_name,
 
 	This_::additioinal_data_name_to_values_.emplace(variable_name, std::move(converted_variables));
 }
+
+
+template <typename T>
+void Post_Solution_Data::conditionally_record_cell_variables(const std::string& variable_name, const std::vector<T>& variables) {
+	if (This_::is_time_to_post_)
+		record_cell_variables(variable_name, variables);	
+}
+
+template <ushort num_equation>
+void Post_Solution_Data::conditionally_post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {
+	if (This_::is_time_to_post_)
+		This_::post_solution(solutions, comment);
+}
+
+template <ushort num_equation>
+void Post_Solution_Data::post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {	
+	//FVM solutions post processing
+	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
+	post_point_solutions.reserve(This_::num_node_);
+
+	const auto num_solution = solutions.size();
+
+	for (uint i = 0; i < num_solution; ++i) {
+		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
+			post_point_solutions.push_back(solutions[i]);
+	}
+
+	This_::write_solution_post_file(post_point_solutions, comment);
+}
+
+template <ushort num_equation, ushort num_basis>
+void Post_Solution_Data::conditionally_post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment) {
+	if (This_::is_time_to_post_)
+		This_::post_solution(solution_coefficients, comment);
+}
+
+template <ushort num_equation, ushort num_basis>
+void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment) {
+	//HOM solution coefficients post processing
+	std::vector<Euclidean_Vector<num_equation>> post_point_solutions;
+	post_point_solutions.reserve(This_::num_node_);
+
+	const auto num_solution_coefficient = solution_coefficients.size();
+	for (uint i = 0; i < num_solution_coefficient; ++i) {
+		const auto solution_post_points = solution_coefficients[i] * This_::set_of_basis_post_points_[i];
+		for (ushort j = 0; j < This_::num_post_points_[i]; ++j)
+			post_point_solutions.push_back(solution_post_points.column<num_equation>(j));
+	}
+
+	This_::write_solution_post_file(post_point_solutions, comment);
+}
+
+
 
 
 

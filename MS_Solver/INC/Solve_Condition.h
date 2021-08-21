@@ -53,35 +53,48 @@ public:
         else
             Log::content_ << std::setprecision(2) << std::fixed << "(" << This_::num_iter_ * 100 / This_::end_condition_constant_ << "%)  \t" << std::defaultfloat << std::setprecision(6);
 
-        std::vector<double> exceed_times;
-        
         if (This_::end_condition_ == Controll_Condition::by_time) {
             const double expect_time = current_time + time_step;
-            if (This_::end_condition_constant_ <= expect_time)
-                exceed_times.push_back(expect_time - end_condition_constant_);            
+            if (This_::end_condition_constant_ <= expect_time) {
+                const auto exceed_time = expect_time - This_::end_condition_constant_;
+                time_step -= exceed_time;
+
+                return;
+            }
         }
 
         if (This_::post_condition_ == Controll_Condition::by_time) {            
-
             const auto post_time_step = This_::post_condition_constant_;
 
             const auto target_time = (This_::num_post_ + 1) * post_time_step;
             const auto expect_time = current_time + time_step;
-            if (target_time <= expect_time) 
-                exceed_times.push_back(expect_time - target_time);
-        }
-
-        if (!exceed_times.empty()) {
-            const auto min_exceed_time = *std::min_element(exceed_times.begin(), exceed_times.end());
-            time_step -= min_exceed_time;
+            if (target_time <= expect_time) {
+                const auto exceed_time = expect_time - target_time;
+                time_step -= exceed_time;
+                return;
+            }
         }
     }
 
     static bool is_time_to_end(const double current_time) {                
-        if (This_::end_condition_ == Controll_Condition::by_time) 
-            return current_time == This_::end_condition_constant_;
-        else 
-            return This_::num_iter_ == This_::end_condition_constant_;
+        if (This_::end_condition_ == Controll_Condition::by_time) {
+            if (ms::compare_double(current_time, This_::end_condition_constant_)) {
+                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_++ << "\t";
+                Log::content_ << "current time: " << std::to_string(current_time) << " (100.00%)  \tend";
+                return true;
+            }
+            else
+                return false;
+        }
+        else {
+            if (This_::num_iter_ == This_::end_condition_constant_) {
+                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_++ << "\t";
+                Log::content_ << "current time: " << std::to_string(current_time) << " (100.00%)  \t End";
+                return true;
+            }
+            else
+                return false;
+        }
     }
 
     static bool is_time_to_post(const double current_time) {
@@ -89,7 +102,7 @@ public:
             const auto post_time_step = This_::post_condition_constant_;
             const auto target_time = (This_::num_post_ + 1) * post_time_step;
 
-            if (current_time == target_time) {
+            if (ms::compare_double(current_time, target_time)) {
                 This_::num_post_++;
                 return true;
             }

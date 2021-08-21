@@ -21,27 +21,38 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
+        //const auto num_cell = solutions.size();
+        //std::vector<uint> cell_index(num_cell);
+        //for (uint i = 0; i < num_cell; ++i)
+        //    cell_index[i] = i;
+
+        //Post_Solution_Data::record_cell_variables("cell_index", cell_index);
+
+
+        //Post_Solution_Data::post_solution(solutions, "initial");//post
+
+        Post_Solution_Data::is_time_to_post_ = true; // post
+        semi_discrete_equation.reconstruct(solutions);
+
         SET_TIME_POINT;
         while (true) {
-            SET_TIME_POINT;
-            auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
-            Solve_Controller::controll_time_step(current_time, time_step);
+            if (Solve_Controller::is_time_to_end(current_time)) {
+                Post_Solution_Data::post_solution(solutions, "final");//post
 
-            if (Solve_Controller::is_time_to_end(current_time)){
-                Post_Solution_Data::is_time_to_post_ = true;
-                Post_Solution_Data::post_solution(solutions, "final");
-
-                Log::content_ << "computation cost: " << std::to_string(GET_TIME_DURATION) << "s \n";
-                Log::print();
                 break;
             }
 
             if (Solve_Controller::is_time_to_post(current_time))
-                Post_Solution_Data::is_time_to_post_ = true;
+                Post_Solution_Data::is_time_to_post_ = true; // post
+                //Post_Solution_Data::post_solution(solutions); // post
+            
+
+            SET_TIME_POINT;
+            auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
+            Solve_Controller::controll_time_step(current_time, time_step);
 
             Time_Integral_Method::update_solutions(semi_discrete_equation, solutions, time_step);
             current_time += time_step;
-
 
             Log::content_ << "computation cost: " << std::to_string(GET_TIME_DURATION) << "s \n";
             Log::print();

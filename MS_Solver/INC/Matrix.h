@@ -93,14 +93,17 @@ public:
 	Dynamic_Matrix(const size_t num_row, const size_t num_column);
 	Dynamic_Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
 
+public:
 	Dynamic_Matrix operator*(const Dynamic_Matrix& other) const;
 	bool operator==(const Dynamic_Matrix& other) const;
 		
+public:
 	double at(const size_t row, const size_t column) const;
 	Dynamic_Matrix transpose(void) const;
 	std::string to_string(void) const;
 	Dynamic_Matrix inverse(void) const;
 	std::pair<size_t, size_t> size(void) const;
+	bool is_finite(void) const;
 
 public:
 	Dynamic_Matrix& be_transpose(void);

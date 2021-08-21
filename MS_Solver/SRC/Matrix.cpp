@@ -74,6 +74,14 @@ std::pair<size_t, size_t> Dynamic_Matrix::size(void) const {
 	return std::make_pair(this->num_row_, this->num_column_);
 }
 
+bool Dynamic_Matrix::is_finite(void) const {
+	for (const auto value : this->values_) {
+		if (!std::isfinite(value))
+			return false;
+	}
+	return true;
+}
+
 Dynamic_Matrix& Dynamic_Matrix::be_transpose(void) {
 	std::swap(this->num_row_, this->num_column_);
 
@@ -212,6 +220,8 @@ void Matrix_OP::gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* o
 }
 
 void Matrix_OP::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
+	dynamic_require(A.num_column_ == v1.dimension(), "dimension should be matched for matrix vector multiplication");
+	
 	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
 	const auto transA = A.transpose_type_;
 	const auto m = static_cast<MKL_INT>(A.num_row_);

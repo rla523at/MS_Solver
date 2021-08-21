@@ -3,7 +3,7 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__				"E:/Code/Result/DFM/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/"
+#define __DEFAULT_PATH__				"E:/Code/Result/DFM/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name()  + "/test/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
@@ -30,7 +30,7 @@
 #define __SOLVE_END_CONDITION_CONSTANT__		2.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
-#define __POST_ORDER__							0
+#define __POST_ORDER__							1
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -38,7 +38,7 @@
 // __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __MODIFIED_SOD__, __CONSTANT1__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
-//									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__
+//									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
 // __GRADIENT_METHOD__				__VERTEX_LEAST_SQUARE__, __FACE_LEAST_SQUARE__ 
 // __NUMERICAL_FLUX__				__LLF__
 // __TIME_INTEGRAL_METHOD__			__SSPRK33__, __SSPRK54__
@@ -154,6 +154,10 @@
 #if		__RECONSTRUCTION_METHOD__ == __hMLP_RECONSTRUCTION__
 #define RECONSTRUCTION_METHOD hMLP_Reconstruction<__DIMENSION__, __SOLUTION_ORDER__>
 #endif
+#if		__RECONSTRUCTION_METHOD__ == __hMLP_BD_RECONSTRUCTION__
+#define RECONSTRUCTION_METHOD hMLP_BD_Reconstruction<__DIMENSION__, __SOLUTION_ORDER__>
+#endif
+
 
 #if		__NUMERICAL_FLUX__ == __LLF__
 #define NUMERICAL_FLUX_FUNCTION	LLF<GOVERNING_EQUATION>
