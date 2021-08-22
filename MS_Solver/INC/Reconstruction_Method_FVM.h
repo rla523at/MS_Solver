@@ -224,8 +224,10 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
     const auto num_cell = solutions.size();
         
-    //std::vector<double> values1(num_cell);//post
-    //std::vector<double> values2(num_cell);//post
+    std::vector<double> values1(num_cell);//post
+    std::vector<double> values2(num_cell);//post
+    std::vector<double> values3(num_cell);//post
+    std::vector<double> values4(num_cell);//post
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
@@ -247,16 +249,21 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             }
         }
                 
-        //values1[i] = limiting_values[0];//post
-        //values2[i] = i;//post
+        values1[i] = limiting_values[0];//post
+        values2[i] = i;//post
+        values3[i] = gradient.at(0,0);//post
+        values4[i] = gradient.at(0,1);//post
 
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 
-    //Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
-    //Post_Solution_Data::record_cell_variables("cell_index", values2);//post
-    //Post_Solution_Data::post_solution(solutions);//post
+    
+    Post_Solution_Data::conditionally_record_cell_variables("limiting_value", values1);//post
+    Post_Solution_Data::conditionally_record_cell_variables("cell_index", values2);//post
+    Post_Solution_Data::conditionally_record_cell_variables("gradient_x", values3);//post
+    Post_Solution_Data::conditionally_record_cell_variables("gradient_y", values4);//post
+    Post_Solution_Data::conditionally_post_solution(solutions);//post
 
 
     Post_AI_Data::post();

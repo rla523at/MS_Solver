@@ -22,20 +22,23 @@ public:
         Log::content_ << "================================================================================\n";
 
 
-        Post_Solution_Data::post_solution(solutions, "initial");//post
+        //Post_Solution_Data::post_solution(solutions, "initial");//post
+        Post_Solution_Data::is_time_to_conditionally_post_ = true;
 
         semi_discrete_equation.reconstruct(solutions);
 
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
-                Post_Solution_Data::post_solution(solutions, "final");//post
+                Post_Solution_Data::is_time_to_conditionally_post_ = true;
+                //Post_Solution_Data::post_solution(solutions, "final");//post
                 break;
             }
 
-            if (Solve_Controller::is_time_to_post(current_time))
-                Post_Solution_Data::post_solution(solutions); // post
-            
+            if (Solve_Controller::is_time_to_post(current_time)) {
+                Post_Solution_Data::is_time_to_conditionally_post_ = true;
+                //Post_Solution_Data::post_solution(solutions); //post
+            }
 
             SET_TIME_POINT;
             auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);

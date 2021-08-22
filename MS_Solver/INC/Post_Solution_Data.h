@@ -14,7 +14,7 @@ private:
 	using This_ = Post_Solution_Data;
 	
 public:
-	static inline bool is_time_to_post_ = false;
+	static inline bool is_time_to_conditionally_post_ = false;
 
 private:
 	static inline std::string path_;
@@ -194,19 +194,19 @@ void Post_Solution_Data::record_cell_indexes(void) {
 
 template <typename T>
 void Post_Solution_Data::conditionally_record_cell_variables(const std::string& variable_name, const std::vector<T>& variables) {
-	if (This_::is_time_to_post_)
+	if (This_::is_time_to_conditionally_post_)
 		This_::record_cell_variables(variable_name, variables);
 }
 
 void Post_Solution_Data::conditionally_record_cell_indexes(void) {
-	if (This_::is_time_to_post_)
+	if (This_::is_time_to_conditionally_post_)
 		This_::record_cell_indexes();
 }
 
 
 template <ushort num_equation>
 void Post_Solution_Data::conditionally_post_solution(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment) {
-	if (This_::is_time_to_post_)
+	if (This_::is_time_to_conditionally_post_)
 		This_::post_solution(solutions, comment);
 }
 
@@ -228,7 +228,7 @@ void Post_Solution_Data::post_solution(const std::vector<Euclidean_Vector<num_eq
 
 template <ushort num_equation, ushort num_basis>
 void Post_Solution_Data::conditionally_post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment) {
-	if (This_::is_time_to_post_)
+	if (This_::is_time_to_conditionally_post_)
 		This_::post_solution(solution_coefficients, comment);
 }
 
@@ -293,7 +293,7 @@ Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 }
 
 void Post_Solution_Data::reset(void) {
-	This_::is_time_to_post_ = false;
+	This_::is_time_to_conditionally_post_ = false;
 	This_::path_.clear();
 	This_::post_order_ = 0;
 	This_::grid_variable_str_.clear();
@@ -392,7 +392,7 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 
 
 	This_::additioinal_data_name_to_values_.clear();
-	This_::is_time_to_post_ = false;
+	This_::is_time_to_conditionally_post_ = false;	//다시 off해준다.
 	if (comment == "final") {
 		count = 1;
 		This_::reset();
