@@ -82,6 +82,8 @@ private:
 
 	template <ushort num_equation>
 	static void write_solution_post_file(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
+
+	static void string_to_tecplot_binary(std::vector<int>& bin, const std::string& str);
 };
 
 
@@ -251,15 +253,20 @@ void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, nu
 
 
 
-
 Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 	static size_t strand_id = 0;
 
-	Text header;
-	header.reserve(10);
+	std::string version_number = "#!TDV112";
+
+	std::vector<int> header;
+	header.push_back(1); // byte order of the reader, relatvie to the writer. default.
+
 	if (file_type == Post_File_Type::Grid) {
+		header.push_back(1); //FileType 1 = Grid
+		
+
 		header << "Title = Grid";
-		header << "FileType = Grid";
+		header << "";
 		header << This_::grid_variable_str_;
 		header << "Zone T = Grid";
 	}
@@ -278,19 +285,66 @@ Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 		strand_id++;
 	}
 
-	header << This_::zone_type_str_;
-	header << "Nodes = " + std::to_string(num_node_);
-	header << "Elements = " + std::to_string(num_element_);
-	header << "DataPacking = Block";
-	header << "StrandID = " + std::to_string(strand_id);
+	
 
-	if (file_type == Post_File_Type::Grid)
-		header << "SolutionTime = 0.0 \n\n";
-	else
-		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
 
-	return header;
+
+	//Text header;
+	//header.reserve(10);
+
+	//header << This_::zone_type_str_;
+	//header << "Nodes = " + std::to_string(num_node_);
+	//header << "Elements = " + std::to_string(num_element_);
+	//header << "DataPacking = Block";
+	//header << "StrandID = " + std::to_string(strand_id);
+
+	//if (file_type == Post_File_Type::Grid)
+	//	header << "SolutionTime = 0.0 \n\n";
+	//else
+	//	header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
+
+	//return header;
 }
+
+//Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
+//	static size_t strand_id = 0;
+//
+//	Text header;
+//	header.reserve(10);
+//	if (file_type == Post_File_Type::Grid) {
+//		header << "Title = Grid";
+//		header << "FileType = Grid";
+//		header << This_::grid_variable_str_;
+//		header << "Zone T = Grid";
+//	}
+//	else {
+//		std::string solution_variable_str = This_::solution_variable_str_;
+//		if (!This_::additioinal_data_name_to_values_.empty()) {
+//			for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
+//				solution_variable_str += ", " + info_name;
+//		}
+//
+//		header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
+//		header << "FileType = Solution";
+//		header << solution_variable_str;
+//		header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
+//
+//		strand_id++;
+//	}
+//
+//	header << This_::zone_type_str_;
+//	header << "Nodes = " + std::to_string(num_node_);
+//	header << "Elements = " + std::to_string(num_element_);
+//	header << "DataPacking = Block";
+//	header << "StrandID = " + std::to_string(strand_id);
+//
+//	if (file_type == Post_File_Type::Grid)
+//		header << "SolutionTime = 0.0 \n\n";
+//	else
+//		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
+//
+//	return header;
+//}
 
 void Post_Solution_Data::reset(void) {
 	This_::is_time_to_post_ = false;
@@ -397,4 +451,9 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 		count = 1;
 		This_::reset();
 	}
+}
+
+void Post_Solution_Data::string_to_tecplot_binary(std::vector<int>& bin, const std::string& str) {
+	bin.insert(bin.end(), str.begin(), str.end());
+	bin.push_back(0); // null
 }

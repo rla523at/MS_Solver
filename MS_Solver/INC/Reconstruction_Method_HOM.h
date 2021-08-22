@@ -87,7 +87,7 @@ public:
         //    return false;
 
         //debug 16:05
-        constexpr double eps = 1.0E-15;
+        constexpr double eps = 1.0E-8;
         if (P1_mode_solution > -eps && higher_mode_solution < eps && solution > allowable_min)
             return true;
         else if (P1_mode_solution < eps && higher_mode_solution > -eps && solution < allowable_max)
