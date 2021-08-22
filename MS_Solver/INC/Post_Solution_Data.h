@@ -254,36 +254,36 @@ void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, nu
 
 
 Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
-	static size_t strand_id = 0;
+	//static size_t strand_id = 0;
 
-	std::string version_number = "#!TDV112";
+	//std::string version_number = "#!TDV112";
 
-	std::vector<int> header;
-	header.push_back(1); // byte order of the reader, relatvie to the writer. default.
+	//std::vector<int> header;
+	//header.push_back(1); // byte order of the reader, relatvie to the writer. default.
 
-	if (file_type == Post_File_Type::Grid) {
-		header.push_back(1); //FileType 1 = Grid
-		
+	//if (file_type == Post_File_Type::Grid) {
+	//	header.push_back(1); //FileType 1 = Grid
+	//	
 
-		header << "Title = Grid";
-		header << "";
-		header << This_::grid_variable_str_;
-		header << "Zone T = Grid";
-	}
-	else {
-		std::string solution_variable_str = This_::solution_variable_str_;
-		if (!This_::additioinal_data_name_to_values_.empty()) {
-			for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
-				solution_variable_str += ", " + info_name;
-		}
+	//	header << "Title = Grid";
+	//	header << "";
+	//	header << This_::grid_variable_str_;
+	//	header << "Zone T = Grid";
+	//}
+	//else {
+	//	std::string solution_variable_str = This_::solution_variable_str_;
+	//	if (!This_::additioinal_data_name_to_values_.empty()) {
+	//		for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
+	//			solution_variable_str += ", " + info_name;
+	//	}
 
-		header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
-		header << "FileType = Solution";
-		header << solution_variable_str;
-		header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
+	//	header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
+	//	header << "FileType = Solution";
+	//	header << solution_variable_str;
+	//	header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
 
-		strand_id++;
-	}
+	//	strand_id++;
+	//}
 
 	
 
@@ -457,3 +457,135 @@ void Post_Solution_Data::string_to_tecplot_binary(std::vector<int>& bin, const s
 	bin.insert(bin.end(), str.begin(), str.end());
 	bin.push_back(0); // null
 }
+
+class BO
+{
+private:
+	std::ofstream binary_file_stream_;
+
+public:
+	BO(const std::string& file_path) {
+		binary_file_stream_.open(file_path, std::ios::binary);
+
+		dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
+	}
+
+	template <typename T>
+	BO& operator<<(const T value) {
+		this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+		return *this;
+	}
+
+	template <>
+	BO& operator<<(const char* value) {
+		this->binary_file_stream_.write(reinterpret_cast<const char*>(value), sizeof(value));
+		return *this;
+	}
+
+	template <>
+	BO& operator<<(const std::string& str) {
+		this->binary_file_stream_ << str;
+		return *this;
+	}
+
+	template <typename T>
+	BO& operator<<(const std::vector<T>& values) {
+		for (const auto value : values)
+			this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+		return *this;
+	}
+};
+
+//std::vector<int> string_to_tecplot_binary(const std::string& str) {
+//	std::vector<int> bin;
+//	bin.insert(bin.end(), str.begin(), str.end());
+//	bin.push_back(0); // null
+//	return bin;
+//}
+//
+//int main()
+//{
+//	BO bo("ms_debug2.plt");
+//
+//	//I. header section
+//
+//		//i
+//	const char version[] = "#!TDV112";
+//	//ii
+//	const int byte_order = 1; //default
+//		//iii
+//	const int file_type = 1; //grid
+//	const auto title = string_to_tecplot_binary("test");	// title
+//	const int num_variable = 2;
+//	const auto variable1 = string_to_tecplot_binary("X"); //variable names
+//	const auto variable2 = string_to_tecplot_binary("Y"); //variable names
+//
+//	//iiii .zones
+//	const float zone_marker = 299.0f;
+//	const auto zone_name = string_to_tecplot_binary("zone"); //zone name
+//
+//
+//	const int parent_zone = -1; //default
+//	const int strand_id = 0;
+//	const double solution_time = 0.0;
+//
+//
+//	const int not_used = -1;
+//	const int zone_type = 2; //FETriangle
+//	//const int data_packing = 0; //block
+//	const int specify_var_location = 0;					//default
+//	const int one_to_one_face_neighbor = 0;				//default
+//	const int user_define_face_neighbor_connection = 0;	//default;
+//	const int num_points = 3;
+//	const int num_elements = 1;
+//	const int i_cell_dim = 0;
+//	const int j_cell_dim = 0;
+//	const int k_cell_dim = 0;
+//	const int auxilarily_name_index_pair = 0;
+//	const float EOH_marker = 357.0f;
+//
+//	//II DATA SECTION
+//	//zone
+//	int variable1_data_format = 2;		//double
+//	int variable2_data_format = 2;		//double
+//	int has_passive_varaible = 0;		//default
+//	int has_variable_sharing = 0;		//default
+//	int zeros_based_zone_number = -1;   //default
+//
+//	double variable1_min_value = 0.0;
+//	double variable1_max_value = 1.0;
+//	double variable2_min_value = 0.0;
+//	double variable2_max_value = 1.0;
+//
+//	//data
+//	std::vector<double> x = { 0, 1, 0 };
+//	std::vector<double> y = { 0, 0, 1 };
+//	std::vector<int> connectivity = { 1,2,3 };
+//
+//
+//
+//	bo << version;
+//	bo << byte_order;
+//	bo << file_type << title << num_variable << variable1 << variable2;
+//	bo << zone_marker << zone_name;
+//
+//	bo << parent_zone << strand_id << solution_time;
+//	bo << not_used;
+//	//bo << zone_type << data_packing;
+//	bo << zone_type;
+//	bo << specify_var_location;
+//	bo << one_to_one_face_neighbor;
+//	bo << user_define_face_neighbor_connection;
+//	bo << num_points << num_elements;
+//
+//	bo << i_cell_dim << j_cell_dim << k_cell_dim << auxilarily_name_index_pair;
+//	bo << EOH_marker;
+//
+//	bo << zone_marker;
+//	bo << variable1_data_format << variable2_data_format;
+//	bo << has_passive_varaible << has_variable_sharing << zeros_based_zone_number;
+//	bo << variable1_min_value << variable1_max_value;
+//	bo << variable2_min_value << variable2_max_value;
+//
+//	bo << x << y << connectivity;
+//}
