@@ -56,13 +56,23 @@ Dynamic_Matrix Dynamic_Matrix::transpose(void) const {
 }
 
 std::string Dynamic_Matrix::to_string(void) const {
-	std::string result;
+	std::ostringstream oss;
+	oss << std::setprecision(16) << std::showpoint << std::left;
 	for (size_t i = 0; i < this->num_row_; ++i) {
 		for (size_t j = 0; j < this->num_column_; ++j)
-			result += ms::double_to_string(this->at(i, j)) + "   \t";
-		result += "\n";
+			oss << std::setw(25) << this->at(i, j);
+		oss << "\n";
 	}
-	return result;
+	return oss.str();
+
+	
+	//std::string result;
+	//for (size_t i = 0; i < this->num_row_; ++i) {
+	//	for (size_t j = 0; j < this->num_column_; ++j)
+	//		result += ms::double_to_string(this->at(i, j)) + " ";
+	//	result += "\n";
+	//}
+	//return result;
 }
 
 Dynamic_Matrix Dynamic_Matrix::inverse(void) const {

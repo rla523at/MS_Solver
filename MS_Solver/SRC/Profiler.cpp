@@ -21,6 +21,8 @@ void Profiler::set_time_point(void){
 }
 
 double Profiler::get_time_duration(void){
+	dynamic_require(!time_points_.empty(), "time point should be exist to get time duration");
+
 	std::chrono::duration<double> time_duration = std::chrono::steady_clock::now() - time_points_.back();	
 	time_points_.pop_back();
 	return time_duration.count();

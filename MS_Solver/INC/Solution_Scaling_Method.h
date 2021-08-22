@@ -49,7 +49,7 @@ public:
 					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
-					if (rho < 0.0 || pressure < 0.0) {
+					if (rho <= 0.0 || pressure <= 0.0) {
 						fix_count++;
 						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
 						solution_coefficients[i] *= fix_matrix;
@@ -80,7 +80,7 @@ public:
 					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
-					if (rho < 0.0 || pressure < 0.0) {
+					if (rho <= 0.0 || pressure <= 0.0) {
 						fix_count++;
 						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
 						solution_coefficients[cell_index] *= fix_matrix;

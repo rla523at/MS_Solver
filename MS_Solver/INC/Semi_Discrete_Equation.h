@@ -50,7 +50,7 @@ public:
             this->periodic_boundaries_.initialize_scaling_method();
             this->inner_faces_.initialize_scaling_method();
 
-            Log::content_ << std::left << std::setw(50) << "@ Pressure Fix precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+            Log::content_ << std::left << std::setw(50) << "@ Scailing Method precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
             Log::print();
         }
 
