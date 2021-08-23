@@ -3,11 +3,13 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+//#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/PostTest/"
+
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
+#define __GRID_FILE_NAMES__						Shocktube_OrthoTri_100x10
 #define __GOVERNING_EQUATION__					__EULER__
 #define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
@@ -31,7 +33,7 @@
 #define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
-#define __POST_ORDER__							1
+#define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__

@@ -7,6 +7,10 @@ enum class Post_File_Type {
 	Grid, Solution
 };
 
+enum class Zone_Type {
+	FETriangle = 2,
+	FETetraheron = 4
+};
 
 class Post_Solution_Data
 {
@@ -19,9 +23,9 @@ public:
 private:
 	static inline std::string path_;
 	static inline ushort post_order_ = 0;
-	static inline std::string grid_variable_str_;
-	static inline std::string solution_variable_str_;
-	static inline std::string zone_type_str_;
+	static inline std::string grid_variables_str_;
+	static inline std::string solution_variables_str_;
+	static inline Zone_Type zone_type_;
 	static inline size_t num_element_ = 0;
 	static inline size_t num_node_ = 0;
 	static inline const double* time_ptr_ = nullptr;
@@ -76,14 +80,15 @@ public:	//for HOM
 	static void post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment = "");
 
 private:
-	static Text header_text(const Post_File_Type file_type);
+	//static Text header_text(const Post_File_Type file_type);
 	static constexpr bool is_scalar_equation(const ushort num_equation) { return num_equation == 1; };
 	static void reset(void);
 
 	template <ushort num_equation>
 	static void write_solution_post_file(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::string& comment = "");
 
-	static void string_to_tecplot_binary(std::vector<int>& bin, const std::string& str);
+	static std::vector<int> str_to_tecplot_binary_format(const std::string& str);
+	static void write_binary_header(const Post_File_Type file_type, const std::string_view post_file_path);
 };
 
 
@@ -92,16 +97,29 @@ template <typename Governing_Equation>
 void Post_Solution_Data::initialize(const ushort post_order) {
 	This_::post_order_ = post_order;
 
+	// Binary output
 	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
-		This_::grid_variable_str_ = "Variables = X Y";
-		This_::solution_variable_str_ = "Variables = q";
-		This_::zone_type_str_ = "ZoneType = FETriangle";
+		This_::grid_variables_str_ = "X,Y";
+		This_::solution_variables_str_ = "q";
+		This_::zone_type_ = Zone_Type::FETriangle;
 	}
 	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
-		This_::grid_variable_str_ = "Variables = X Y";
-		This_::solution_variable_str_ = "Variables = rho rhou rhov rhoE u v p";
-		This_::zone_type_str_ = "ZoneType = FETriangle";
+		This_::grid_variables_str_ = "X,Y";
+		This_::solution_variables_str_ = "rho,rhou,rhov,rhoE,u,v,p";
+		This_::zone_type_ = Zone_Type::FETriangle;
 	}
+
+	// ASCII output
+	//if constexpr (ms::is_SCL_2D<Governing_Equation>) {
+	//	This_::grid_variable_str_ = "Variables = X Y";
+	//	This_::solution_variable_str_ = "Variables = q";
+	//	This_::zone_type_str_ = "ZoneType = FETriangle";
+	//}
+	//else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
+	//	This_::grid_variable_str_ = "Variables = X Y";
+	//	This_::solution_variable_str_ = "Variables = rho rhou rhov rhoE u v p";
+	//	This_::zone_type_str_ = "ZoneType = FETriangle";
+	//}
 };
 
 template <ushort space_dimension, typename Reconstruction_Method>
@@ -120,49 +138,123 @@ void Post_Solution_Data::initialize_HOM(const Grid<space_dimension>& grid, const
 
 template <ushort space_dimension>
 void Post_Solution_Data::post_grid(const std::vector<Element<space_dimension>>& cell_elements) {
+	//post processing grid data	
 	const auto num_cell = cell_elements.size();
 	This_::num_post_points_.resize(num_cell);
 
-	ushort str_per_line = 1;
-	size_t connectivity_start_index = 1;
+	size_t connectivity_start_index = 0; // binary connecitivity start with 0
 
-	Text grid_post_data_text(space_dimension);
+	std::vector<std::vector<double>> coordinates(space_dimension);
+	std::vector<std::vector<int>> connectivities;
+
 	for (uint i = 0; i < num_cell; ++i) {
 		const auto& geometry = cell_elements[i].geometry_;
 
 		const auto post_nodes = geometry.post_nodes(This_::post_order_);
 		for (const auto& node : post_nodes) {
-			for (ushort i = 0; i < space_dimension; ++i, ++str_per_line) {
-				grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
-				if (str_per_line == 10) {
-					grid_post_data_text[i] += "\n";
-					str_per_line = 1;
-				}
-			}
+			for (ushort j = 0; j < space_dimension; ++j) 
+				coordinates[j].push_back(node[j]);
 		}
 
-		const auto connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
+		const auto post_connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
 
-		std::string connectivity_str;
-		for (const auto& connectivity : connectivities) {
-			for (const auto index : connectivity)
-				connectivity_str += std::to_string(index) + " ";
+		for (const auto& connectivity : post_connectivities) {
+			const auto num_point = connectivity.size();			
+			std::vector<int> temp(num_point);
 
-			grid_post_data_text << std::move(connectivity_str);
+			for (uint j = 0; j < num_point; ++j)
+				temp[j] = static_cast<int>(connectivity[j]);
+
+			connectivities.push_back(std::move(temp));
 		}
 
 		const auto num_post_node = post_nodes.size();
 		connectivity_start_index += num_post_node;
 		This_::num_node_ += num_post_node;
-		This_::num_element_ += connectivities.size();
+		This_::num_element_ += post_connectivities.size();
 		This_::num_post_points_[i] = num_post_node;
 	}
 
-	auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
 
+	//write
 	const auto grid_file_path = This_::path_ + "grid.plt";
-	grid_post_header_text.write(grid_file_path);
-	grid_post_data_text.add_write(grid_file_path);
+	This_::write_binary_header(Post_File_Type::Grid, grid_file_path);
+
+	//II DATA SECTION		
+	Binary_Writer grid_binary_file(grid_file_path);
+
+	const ushort num_variable = space_dimension;
+
+	//zone
+	grid_binary_file << 299.0f;			//zone marker
+
+	for (ushort i = 0; i < num_variable; ++i)
+		grid_binary_file << 2;			//variable data format, double = 2
+	
+	grid_binary_file << 0 << 0 << -1;	//has passive variable, has variable sharing, zone number to share connectivity, default
+
+	for (ushort i = 0; i < num_variable; ++i) {
+		const auto min_value = *std::min_element(coordinates[i].begin(), coordinates[i].end());
+		const auto max_value = *std::max_element(coordinates[i].begin(), coordinates[i].end());
+
+		grid_binary_file << min_value << max_value;	//min,max value of each variable
+	}
+
+	for (ushort i = 0; i < num_variable; ++i) 
+		grid_binary_file << coordinates[i];			//values of each variable
+	
+	for (const auto& connectivity : connectivities)
+		grid_binary_file << connectivity;
+	
+	
+
+
+
+
+	//ASCII
+	//const auto num_cell = cell_elements.size();
+	//This_::num_post_points_.resize(num_cell);
+
+	//ushort str_per_line = 1;
+	//size_t connectivity_start_index = 1;
+
+	//Text grid_post_data_text(space_dimension);
+	//for (uint i = 0; i < num_cell; ++i) {
+	//	const auto& geometry = cell_elements[i].geometry_;
+
+	//	const auto post_nodes = geometry.post_nodes(This_::post_order_);
+	//	for (const auto& node : post_nodes) {
+	//		for (ushort i = 0; i < space_dimension; ++i, ++str_per_line) {
+	//			grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
+	//			if (str_per_line == 10) {
+	//				grid_post_data_text[i] += "\n";
+	//				str_per_line = 1;
+	//			}
+	//		}
+	//	}
+
+	//	const auto connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
+
+	//	std::string connectivity_str;
+	//	for (const auto& connectivity : connectivities) {
+	//		for (const auto index : connectivity)
+	//			connectivity_str += std::to_string(index) + " ";
+
+	//		grid_post_data_text << std::move(connectivity_str);
+	//	}
+
+	//	const auto num_post_node = post_nodes.size();
+	//	connectivity_start_index += num_post_node;
+	//	This_::num_node_ += num_post_node;
+	//	This_::num_element_ += connectivities.size();
+	//	This_::num_post_points_[i] = num_post_node;
+	//}
+
+	//auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
+
+	//const auto grid_file_path = This_::path_ + "grid.plt";
+	//grid_post_header_text.write(grid_file_path);
+	//grid_post_data_text.add_write(grid_file_path);
 }
 
 
@@ -251,61 +343,6 @@ void Post_Solution_Data::post_solution(const std::vector<Matrix<num_equation, nu
 }
 
 
-
-
-Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
-	//static size_t strand_id = 0;
-
-	//std::string version_number = "#!TDV112";
-
-	//std::vector<int> header;
-	//header.push_back(1); // byte order of the reader, relatvie to the writer. default.
-
-	//if (file_type == Post_File_Type::Grid) {
-	//	header.push_back(1); //FileType 1 = Grid
-	//	
-
-	//	header << "Title = Grid";
-	//	header << "";
-	//	header << This_::grid_variable_str_;
-	//	header << "Zone T = Grid";
-	//}
-	//else {
-	//	std::string solution_variable_str = This_::solution_variable_str_;
-	//	if (!This_::additioinal_data_name_to_values_.empty()) {
-	//		for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
-	//			solution_variable_str += ", " + info_name;
-	//	}
-
-	//	header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
-	//	header << "FileType = Solution";
-	//	header << solution_variable_str;
-	//	header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
-
-	//	strand_id++;
-	//}
-
-	
-
-
-
-	//Text header;
-	//header.reserve(10);
-
-	//header << This_::zone_type_str_;
-	//header << "Nodes = " + std::to_string(num_node_);
-	//header << "Elements = " + std::to_string(num_element_);
-	//header << "DataPacking = Block";
-	//header << "StrandID = " + std::to_string(strand_id);
-
-	//if (file_type == Post_File_Type::Grid)
-	//	header << "SolutionTime = 0.0 \n\n";
-	//else
-	//	header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
-
-	//return header;
-}
-
 //Text Post_Solution_Data::header_text(const Post_File_Type file_type) {
 //	static size_t strand_id = 0;
 //
@@ -350,9 +387,9 @@ void Post_Solution_Data::reset(void) {
 	This_::is_time_to_post_ = false;
 	This_::path_.clear();
 	This_::post_order_ = 0;
-	This_::grid_variable_str_.clear();
-	This_::solution_variable_str_.clear();
-	This_::zone_type_str_.clear();
+	This_::grid_variables_str_.clear();
+	This_::solution_variables_str_.clear();
+	//This_::zone_type_str_.clear();
 	This_::num_element_ = 0;
 	This_::num_node_ = 0;
 	This_::time_ptr_ = nullptr;
@@ -373,8 +410,8 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
 
 	//solution post header text
-	auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
-	solution_post_header_text.write(solution_file_path);
+	//auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
+	//solution_post_header_text.write(solution_file_path);
 
 
 	//solution post data text
@@ -453,139 +490,74 @@ void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Ve
 	}
 }
 
-void Post_Solution_Data::string_to_tecplot_binary(std::vector<int>& bin, const std::string& str) {
-	bin.insert(bin.end(), str.begin(), str.end());
-	bin.push_back(0); // null
+std::vector<int> Post_Solution_Data::str_to_tecplot_binary_format(const std::string& str) {
+	std::vector<int> tecplot_binary_format;
+	tecplot_binary_format.insert(tecplot_binary_format.end(), str.begin(), str.end());
+	tecplot_binary_format.push_back(0); // null
+	return tecplot_binary_format;
 }
 
-class BO
-{
-private:
-	std::ofstream binary_file_stream_;
+void Post_Solution_Data::write_binary_header(const Post_File_Type file_type, const std::string_view post_file_path) {
+	static int strand_id = 0;
 
-public:
-	BO(const std::string& file_path) {
-		binary_file_stream_.open(file_path, std::ios::binary);
+	Binary_Writer post_file(post_file_path);
 
-		dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
+//I. HEADER SECTION
+
+	//i
+	post_file << "#!TDV112";	//version	
+	
+	//ii
+	post_file << 1;				//byte order, default
+	
+	//iii. Title and variable names
+	if (file_type == Post_File_Type::Grid) {
+		post_file << 1; // grid file type = 1 
+		post_file << This_::str_to_tecplot_binary_format("Grid");	// title
+
+		const char delimiter = ',';
+		const auto parsed_grid_variable_strs = ms::parse(This_::grid_variables_str_, delimiter);
+
+		post_file << static_cast<int>(parsed_grid_variable_strs.size());			//num variable
+		for (const auto& grid_variable_str : parsed_grid_variable_strs)
+			post_file << This_::str_to_tecplot_binary_format(grid_variable_str);	//variable names
+	}
+	else {
+		post_file << 2; // solution file type = 2 
+		post_file << This_::str_to_tecplot_binary_format("Solution_at_" + std::to_string(*This_::time_ptr_));	// title
+
+		const char delimiter = ',';
+		const auto parsed_solution_variable_strs = ms::parse(This_::solution_variables_str_, delimiter);
+
+		post_file << static_cast<int>(parsed_solution_variable_strs.size());			//num variable
+		for (const auto& solution_variable_str : parsed_solution_variable_strs)
+			post_file << This_::str_to_tecplot_binary_format(solution_variable_str);	//variable names
 	}
 
-	template <typename T>
-	BO& operator<<(const T value) {
-		this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
-		return *this;
+	//iiii. zones
+	post_file << 299.0f;	//zone marker
+
+	if (file_type == Post_File_Type::Grid) 
+		post_file << str_to_tecplot_binary_format("Grid");	//zone name
+	else {
+		post_file << str_to_tecplot_binary_format("Solution_at_" + std::to_string(*This_::time_ptr_));	//zone name
+		strand_id++;			 
 	}
 
-	template <>
-	BO& operator<<(const char* value) {
-		this->binary_file_stream_.write(reinterpret_cast<const char*>(value), sizeof(value));
-		return *this;
-	}
+	post_file << -1;									//parent zone, default
+	post_file << strand_id;								//strand id
 
-	template <>
-	BO& operator<<(const std::string& str) {
-		this->binary_file_stream_ << str;
-		return *this;
-	}
+	if (file_type == Post_File_Type::Grid)
+		post_file << 0.0;								//solution time
+	else 
+		post_file << *This_::time_ptr_;					//solution time
 
-	template <typename T>
-	BO& operator<<(const std::vector<T>& values) {
-		for (const auto value : values)
-			this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
-		return *this;
-	}
-};
-
-//std::vector<int> string_to_tecplot_binary(const std::string& str) {
-//	std::vector<int> bin;
-//	bin.insert(bin.end(), str.begin(), str.end());
-//	bin.push_back(0); // null
-//	return bin;
-//}
-//
-//int main()
-//{
-//	BO bo("ms_debug2.plt");
-//
-//	//I. header section
-//
-//		//i
-//	const char version[] = "#!TDV112";
-//	//ii
-//	const int byte_order = 1; //default
-//		//iii
-//	const int file_type = 1; //grid
-//	const auto title = string_to_tecplot_binary("test");	// title
-//	const int num_variable = 2;
-//	const auto variable1 = string_to_tecplot_binary("X"); //variable names
-//	const auto variable2 = string_to_tecplot_binary("Y"); //variable names
-//
-//	//iiii .zones
-//	const float zone_marker = 299.0f;
-//	const auto zone_name = string_to_tecplot_binary("zone"); //zone name
-//
-//
-//	const int parent_zone = -1; //default
-//	const int strand_id = 0;
-//	const double solution_time = 0.0;
-//
-//
-//	const int not_used = -1;
-//	const int zone_type = 2; //FETriangle
-//	//const int data_packing = 0; //block
-//	const int specify_var_location = 0;					//default
-//	const int one_to_one_face_neighbor = 0;				//default
-//	const int user_define_face_neighbor_connection = 0;	//default;
-//	const int num_points = 3;
-//	const int num_elements = 1;
-//	const int i_cell_dim = 0;
-//	const int j_cell_dim = 0;
-//	const int k_cell_dim = 0;
-//	const int auxilarily_name_index_pair = 0;
-//	const float EOH_marker = 357.0f;
-//
-//	//II DATA SECTION
-//	//zone
-//	int variable1_data_format = 2;		//double
-//	int variable2_data_format = 2;		//double
-//	int has_passive_varaible = 0;		//default
-//	int has_variable_sharing = 0;		//default
-//	int zeros_based_zone_number = -1;   //default
-//
-//	double variable1_min_value = 0.0;
-//	double variable1_max_value = 1.0;
-//	double variable2_min_value = 0.0;
-//	double variable2_max_value = 1.0;
-//
-//	//data
-//	std::vector<double> x = { 0, 1, 0 };
-//	std::vector<double> y = { 0, 0, 1 };
-//	std::vector<int> connectivity = { 1,2,3 };
-//
-//
-//
-//	bo << version;
-//	bo << byte_order;
-//	bo << file_type << title << num_variable << variable1 << variable2;
-//	bo << zone_marker << zone_name;
-//
-//	bo << parent_zone << strand_id << solution_time;
-//	bo << not_used;
-//	//bo << zone_type << data_packing;
-//	bo << zone_type;
-//	bo << specify_var_location;
-//	bo << one_to_one_face_neighbor;
-//	bo << user_define_face_neighbor_connection;
-//	bo << num_points << num_elements;
-//
-//	bo << i_cell_dim << j_cell_dim << k_cell_dim << auxilarily_name_index_pair;
-//	bo << EOH_marker;
-//
-//	bo << zone_marker;
-//	bo << variable1_data_format << variable2_data_format;
-//	bo << has_passive_varaible << has_variable_sharing << zeros_based_zone_number;
-//	bo << variable1_min_value << variable1_max_value;
-//	bo << variable2_min_value << variable2_max_value;
-//
-//	bo << x << y << connectivity;
-//}
+	post_file << -1;									//not used
+	post_file << static_cast<int>(This_::zone_type_);	//zone type
+	//post_file << 0;									//data packing block = 0 .. ?
+	post_file << 0 << 0 << 0;							//specify var location, one to one face neighbor, user define face neighbor connection, default
+	post_file << static_cast<int>(This_::num_node_);	//num points
+	post_file << static_cast<int>(This_::num_element_);	//num elements
+	post_file << 0 << 0 << 0 << 0;						//i,j,k cell dim, auxilarily name index pair, default
+	post_file << 357.0f;								//EOH_marker
+}
