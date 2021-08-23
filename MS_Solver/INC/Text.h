@@ -43,6 +43,7 @@ private:
 
 public:
 	Binary_Writer(const std::string_view file_path);
+	Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode);
 
 	template <typename T>
 	Binary_Writer& operator<<(const T value);

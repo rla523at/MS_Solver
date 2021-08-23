@@ -45,7 +45,7 @@ public:
     };
 
     static void controll_time_step(const double current_time, double& time_step) {
-        Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_++ << "\t";
+        Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_ << "\t";
         Log::content_ << "current time: " << std::to_string(current_time) << " ";
 
         if (This_::end_condition_ == Controll_Condition::by_time)
@@ -74,12 +74,14 @@ public:
                 return;
             }
         }
+
+        This_::num_iter_++;
     }
 
     static bool is_time_to_end(const double current_time) {                
         if (This_::end_condition_ == Controll_Condition::by_time) {
             if (ms::compare_double(current_time, This_::end_condition_constant_)) {
-                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_++ << "\t";
+                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_ << "\t";
                 Log::content_ << "current time: " << std::to_string(current_time) << " (100.00%)  \tend";
                 return true;
             }
@@ -88,8 +90,8 @@ public:
         }
         else {
             if (This_::num_iter_ == This_::end_condition_constant_) {
-                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_++ << "\t";
-                Log::content_ << "current time: " << std::to_string(current_time) << " (100.00%)  \t End";
+                Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_ << "\t";
+                Log::content_ << "current time: " << std::to_string(current_time) << " (100.00%)  \tend";
                 return true;
             }
             else

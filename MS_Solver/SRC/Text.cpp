@@ -83,7 +83,14 @@ std::ostream& operator<<(std::ostream& ostream, const Text& text) {
 
 Binary_Writer::Binary_Writer(const std::string_view file_path) {
 	ms::make_path(file_path);
-	binary_file_stream_.open(file_path.data(), std::ios::binary | std::ios::app);
+	binary_file_stream_.open(file_path.data(), std::ios::binary);
+
+	dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
+}
+
+Binary_Writer::Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode) {
+	ms::make_path(file_path);
+	binary_file_stream_.open(file_path.data(), std::ios::binary | mode);
 
 	dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
 }

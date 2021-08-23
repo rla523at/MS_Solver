@@ -2,7 +2,7 @@
 #include "Spatial_Discrete_Method.h"
 #include "Gradient_Method.h"
 #include "PostAI.h"
-#include "Post_Solution_Data.h"
+#include "Tecplot.h"
 
 
 class RM {};
@@ -361,9 +361,9 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
         ANN_limiter_values[i] = input[0];//post
     }
 
-    Post_Solution_Data::conditionally_record_cell_variables("cell_index", cell_indexes);//post
-    Post_Solution_Data::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
-    Post_Solution_Data::conditionally_post_solution(solutions);//post
+    Tecplot::conditionally_record_cell_variables("cell_index", cell_indexes);//post
+    Tecplot::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
+    Tecplot::conditionally_post_solution(solutions);//post
 }
 
 

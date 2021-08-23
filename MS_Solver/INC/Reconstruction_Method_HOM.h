@@ -2,7 +2,7 @@
 #include "Governing_Equation.h"
 #include "Reconstruction_Method_FVM.h"
 #include "Polynomial.h"
-
+#include "Tecplot.h"
 
 class HOM_Reconstruction : public RM {};
 
@@ -46,12 +46,12 @@ class MLP_Smooth_Extrema_Detector
 {
 public:
     static bool is_smooth_extrema(const double solution, const double higher_mode_solution, const double P1_mode_solution, const double allowable_min, const double allowable_max) {
-        //if (P1_mode_solution > 0 && higher_mode_solution < 0 && solution > allowable_min)
-        //    return true;
-        //else if (P1_mode_solution < 0 && higher_mode_solution > 0 && solution < allowable_max)
-        //    return true;
-        //else
-        //    return false;
+        if (P1_mode_solution > 0 && higher_mode_solution < 0 && solution > allowable_min)
+            return true;
+        else if (P1_mode_solution < 0 && higher_mode_solution > 0 && solution < allowable_max)
+            return true;
+        else
+            return false;
 
 
         ////debug 15:03
@@ -86,14 +86,14 @@ public:
         //else
         //    return false;
 
-        //debug 16:05
-        constexpr double eps = 1.0E-8;
-        if (P1_mode_solution > -eps && higher_mode_solution < eps && solution > allowable_min)
-            return true;
-        else if (P1_mode_solution < eps && higher_mode_solution > -eps && solution < allowable_max)
-            return true;
-        else
-            return false;
+        ////debug 16:05
+        //constexpr double eps = 1.0E-8;
+        //if (P1_mode_solution > -eps && higher_mode_solution < eps && solution > allowable_min)
+        //    return true;
+        //else if (P1_mode_solution < eps && higher_mode_solution > -eps && solution < allowable_max)
+        //    return true;
+        //else
+        //    return false;
     }
 };
 
@@ -378,6 +378,12 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 
     const auto num_cell = solution_coefficients.size();
 
+    //post
+    std::vector<ushort> limiting_flag(num_cell);
+    std::vector<ushort> mlp_u1_flag(num_cell);
+    auto initial_coeff = solution_coefficients;
+    //post
+
     for (uint i = 0; i < num_cell; ++i) {
         auto temporal_solution_order = solution_order_;
 
@@ -411,11 +417,15 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                         break;
                     else {
                         if (temporal_solution_order == 1) {
+                            mlp_u1_flag[i] = 1; // post
+
                             const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max);
                             solution_coefficient *= this->limiting_matrix(limiting_value);
                             break;
                         }
                         else {
+                            limiting_flag[i] = 1; //post
+
                             //limiting highest mode
                             solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order);
 
@@ -429,6 +439,19 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 
         }
     }
+
+    Tecplot::conditionally_record_cell_indexes();
+    Tecplot::conditionally_record_cell_variables("limiting_flag", limiting_flag);
+    Tecplot::conditionally_record_cell_variables("mlp_u1_flag", mlp_u1_flag);
+    Tecplot::conditionally_post_solution(initial_coeff, "before_limiting");
+
+
+    //Tecplot::record_cell_indexes();
+    //Tecplot::record_cell_variables("limiting_flag", limiting_flag);
+    //Tecplot::record_cell_variables("mlp_u1_flag", mlp_u1_flag);
+    //Tecplot::post_solution(initial_coeff, "before_limiting");
+    //Tecplot::record_cell_indexes();
+    //Tecplot::post_solution(solution_coefficients, "after_limiting");
 }
 
 //template <ushort space_dimension_, ushort solution_order_>

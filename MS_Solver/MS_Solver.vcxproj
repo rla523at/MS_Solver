@@ -170,6 +170,7 @@
     <ClCompile Include="SRC\Polynomial.cpp" />
     <ClCompile Include="SRC\PostAI.cpp" />
     <ClCompile Include="SRC\Profiler.cpp" />
+    <ClCompile Include="SRC\Tecplot.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -199,7 +200,7 @@
     <ClInclude Include="INC\Periodic_Boundaries_FVM.h" />
     <ClInclude Include="INC\Periodic_Boundaries_HOM.h" />
     <ClInclude Include="INC\Polynomial.h" />
-    <ClInclude Include="INC\Post_Solution_Data.h" />
+    <ClInclude Include="INC\Tecplot.h" />
     <ClInclude Include="INC\PostAI.h" />
     <ClInclude Include="INC\Solution_Scaling_Method.h" />
     <ClInclude Include="INC\Profiler.h" />
@@ -208,7 +209,7 @@
     <ClInclude Include="INC\Semi_Discrete_Equation.h" />
     <ClInclude Include="INC\Setting.h" />
     <ClInclude Include="INC\Setting_Base.h" />
-    <ClInclude Include="INC\Solve_Condition.h" />
+    <ClInclude Include="INC\Solve_Controller.h" />
     <ClInclude Include="INC\Spatial_Discrete_Method.h" />
     <ClInclude Include="INC\Text.h" />
     <ClInclude Include="INC\Time_Integral_Method.h" />

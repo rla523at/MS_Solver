@@ -5,7 +5,7 @@
 #include "Periodic_Boundaries.h"
 #include "Solution_Scaling_Method.h"
 #include "Numerical_Flux_Function.h"
-#include "Post_Solution_Data.h"
+#include "Tecplot.h"
 
 
 template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -40,7 +40,7 @@ public:
         cells_(grid, reconstruction_method_), periodic_boundaries_(std::move(grid), reconstruction_method_), inner_faces_(std::move(grid), reconstruction_method_) {
 
         if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
-            Post_Solution_Data::initialize_HOM(grid, this->reconstruction_method_);
+            Tecplot::initialize_HOM(grid, this->reconstruction_method_);
 
         if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>) {
             SET_TIME_POINT;
