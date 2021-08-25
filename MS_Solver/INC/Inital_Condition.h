@@ -80,19 +80,37 @@ public:
 //std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 
 
+class SOD_2D : public IC {
+private:
+    static constexpr size_t num_eqation_ = 4;
+    static constexpr size_t dimension_ = 2;
+
+    using Space_Vector_ = Euclidean_Vector<dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+private:
+    SOD_2D(void) = delete;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::string name(void) { return "SOD"; };
+};
+
 class Modified_SOD_2D : public IC {
+private:
     static constexpr size_t num_eqation_ = 4;
     static constexpr size_t dimension_ = 2;
 
     using Space_Vector_ = Euclidean_Vector<dimension_>;
     using Solution_     = Euclidean_Vector<num_eqation_>;
+
+private:
+    Modified_SOD_2D(void) = delete;
+
 public:
     static Solution_ calculate_solution(const Space_Vector_& space_vector);
     static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
     static std::string name(void) { return "Modifid_SOD"; };
-
-private:
-    Modified_SOD_2D(void) = delete;
 };
 
 

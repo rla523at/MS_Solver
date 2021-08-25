@@ -3,15 +3,13 @@
 
 // ########################################## OPTION ##################################################################
 
-//#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/PostTest/"
-
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
+#define __GRID_FILE_NAMES__						Shocktube_OrthoTri_100x10
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__MODIFIED_SOD__
+#define __INITIAL_CONDITION__					__SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
@@ -38,7 +36,7 @@
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
-// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __MODIFIED_SOD__, __CONSTANT1__
+// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __MODIFIED_SOD__, __CONSTANT1__, __SOD__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
@@ -122,6 +120,9 @@
 #endif
 #if		__INITIAL_CONDITION__ == __CONSTANT1__
 #define INITIAL_CONDITION	SET_FORMAT1(Constant1, __DIMENSION__)
+#endif
+#if		__INITIAL_CONDITION__ == __SOD__
+#define INITIAL_CONDITION	SET_FORMAT1(SOD, __DIMENSION__)
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ == __FVM__

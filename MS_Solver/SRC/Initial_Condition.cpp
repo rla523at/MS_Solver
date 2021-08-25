@@ -53,6 +53,39 @@ std::vector<Square_Wave_2D::Solution_> Square_Wave_2D::calculate_solutions(const
 //
 //	return exact_solutions_;
 //}
+SOD_2D::Solution_ SOD_2D::calculate_solution(const Space_Vector_& space_vector) {
+	constexpr auto gamma = 1.4;
+	constexpr auto c = 1 / (1.4 - 1);
+	constexpr auto discontinuity_location = 0.5;
+
+	const auto x_coordinate = space_vector.at(0);
+
+	if (x_coordinate <= discontinuity_location) {
+		constexpr auto rho = 1.0;
+		constexpr auto u = 0.0;
+		constexpr auto v = 0.0;
+		constexpr auto p = 1.0;
+
+		constexpr auto rhou = rho * u;
+		constexpr auto rhov = rho * v;
+		constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+	else {
+		constexpr auto rho = 0.125;
+		constexpr auto u = 0.0;
+		constexpr auto v = 0.0;
+		constexpr auto p = 0.1;
+
+		constexpr auto rhou = rho * u;
+		constexpr auto rhov = rho * v;
+		constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+}
+
 
 Modified_SOD_2D::Solution_ Modified_SOD_2D::calculate_solution(const Space_Vector_& space_vector) {
 	constexpr auto gamma = 1.4;
@@ -84,7 +117,6 @@ Modified_SOD_2D::Solution_ Modified_SOD_2D::calculate_solution(const Space_Vecto
 
 		return { rho, rhou, rhov, rhoE };
 	}
-
 }
 
 
