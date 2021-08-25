@@ -27,8 +27,8 @@
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__END_BY_ITER__
-#define __SOLVE_END_CONDITION_CONSTANT__		10
+#define __SOLVE_END_CONDITION__					__END_BY_TIME__
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2

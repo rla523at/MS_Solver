@@ -46,12 +46,14 @@ public:
 
     static void controll_time_step(const double current_time, double& time_step) {
         Log::content_ << "Iter:" << std::left << std::setw(5) << This_::num_iter_ << "\t";
-        Log::content_ << "current time: " << std::to_string(current_time) << " ";
+        Log::content_ << "current time: " << std::to_string(current_time) << " ";        
 
         if (This_::end_condition_ == Controll_Condition::by_time)
             Log::content_ << std::setprecision(2) << std::fixed << "(" << current_time * 100 / This_::end_condition_constant_ << "%)  \t" << std::defaultfloat << std::setprecision(6);
         else
             Log::content_ << std::setprecision(2) << std::fixed << "(" << This_::num_iter_ * 100 / This_::end_condition_constant_ << "%)  \t" << std::defaultfloat << std::setprecision(6);
+
+        Log::print();
 
         if (This_::end_condition_ == Controll_Condition::by_time) {
             const double expect_time = current_time + time_step;

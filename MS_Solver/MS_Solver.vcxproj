@@ -181,6 +181,7 @@
     <ClInclude Include="INC\Cells.h" />
     <ClInclude Include="INC\Cells_FVM.h" />
     <ClInclude Include="INC\Cells_HOM.h" />
+    <ClInclude Include="INC\Debugger.h" />
     <ClInclude Include="INC\Discrete_Equation.h" />
     <ClInclude Include="INC\Element.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />

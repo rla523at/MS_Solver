@@ -343,13 +343,22 @@ Euclidean_Vector<num_row> Matrix<num_row, num_column>::column(const size_t colum
 
 template<size_t num_row, size_t num_column>
 std::string Matrix<num_row, num_column>::to_string(void) const {
-	std::string result;
+	std::ostringstream oss;
+	oss << std::setprecision(16) << std::showpoint << std::left;
 	for (size_t i = 0; i < num_row; ++i) {
 		for (size_t j = 0; j < num_column; ++j)
-			result += ms::double_to_string(this->at(i, j)) + "   \t";
-		result += "\n";
+			oss << std::setw(25) << this->at(i, j);
+		oss << "\n";
 	}
-	return result;
+	return oss.str();
+
+	//std::string result;
+	//for (size_t i = 0; i < num_row; ++i) {
+	//	for (size_t j = 0; j < num_column; ++j)
+	//		result += ms::double_to_string(this->at(i, j)) + "   \t";
+	//	result += "\n";
+	//}
+	//return result;
 }
 
 template<size_t num_row, size_t num_column>
