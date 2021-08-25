@@ -222,6 +222,8 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
     const auto solution_gradients = this->gradient_method_.calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
 
+    Post_AI_Data::record_solution_datas(solutions, solution_gradients);//postAI
+
     const auto num_cell = solutions.size();
         
     std::vector<double> values1(num_cell);//post
@@ -248,7 +250,8 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
-                
+        Post_AI_Data::record_limiting_value(i, limiting_values);//postAI
+
         values1[i] = limiting_values[0];//post
         values2[i] = i;//post
         values3[i] = gradient.at(0,0);//post
@@ -338,7 +341,7 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
         const auto ordered_indexes = this->ordering_function(solutions, i);
         const auto num_ordered_index = ordered_indexes.size();
 
-        const auto num_input_values = 3 * num_ordered_index;
+        const auto num_input_values = 3 * num_ordered_index;    //input : [27 x 1]
         std::vector<double> input_values(num_input_values);
 
         for (size_t j = 0; j < num_equation_; ++j) {
@@ -360,7 +363,7 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code
+        this->solution_gradients_[i] *= input[0]; //temporal code ??
                 
         ANN_limiter_values[i] = input[0];//post
     }
@@ -454,7 +457,7 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    std::ifstream file("RSC/model.bin", std::ios::binary);
+    std::ifstream file("RSC/model.bin", std::ios::binary); 
     dynamic_require(file.is_open(), "Model file should be open");
 
     int num_layer;

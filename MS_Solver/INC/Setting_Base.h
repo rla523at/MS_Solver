@@ -13,6 +13,8 @@
 #define __SQUARE_WAVE__					31
 #define __MODIFIED_SOD__				32
 #define __CONSTANT1__					33
+#define __CIRCLE_WAVE__					34
+#define __GAUSSIAN_WAVE__				35
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41

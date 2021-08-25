@@ -30,8 +30,7 @@ public:
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
-                Post_Solution_Data::is_time_to_conditionally_post_ = true;
-                //Post_Solution_Data::post_solution(solutions, "final");//post
+                Post_Solution_Data::post_solution(solutions, "final");//post
                 break;
             }
 

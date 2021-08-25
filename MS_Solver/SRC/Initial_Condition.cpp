@@ -27,7 +27,53 @@ std::vector<Square_Wave_2D::Solution_> Square_Wave_2D::calculate_solutions(const
 	return solutions_;
 }
 
+Circle_Wave_2D::Solution_ Circle_Wave_2D::calculate_solution(const Space_Vector_& space_vector) {
+	const auto x_coord = space_vector.at(0);
+	const auto y_coord = space_vector.at(1);
 
+	if ( (x_coord - 0.5) * (x_coord - 0.5) + (y_coord - 0.5) * (y_coord - 0.5) <= 0.25 * 0.25 )
+		return { 1 };
+	else
+		return { 0 };
+}
+
+std::vector<Circle_Wave_2D::Solution_> Circle_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+	const auto num_cell = cell_centers.size();
+
+	std::vector<Solution_> solutions_(num_cell);
+	for (size_t i = 0; i < num_cell; ++i) {
+		const auto x_coord = cell_centers[i].at(0);
+		const auto y_coord = cell_centers[i].at(1);
+
+		if ((x_coord - 0.5) * (x_coord - 0.5) + (y_coord - 0.5) * (y_coord - 0.5) <= 0.25 * 0.25 )
+			solutions_[i] = 1;
+		else
+			solutions_[i] = 0;
+	}
+
+	return solutions_;
+}
+
+Euclidean_Vector<1> Gaussian_Wave_2D::calculate_solution(const Space_Vector_& space_vector) {
+	const auto x_coord = space_vector.at(0);
+	const auto y_coord = space_vector.at(1);
+
+	return { exp(- This_::beta_*( (x_coord - 0.5) * (x_coord - 0.5) + (y_coord - 0.5) * (y_coord - 0.5))) };
+}
+
+std::vector<Euclidean_Vector<1>> Gaussian_Wave_2D::calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
+	const auto num_cell = space_vectors.size();
+
+	std::vector<Solution_> solutions_(num_cell);
+	for (size_t i = 0; i < num_cell; ++i) {
+		const auto x_coord = space_vectors[i].at(0);
+		const auto y_coord = space_vectors[i].at(1);
+
+		solutions_[i] = exp(-This_::beta_ * ((x_coord - 0.5) * (x_coord - 0.5) + (y_coord - 0.5) * (y_coord - 0.5)));
+	}
+
+	return solutions_;
+}
 //template <>
 //std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& space_vector, const double end_time) {
 //	const auto num_cell = space_vector.size();

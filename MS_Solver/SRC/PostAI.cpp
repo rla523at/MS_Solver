@@ -1,7 +1,7 @@
 #include "../INC/PostAI.h"
 
 void Post_AI_Data::set_path(const std::string& path) {
-#ifdef POST_AI_DATA
+#ifdef POST_AI_DATA_MODE
 
 	path_ = path;
 
@@ -9,7 +9,7 @@ void Post_AI_Data::set_path(const std::string& path) {
 }
 
 void Post_AI_Data::post(void) {
-#ifdef POST_AI_DATA
+#ifdef POST_AI_DATA_MODE
 
 	static size_t num_post = 1;
 	static size_t num_post_data = 1;
@@ -31,32 +31,14 @@ void Post_AI_Data::post(void) {
 
 			file_name = "AI_Solver_Data_" + std::to_string(++num_post) + ".txt";
 			file_path = path_ + file_name;
+			comment_.add_write(file_path);
 		}
 	}
 
-	target_cell_indexes_.reset();
+	target_cell_indexes_.clear();
+	//target_cell_indexes_.reset();		
 
 #endif
 }
 
-std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix>& solution_gradients) {
-	const auto num_solution = solution_gradients.size();
-	const auto [num_equation, space_dimension] = solution_gradients.front().size();
-
-	std::vector<std::string> solution_gradient_strings;
-	solution_gradient_strings.reserve(num_solution);
-
-	std::string solution_gradient_string;
-	for (size_t i = 0; i < num_solution; ++i) {
-
-		const auto& solution_gradient = solution_gradients[i];
-		for (size_t j = 0; j < num_equation; ++j)
-			for (size_t k = 0; k < space_dimension; ++k)
-				solution_gradient_string += ms::double_to_str_sp(solution_gradient.at(j, k)) + "\t";
-
-		solution_gradient_strings.push_back(std::move(solution_gradient_string));
-	}
-
-	return solution_gradient_strings;
-}
 

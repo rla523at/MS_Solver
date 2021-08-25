@@ -10,6 +10,7 @@ class Post_AI_Data
 public:
 	inline static std::string path_;
 	inline static size_t num_data_;
+	inline static Text comment_;
 	inline static std::vector<Text> ai_data_text_set_;
 	inline static std::vector<std::vector<size_t>> vertex_share_cell_indexes_set_;
 	inline static std::vector<size_t> target_cell_indexes_;
@@ -38,7 +39,8 @@ public:
 	template <size_t num_equation>
 	static auto convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions);
 
-	static std::vector<std::string> convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix>& solution_gradients);
+	template <size_t num_equation, size_t space_dimension>
+	static std::vector<std::string> convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
 };
 
 
@@ -54,6 +56,17 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 	vertex_share_cell_indexes_set_.reserve(num_data_);
 	ai_data_text_set_.resize(num_data_);
 	target_cell_indexes_.reserve(num_data_);
+
+	auto file_path = path_ + "AI_Solver_Data_1.txt";	
+	const auto parsed_path = ms::parse(path_, '/');
+	comment_ << "***********************************\n"
+		"***********************************\n"
+		"G.E : " + parsed_path[4] + "\n" +
+		"I.C : " + parsed_path[5] + "\n" +
+		"Grid : " + parsed_path[7] + "\n" +
+		"***********************************\n"
+		"***********************************\n\n";	//Grid 부분 수정 필요
+	comment_.add_write(file_path);	
 
 	const auto face_share_cell_indexes_set = calculate_face_share_cell_indexes_set(grid);
 	const auto vnodes_coordinate_string_set = calculate_vertex_nodes_coordinate_string_set(grid);
@@ -141,7 +154,7 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
 	dynamic_require(num_data_ == solution_gradients.size(), "number of solution gradient should be same with number of data");
 
-	const auto solution_strings = convert_to_solution_strings(solutions);
+	const auto solution_strings = convert_to_solution_strings(solutions);	//?
 	const auto solution_gradient_strings = convert_to_solution_gradient_strings(solution_gradients);
 
 	std::string cell_average_string;
@@ -285,11 +298,32 @@ auto Post_AI_Data::convert_to_solution_strings(const std::vector<Euclidean_Vecto
 	return solution_strings;
 }
 
+template <size_t num_equation, size_t space_dimension>
+std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
+	const auto num_solution = solution_gradients.size();
+	//const auto [num_equation, space_dimension] = solution_gradients.front().size();
+
+	std::vector<std::string> solution_gradient_strings;
+	solution_gradient_strings.reserve(num_solution);
+
+	std::string solution_gradient_string;
+	for (size_t i = 0; i < num_solution; ++i) {
+
+		const auto& solution_gradient = solution_gradients[i];
+		for (size_t j = 0; j < num_equation; ++j)
+			for (size_t k = 0; k < space_dimension; ++k)
+				solution_gradient_string += ms::double_to_str_sp(solution_gradient.at(j, k)) + "\t";
+
+		solution_gradient_strings.push_back(std::move(solution_gradient_string));
+	}
+
+	return solution_gradient_strings;
+}
 
 template <ushort num_equation>
 void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-#ifdef POST_AI_DATA
-	size_t num_equation = limiting_value.size();
+#ifdef POST_AI_DATA_MODE
+	//size_t num_equation = limiting_value.size();
 
 	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
 		return;

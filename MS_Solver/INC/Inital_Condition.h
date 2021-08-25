@@ -75,6 +75,42 @@ public:
     static std::vector<Solution_> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
 };
 
+class Circle_Wave_2D : public IC {
+private:
+    static constexpr size_t num_eqation_ = 1;
+    static constexpr size_t dimension_ = 2;
+
+    using Space_Vector_ = Euclidean_Vector<dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+private:
+    Circle_Wave_2D(void) = delete;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
+    static std::string name(void) { return "Circle_Wave_2D"; };
+};
+
+class Gaussian_Wave_2D : public IC {
+private:
+    static constexpr size_t num_eqation_ = 1;
+    static constexpr size_t dimension_ = 2;
+    static constexpr double beta_ = 20.0;
+
+    using This_ = Gaussian_Wave_2D;
+    using Space_Vector_ = Euclidean_Vector<dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+private:
+    Gaussian_Wave_2D(void) = delete;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
+    static std::string name(void) { return "Gaussian_Wave_2D"; };
+};
+
 
 //template <>
 //std::vector<Square_Wave_2D::Solution> Square_Wave_2D::calculate_exact_solutions<Linear_Advection_2D>(const std::vector<Space_Vector_>& cell_centers, const double end_time);
