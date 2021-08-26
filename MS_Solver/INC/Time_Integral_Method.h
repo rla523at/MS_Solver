@@ -73,10 +73,10 @@ template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions, const double time_step) {
     const auto num_sol = solutions.size();  
 
-     //stage1
     const auto initial_solutions = solutions;
     const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);    
 
+    //stage1
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += 0.391752226571890 * time_step * initial_RHS[i];    
     semi_discrete_equation.reconstruct(solutions);    
