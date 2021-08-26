@@ -22,34 +22,29 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-        Debugger::conditions_.resize(6, false); // debug
+        //Debugger::conditions_.resize(1, false);//debug
 
         //Tecplot::post_solution(solutions, "initial");//post
-        //Tecplot::post_condition_ = true;//post
+        Tecplot::post_condition_ = true;//post
         semi_discrete_equation.reconstruct(solutions);
-        //Tecplot::conditionally_post_solution(solutions);//post       
 
+        //Debugger::conditions_[0] = true; //debug
+        
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
-                //Tecplot::post_solution(solutions, "final");//post
+                Tecplot::post_solution(solutions, "final");//post
                 break;
             }                      
 
-            //if (Solve_Controller::is_time_to_post(current_time))
-            //    Tecplot::post_condition_ = true;
+            if (Solve_Controller::is_time_to_post(current_time))
+                Tecplot::post_condition_ = true;
                 //    //Tecplot::post_solution(solutions); // post
             
 
             SET_TIME_POINT;
             auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
             Solve_Controller::controll_time_step(current_time, time_step);
-
-            if (Debugger::count_++ == 70) {
-                std::cout << "\n";
-                //std::cout << current_time;
-                Debugger::conditions_[0] = true;//debug
-            }
 
             Time_Integral_Method::update_solutions(semi_discrete_equation, solutions, time_step);
             current_time += time_step;

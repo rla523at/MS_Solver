@@ -351,14 +351,6 @@ std::string Matrix<num_row, num_column>::to_string(void) const {
 		oss << "\n";
 	}
 	return oss.str();
-
-	//std::string result;
-	//for (size_t i = 0; i < num_row; ++i) {
-	//	for (size_t j = 0; j < num_column; ++j)
-	//		result += ms::double_to_string(this->at(i, j)) + "   \t";
-	//	result += "\n";
-	//}
-	//return result;
 }
 
 template<size_t num_row, size_t num_column>

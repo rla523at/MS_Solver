@@ -7,11 +7,11 @@
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_OrthoTri_100x10
+#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SOD__
+#define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__

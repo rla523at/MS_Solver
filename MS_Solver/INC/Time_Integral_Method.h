@@ -79,8 +79,6 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
 
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += 0.391752226571890 * time_step * initial_RHS[i];    
-    if (Debugger::conditions_[0])//deubg
-        Debugger::conditions_[1] = true;//debug
     semi_discrete_equation.reconstruct(solutions);    
 
     const auto stage1_RHS = semi_discrete_equation.calculate_RHS(solutions);
@@ -88,8 +86,6 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     //stage2
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.444370493651235 * initial_solutions[i] + 0.555629506348765 * solutions[i] + 0.368410593050371 * time_step * stage1_RHS[i];
-    if (Debugger::conditions_[0])//deubg
-        Debugger::conditions_[2] = true;//debug
     semi_discrete_equation.reconstruct(solutions);
 
     const auto stage2_solutions = solutions;
@@ -98,8 +94,6 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     //stage3
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.620101851488403 * initial_solutions[i] + 0.379898148511597 * solutions[i] + 0.251891774271694 * time_step * stage2_RHS[i];
-    if (Debugger::conditions_[0])//deubg
-        Debugger::conditions_[3] = true;//debug
     semi_discrete_equation.reconstruct(solutions);
 
     const auto stage3_solutions = solutions;
@@ -108,8 +102,6 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     //stage4
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.178079954393132 * initial_solutions[i] + 0.821920045606868 * solutions[i] + 0.544974750228521 * time_step * stage3_RHS[i];    
-    if (Debugger::conditions_[0])//deubg
-        Debugger::conditions_[4] = true;//debug
     semi_discrete_equation.reconstruct(solutions);
 
     const auto stage4_RHS = semi_discrete_equation.calculate_RHS(solutions);
@@ -117,7 +109,5 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     //stage5
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.517231671970585 * stage2_solutions[i] + 0.096059710526147 * stage3_solutions[i] + 0.063692468666290 * time_step * stage3_RHS[i] + 0.386708617503269 * solutions[i] + 0.226007483236906 * time_step * stage4_RHS[i];
-    if (Debugger::conditions_[0])//deubg
-        Debugger::conditions_[5] = true;//debug
     semi_discrete_equation.reconstruct(solutions);
 }
