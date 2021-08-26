@@ -43,7 +43,7 @@ int main(void) {
 
 		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
 
-		Tecplot::post_grid(grid.elements.cell_elements); //post
+		//Tecplot::post_grid(grid.elements.cell_elements); //post
 
 		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
 

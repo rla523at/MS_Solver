@@ -121,6 +121,24 @@ public:
 };
 
 
+template <typename Function, size_t num_row, size_t num_column>
+Vector_Function<Function, num_row> operator*(const Matrix<num_row, num_column>& matrix, const Vector_Function<Function, num_column>& vector_function) {
+	std::array<Function, num_row> functions;
+
+	for (size_t i = 0; i < num_row; ++i)
+		for (size_t j = 0; j < num_column; ++j)
+			functions[i] += matrix.at(i, j) * vector_function[j];
+
+	return functions;
+}
+
+
+template <typename Function, size_t range_dimension>
+std::ostream& operator<<(std::ostream& os, const Vector_Function<Function, range_dimension>& vf) {
+	return os << vf.to_string();
+}
+
+
 // Vector_Function class template for Range dimension is not compile time constant
 template <typename Function>
 using Dynamic_Vector_Function_ = Vector_Function<Function, 0>;
@@ -178,6 +196,13 @@ public:
 };
 
 
+template <typename Function>
+std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function_<Function>& vf) {
+	return os << vf.to_string();
+}
+
+
+
 template <typename Function, ushort range_num_row, ushort range_num_column>
 class Matrix_Function
 {
@@ -231,7 +256,5 @@ private:
 };
 
 
-template <typename Function>
-std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function_<Function>& vf) {
-	return os << vf.to_string();
-}
+
+
