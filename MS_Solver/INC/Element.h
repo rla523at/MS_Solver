@@ -239,17 +239,6 @@ namespace ms {
 		return normalized_functions;
 	}
 
-	template <ushort space_dimension>
-	void gemv(const Dynamic_Matrix& A, const Dynamic_Vector_Function_<Polynomial<space_dimension>>& v, Polynomial<space_dimension>* ptr) {
-		const auto [num_row, num_column] = A.size();
-		const auto range_dimension = v.range_dimension();
-		dynamic_require(num_column == range_dimension, "number of column should be same with range dimension");
-
-		for (size_t i = 0; i < num_row; ++i)
-			for (size_t j = 0; j < num_column; ++j)
-				ptr[i] += A.at(i, j) * v.at(j);
-	}
-
 	//double inner_product(const Polynomial& f1, const Polynomial& f2, const QuadratureRule& quadrature_rule);
 	//double L2_Norm(const Polynomial& polynomial, const QuadratureRule& quadrature_rule);
 	//std::vector<Polynomial> Gram_Schmidt_Process(const std::vector<Polynomial>& initial_polynomial_set, const QuadratureRule& quadrature_rule);

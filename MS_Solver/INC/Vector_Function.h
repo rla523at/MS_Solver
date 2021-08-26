@@ -139,6 +139,7 @@ std::ostream& operator<<(std::ostream& os, const Vector_Function<Function, range
 }
 
 
+
 // Vector_Function class template for Range dimension is not compile time constant
 template <typename Function>
 using Dynamic_Vector_Function_ = Vector_Function<Function, 0>;
@@ -201,6 +202,20 @@ std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function_<Functi
 	return os << vf.to_string();
 }
 
+
+namespace ms {
+	template <typename Function>
+	void gemv(const Dynamic_Matrix& A, const Dynamic_Vector_Function_<Function>& v, Function* ptr) {
+		//code for dynmaic matrix * dynmaic vector function => vector function
+		const auto [num_row, num_column] = A.size();
+		const auto range_dimension = v.range_dimension();
+		dynamic_require(num_column == range_dimension, "number of column should be same with range dimension");
+
+		for (size_t i = 0; i < num_row; ++i)
+			for (size_t j = 0; j < num_column; ++j)
+				ptr[i] += A.at(i, j) * v.at(j);
+	}
+}
 
 
 template <typename Function, ushort range_num_row, ushort range_num_column>
