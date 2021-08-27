@@ -1,6 +1,6 @@
 #include "../INC/Inital_Condition.h"
 #include "../INC/Discrete_Equation.h"
-#include "../INC/Post_Solution_Data.h"
+#include "../INC/Tecplot.h"
 #include "../INC/Log.h"
 #include "../INC/Setting.h"
 
@@ -15,13 +15,9 @@ int main(void) {
 	
 
 	for (auto& grid_file_name : grid_file_names) {
-		ms::erase(grid_file_name, " ");
+		ms::remove(grid_file_name, " ");
 
 		const auto date_str = Log::date_string();
-
-		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
-		Post_Solution_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
-		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/" + "AI_Data/");
 
 		Log::content_ << "current date : " << date_str << "\n\n";
 		Log::content_ << "================================================================================\n";
@@ -40,12 +36,17 @@ int main(void) {
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
 
+		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
+		Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
+		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/" + "AI_Data/");
+
+		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
+		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
+
 		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
 
-		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
-		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 		Post_AI_Data::intialize(grid);
-		Post_Solution_Data::post_grid(grid.elements.cell_elements);
+		Tecplot::post_grid(grid.elements.cell_elements); //post
 
 		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();

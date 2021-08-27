@@ -16,6 +16,20 @@ TEST(Vector_Function, constructor) {
 	EXPECT_EQ(vf.at(2), y);
 }
 
+TEST(Vector_Function, mv_1) {
+	constexpr ushort domain_dimension = 2;
+
+	Polynomial<domain_dimension> x("x0");
+	Polynomial<domain_dimension> y("x1");
+
+	Matrix<2, 2> m = { 1,2,3,4 };
+	Vector_Function<Polynomial<2>, 2> vf = { x , y };
+	const auto result = m * vf;
+
+	Vector_Function<Polynomial<2>, 2> ref = { x + 2 * y ,3 * x + 4 * y };
+	EXPECT_EQ(result, ref);
+}
+
 GTEST_TEST(Vector_Function, differentiate_1)
 {
 	constexpr size_t domain_dimension = 2;

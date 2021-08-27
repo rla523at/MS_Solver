@@ -42,9 +42,9 @@ public:
 		time_t date_calculator = time(nullptr);
 		tm date;
 		localtime_s(&date, &date_calculator);
-
+		
 		return std::to_string(date.tm_year + 1900) + "." + std::to_string(date.tm_mon + 1) + "." + std::to_string(date.tm_mday) 
-			+ "_" + std::to_string(date.tm_hour) + "h" + std::to_string(date.tm_min) + "m";		
+			+ "__(" + std::to_string(date.tm_hour) + "£º" + std::to_string(date.tm_min) + ")";
 	}
 };
 

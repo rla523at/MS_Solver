@@ -54,6 +54,9 @@
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Tecplot.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Boundaries.h">
@@ -119,9 +122,6 @@
     <ClInclude Include="INC\Periodic_Boundaries_FVM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Post_Solution_Data.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\PostAI.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -134,7 +134,7 @@
     <ClInclude Include="INC\Semi_Discrete_Equation.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Solve_Condition.h">
+    <ClInclude Include="INC\Solve_Controller.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Spatial_Discrete_Method.h">
@@ -177,6 +177,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Solution_Scaling_Method.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Tecplot.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Debugger.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

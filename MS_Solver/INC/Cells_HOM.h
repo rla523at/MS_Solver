@@ -149,12 +149,12 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
         const auto [num_eq, num_quadrature_node] = solution_quadrature_nodes.size();
         Dynamic_Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
 
-        for (size_t i = 0; i < num_quadrature_node; ++i) {
-            const auto physical_flux = Governing_Equation::physical_flux(solution_quadrature_nodes.column<This_::num_equation_>(i));
-            flux_quadrature_points.change_columns(i * This_::space_dimension_, physical_flux);
+        for (size_t j = 0; j < num_quadrature_node; ++j) {
+            const auto physical_flux = Governing_Equation::physical_flux(solution_quadrature_nodes.column<This_::num_equation_>(j));
+            flux_quadrature_points.change_columns(j * This_::space_dimension_, physical_flux);
         }
 
-        This_::Residual_ delta_rhs;
+        Residual_ delta_rhs;
         ms::gemm(flux_quadrature_points, This_::gradient_basis_weights_[i], delta_rhs);
 
         RHS[i] += delta_rhs;

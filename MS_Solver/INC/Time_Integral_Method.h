@@ -1,5 +1,5 @@
 #pragma once
-#include "Post_Solution_Data.h"
+#include "Tecplot.h"
 
 #include <vector>
 
@@ -48,14 +48,12 @@ static void SSPRK33::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     const auto initial_solutions = solutions;
     const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);
 
-    Post_AI_Data::is_time_to_conditionally_post_ = true;//postAI
     //stage 1
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += time_step * initial_RHS[i];
     semi_discrete_equation.reconstruct(solutions);
 
     const auto stage1_RHS = semi_discrete_equation.calculate_RHS(solutions);
-    Post_AI_Data::is_time_to_conditionally_post_ = false;//postAI
 
     //stage 2
     for (size_t i = 0; i < num_sol; ++i)
@@ -75,10 +73,10 @@ template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions, const double time_step) {
     const auto num_sol = solutions.size();  
 
-     //stage1
     const auto initial_solutions = solutions;
     const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);    
 
+    //stage1
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += 0.391752226571890 * time_step * initial_RHS[i];    
     semi_discrete_equation.reconstruct(solutions);    
@@ -111,6 +109,5 @@ static void SSPRK54::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     //stage5
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = 0.517231671970585 * stage2_solutions[i] + 0.096059710526147 * stage3_solutions[i] + 0.063692468666290 * time_step * stage3_RHS[i] + 0.386708617503269 * solutions[i] + 0.226007483236906 * time_step * stage4_RHS[i];
-    
     semi_discrete_equation.reconstruct(solutions);
 }
