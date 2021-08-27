@@ -948,12 +948,12 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
             auto solution_vnodes = solution_coefficient * this->set_of_basis_vnodes_[i];
             auto simplex_P1_projected_solution_vnodes = solution_coefficient * this->set_of_simplex_P1_projected_basis_vnodes_[i];
 
-            if (Debugger::conditions_[0] && (i == 0)) { //debug
-                std::cout << "\n";
-                std::cout << "cell_index " << i << "\n";
-                //std::cout << "order " << temporal_solution_order << "\n";
-                //std::cout << "vnode_indexes " << vnode_indexes << "\n";
-            }
+            //if (Debugger::conditions_[0] && (i == 0)) { //debug
+            //    std::cout << "\n";
+            //    std::cout << "cell_index " << i << "\n";
+            //    //std::cout << "order " << temporal_solution_order << "\n";
+            //    //std::cout << "vnode_indexes " << vnode_indexes << "\n";
+            //}
 
             //if (Debugger::conditions_[0] && i == 63) { //debug
             //    std::cout << "\n";
@@ -985,14 +985,14 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 //    std::cout << "is_typeII_oscillation " << this->is_typeII_subcell_oscillation(num_trouble_boundary) << "\n";
                 //}
 
-                if (Debugger::conditions_[0] && i == 0 && vnode_index == 255) { //debug
-                    std::cout << std::boolalpha << std::setprecision(16);
-                    std::cout << "vnode_index " << vnode_index << "\n";
-                    std::cout << "simplex_P1_projected_criterion_value " << simplex_P1_projected_criterion_value << "\n";
-                    std::cout << "min " << allowable_min << "\n";
-                    std::cout << "max " << allowable_max << "\n";
-                    std::cout << "is_satisfy_MLP_condition " << P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) << "\n";
-                }
+                //if (Debugger::conditions_[0] && i == 0 && vnode_index == 255) { //debug
+                //    std::cout << std::boolalpha << std::setprecision(16);
+                //    std::cout << "vnode_index " << vnode_index << "\n";
+                //    std::cout << "simplex_P1_projected_criterion_value " << simplex_P1_projected_criterion_value << "\n";
+                //    std::cout << "min " << allowable_min << "\n";
+                //    std::cout << "max " << allowable_max << "\n";
+                //    std::cout << "is_satisfy_MLP_condition " << P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) << "\n";
+                //}
 
                 //if (Debugger::conditions_[0] && temporal_solution_order == 1 && i == 532) { //debug
                 //    std::cout << std::boolalpha << std::setprecision(16);
@@ -1036,8 +1036,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 }
             }
 
-            if (Debugger::conditions_[0] && i == 0)
-                std::exit(523);//debug
+            //if (Debugger::conditions_[0] && i == 0)
+            //    std::exit(523);//debug
 
             if (is_normal_cell)
                 break;
@@ -1087,11 +1087,11 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
     }
 
-    //Tecplot::conditionally_record_cell_indexes();// post
-    //Tecplot::conditionally_record_cell_variables("solution_order", solution_order); //post
-    //Tecplot::conditionally_record_cell_variables("mlp_u1_flag", mlp_u1_flags); //post
-    //Tecplot::conditionally_record_cell_variables("num_trouble_boundary", set_of_num_trobule_boundary); //post
-    //Tecplot::conditionally_post_solution(initial_coefficients, "before limiting"); //post
+    Tecplot::conditionally_record_cell_indexes();// post
+    Tecplot::conditionally_record_cell_variables("solution_order", solution_order); //post
+    Tecplot::conditionally_record_cell_variables("mlp_u1_flag", mlp_u1_flags); //post
+    Tecplot::conditionally_record_cell_variables("num_trouble_boundary", set_of_num_trobule_boundary); //post
+    Tecplot::conditionally_post_solution(initial_coefficients, "before limiting"); //post
 
     //if (Debugger::conditions_[0]) {//debug
     //    Tecplot::record_cell_indexes();//debug
