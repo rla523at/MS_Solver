@@ -89,7 +89,7 @@ public:
 struct ANN_Model
 {
     std::vector<Dynamic_Matrix> weights;
-    std::vector<std::vector<double>> biases;
+    std::vector<Dynamic_Euclidean_Vector> biases;
 };
 
 
@@ -128,14 +128,13 @@ private:
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
 
-    void reconstruct(const std::vector<Solution_>& solutions);
-    
+public:
+    void reconstruct(const std::vector<Solution_>& solutions);    
     const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
 
 private:
     bool is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
     std::vector<size_t> ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
-
     void limit(Dynamic_Euclidean_Vector& feature) const;
     ANN_Model read_model(void) const;
 
@@ -227,9 +226,6 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
     const auto num_cell = solutions.size();
         
-    //std::vector<double> values1(num_cell);//post
-    //std::vector<double> values2(num_cell);//post
-
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
         const auto P1_mode_solution_vnodes = gradient * this->center_to_vertex_matrixes_[i];
@@ -250,19 +246,9 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             }
         }
                 
-        //values1[i] = limiting_values[0];//post
-        //values2[i] = i;//post
-
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
-
-    //Post_Solution_Data::record_cell_variables("limiting_value", values1);//post
-    //Post_Solution_Data::record_cell_variables("cell_index", values2);//post
-    //Post_Solution_Data::post_solution(solutions);//post
-
-
-    Post_AI_Data::post();
 };
 
 
@@ -320,13 +306,6 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
     const auto num_solution = solutions.size();    
 
-    
-    std::vector<uint> cell_indexes(num_solution);
-    for (uint i = 0; i < num_solution; ++i)
-        cell_indexes[i] = i;    //post
-
-    std::vector<double> ANN_limiter_values(num_solution, 1);//post
-
     for (size_t i = 0; i < num_solution; ++i) {
         if (this->is_constant_region(solutions, i))
             continue;
@@ -356,14 +335,8 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code
-                
-        ANN_limiter_values[i] = input[0];//post
+        this->solution_gradients_[i] *= input[0]; //temporal code                
     }
-
-    Tecplot::conditionally_record_cell_variables("cell_index", cell_indexes);//post
-    Tecplot::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
-    Tecplot::conditionally_post_solution(solutions);//post
 }
 
 
@@ -435,17 +408,20 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
     static const ReLU activation_function;
     static const HardTanh output_function;
 
-    for (ushort i = 0; i < num_layer; ++i) {
-        std::vector<double> new_feature = model.biases[i];
+    for (ushort i = 0; i < num_layer - 1; ++i) {
+        auto new_feature = model.biases[i];
 
         ms::gemvpv(model.weights[i], feature, new_feature);
+        new_feature.apply(activation_function);
         feature = std::move(new_feature);
-        feature.apply(activation_function);
-
-        //new_feature.apply(activation_function);
-        //feature = std::move(new_feature);
     }
-    feature.apply(output_function);
+
+    //output layer
+    auto new_feature = model.biases[num_layer - 1];
+
+    ms::gemvpv(model.weights[num_layer - 1], feature, new_feature);
+    new_feature.apply(output_function);
+    feature = std::move(new_feature);
 }
 
 template <typename Gradient_Method>

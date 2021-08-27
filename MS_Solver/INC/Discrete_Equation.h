@@ -24,7 +24,6 @@ public:
 
 
         Tecplot::post_condition_ = true;//post
-        //Tecplot::post_solution(solutions, "initial");//post
 
         semi_discrete_equation.reconstruct(solutions);
 
@@ -37,7 +36,6 @@ public:
 
             if (Solve_Controller::is_time_to_post(current_time))
                 Tecplot::post_condition_ = true;
-                //Tecplot::post_solution(solutions); // post
             
 
             SET_TIME_POINT;

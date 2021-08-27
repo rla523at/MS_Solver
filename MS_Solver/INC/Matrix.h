@@ -155,7 +155,7 @@ namespace ms {
 		template<size_t num_row, size_t num_column>
 		static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) { BLAS::gemm(A, B, C.values_.data()); };
 		static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
-		static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2);
+		static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
 	};
 
 	inline constexpr ushort blas_dscal_criteria = 10;
@@ -165,7 +165,7 @@ namespace ms {
 		ms::BLAS::gemm(A, B, output_ptr);
 	}
 
-	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
+	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
 		ms::BLAS::gemvpv(A, v1, v2);
 	}
 

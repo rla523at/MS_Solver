@@ -229,7 +229,7 @@ namespace ms {
 		cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.values_.data(), lda, B.values_.data(), ldb, beta, output_ptr, ldc);
 	}
 
-	void BLAS::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
+	void BLAS::gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
 		dynamic_require(A.num_column_ == v1.dimension(), "dimension should be matched for matrix vector multiplication");
 
 		const auto layout = CBLAS_LAYOUT::CblasRowMajor;
@@ -242,6 +242,6 @@ namespace ms {
 		const auto beta = 1.0;
 		const auto incy = 1;
 
-		cblas_dgemv(layout, transA, m, n, alpha, A.values_.data(), lda, v1.data(), incx, beta, v2.data(), incy);
+		cblas_dgemv(layout, transA, m, n, alpha, A.values_.data(), lda, v1.data(), incx, beta, v2.values_.data(), incy);
 	};
 }
