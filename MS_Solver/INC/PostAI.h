@@ -182,7 +182,7 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 
 template <size_t space_dimension>
 auto Post_AI_Data::calculate_face_share_cell_indexes_set(const Grid<space_dimension>& grid) {
-	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
+	const auto& vnode_index_to_share_cell_index_set = grid.connectivity.vnode_index_to_share_cell_index_set;
 	const auto& cell_elements = grid.elements.cell_elements;
 	const auto num_cell = cell_elements.size();
 
@@ -204,14 +204,14 @@ auto Post_AI_Data::calculate_face_share_cell_indexes_set(const Grid<space_dimens
 
 			const auto num_face_vnode = face_vnode_indexes.size();
 
-			const auto& set_0 = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[0]);
-			const auto& set_1 = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[1]);
+			const auto& set_0 = vnode_index_to_share_cell_index_set.at(face_vnode_indexes[0]);
+			const auto& set_1 = vnode_index_to_share_cell_index_set.at(face_vnode_indexes[1]);
 			std::set_intersection(set_0.begin(), set_0.end(), set_1.begin(), set_1.end(), std::back_inserter(this_face_share_cell_indexes));
 
 			if (2 < num_face_vnode) {
 				std::vector<size_t> buffer;
 				for (size_t i = 2; i < num_face_vnode; ++i) {
-					const auto& set_i = vnode_index_to_share_cell_indexes.at(face_vnode_indexes[i]);
+					const auto& set_i = vnode_index_to_share_cell_index_set.at(face_vnode_indexes[i]);
 
 					buffer.clear();
 					std::set_intersection(this_face_share_cell_indexes.begin(), this_face_share_cell_indexes.end(), set_i.begin(), set_i.end(), std::back_inserter(buffer));

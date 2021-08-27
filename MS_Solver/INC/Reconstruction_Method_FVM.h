@@ -185,7 +185,7 @@ MLP_u1<Gradient_Method>::MLP_u1(Grid<space_dimension_>&& grid) : gradient_method
     SET_TIME_POINT;
 
     //vnode index to share cell indexes
-    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
+    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_index_set);
 
     const auto& cell_elements = grid.elements.cell_elements;
 

@@ -134,17 +134,17 @@ private:
     using This_ = hMLP_BD_Reconstruction<space_dimension_, solution_order_>;
 
 private:
+    std::unordered_map<uint, std::set<uint>> vnode_index_to_matched_vnode_index_set_;
+
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P0_projected_basis_vnodes_;
+
 
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;
     std::vector<Dynamic_Euclidean_Vector> set_of_jump_qweights_;
-
-private://debug
-    std::map<std::pair<uint, uint>, Vector_Function<Polynomial<space_dimension_>, This_::num_basis_>> cell_vnode_index_to_simplex_P1_projection_basis_vector_function_;//debug
 
 public:
     hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid);
@@ -261,7 +261,7 @@ hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(Grid<space_dimension_>&&
     for (ushort i = 0; i <= solution_order_; ++i)
         this->num_Pn_projection_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
 
-    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
+    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_index_set);
 
     const auto num_cell = grid.elements.cell_elements.size();
     this->set_of_vnode_indexes_.reserve(num_cell);
@@ -794,6 +794,8 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     : hMLP_Base<space_dimension_, solution_order_>(std::move(grid)) {
     SET_TIME_POINT;
 
+    this->vnode_index_to_matched_vnode_index_set_ = std::move(grid.connectivity.vnode_index_to_matched_vnode_index_set);
+
     const auto& cell_elements = grid.elements.cell_elements;
 
     const auto num_cell = cell_elements.size();
@@ -833,11 +835,7 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
                 const auto& vnode = vnodes[j];
 
                 simplex_P0_projected_basis_vnodes.change_column(j, simplex_P0_projection_basis_vector_function(vnode));
-                simplex_P1_projected_basis_vnodes.change_column(j, simplex_P1_projection_basis_vector_function(vnode));
-
-                //debug
-                this->cell_vnode_index_to_simplex_P1_projection_basis_vector_function_.emplace(std::make_pair(i,cell_elements[i].vertex_node_indexes()[j]), simplex_P1_projection_basis_vector_function);
-                    
+                simplex_P1_projected_basis_vnodes.change_column(j, simplex_P1_projection_basis_vector_function(vnode));                    
             }
 
             this->set_of_simplex_P0_projected_basis_vnodes_.push_back(std::move(simplex_P0_projected_basis_vnodes));
@@ -925,16 +923,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     const auto set_of_vnode_index_to_simplex_P0_criterion_value = this->calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(solution_coefficients);
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(set_of_vnode_index_to_simplex_P0_criterion_value);
     const auto set_of_num_trobule_boundary = this->calculate_set_of_num_trouble_boundary(solution_coefficients);
-
-    //if (Debugger::conditions_[0]) { //debug
-    //    std::cout << "\n";
-    //    std::cout << "cell_index " << 0 << "\n";
-    //    std::cout << "P0_vnodes_values " << solution_coefficients[0] * this->set_of_simplex_P0_projected_basis_vnodes_[0] << "\n";
-    //    
-    //    std::cout << "256 node values" << set_of_vnode_index_to_simplex_P0_criterion_value[0].at(256).size();
-
-    //    std::exit(99);
-    //}
 
     const auto num_cell = solution_coefficients.size();
     
@@ -1150,13 +1138,40 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
     std::unordered_map<uint, std::vector<double>> vnode_index_to_simplex_P0_criterion_values;
     vnode_index_to_simplex_P0_criterion_values.reserve(num_vnode);
 
-    for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_indexes_)
-        vnode_index_to_simplex_P0_criterion_values.emplace(vnode_index, std::vector<double>());
-
     for (const auto& vnode_index_to_simplex_P0_criterion_value : set_of_vnode_index_to_simplex_P0_criterion_value) {
-        for (const auto& [vnode_index, simplex_P0_criterion_value] : vnode_index_to_simplex_P0_criterion_value)
+        for (const auto& [vnode_index, simplex_P0_criterion_value] : vnode_index_to_simplex_P0_criterion_value) {
+            if (!vnode_index_to_simplex_P0_criterion_values.contains(vnode_index))
+                vnode_index_to_simplex_P0_criterion_values.emplace(vnode_index, std::vector<double>());
+
             vnode_index_to_simplex_P0_criterion_values.at(vnode_index).push_back(simplex_P0_criterion_value);
+        }
     }
+
+    //consider pbdry
+    std::unordered_set<uint> considered_node_index_set;
+
+    for (const auto& [vnode_index, matched_vnode_index_set] : this->vnode_index_to_matched_vnode_index_set_) {
+        if (considered_node_index_set.contains(vnode_index))
+            continue;
+        
+        //integrate
+        std::vector<double> total_values = vnode_index_to_simplex_P0_criterion_values.at(vnode_index);
+        for (const auto matched_vnode_index : matched_vnode_index_set) {
+            const auto& values = vnode_index_to_simplex_P0_criterion_values.at(matched_vnode_index);
+            total_values.insert(total_values.end(), values.begin(), values.end());             
+        }
+
+        //copy
+        for (const auto matched_vnode_index : matched_vnode_index_set) 
+            vnode_index_to_simplex_P0_criterion_values.at(matched_vnode_index) = total_values;
+
+        vnode_index_to_simplex_P0_criterion_values.at(vnode_index) = std::move(total_values);
+
+        //prevent repetition
+        considered_node_index_set.insert(vnode_index);
+        considered_node_index_set.insert(matched_vnode_index_set.begin(), matched_vnode_index_set.end());
+    }
+
 
     std::unordered_map<uint, std::pair<double, double>> vnode_index_to_allowable_min_max_criterion_value;
     vnode_index_to_allowable_min_max_criterion_value.reserve(num_vnode);
