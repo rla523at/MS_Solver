@@ -6,7 +6,12 @@
 
 class Post_AI_Data
 {
-//private: //for test
+private:
+	using This_ = Post_AI_Data;
+
+public:
+	static inline bool is_time_to_conditionally_post_ = false;
+
 public:
 	inline static std::string path_;
 	inline static size_t num_data_;
@@ -14,9 +19,12 @@ public:
 	inline static std::vector<Text> ai_data_text_set_;
 	inline static std::vector<std::vector<size_t>> vertex_share_cell_indexes_set_;
 	inline static std::vector<size_t> target_cell_indexes_;
+
+private:
+	Post_AI_Data(void) = delete;
 	
 public:
-	static void set_path(const std::string& path);
+	static void set_path(const std::string& path) { This_::path_ = path; }
 
 	template <size_t space_dimension>
 	static void intialize(const Grid<space_dimension>& grid);
@@ -24,10 +32,22 @@ public:
 	template <size_t num_equation, size_t space_dimension>
 	static void record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
 
+	template <size_t num_equation, size_t space_dimension>
+	static void conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
+
 	template <ushort num_equation>
 	static void record_limiting_value(const size_t index, const std::array<double,num_equation>& limiting_value);
 
+	template <ushort num_equation>
+	static void conditionally_record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value);
+
 	static void post(void);
+	
+	static void conditionally_post(void);	//추가
+
+	static void post_scatter_data(const std::vector<double>& limiting_values);
+
+
 
 //private: //for test
 	template <size_t space_dimension>
@@ -51,21 +71,27 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 
 	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
 	const auto& cell_elements = grid.elements.cell_elements;
-	num_data_ = cell_elements.size();
+	This_::num_data_ = cell_elements.size();
 
-	vertex_share_cell_indexes_set_.reserve(num_data_);
-	ai_data_text_set_.resize(num_data_);
-	target_cell_indexes_.reserve(num_data_);
+	This_::vertex_share_cell_indexes_set_.reserve(num_data_);
+	This_::ai_data_text_set_.resize(num_data_);
+	This_::target_cell_indexes_.reserve(num_data_);
 
 	auto file_path = path_ + "AI_Solver_Data_1.txt";	
+
 	const auto parsed_path = ms::parse(path_, '/');
+	const auto GE_comments = parsed_path[4];
+	const auto IC_comments = parsed_path[5];
+	const auto grid_comments = ms::parse(parsed_path[7], '_');
+
 	comment_ << "***********************************\n"
 		"***********************************\n"
-		"G.E : " + parsed_path[4] + "\n" +
-		"I.C : " + parsed_path[5] + "\n" +
-		"Grid : " + parsed_path[7] + "\n" +
+		"G.E : " + GE_comments + "\n" +
+		"I.C : " + IC_comments + "\n" +
+		"Grid : " + grid_comments[0] + "\n" +
 		"***********************************\n"
-		"***********************************\n\n";	//Grid 부분 수정 필요
+		"***********************************\n\n";	
+
 	comment_.add_write(file_path);	
 
 	const auto face_share_cell_indexes_set = calculate_face_share_cell_indexes_set(grid);
@@ -142,14 +168,13 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 		//vertex_share_cell_indexes
 		vertex_share_cell_indexes_set_.push_back(std::move(vertex_share_cell_indexes));
 	}
-
 #endif
 }
 
 
+
 template <size_t num_equation, size_t space_dimension>
 void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
-#ifdef POST_AI_DATA_MODE
 
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
 	dynamic_require(num_data_ == solution_gradients.size(), "number of solution gradient should be same with number of data");
@@ -189,8 +214,40 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 		ai_data_text_set_[i] << std::move(cell_average_string) << std::move(cell_gradient_string);
 	}
 
-#endif
 }
+
+template <size_t num_equation, size_t space_dimension>
+void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
+	if (This_::is_time_to_conditionally_post_)
+		This_::record_solution_datas(solutions, solution_gradients);
+}
+
+
+
+template <ushort num_equation>
+void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
+	//size_t num_equation = limiting_value.size();
+
+	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
+		return;
+
+	std::string limiting_value_string = "@limiterFunction\n";
+
+	for (size_t i = 0; i < num_equation; ++i)
+		limiting_value_string += ms::double_to_str_sp(limiting_value[i]) + "\t";
+	limiting_value_string += "\n";
+
+	ai_data_text_set_[index] << std::move(limiting_value_string);
+
+}
+
+template <ushort num_equation>
+void Post_AI_Data::conditionally_record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
+	if (This_::is_time_to_conditionally_post_)
+		This_::record_limiting_value(index, limiting_value);
+}
+
+
 
 
 template <size_t space_dimension>
@@ -298,6 +355,7 @@ auto Post_AI_Data::convert_to_solution_strings(const std::vector<Euclidean_Vecto
 	return solution_strings;
 }
 
+
 template <size_t num_equation, size_t space_dimension>
 std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
 	const auto num_solution = solution_gradients.size();
@@ -320,21 +378,4 @@ std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(cons
 	return solution_gradient_strings;
 }
 
-template <ushort num_equation>
-void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-#ifdef POST_AI_DATA_MODE
-	//size_t num_equation = limiting_value.size();
 
-	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
-		return;
-
-	std::string limiting_value_string = "@limiterFunction\n";
-
-	for (size_t i = 0; i < num_equation; ++i)
-		limiting_value_string += ms::double_to_str_sp(limiting_value[i]) + "\t";
-	limiting_value_string += "\n";
-
-	ai_data_text_set_[index] << std::move(limiting_value_string);
-
-#endif
-}

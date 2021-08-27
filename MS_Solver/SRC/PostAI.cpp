@@ -1,15 +1,13 @@
 #include "../INC/PostAI.h"
 
-void Post_AI_Data::set_path(const std::string& path) {
-#ifdef POST_AI_DATA_MODE
 
-	path_ = path;
-
-#endif
+void Post_AI_Data::conditionally_post(void) {
+	if (This_::is_time_to_conditionally_post_)
+		This_::post();
 }
 
 void Post_AI_Data::post(void) {
-#ifdef POST_AI_DATA_MODE
+//#ifdef POST_AI_DATA_MODE
 
 	static size_t num_post = 1;
 	static size_t num_post_data = 1;
@@ -34,11 +32,24 @@ void Post_AI_Data::post(void) {
 			comment_.add_write(file_path);
 		}
 	}
-
 	target_cell_indexes_.clear();
-	//target_cell_indexes_.reset();		
-
-#endif
+//#endif
 }
 
+void Post_AI_Data::post_scatter_data(const std::vector<double>& limiting_values) {
+
+	const size_t num_cell = limiting_values.size();
+
+	std::string limting_value_sentence;
+
+	for (size_t i = 0; i < num_cell; i++)
+		limting_value_sentence += ms::double_to_string(limiting_values[i]) + "\n";
+	limting_value_sentence += "\n";
+
+	Text limiting_value_text = { limting_value_sentence };
+
+	const auto file_name = "limiting values.txt";
+	const auto file_path = path_ + "scatter_data/" + file_name;
+	limiting_value_text.add_write(file_path);
+}
 

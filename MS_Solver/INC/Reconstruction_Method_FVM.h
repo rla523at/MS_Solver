@@ -221,15 +221,15 @@ template <typename Gradient_Method>
 void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     const auto solution_gradients = this->gradient_method_.calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
-
-    Post_AI_Data::record_solution_datas(solutions, solution_gradients);//postAI
-
     const auto num_cell = solutions.size();
-        
+
+    Post_AI_Data::conditionally_record_solution_datas(solutions, solution_gradients);//postAI
+
     std::vector<double> values1(num_cell);//post
     std::vector<double> values2(num_cell);//post
     std::vector<double> values3(num_cell);//post
     std::vector<double> values4(num_cell);//post
+    std::vector<double> values5(num_cell,-1);//postAI 
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
@@ -250,26 +250,26 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
-        Post_AI_Data::record_limiting_value(i, limiting_values);//postAI
+        Post_AI_Data::conditionally_record_limiting_value(i, limiting_values);//postAI
 
         values1[i] = limiting_values[0];//post
         values2[i] = i;//post
         values3[i] = gradient.at(0,0);//post
         values4[i] = gradient.at(0,1);//post
+        values5[i] = limiting_values[0];//postAI
 
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 
-    
     Post_Solution_Data::conditionally_record_cell_variables("limiting_value", values1);//post
     Post_Solution_Data::conditionally_record_cell_variables("cell_index", values2);//post
     Post_Solution_Data::conditionally_record_cell_variables("gradient_x", values3);//post
     Post_Solution_Data::conditionally_record_cell_variables("gradient_y", values4);//post
     Post_Solution_Data::conditionally_post_solution(solutions);//post
 
-
-    Post_AI_Data::post();
+    Post_AI_Data::post_scatter_data(values5);//postAI
+    Post_AI_Data::conditionally_post();//postAI
 };
 
 
@@ -327,21 +327,22 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
     const auto num_solution = solutions.size();    
 
-    
     std::vector<uint> cell_indexes(num_solution);
     for (uint i = 0; i < num_solution; ++i)
         cell_indexes[i] = i;    //post
 
     std::vector<double> ANN_limiter_values(num_solution, 1);//post
+    std::vector<double> values(num_solution, -1);//postAI
 
     for (size_t i = 0; i < num_solution; ++i) {
-        if (this->is_constant_region(solutions, i))
-            continue;
 
+        if (this->is_constant_region(solutions, i)) 
+            continue;
+        
         const auto ordered_indexes = this->ordering_function(solutions, i);
         const auto num_ordered_index = ordered_indexes.size();
 
-        const auto num_input_values = 3 * num_ordered_index;    //input : [27 x 1]
+        const auto num_input_values = 3 * num_ordered_index;    //input : [27x1]
         std::vector<double> input_values(num_input_values);
 
         for (size_t j = 0; j < num_equation_; ++j) {
@@ -363,14 +364,17 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code ??
-                
+        this->solution_gradients_[i] *= input[0]; //temporal code
+       
         ANN_limiter_values[i] = input[0];//post
+        values[i] = ANN_limiter_values[i];
     }
 
     Post_Solution_Data::conditionally_record_cell_variables("cell_index", cell_indexes);//post
     Post_Solution_Data::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
     Post_Solution_Data::conditionally_post_solution(solutions);//post
+
+    Post_AI_Data::post_scatter_data(values);//postAI
 }
 
 
@@ -421,6 +425,9 @@ std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::v
 
             for (const auto candidate_cell_index : candidate_cell_indexes)
                 temporary_solutions.push_back(solutions[candidate_cell_index].at(0));
+
+            std::reverse(temporary_solutions.begin(), temporary_solutions.end());
+            std::reverse(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
 
             const auto max_solution_iter = std::max_element(temporary_solutions.begin(), temporary_solutions.end());
             const auto pos = max_solution_iter - temporary_solutions.begin();

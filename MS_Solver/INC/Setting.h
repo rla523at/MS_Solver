@@ -7,7 +7,7 @@
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						RQ10
+#define __GRID_FILE_NAMES__						RQ50
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__FVM__
@@ -58,7 +58,7 @@
 // Sine Wave
 #define X_WAVE_LENGTH					1.0
 #define Y_WAVE_LENGTH					1.0
-#define Z_WAVE_LENGTH					1
+#define Z_WAVE_LENGTH					1.0
 
 // Mode (comment out == turn off)
 #define POST_AI_DATA_MODE

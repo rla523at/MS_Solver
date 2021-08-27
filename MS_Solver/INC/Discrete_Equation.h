@@ -21,12 +21,12 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-
         //Post_Solution_Data::post_solution(solutions, "initial");//post
         Post_Solution_Data::is_time_to_conditionally_post_ = true;
+        Post_AI_Data::is_time_to_conditionally_post_ = true;
 
         semi_discrete_equation.reconstruct(solutions);
-
+      
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
@@ -49,7 +49,6 @@ public:
             Log::content_ << "computation cost: " << std::to_string(GET_TIME_DURATION) << "s \n";
             Log::print();
         }
-
 
         Log::content_ << "\n================================================================================\n";
         Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";

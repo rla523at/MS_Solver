@@ -40,17 +40,16 @@ int main(void) {
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
 
-		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
-		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
-
 		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
 
+		Post_Solution_Data::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
+		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
+		Post_AI_Data::intialize(grid);
 		Post_Solution_Data::post_grid(grid.elements.cell_elements);
 
-		Post_AI_Data::intialize(grid);
 		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
-
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
+
 		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
 
 #ifdef ERROR_CALCULATION
