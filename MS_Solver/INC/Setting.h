@@ -3,17 +3,15 @@
 
 // ########################################## OPTION ##################################################################
 
-//#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
-
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
 #define __GRID_FILE_NAMES__						OrthoTri64
-#define __GOVERNING_EQUATION__					__BURGERS__
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
@@ -30,9 +28,9 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.4
-#define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		1
+#define __SOLVE_END_CONDITION_CONSTANT__		1.0
+#define __SOLVE_POST_CONDITION__				__POST_BY_TIME__
+#define __SOLVE_POST_CONDITION_CONSTANT__		2.0
 #define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS

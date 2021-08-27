@@ -39,9 +39,12 @@ public:
 	template <typename... Args>
 	Euclidean_Vector(Args... args);
 
+public:
 	Euclidean_Vector& operator+=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator-=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator*=(const double scalar);
+
+public:
 	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
 	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
 	Euclidean_Vector operator*(const double scalar) const;
@@ -49,18 +52,22 @@ public:
 	//bool operator==(const Dynamic_Euclidean_Vector& y) const;
 	double operator[](const size_t position) const;
 
+public:
+	Euclidean_Vector& be_normalize(void);
+	double* data(void);
+
+public:
 	double at(const size_t position) const;
 	auto begin(void) const;
 	auto end(void) const;
-	static constexpr size_t dimension(void);
 	double inner_product(const Euclidean_Vector& y) const;
 	double L1_norm(void) const;
 	double norm(void) const;
 	bool is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const;
 	std::string to_string(void) const;
 
-	Euclidean_Vector& be_normalize(void);
-	double* data(void);
+public:
+	static constexpr size_t dimension(void);
 };
 
 
