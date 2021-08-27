@@ -11,8 +11,11 @@ struct Grid_Connectivity
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes; // vnode				:= node at vertex, 
 																				// share_cell_indexes	:= cell indexes which shares vnode
 	std::vector<uint> boundary_oc_indexes;
-	std::vector<std::pair<uint, uint>> periodic_boundary_oc_nc_index_pairs;		// {owner cell index, neighbor cell index}
-	std::vector<std::pair<uint, uint>> inner_face_oc_nc_index_pairs;			// {owner cell index, neighbor cell index}
+
+	std::vector<std::pair<uint, uint>> periodic_boundary_oc_nc_index_pairs;			// {owner cell index, neighbor cell index}
+	std::unordered_map<uint, std::set<uint>> vnode_index_to_matched_vnode_indexes;
+
+	std::vector<std::pair<uint, uint>> inner_face_oc_nc_index_pairs;				// {owner cell index, neighbor cell index}
 };
 
 
@@ -142,7 +145,7 @@ template <ushort space_dimension>
 Grid_Connectivity Grid_Builder<space_dimension>::make_grid_connectivity(const Grid_Elements<space_dimension>& grid_elements) {
 	SET_TIME_POINT;
 
-	const auto& [cell_elements, boundary_elements, periodic_boundary_element_pairs, inner_face_elements] = grid_elements;
+	const auto& [cell_elements, boundary_elements, pbdry_element_pairs, inner_face_elements] = grid_elements;
 
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes;
 
@@ -173,53 +176,61 @@ Grid_Connectivity Grid_Builder<space_dimension>::make_grid_connectivity(const Gr
 	}
 
 	//periodic boundary grid connectivity
-	const auto num_pbdry_pair = periodic_boundary_element_pairs.size();
-	std::vector<std::pair<uint, uint>> periodic_boundary_oc_nc_index_pairs(num_pbdry_pair);
+	const auto num_vnode = vnode_index_to_share_cell_indexes.size();
+	const auto num_pbdry_pair = pbdry_element_pairs.size();
+	std::vector<std::pair<uint, uint>> pbdry_oc_nc_index_pairs(num_pbdry_pair);	
+	std::unordered_map<uint, std::set<uint>> vnode_index_to_matched_vnode_index_set;	
+	vnode_index_to_matched_vnode_index_set.reserve(num_vnode);
 
 	for (size_t i = 0; i < num_pbdry_pair; ++i) {
-		const auto& [i_pbdry_element, j_pbdry_element] = periodic_boundary_element_pairs[i];
-
-		const auto cell_indexes_have_i = find_cell_indexes_have_these_vnodes(vnode_index_to_share_cell_indexes, i_pbdry_element.vertex_node_indexes());
-		const auto cell_indexes_have_j = find_cell_indexes_have_these_vnodes(vnode_index_to_share_cell_indexes, j_pbdry_element.vertex_node_indexes());
-		dynamic_require(cell_indexes_have_i.size() == 1, "periodic boundary should have unique owner cell");
-		dynamic_require(cell_indexes_have_j.size() == 1, "periodic boundary should have unique neighbor cell");
-
-		// set i as owner side element and j as neighbor side elemnt
-		const auto oc_index = cell_indexes_have_i.front();
-		const auto nc_index = cell_indexes_have_j.front();
-		periodic_boundary_oc_nc_index_pairs[i] = { oc_index,nc_index };
-	}
-
-	// update vnode_index_to_share_cell_indexes
-	for (size_t i = 0; i < num_pbdry_pair; ++i) {
-		const auto [oc_index, nc_index] = periodic_boundary_oc_nc_index_pairs[i];
-		const auto& [oc_side_element, nc_side_element] = periodic_boundary_element_pairs[i];
-
-		const auto oc_side_vnode_indexes = oc_side_element.vertex_node_indexes();
-		const auto nc_side_vnode_indexes = nc_side_element.vertex_node_indexes();
-
-		for (const auto vnode_index : oc_side_vnode_indexes) {
-			auto& vnode_share_cell_indexes = vnode_index_to_share_cell_indexes.at(vnode_index);
-			vnode_share_cell_indexes.insert(nc_index);
-		}
-		for (const auto vnode_index : nc_side_vnode_indexes) {
-			auto& cell_container_indexes = vnode_index_to_share_cell_indexes.at(vnode_index);
-			cell_container_indexes.insert(oc_index);
-		}
-	}
-
-	for (uint i = 0; i < num_pbdry_pair; ++i) {
-		const auto& [oc_side_element, nc_side_element] = periodic_boundary_element_pairs[i];
+		const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
 
 		const auto periodic_vnode_index_pairs = oc_side_element.find_periodic_vnode_index_pairs(nc_side_element);
 		for (const auto [i_vnode_index, j_vnode_index] : periodic_vnode_index_pairs) {
-			auto& i_vnode_share_cell_indexes = vnode_index_to_share_cell_indexes.at(i_vnode_index);
-			auto& j_vnode_share_cell_indexes = vnode_index_to_share_cell_indexes.at(j_vnode_index);
+			if (vnode_index_to_matched_vnode_index_set.find(i_vnode_index) == vnode_index_to_matched_vnode_index_set.end())
+				vnode_index_to_matched_vnode_index_set.emplace(i_vnode_index, std::set<uint>());
 
-			if (i_vnode_share_cell_indexes != j_vnode_share_cell_indexes) {
-				i_vnode_share_cell_indexes.insert(j_vnode_share_cell_indexes.begin(), j_vnode_share_cell_indexes.end());
-				j_vnode_share_cell_indexes.insert(i_vnode_share_cell_indexes.begin(), i_vnode_share_cell_indexes.end());
+			if (vnode_index_to_matched_vnode_index_set.find(j_vnode_index) == vnode_index_to_matched_vnode_index_set.end())
+				vnode_index_to_matched_vnode_index_set.emplace(j_vnode_index, std::set<uint>());
+
+			vnode_index_to_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
+			vnode_index_to_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
+		}
+
+		const auto oc_indexes = find_cell_indexes_have_these_vnodes(vnode_index_to_share_cell_indexes, oc_side_element.vertex_node_indexes());
+		const auto nc_indexes = find_cell_indexes_have_these_vnodes(vnode_index_to_share_cell_indexes, nc_side_element.vertex_node_indexes());
+		dynamic_require(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
+		dynamic_require(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
+
+		const auto oc_index = oc_indexes.front();
+		const auto nc_index = nc_indexes.front();
+		pbdry_oc_nc_index_pairs[i] = { oc_index,nc_index };
+	}
+
+	// check missing match - periodic boundary conner
+	for (auto& [vnode_index, matched_vnode_index_set] : vnode_index_to_matched_vnode_index_set) {
+		if (matched_vnode_index_set.size() == 1)
+			continue;
+		
+		for (const auto matched_vnode_index : matched_vnode_index_set) {
+			const auto& other_matched_vnode_index_set = vnode_index_to_matched_vnode_index_set.at(matched_vnode_index);
+			
+			//other matched vnode index should be included my matched vnode index
+			for (const auto other_matched_vnode_index : other_matched_vnode_index_set) {
+				if (other_matched_vnode_index != vnode_index) //except my vnode index
+					matched_vnode_index_set.insert(other_matched_vnode_index);
 			}
+		}
+	}
+
+	// reflect pbdry connectivity to vnode_index_to_share_cell_indexes
+	for (const auto& [vnode_index, matched_vnode_index_set] : vnode_index_to_matched_vnode_index_set) {
+		for (const auto matched_vnode_index : matched_vnode_index_set) {
+			auto& i_set = vnode_index_to_share_cell_indexes.at(vnode_index);
+			auto& j_set = vnode_index_to_share_cell_indexes.at(matched_vnode_index);
+
+			i_set.insert(j_set.begin(), j_set.end());
+			j_set.insert(i_set.begin(), i_set.end());
 		}
 	}
 
@@ -242,7 +253,7 @@ Grid_Connectivity Grid_Builder<space_dimension>::make_grid_connectivity(const Gr
 	Log::content_ << std::left << std::setw(50) << "@ Figure out connectivity" << " ----------- " << GET_TIME_DURATION << "s\n\n";
 	Log::print();
 
-	return { vnode_index_to_share_cell_indexes,	boudnary_oc_indexes, periodic_boundary_oc_nc_index_pairs, inner_face_oc_nc_index_pairs };
+	return { vnode_index_to_share_cell_indexes,	boudnary_oc_indexes, pbdry_oc_nc_index_pairs, vnode_index_to_matched_vnode_index_set, inner_face_oc_nc_index_pairs };
 }
 
 

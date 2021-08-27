@@ -26,10 +26,6 @@ public:
         Tecplot::post_condition_ = true;//post
         //Tecplot::post_solution(solutions, "initial");//post
 
-        Debugger::conditions_.resize(1, false); //debug
-        Debugger::count_ = 0; //debug
-
-        Debugger::conditions_[0] = true;//debug
         semi_discrete_equation.reconstruct(solutions);
 
         SET_TIME_POINT;
@@ -47,9 +43,6 @@ public:
             SET_TIME_POINT;
             auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
             Solve_Controller::controll_time_step(current_time, time_step);
-
-            //if (Debugger::count_++ == 6) //debug
-            //    Debugger::conditions_[0] = true; //debug
 
             Time_Integral_Method::update_solutions(semi_discrete_equation, solutions, time_step);
             current_time += time_step;

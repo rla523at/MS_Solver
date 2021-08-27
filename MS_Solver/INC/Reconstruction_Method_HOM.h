@@ -573,12 +573,12 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 
         auto& solution_coefficient = solution_coefficients[i];
 
-        if (Debugger::conditions_[0] && (i == 0)) { //debug
-            std::cout << "\n";
-            std::cout << "cell_index " << i << "\n";
-            std::cout << "order " << temporal_solution_order << "\n";
-            std::cout << "vnode_indexes " << vnode_indexes << "\n";
-        }
+        //if (Debugger::conditions_[0] && (i == 0)) { //debug
+        //    std::cout << "\n";
+        //    std::cout << "cell_index " << i << "\n";
+        //    std::cout << "order " << temporal_solution_order << "\n";
+        //    std::cout << "vnode_indexes " << vnode_indexes << "\n";
+        //}
 
         while (true) {
             bool is_normal = true;
@@ -604,14 +604,14 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                 //    std::cout << "is_smooth_extrem " << MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, higher_mode_criterion_value, P1_mode_criterion_value, allowable_min, allowable_max) << "\n";
                 //}
 
-                if (Debugger::conditions_[0] && i == 0 && vnode_index == 255) { //debug
-                    std::cout << std::boolalpha << std::setprecision(16);
-                    std::cout << "vnode_index " << vnode_index << "\n";
-                    std::cout << "simplex_P1_projected_criterion_value " << P1_projected_criterion_value << "\n";
-                    std::cout << "min " << allowable_min << "\n";
-                    std::cout << "max " << allowable_max << "\n";
-                    std::cout << "is_satisfy_MLP_condition " << P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max) << "\n";
-                }
+                //if (Debugger::conditions_[0] && i == 0 && vnode_index == 255) { //debug
+                //    std::cout << std::boolalpha << std::setprecision(16);
+                //    std::cout << "vnode_index " << vnode_index << "\n";
+                //    std::cout << "simplex_P1_projected_criterion_value " << P1_projected_criterion_value << "\n";
+                //    std::cout << "min " << allowable_min << "\n";
+                //    std::cout << "max " << allowable_max << "\n";
+                //    std::cout << "is_satisfy_MLP_condition " << P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max) << "\n";
+                //}
  
                 if (!Constant_Region_Detector::is_constant(criterion_value, P0_criterion_value, volume) &&
                     !P1_Projected_MLP_Condition::is_satisfy(P1_projected_criterion_value, allowable_min, allowable_max) &&
@@ -621,8 +621,8 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                 }
             }
 
-            if (Debugger::conditions_[0] && i == 0)
-                std::exit(523);
+            //if (Debugger::conditions_[0] && i == 0)
+            //    std::exit(523);
 
             if (is_normal)
                 break;
@@ -631,23 +631,23 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                 temporal_solution_order = 1;
                 solution_coefficient *= this->Pn_projection_matrix(temporal_solution_order);
                 P1_projected_solution_vnodes = solution_coefficient * this->set_of_P1_projected_basis_vnodes_[i];
-
                 double limiting_value = 1.0;
                 for (ushort j = 0; j < num_vnode; ++j) {
                     const auto vnode_index = vnode_indexes[j];
                     const auto [allowable_min, allowable_max] = vnode_index_to_allowable_min_max_criterion_value.at(vnode_index);
-
+    
                     const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
                     const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
-
+    
                     limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max));
                 }
-
+    
                 solution_coefficient *= this->limiting_matrix(limiting_value);
                 break;
             }
-            else                     
-                solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order); //limiting highest mode
+            else
+            solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order); //limiting highest mode       
+
         }
         
         solution_order[i] = temporal_solution_order; //post

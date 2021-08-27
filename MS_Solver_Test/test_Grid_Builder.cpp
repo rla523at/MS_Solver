@@ -17,6 +17,26 @@ TEST(Grid, set_of_face_share_cell_indexes) {
 	EXPECT_EQ(ref, result);
 }
 
+TEST(Grid, vnode_index_to_matched_vnode_index_set_1) {
+	constexpr ushort space_dimension = 2;
+
+	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
+	const auto result = grid.connectivity.vnode_index_to_matched_vnode_indexes.at(0);
+
+	const std::set<uint> ref = { 3,12,15 };
+	EXPECT_EQ(ref, result);
+}
+
+TEST(Grid, vnode_index_to_share_cell_indexes_1) {
+	constexpr ushort space_dimension = 2;
+
+	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
+	const auto result = grid.connectivity.vnode_index_to_share_cell_indexes.at(0);
+
+	const std::set<uint> ref = { 0,2,6,8 };
+	EXPECT_EQ(ref, result);
+}
+
 //
 //GTEST_TEST(Grid_Info_Extractor, volume) {
 //	auto grid_data = Grid_File_Convertor<Gmsh, 2>::convert("RSC/Grid/Quad_10.msh");
