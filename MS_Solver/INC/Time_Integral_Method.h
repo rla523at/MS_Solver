@@ -45,32 +45,17 @@ template <typename Semi_Discrete_Equation, typename Solution>
 static void SSPRK33::update_solutions(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions, const double time_step) {
     const auto num_sol = solutions.size();
 
-    ////stage1
-    //const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);
-    //const auto initial_solutions = solutions;
-
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] += time_step * initial_RHS[i];
-    //const auto stage1_RHS = semi_discrete_equation.calculate_RHS(solutions);
-
-    ////stage 2
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = 0.25 * (3 * initial_solutions[i] + solutions[i] + time_step * stage1_RHS[i]);
-    //const auto stage2_RHS = semi_discrete_equation.calculate_RHS(solutions);
-
-    ////stage3
-    //for (size_t i = 0; i < num_sol; ++i)
-    //    solutions[i] = c1_3 * (initial_solutions[i] + 2 * solutions[i] + 2 * time_step * stage2_RHS[i]);
-
-        //stage1
     const auto initial_solutions = solutions;
     const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);
 
+    Post_AI_Data::is_time_to_conditionally_post_ = true;//postAI
+    //stage 1
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += time_step * initial_RHS[i];
     semi_discrete_equation.reconstruct(solutions);
-    
+
     const auto stage1_RHS = semi_discrete_equation.calculate_RHS(solutions);
+    Post_AI_Data::is_time_to_conditionally_post_ = false;//postAI
 
     //stage 2
     for (size_t i = 0; i < num_sol; ++i)
@@ -79,7 +64,7 @@ static void SSPRK33::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     
     const auto stage2_RHS = semi_discrete_equation.calculate_RHS(solutions);
 
-    //stage3
+    //stage 3
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] = c1_3 * (initial_solutions[i] + 2 * solutions[i] + 2 * time_step * stage2_RHS[i]);
     semi_discrete_equation.reconstruct(solutions);

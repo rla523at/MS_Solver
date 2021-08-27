@@ -3,15 +3,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"D:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						OrthoTri64
-#define __GOVERNING_EQUATION__					__BURGERS__
+#define __GRID_FILE_NAMES__						RQ50
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
+#define __SPATIAL_DISCRETE_METHOD__				__FVM__
+#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
@@ -24,19 +24,19 @@
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
-#define __TIME_INTEGRAL_METHOD__				__SSPRK54__
+#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.4
+#define __SOLVE_END_CONDITION_CONSTANT__		2
 #define __SOLVE_POST_CONDITION__				__POST_BY_TIME__
-#define __SOLVE_POST_CONDITION_CONSTANT__		0.04
-#define __POST_ORDER__							1
+#define __SOLVE_POST_CONDITION_CONSTANT__		0.01
+#define __POST_ORDER__							0
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
-// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __MODIFIED_SOD__, __CONSTANT1__
+// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __MODIFIED_SOD__, __CONSTANT1__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
@@ -52,18 +52,19 @@
 // #################################### USER DEFINE SETTING ############################################################
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				2.0
+#define Y_ADVECTION_SPEED				0.5
 #define Z_ADVECTION_SPEED				0.5
 
 // Sine Wave
 #define X_WAVE_LENGTH					1.0
 #define Y_WAVE_LENGTH					1.0
-#define Z_WAVE_LENGTH					1
+#define Z_WAVE_LENGTH					1.0
 
 // Mode (comment out == turn off)
+#define POST_AI_DATA_MODE
 
 #if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
-#define ERROR_CALCULATION_MODE
+//#define ERROR_CALCULATION_MODE
 #endif
 
 #if __GOVERNING_EQUATION__		== 		__EULER__
@@ -114,6 +115,12 @@
 #endif
 #if		__INITIAL_CONDITION__ == __SQUARE_WAVE__
 #define INITIAL_CONDITION	SET_FORMAT1(Square_Wave, __DIMENSION__)
+#endif
+#if		__INITIAL_CONDITION__ == __CIRCLE_WAVE__
+#define INITIAL_CONDITION	SET_FORMAT1(Circle_Wave, __DIMENSION__)
+#endif
+#if		__INITIAL_CONDITION__ == __GAUSSIAN_WAVE__
+#define INITIAL_CONDITION	SET_FORMAT1(Gaussian_Wave, __DIMENSION__)
 #endif
 #if		__INITIAL_CONDITION__ == __MODIFIED_SOD__
 #define INITIAL_CONDITION	SET_FORMAT1(Modified_SOD, __DIMENSION__)

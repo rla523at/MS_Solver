@@ -1,15 +1,13 @@
 #include "../INC/PostAI.h"
 
-void Post_AI_Data::set_path(const std::string& path) {
-#ifdef POST_AI_DATA
 
-	path_ = path;
-
-#endif
+void Post_AI_Data::conditionally_post(void) {
+	if (This_::is_time_to_conditionally_post_)
+		This_::post();
 }
 
 void Post_AI_Data::post(void) {
-#ifdef POST_AI_DATA
+//#ifdef POST_AI_DATA_MODE
 
 	static size_t num_post = 1;
 	static size_t num_post_data = 1;
@@ -31,32 +29,27 @@ void Post_AI_Data::post(void) {
 
 			file_name = "AI_Solver_Data_" + std::to_string(++num_post) + ".txt";
 			file_path = path_ + file_name;
+			comment_.add_write(file_path);
 		}
 	}
-
-	target_cell_indexes_.reset();
-
-#endif
+	target_cell_indexes_.clear();
+//#endif
 }
 
-std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Dynamic_Matrix>& solution_gradients) {
-	const auto num_solution = solution_gradients.size();
-	const auto [num_equation, space_dimension] = solution_gradients.front().size();
+void Post_AI_Data::post_scatter_data(const std::vector<double>& limiting_values) {
 
-	std::vector<std::string> solution_gradient_strings;
-	solution_gradient_strings.reserve(num_solution);
+	const size_t num_cell = limiting_values.size();
 
-	std::string solution_gradient_string;
-	for (size_t i = 0; i < num_solution; ++i) {
+	std::string limting_value_sentence;
 
-		const auto& solution_gradient = solution_gradients[i];
-		for (size_t j = 0; j < num_equation; ++j)
-			for (size_t k = 0; k < space_dimension; ++k)
-				solution_gradient_string += ms::double_to_str_sp(solution_gradient.at(j, k)) + "\t";
+	for (size_t i = 0; i < num_cell; i++)
+		limting_value_sentence += ms::double_to_string(limiting_values[i]) + "\n";
+	limting_value_sentence += "\n";
 
-		solution_gradient_strings.push_back(std::move(solution_gradient_string));
-	}
+	Text limiting_value_text = { limting_value_sentence };
 
-	return solution_gradient_strings;
+	const auto file_name = "limiting values.txt";
+	const auto file_path = path_ + "scatter_data/" + file_name;
+	limiting_value_text.add_write(file_path);
 }
 
