@@ -926,12 +926,15 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(set_of_vnode_index_to_simplex_P0_criterion_value);
     const auto set_of_num_trobule_boundary = this->calculate_set_of_num_trouble_boundary(solution_coefficients);
 
-    if (Debugger::conditions_[0]) { //debug
-        std::cout << "\n";
-        std::cout << "cell_index " << 0 << "\n";
-        std::cout << "P0_vnodes_values " << solution_coefficients[0] * this->set_of_simplex_P0_projected_basis_vnodes_[0] << "\n";
-        std::exit(99);
-    }
+    //if (Debugger::conditions_[0]) { //debug
+    //    std::cout << "\n";
+    //    std::cout << "cell_index " << 0 << "\n";
+    //    std::cout << "P0_vnodes_values " << solution_coefficients[0] * this->set_of_simplex_P0_projected_basis_vnodes_[0] << "\n";
+    //    
+    //    std::cout << "256 node values" << set_of_vnode_index_to_simplex_P0_criterion_value[0].at(256).size();
+
+    //    std::exit(99);
+    //}
 
     const auto num_cell = solution_coefficients.size();
     
@@ -1159,14 +1162,6 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
     vnode_index_to_allowable_min_max_criterion_value.reserve(num_vnode);
 
     for (const auto& [vnode_index, simplex_P0_criterion_values] : vnode_index_to_simplex_P0_criterion_values) {
-
-        //if (Debugger::conditions_[0] && vnode_index == 433) {//debug
-        //    std::cout << std::setprecision(16);//debug
-        //    std::cout << "vnode_index " << vnode_index << "\n";//debug
-        //    std::cout << "simplex_p0_values " << simplex_P0_criterion_values << "\n";//debug
-        //    std::exit(523);//debug            
-        //}
-
         const auto min_criterion_value = *std::min_element(simplex_P0_criterion_values.begin(), simplex_P0_criterion_values.end());
         const auto max_criterion_value = *std::max_element(simplex_P0_criterion_values.begin(), simplex_P0_criterion_values.end());
 
