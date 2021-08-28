@@ -8,7 +8,7 @@ Burgers_2D::Physical_Flux_ Burgers_2D::physical_flux(const Solution_& solution) 
 }
 
 std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::vector<Solution_>& solutions) {
-	static size_t num_solution = solutions.size();
+	const auto num_solution = solutions.size();
 
 
 	std::vector<Physical_Flux_> physical_fluxes(num_solution);
@@ -22,7 +22,7 @@ std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::v
 }
 
 std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-	static size_t num_solution = solutions.size();
+	const auto num_solution = solutions.size();
 
 	std::vector<std::array<double, Burgers_2D::space_dimension_>> projected_maximum_lambdas(num_solution);
 	for (size_t i = 0; i < num_solution; ++i) {
@@ -57,7 +57,7 @@ Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conserv
 }
 
 std::vector<std::array<double, Euler_2D::space_dimension_>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables) {
-	static auto num_solution = conservative_variables.size();
+	auto num_solution = conservative_variables.size();
 
 	std::vector<Solution_> primitive_variables;
 	primitive_variables.reserve(num_solution);
@@ -107,7 +107,7 @@ Euler_2D::Physical_Flux_ Euler_2D::physical_flux(const Solution_& conservative_v
 }
 
 std::vector<Euler_2D::Physical_Flux_> Euler_2D::physical_fluxes(const std::vector<Solution_>& conservative_variables, const std::vector<Solution_>& primitive_variables) {
-	static const size_t num_solution = conservative_variables.size();
+	const size_t num_solution = conservative_variables.size();
 	
 	std::vector<Physical_Flux_> physical_fluxes;
 	physical_fluxes.reserve(num_solution);

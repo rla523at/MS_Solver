@@ -113,8 +113,7 @@ auto Linear_Advection_2D<x_advection_speed, y_advection_speed>::physical_flux(co
 
 template <double x_advection_speed, double y_advection_speed>
 auto Linear_Advection_2D<x_advection_speed, y_advection_speed>::physical_fluxes(const std::vector<Solution_>& solutions) {
-    //static size_t num_solution = solutions.size();
-    const size_t num_solution = solutions.size();
+    const auto num_solution = solutions.size();
 
     std::vector<Physical_Flux_> physical_fluxes(num_solution);
     for (size_t i = 0; i < num_solution; ++i) {
@@ -127,11 +126,10 @@ auto Linear_Advection_2D<x_advection_speed, y_advection_speed>::physical_fluxes(
 
 template <double x_advection_speed, double y_advection_speed>
 auto Linear_Advection_2D<x_advection_speed, y_advection_speed>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-    //static size_t num_solution = solutions.size();
-    const size_t num_solution = solutions.size();
+    const auto num_solution = solutions.size();
 
-    static double absolute_x_advection_speed = std::abs(x_advection_speed);
-    static double absolute_y_advection_speed = std::abs(y_advection_speed);
+    const auto absolute_x_advection_speed = std::abs(x_advection_speed);
+    const auto absolute_y_advection_speed = std::abs(y_advection_speed);
 
     std::vector<std::array<double, This_::space_dimension_>> projected_maximum_lambdas(num_solution, { absolute_x_advection_speed,absolute_y_advection_speed });
     return projected_maximum_lambdas;

@@ -6,6 +6,7 @@
 
 class IC {}; //Initial Condition
 
+
 class Constant1_2D : public IC {
 private:
     static constexpr ushort num_eqation_ = 1;
@@ -96,6 +97,7 @@ public:
     static std::string name(void) { return "SOD"; };
 };
 
+
 class Modified_SOD_2D : public IC {
 private:
     static constexpr size_t num_eqation_ = 4;
@@ -111,6 +113,23 @@ public:
     static Solution_ calculate_solution(const Space_Vector_& space_vector);
     static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
     static std::string name(void) { return "Modifid_SOD"; };
+};
+
+
+class Shu_Osher_2D : public IC {
+private:
+    static constexpr size_t num_eqation_ = 4;
+    static constexpr size_t dimension_ = 2;
+
+    using Space_Vector_ = Euclidean_Vector<dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+private:
+    Shu_Osher_2D(void) = delete;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::string name(void) { return "Shu_Osher"; };
 };
 
 

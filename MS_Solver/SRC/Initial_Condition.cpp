@@ -157,3 +157,36 @@ std::vector<Modified_SOD_2D::Solution_> Modified_SOD_2D::calculate_solutions(con
 
 	return solutions;
 }
+
+Shu_Osher_2D::Solution_ Shu_Osher_2D::calculate_solution(const Space_Vector_& space_vector) {
+	constexpr auto gamma = 1.4;
+	constexpr auto c = 1 / (1.4 - 1);
+	constexpr auto discontinuity_location = -4.0;
+
+	const auto x_coordinate = space_vector.at(0);
+
+	if (x_coordinate < discontinuity_location) {
+		constexpr auto rho = 3.857143;
+		constexpr auto u = 2.629369;
+		constexpr auto v = 0.0;
+		constexpr auto p = 10.333333;
+
+		constexpr auto rhou = rho * u;
+		constexpr auto rhov = rho * v;
+		constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+	else {
+		const auto rho = 1 + 0.2 * std::sin(5 * x_coordinate);
+		constexpr auto u = 0.0;
+		constexpr auto v = 0.0;
+		constexpr auto p = 1.0;
+
+		const auto rhou = rho * u;
+		const auto rhov = rho * v;
+		const auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+		return { rho, rhou, rhov, rhoE };
+	}
+}

@@ -11,9 +11,10 @@
 // INITIAL CONDITION
 #define __SINE_WAVE__					30
 #define __SQUARE_WAVE__					31
-#define __MODIFIED_SOD__				32
-#define __CONSTANT1__					33
-#define __SOD__							34
+#define __CONSTANT1__					32
+#define __SOD__							33
+#define __MODIFIED_SOD__				34
+#define __SHU_OSHER__					35
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41
