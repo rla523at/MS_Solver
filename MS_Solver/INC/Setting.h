@@ -3,11 +3,11 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Verification/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shu_Osher_Quad_301x7,Shu_Osher_OrthoTri_301x7
+#define __GRID_FILE_NAMES__						Shu_Osher_OrthoTri_301x7
 #define __GOVERNING_EQUATION__					__EULER__
 #define __INITIAL_CONDITION__					__SHU_OSHER__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
@@ -27,8 +27,8 @@
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__END_BY_ITER__
-#define __SOLVE_END_CONDITION_CONSTANT__		10
+#define __SOLVE_END_CONDITION__					__END_BY_TIME__
+#define __SOLVE_END_CONDITION_CONSTANT__		1.8
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2
