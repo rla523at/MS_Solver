@@ -122,11 +122,8 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
         const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
 
-        //if (!(std::isnormal(x_radii) && std::isnormal(y_radii)))
-        //    std::cout << "Debug";
-
-        dynamic_require(std::isnormal(x_radii) && std::isnormal(y_radii), "time step should be normal number");
-        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
+        dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "time step should be finite number");
+        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);        
     }
 
     static const auto solution_order = Reconstruction_Method::solution_order();
@@ -158,7 +155,18 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
         ms::gemm(flux_quadrature_points, This_::gradient_basis_weights_[i], delta_rhs);
 
         RHS[i] += delta_rhs;
+
+        //if ((Debugger::conditions_[0] || Debugger::conditions_[1]) && (i == 1200 || i == 1202)) {
+        //    std::cout << "cell_index " << i << "\n";
+        //    std::cout << "Cell_RHS\n" << delta_rhs << "\n\n"; //debug
+        //}
     }
+
+    //if (Debugger::conditions_[0])//debug
+    //    Debugger::conditions_[0] = false;
+
+    //if (Debugger::conditions_[1])//debug
+    //    exit(523);
 }
 
 

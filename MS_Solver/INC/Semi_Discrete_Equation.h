@@ -79,6 +79,19 @@ public:
         this->inner_faces_.calculate_RHS(RHS, solutions);
         this->cells_.calculate_RHS(RHS, solutions);
 
+        //if (Debugger::conditions_[0] || Debugger::conditions_[1]) {//debug
+        //    std::cout << "oc_index " << 1200 << "\n";
+        //    std::cout << "rhs\n" << RHS[1200];
+        //    std::cout << "oc_index " << 1202 << "\n";
+        //    std::cout << "rhs\n" << RHS[1202];            
+        //}
+
+        //if (Debugger::conditions_[0])//debug
+        //    Debugger::conditions_[0] = false;
+
+        //if (Debugger::conditions_[1])//debug
+        //    exit(523);
+
         return RHS;
     }
 

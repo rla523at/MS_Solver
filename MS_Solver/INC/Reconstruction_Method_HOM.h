@@ -43,6 +43,7 @@ public:
     }
 };
 
+
 class MLP_Smooth_Extrema_Detector
 {
 public:
@@ -55,6 +56,7 @@ public:
             return false;
     }
 };
+
 
 class Constant_Region_Detector
 {
@@ -118,10 +120,8 @@ public:
 
 private:
     template <ushort num_equation>
-    auto calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
-        
+    auto calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;        
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<double>& P0_criterion_values) const;
-
 };
 
 
@@ -140,7 +140,6 @@ private:
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P0_projected_basis_vnodes_;
 
-
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;
@@ -156,18 +155,13 @@ public:
 private:
     template <ushort num_equation>
     auto calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
-
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& cell_index_to_vnode_index_to_simplex_P0_criterion_values) const;
-
     template <ushort num_equation>
     std::vector<ushort> calculate_set_of_num_trouble_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
-
     template <ushort projection_order>
     auto calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const Geometry<space_dimension_>& sub_simplex_geometry) const;
-
     bool is_typeI_subcell_oscillation(const ushort num_trouble_boundaries) const;
     bool is_typeII_subcell_oscillation(const ushort num_trouble_boundary) const;
-
 
 public:
     static std::string name(void) { return "hMLP_BD_Reconstruction_P" + std::to_string(solution_order_); };
@@ -252,7 +246,6 @@ double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P
     return P0_basis_function(node);
 }
 
-
 template <ushort space_dimension_, ushort solution_order_>
 hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(Grid<space_dimension_>&& grid)
     : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid) {
@@ -271,7 +264,6 @@ hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(Grid<space_dimension_>&&
         this->set_of_vnode_indexes_.push_back(cell_element.vertex_node_indexes());
         this->volumes_.push_back(cell_element.geometry_.volume());
     }
-
 
     Log::content_ << std::left << std::setw(50) << "@ hMLP Base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();

@@ -3,7 +3,7 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Verification/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__

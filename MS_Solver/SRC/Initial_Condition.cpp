@@ -160,7 +160,7 @@ std::vector<Modified_SOD_2D::Solution_> Modified_SOD_2D::calculate_solutions(con
 
 Shu_Osher_2D::Solution_ Shu_Osher_2D::calculate_solution(const Space_Vector_& space_vector) {
 	constexpr auto gamma = 1.4;
-	constexpr auto c = 1 / (1.4 - 1);
+	constexpr auto c = 1 / (gamma - 1);
 	constexpr auto discontinuity_location = -4.0;
 
 	const auto x_coordinate = space_vector.at(0);
@@ -189,4 +189,14 @@ Shu_Osher_2D::Solution_ Shu_Osher_2D::calculate_solution(const Space_Vector_& sp
 
 		return { rho, rhou, rhov, rhoE };
 	}
+}
+
+std::vector<Shu_Osher_2D::Solution_> Shu_Osher_2D::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+	const auto num_cell = cell_centers.size();
+
+	std::vector<Solution_> solutions(num_cell);
+	for (size_t i = 0; i < num_cell; ++i)
+		solutions[i] = This_::calculate_solution(cell_centers[i]);	
+
+	return solutions;
 }

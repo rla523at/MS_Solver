@@ -111,7 +111,7 @@ private:
 
 public:
     static Solution_ calculate_solution(const Space_Vector_& space_vector);
-    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
     static std::string name(void) { return "Modifid_SOD"; };
 };
 
@@ -123,12 +123,14 @@ private:
 
     using Space_Vector_ = Euclidean_Vector<dimension_>;
     using Solution_ = Euclidean_Vector<num_eqation_>;
+    using This_ = Shu_Osher_2D;
 
 private:
     Shu_Osher_2D(void) = delete;
 
 public:
     static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
     static std::string name(void) { return "Shu_Osher"; };
 };
 
