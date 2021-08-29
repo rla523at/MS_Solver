@@ -43,12 +43,13 @@ std::string Sine_Wave_2D::name(void) {
 	return "Sine_Wave_2D";
 };
 
-template <typename Governing_Equation>
-std::vector<Euclidean_Vector<1>> Sine_Wave_2D::calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
-	static_require(ms::is_Linear_Advection_2D<Governing_Equation>, "excat solution can be calculated when governing equation is linear advection");
 
+std::vector<Euclidean_Vector<1>> Sine_Wave_2D::calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
+	const auto advection_speed = Linear_Advection_2D::advection_speed();
+	const auto x_advection_speed = advection_speed[0];
+	const auto y_advection_speed = advection_speed[1];
+	
 	const auto num_cell = cell_centers.size();
-	const auto [x_advection_speed, y_advection_speed] = Governing_Equation::advection_speed();
 
 	std::vector<Solution_> exact_solutions_(num_cell);
 	for (size_t i = 0; i < num_cell; ++i) {

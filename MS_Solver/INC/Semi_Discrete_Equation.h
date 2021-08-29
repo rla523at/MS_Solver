@@ -79,19 +79,6 @@ public:
         this->inner_faces_.calculate_RHS(RHS, solutions);
         this->cells_.calculate_RHS(RHS, solutions);
 
-        //if (Debugger::conditions_[0] || Debugger::conditions_[1]) {//debug
-        //    std::cout << "oc_index " << 1200 << "\n";
-        //    std::cout << "rhs\n" << RHS[1200];
-        //    std::cout << "oc_index " << 1202 << "\n";
-        //    std::cout << "rhs\n" << RHS[1202];            
-        //}
-
-        //if (Debugger::conditions_[0])//debug
-        //    Debugger::conditions_[0] = false;
-
-        //if (Debugger::conditions_[1])//debug
-        //    exit(523);
-
         return RHS;
     }
 
@@ -102,7 +89,12 @@ public:
 
     template <typename Initial_Condition>
     void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
-        this->cells_.estimate_error<Initial_Condition>(computed_solutions, time);
+        if constexpr (std::is_same_v<Initial_Condition, Sine_Wave_2D> && std::is_same_v<Governing_Equation, Linear_Advection_2D>)
+            this->cells_.estimate_error(computed_solutions, time);
+        else
+            Log::content_ << "In this setting, error analysis result does not provided.";
+
+        Log::print();
     }
 
     void reconstruct(std::vector<Discretized_Solution_>& solutions) {

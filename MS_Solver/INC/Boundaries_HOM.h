@@ -83,16 +83,7 @@ Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(G
 
         this->set_of_normals_.push_back(std::move(normals));
         this->oc_side_basis_weights_.push_back(std::move(basis_weight));
-
-        //if (oc_index == 600 || oc_index == 1200) {//debug
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "bdry_index " << i << "\n";
-        //    std::cout << this->oc_side_basis_weights_[i];
-        //}
     }
-
-    //std::exit(99);//debug
-
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries HOM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -113,39 +104,17 @@ void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_R
         const auto& boundary_flux_function = *this->boundary_flux_functions_[i];
         const auto& normals = this->set_of_normals_[i];
 
-        Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
+        Dynamic_Matrix boundary_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
-            numerical_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
+            boundary_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
         }
 
         Residual_ owner_side_delta_rhs;
-        ms::gemm(numerical_flux_quadrature,this->oc_side_basis_weights_[i], owner_side_delta_rhs);
+        ms::gemm(boundary_flux_quadrature,this->oc_side_basis_weights_[i], owner_side_delta_rhs);
 
         RHS[oc_index] -= owner_side_delta_rhs;
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "bdry_normals\n" << normals << "\n"; //debug
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "bdry_oc_side_cvariables\n" << oc_side_cvariables; //debug
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "bdry_nfq\n" << numerical_flux_quadrature; //debug
-
-        //if ((Debugger::conditions_[0] || Debugger::conditions_[1]) && (oc_index == 1200 || oc_index == 1202)) {
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "bdry_index " << i << "\n";
-        //    std::cout << "boundary_RHS\n" << owner_side_delta_rhs; //debug
-        //}
-
     }
-
-    //if (Debugger::conditions_[0])
-    //    Debugger::conditions_[0] = false;
-
-    //if (Debugger::conditions_[1])
-    //    exit(523);
 }
 
 

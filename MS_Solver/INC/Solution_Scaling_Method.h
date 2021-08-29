@@ -10,6 +10,9 @@ namespace ms {
 class Solution_Scaler
 {
 private:
+	Solution_Scaler(void) = delete;
+
+private:
 	using This_ = Solution_Scaler;
 
 private:
@@ -17,8 +20,6 @@ private:
 	inline static std::vector<Dynamic_Matrix> set_of_cell_basis_qnodes_;
 	inline static std::vector<std::pair<uint, Dynamic_Matrix>> cell_index_basis_qnodes_pairs;
 
-private:
-	Solution_Scaler(void) = delete;	
 
 public:
 	static void record_cell_basis_qnodes(const std::vector<Dynamic_Matrix>& set_of_cell_basis_qnodes) {

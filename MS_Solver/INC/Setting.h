@@ -10,8 +10,8 @@
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
 #define __GRID_FILE_NAMES__						Shu_Osher_OrthoTri_301x7
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SHU_OSHER__
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
@@ -211,7 +211,9 @@ namespace ms {
 		if constexpr (__DIMENSION__ == 2) {
 			Linear_Advection_2D::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
 			Sine_Wave_2D::initialize(X_WAVE_LENGTH, Y_WAVE_LENGTH);
-			Supersonic_Inlet_2D<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
+			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
+				Supersonic_Inlet_2D<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
+
 		}
 	}
 }

@@ -50,9 +50,7 @@ public:
 public:
     static Solution_ calculate_solution(const Space_Vector_& space_vector);
     static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& space_vectors);
-
-    template <typename Governing_Equation>
-    static std::vector<Euclidean_Vector<1>> calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time);
+    static std::vector<Euclidean_Vector<1>> calculate_exact_solutions(const std::vector<Space_Vector_>& space_vectors, const double end_time);
 };
 
 
