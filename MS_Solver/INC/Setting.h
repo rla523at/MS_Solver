@@ -27,8 +27,8 @@
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__END_BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		1.8
+#define __SOLVE_END_CONDITION__					__END_BY_ITER__
+#define __SOLVE_END_CONDITION_CONSTANT__		800
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2
@@ -49,7 +49,8 @@
 
 // ######################################### OPTION END ################################################################
 
-// #################################### USER DEFINE SETTING ############################################################
+// #################################### USER DEFINED SETTING ############################################################
+
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
 #define Y_ADVECTION_SPEED				2.0
@@ -60,28 +61,25 @@
 #define Y_WAVE_LENGTH					1.0
 #define Z_WAVE_LENGTH					1
 
-// Mode (comment out == turn off)
+// Supersonic Inlet inflow value
+#define INFLOW_RHO						3.857143
+#define INFLOW_RHOU						10.1418522328
+#define INFLOW_RHOV						0.0
+#define INFLOW_RHOE						39.1666684317
 
-#if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
-//#define ERROR_CALCULATION_MODE
-#endif
-
-#if __GOVERNING_EQUATION__		== 		__EULER__
-#if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
-#define PRESSURE_FIX_MODE
-#endif
-#endif
-
-
-
-// ################################# USER DEFINE SETTING END #########################################################
+// ################################# USER DEFINED SETTING END #########################################################
  
 
-
-
-
-
-
+//// Mode (comment out == turn off)		
+//#if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
+////#define ERROR_CALCULATION_MODE
+//#endif
+//
+//#if __GOVERNING_EQUATION__		== 		__EULER__
+//#if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
+//#define PRESSURE_FIX_MODE
+//#endif
+//#endif
 
 // ########################################## MACRO SETTING ##################################################################
 

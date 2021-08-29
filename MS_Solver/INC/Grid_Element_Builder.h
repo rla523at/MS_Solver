@@ -280,6 +280,8 @@ namespace ms {
 			return ElementType::cell;
 		else if (ms::is_there_icase(str, "slip") && ms::is_there_icase(str, "wall") && ms::is_there_icase(str, "2D"))
 			return ElementType::slip_wall_2D;
+		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "inlet") && ms::is_there_icase(str, "2D"))
+			return ElementType::supersonic_inlet_2D;
 		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "outlet") && ms::is_there_icase(str, "2D"))
 			return ElementType::supersonic_outlet_2D;
 		else if (ms::is_there_icase(str, "x") && ms::is_there_icase(str, "periodic"))

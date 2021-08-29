@@ -167,9 +167,9 @@ Shu_Osher_2D::Solution_ Shu_Osher_2D::calculate_solution(const Space_Vector_& sp
 
 	if (x_coordinate < discontinuity_location) {
 		constexpr auto rho = 3.857143;
-		constexpr auto u = 2.629369;
-		constexpr auto v = 0.0;
-		constexpr auto p = 10.333333;
+		constexpr auto u = 2.629369;	//rhou = 10.1418522328
+		constexpr auto v = 0.0;			//rhov = 0.0
+		constexpr auto p = 10.333333;	//rhoE = 39.1666684317
 
 		constexpr auto rhou = rho * u;
 		constexpr auto rhov = rho * v;
