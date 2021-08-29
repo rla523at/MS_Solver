@@ -1,5 +1,45 @@
 #include "../INC/Governing_Equation.h"
 
+SCL_2D::Physical_Flux_ Linear_Advection_2D::physical_flux(const Solution_& solution) {
+	const auto sol = solution.at(0);	//scalar
+	const auto x_advection_speed = This_::advection_speeds_[0];
+	const auto y_advection_speed = This_::advection_speeds_[1];
+
+	Physical_Flux_ physical_flux = { x_advection_speed * sol , y_advection_speed * sol };
+	return physical_flux;
+}
+
+std::vector<SCL_2D::Physical_Flux_> Linear_Advection_2D::physical_fluxes(const std::vector<Solution_>& solutions) {
+	const auto num_solution = solutions.size();
+	const auto x_advection_speed = This_::advection_speeds_[0];
+	const auto y_advection_speed = This_::advection_speeds_[1];
+
+	std::vector<Physical_Flux_> physical_fluxes(num_solution);
+	for (size_t i = 0; i < num_solution; ++i) {
+		const auto sol = solutions[i].at(0);	//scalar
+		physical_fluxes[i] = { x_advection_speed * sol , y_advection_speed * sol };
+	}
+
+	return physical_fluxes;
+}
+
+std::vector<std::array<double, Burgers_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
+	const auto num_solution = solutions.size();
+	const auto x_advection_speed = This_::advection_speeds_[0];
+	const auto y_advection_speed = This_::advection_speeds_[1];
+
+	const auto absolute_x_advection_speed = std::abs(x_advection_speed);
+	const auto absolute_y_advection_speed = std::abs(y_advection_speed);
+
+	std::vector<std::array<double, This_::space_dimension_>> projected_maximum_lambdas(num_solution, { absolute_x_advection_speed,absolute_y_advection_speed });
+	return projected_maximum_lambdas;
+}
+
+double Linear_Advection_2D::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
+	return std::abs(nomal_vector.inner_product(This_::advection_speeds_));
+}
+
+
 Burgers_2D::Physical_Flux_ Burgers_2D::physical_flux(const Solution_& solution) {
 	const auto sol = solution.at(0); //scalar
 

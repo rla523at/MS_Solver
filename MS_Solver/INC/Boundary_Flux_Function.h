@@ -1,7 +1,6 @@
 #pragma once
 #include "Numerical_Flux_Function.h"
 #include "Element.h"
-#include "Setting.h"
 
 template <typename Numerical_Flux_Function>
 class Boundary_Flux_Function
@@ -54,7 +53,6 @@ public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
 		return Numerical_Flux_Function::calculate(solution, solution, normal);
 	}
-
 };
 
 
@@ -71,34 +69,6 @@ class Boundary_Flux_Function_Factory
 public:
 	static std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> make(const ElementType boundary_type);
 };
-
-
-
-//template definition part
-//template <typename Governing_Equation> 
-//Supersonic_Outlet_2D<Governing_Equation>::Boundary_Flux_ Supersonic_Outlet_2D<Governing_Equation>::calculate(const Solution_& solution, const Space_Vector_& normal) const {
-//	////reflective boundaries
-//	//std::array<double, num_equation_> boundary_values;
-//
-//	//boundary_values[0] = solution[0];
-//	//boundary_values[1] = -solution[1];
-//	//boundary_values[2] = -solution[2];
-//	//boundary_values[3] = solution[3];
-//
-//	//return LLF<Euler_2D>::calculate(solution, boundary_values, normal);
-//
-//
-//	//if (is_first) { //debug
-//	//	initial_solution = solution;
-//	//	is_first = false;
-//	//}
-//	//
-//	//const auto oc_physical_flux = Governing_Equation::physical_flux(initial_solution);
-//	//return oc_physical_flux * normal;//debug
-//	
-//	const auto oc_physical_flux = Governing_Equation::physical_flux(solution);
-//	return oc_physical_flux * normal;
-//}
 
 
 template <typename Numerical_Flux_Function>

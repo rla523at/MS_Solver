@@ -1,7 +1,4 @@
-#include "../INC/Inital_Condition.h"
-#include "../INC/Discrete_Equation.h"
-#include "../INC/Tecplot.h"
-#include "../INC/Log.h"
+
 #include "../INC/Setting.h"
 
 using Grid_Builder_				= Grid_Builder<__DIMENSION__>;
@@ -9,6 +6,8 @@ using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATI
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
 int main(void) {
+	ms::apply_user_defined_setting();
+
 	const char delimiter = ',';
 	std::string grid_file_names_str = GRID_FILE_NAMES;
 	auto grid_file_names = ms::parse(grid_file_names_str, delimiter);
