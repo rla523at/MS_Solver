@@ -20,7 +20,7 @@ private:
     static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
     static constexpr size_t num_equation_ = Governing_Equation::num_equation();
 
-    using Boundaries_ = Boundaries<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
+    using Boundaries_ = Boundaries<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
     using Cells_ = Cells<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
     using Periodic_Boundaries_ = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
     using Inner_Faces_ = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;

@@ -22,13 +22,15 @@ private:
     using Solution_         = Euclidean_Vector<num_equation_>;
     using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
 
-private:
-    LLF(void) = delete;
-
 public:
     static std::string name(void) { return "LLF"; };
     static constexpr ushort space_dimension(void) { return This_::space_dimension_; };
     static constexpr ushort num_equation(void) { return This_::num_equation_; };
+
+private:
+    LLF(void) = delete;
+
+public:
     static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
     static auto calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal);
 };
@@ -46,15 +48,17 @@ private:
     using Solution_         = Euclidean_Vector<num_equation_>;
     using Numerical_Flux_   = Euclidean_Vector<num_equation_>;
 
-private:
-    LLF(void) = delete;
-
 public:
     static std::string name(void) { return "LLF"; };
     static constexpr ushort space_dimension(void) { return This_::space_dimension_; };
     static constexpr ushort num_equation(void) { return This_::num_equation_; };
-    static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
+
+private:
+    LLF(void) = delete;
+
+public:
     static Numerical_Flux_ calculate(const Solution_& oc_side_cvariable, const Solution_& nc_side_cvariable, const Space_Vector_& normal);
+    static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& conservative_variables, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
 };
 
 

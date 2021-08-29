@@ -646,9 +646,9 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 
     }
 
-    Tecplot::conditionally_record_cell_indexes();//post
-    Tecplot::conditionally_record_cell_variables("solution_order", solution_order);//post
-    Tecplot::conditionally_post_solution(initial_coefficients, "befor_limiting"); //post
+    //Tecplot::conditionally_record_cell_indexes();//post
+    //Tecplot::conditionally_record_cell_variables("solution_order", solution_order);//post
+    //Tecplot::conditionally_post_solution(initial_coefficients, "befor_limiting"); //post
 }
 
 ////version4 2016 paper
