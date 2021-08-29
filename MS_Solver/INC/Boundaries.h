@@ -3,41 +3,41 @@
 #include "Boundaries_HOM.h"
 #include "Spatial_Discrete_Method.h"
 
-template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method>
+template <typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Boundaries;
 
 
-template <typename Governing_Equation>
-class Boundaries<Governing_Equation, FVM, Constant_Reconstruction> : public Boundaries_FVM_Constant<Governing_Equation>
+template <typename Numerical_Flux_Function>
+class Boundaries<FVM, Constant_Reconstruction, Numerical_Flux_Function> : public Boundaries_FVM_Constant<Numerical_Flux_Function>
 {
 private:
-    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+    static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
     Boundaries(Grid<space_dimension_>&& grid, const Constant_Reconstruction& reconstruction_method)
-        : Boundaries_FVM_Constant<Governing_Equation>(std::move(grid)) {};
+        : Boundaries_FVM_Constant<Numerical_Flux_Function>(std::move(grid)) {};
 };
 
 
-template <typename Governing_Equation, typename Reconstruction_Method>
-class Boundaries<Governing_Equation, FVM, Reconstruction_Method> : public Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+class Boundaries<FVM, Reconstruction_Method, Numerical_Flux_Function> : public Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>
 {
 private:
-    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+    static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
     Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Boundaries_FVM_Linear<Governing_Equation, Reconstruction_Method>(std::move(grid), reconstruction_method) {};
+        : Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
 };
 
 
-template <typename Governing_Equation, typename Reconstruction_Method>
-class Boundaries<Governing_Equation, HOM, Reconstruction_Method> : public Boundaries_HOM<Governing_Equation, Reconstruction_Method>
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+class Boundaries<HOM, Reconstruction_Method, Numerical_Flux_Function> : public Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>
 {
 private:
-    static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
+    static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
     Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Boundaries_HOM<Governing_Equation, Reconstruction_Method>(std::move(grid), reconstruction_method) {};
+        : Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
 };
