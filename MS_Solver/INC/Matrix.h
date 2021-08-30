@@ -5,7 +5,6 @@ using ushort = unsigned short;
 
 
 class Dynamic_Matrix;
-class Matrix_OP;
 
 
 // Matrix template class
@@ -15,8 +14,8 @@ class Matrix
 private:
 	template<size_t num_other_row, size_t num_other_column>
 	friend class Matrix;
-	friend Dynamic_Matrix;
-	friend Matrix_OP;
+	friend class Dynamic_Matrix;
+	friend class ms::BLAS;
 
 	static constexpr size_t num_value_ = num_row * num_column;
 
@@ -79,7 +78,8 @@ class Dynamic_Matrix
 private:
 	template<size_t num_row, size_t num_column>
 	friend class Matrix;
-	friend Matrix_OP;
+	friend class ms::BLAS;
+
 
 private:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -145,37 +145,33 @@ private:
 std::ostream& operator<<(std::ostream& os, const Dynamic_Matrix& m);
 
 
-class Matrix_OP
-{
-private:
-	Matrix_OP(void) = delete;
-
-public:
-	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
-	static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2);
-
-	template<size_t num_row, size_t num_column>
-	static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
-		Matrix_OP::gemm(A, B, C.values_.data());
-	};
-};
-
-
 namespace ms {
+	class BLAS
+	{
+	private:
+		BLAS(void) = delete;
+
+	public:
+		template<size_t num_row, size_t num_column>
+		static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) { BLAS::gemm(A, B, C.values_.data()); };
+		static void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr);
+		static void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+	};
+
 	inline constexpr ushort blas_dscal_criteria = 10;
 	inline constexpr ushort blas_mv_criteria = 50;
 
 	inline void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, double* output_ptr) {
-		Matrix_OP::gemm(A, B, output_ptr);
+		ms::BLAS::gemm(A, B, output_ptr);
 	}
 
-	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, std::vector<double>& v2) {
-		Matrix_OP::gemvpv(A, v1, v2);
+	inline void gemvpv(const Dynamic_Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+		ms::BLAS::gemvpv(A, v1, v2);
 	}
 
 	template<size_t num_row, size_t num_column>
 	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
-		Matrix_OP::gemm(A, B, C);
+		ms::BLAS::gemm(A, B, C);
 	}
 }
 
@@ -343,13 +339,14 @@ Euclidean_Vector<num_row> Matrix<num_row, num_column>::column(const size_t colum
 
 template<size_t num_row, size_t num_column>
 std::string Matrix<num_row, num_column>::to_string(void) const {
-	std::string result;
+	std::ostringstream oss;
+	oss << std::setprecision(16) << std::showpoint << std::left;
 	for (size_t i = 0; i < num_row; ++i) {
 		for (size_t j = 0; j < num_column; ++j)
-			result += ms::double_to_string(this->at(i, j)) + "   \t";
-		result += "\n";
+			oss << std::setw(25) << this->at(i, j);
+		oss << "\n";
 	}
-	return result;
+	return oss.str();
 }
 
 template<size_t num_row, size_t num_column>
@@ -417,7 +414,7 @@ void Dynamic_Matrix::change_row(const size_t row_index, const Euclidean_Vector<d
 	dynamic_require(this->num_column_ == dimension, "vector dimension should be matched with number of column");
 
 	const auto jump_index = row_index * this->num_column_;
-	std::copy(vec.begin(), vec.end(), this->values_.begin() + jump_index);
+	std::copy(vec.cbegin(), vec.cend(), this->values_.begin() + jump_index);
 }
 
 template <size_t dimension>

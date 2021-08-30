@@ -2,7 +2,7 @@
 #include "Spatial_Discrete_Method.h"
 #include "Gradient_Method.h"
 #include "PostAI.h"
-#include "Post_Solution_Data.h"
+#include "Tecplot.h"
 
 
 class RM {};
@@ -89,7 +89,7 @@ public:
 struct ANN_Model
 {
     std::vector<Dynamic_Matrix> weights;
-    std::vector<std::vector<double>> biases;
+    std::vector<Dynamic_Euclidean_Vector> biases;
 };
 
 
@@ -130,15 +130,19 @@ private:
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
 
-    void reconstruct(const std::vector<Solution_>& solutions);
-    
+public:
+    void reconstruct(const std::vector<Solution_>& solutions);    
     const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
 
 private:
     bool is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
+<<<<<<< HEAD
     std::vector<size_t> ordering_function_using_solutions(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
     std::vector<size_t> ordering_function_using_cell_indexes(const size_t target_cell_index) const;
 
+=======
+    std::vector<size_t> ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
+>>>>>>> ms/dev/DFM
     void limit(Dynamic_Euclidean_Vector& feature) const;
     ANN_Model read_model(void) const;
 
@@ -174,10 +178,13 @@ void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solut
 }
 
 double MLP_u1_Limiting_Strategy::calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
+    if (P1_mode_solution == 0)
+        return 1.0;
+    
     if (P1_mode_solution < 0)
-        return min((allowable_min - P0_solution) / P1_mode_solution, 1);
+        return (std::min)((allowable_min - P0_solution) / P1_mode_solution, 1.0);
     else
-        return min((allowable_max - P0_solution) / P1_mode_solution, 1);
+        return (std::min)((allowable_max - P0_solution) / P1_mode_solution, 1.0);
 }
 
 template <typename Gradient_Method>
@@ -185,7 +192,7 @@ MLP_u1<Gradient_Method>::MLP_u1(Grid<space_dimension_>&& grid) : gradient_method
     SET_TIME_POINT;
 
     //vnode index to share cell indexes
-    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_indexes);
+    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_index_set);
 
     const auto& cell_elements = grid.elements.cell_elements;
 
@@ -226,14 +233,6 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
     const auto num_cell = solutions.size();
 
-    Post_AI_Data::conditionally_record_solution_datas(solutions, solution_gradients);//postAI
-
-    std::vector<double> values1(num_cell);//post
-    std::vector<double> values2(num_cell);//post
-    std::vector<double> values3(num_cell);//post
-    std::vector<double> values4(num_cell);//post
-    std::vector<double> values5(num_cell,-1);//postAI 
-
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
         const auto P1_mode_solution_vnodes = gradient * this->center_to_vertex_matrixes_[i];
@@ -253,26 +252,10 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
-        Post_AI_Data::conditionally_record_limiting_value(i, limiting_values);//postAI
-
-        values1[i] = limiting_values[0];//post
-        values2[i] = i;//post
-        values3[i] = gradient.at(0,0);//post
-        values4[i] = gradient.at(0,1);//post
-        values5[i] = limiting_values[0];//postAI
-
+                
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
-
-    Post_Solution_Data::conditionally_record_cell_variables("limiting_value", values1);//post
-    Post_Solution_Data::conditionally_record_cell_variables("cell_index", values2);//post
-    Post_Solution_Data::conditionally_record_cell_variables("gradient_x", values3);//post
-    Post_Solution_Data::conditionally_record_cell_variables("gradient_y", values4);//post
-    Post_Solution_Data::conditionally_post_solution(solutions);//post
-
-    Post_AI_Data::post_scatter_data(values5);//postAI
-    Post_AI_Data::conditionally_post();//postAI
 };
 
 
@@ -330,13 +313,6 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
     const auto num_solution = solutions.size();    
 
-    std::vector<uint> cell_indexes(num_solution);
-    for (uint i = 0; i < num_solution; ++i)
-        cell_indexes[i] = i;    //post
-
-    std::vector<double> ANN_limiter_values(num_solution, 1);//post
-    std::vector<double> values(num_solution, -1);//postAI
-
     for (size_t i = 0; i < num_solution; ++i) {
 
         if (this->is_constant_region(solutions, i)) {
@@ -348,7 +324,7 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
         const auto ordered_indexes = this->ordering_function_using_cell_indexes(i);
         const auto num_ordered_index = ordered_indexes.size();
 
-        const auto num_input_values = 3 * num_ordered_index;    //input : [27x1]
+        const auto num_input_values = 3 * num_ordered_index; //temporal code
         std::vector<double> input_values(num_input_values);
 
         for (size_t j = 0; j < num_equation_; ++j) {
@@ -370,17 +346,8 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code
-       
-        ANN_limiter_values[i] = input[0];//post
-        values[i] = ANN_limiter_values[i];
+        this->solution_gradients_[i] *= input[0]; //temporal code                
     }
-
-    Post_Solution_Data::conditionally_record_cell_variables("cell_index", cell_indexes);//post
-    Post_Solution_Data::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);//post
-    Post_Solution_Data::conditionally_post_solution(solutions);//post
-
-    Post_AI_Data::post_scatter_data(values);//postAI
 }
 
 
@@ -494,17 +461,21 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
     static const ReLU activation_function;
     static const HardTanh output_function;
 
-    for (ushort i = 0; i < num_layer; ++i) {
-        std::vector<double> new_feature = model.biases[i];
+    //hidden layer
+    for (ushort i = 0; i < num_layer - 1; ++i) {
+        auto new_feature = model.biases[i];
 
         ms::gemvpv(model.weights[i], feature, new_feature);
+        new_feature.apply(activation_function);
         feature = std::move(new_feature);
-        feature.apply(activation_function);
-
-        //new_feature.apply(activation_function);
-        //feature = std::move(new_feature);
     }
-    feature.apply(output_function);
+
+    //output layer
+    auto new_feature = model.biases[num_layer - 1];
+
+    ms::gemvpv(model.weights[num_layer - 1], feature, new_feature);
+    new_feature.apply(output_function);
+    feature = std::move(new_feature);
 }
 
 template <typename Gradient_Method>

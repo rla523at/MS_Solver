@@ -18,24 +18,45 @@ public:
 	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
 	Text(std::ifstream& file, const size_t num_read_line);
 
+public:
 	Text& operator<<(const std::string& str);
 	Text& operator<<(std::string&& str);
 
-
-	void add_write(const std::string& write_file_path) const;
-	Text& read_line_by_line(const std::string& read_file_path);
-	void read(std::ifstream& file, const size_t num_read_line);
-	Text& remove_empty_line(void);
-	void write(const std::string& write_file_path) const;
-
 public:
 	void merge(Text&& other);
+	Text& remove_empty_line(void);
+	Text& read_line_by_line(const std::string& read_file_path);
+	void read(std::ifstream& file, const size_t num_read_line);
 
-private:
-	void make_path(std::string_view file_path) const;
+public:
+	void add_write(const std::string& write_file_path) const;
+	void write(const std::string& write_file_path) const;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Text& text);
+
+
+class Binary_Writer
+{
+private:
+	std::ofstream binary_file_stream_;
+
+public:
+	Binary_Writer(const std::string_view file_path);
+	Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode);
+
+	template <typename T>
+	Binary_Writer& operator<<(const T value);
+
+	template <typename T>
+	Binary_Writer& operator<<(const std::vector<T>& values);
+
+	template <>
+	Binary_Writer& operator<<(const char* value);
+
+	template <>
+	Binary_Writer& operator<<(const std::string& str);
+};
 
 
 namespace ms {
@@ -44,16 +65,30 @@ namespace ms {
 	T string_to_value(const std::string& str);
 	template<typename T>
 	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set);
-	std::string erase(const std::string& str, const std::string& target);
+	std::string remove(const std::string& str, const std::string& target);
 	std::string upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
 	bool is_there_icase(const std::string& str, const std::string& target);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	Text extract_file_path_text(const std::string& path);
+	void make_path(std::string_view file_path);
 }
 
 
 //template definition
+template <typename T>
+Binary_Writer& Binary_Writer::operator<<(const T value) {
+	this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+	return *this;
+}
+
+template <typename T>
+Binary_Writer& Binary_Writer::operator<<(const std::vector<T>& values) {
+	for (const auto value : values)
+		this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+	return *this;
+}
+
 namespace ms {
 	template<typename T>
 	T string_to_value(const std::string& str) {
@@ -73,132 +108,3 @@ namespace ms {
 		return result;
 	};
 }
-
-//#include "FatalError.h"
-//#include "FreeFunction.h"
-
-//
-//
-//class Text
-//{
-//	using Iter = std::vector<std::string>::iterator;
-//	using CIter = std::vector<std::string>::const_iterator;
-//
-//private:
-//	std::vector<std::string> sentence_set_;
-//
-//public:
-//	Text(void) = default;
-//	
-//	Text(const std::vector<std::string>& other_sentence_set)
-//		: sentence_set_(other_sentence_set) {};
-//
-	//Text(std::initializer_list<std::string> list)
-	//	: sentence_set_{ list } {};
-//
-//	Text(const std::string& read_file);
-//
-//	Text(std::ifstream& read_file_stream, const size_t num_line = -1);
-//
-//	Text(std::ifstream& read_file_stream, const std::streampos& start_position, const size_t num_line = -1);
-//
-//
-//
-//	template <typename T>
-//	Text& operator<<(const T& value) {
-//		this->sentence_set_.emplace_back(Editor::to_String(value));
-//		return *this;
-//	};
-//
-//	Text& operator<<(std::string&& sentence) {
-//		this->sentence_set_.emplace_back(std::move(sentence));
-//		return *this;
-//	};
-//
-//	std::string& operator[](const size_t index) {
-//		return this->sentence_set_[index];
-//	};
-//
-//	const std::string& operator[](const size_t index) const {
-//		return this->sentence_set_[index];
-//	};
-//
-//
-//	std::string& back(void) {
-//		return this->sentence_set_.back();
-//	};
-//
-//	const std::string& back(void) const {
-//		return this->sentence_set_.back();
-//	};
-//
-//	Iter begin(void) {
-//		return this->sentence_set_.begin(); 
-//	};
-//
-//	CIter begin(void) const {
-//		return this->sentence_set_.begin();
-//	};
-//
-//	Iter end(void) {
-//		return this->sentence_set_.end();
-//	};
-//
-//	CIter end(void) const {
-//		return this->sentence_set_.end();
-//	};
-//
-//	Iter erase(const Iter& iter) {
-//		return this->sentence_set_.erase(iter);
-//	};
-//
-//	std::string& front(void) {
-//		return this->sentence_set_.front();
-//	};
-//
-//	const std::string& front(void) const {
-//		return this->sentence_set_.front();
-//	};
-//
-//	void pop_back(void) {
-//		this->sentence_set_.pop_back();
-//	};
-//
-//	void reserve(const size_t required_capacity) {
-//		this->sentence_set_.reserve(required_capacity);
-//	};
-//
-//	size_t size(void) const {
-//		return this->sentence_set_.size();
-//	};
-//
-//
-//	void add_Write(const std::string& file_path) const;
-//
-//	void merge(const Text& other) {
-//		this->sentence_set_.insert(this->end(), other.begin(), other.end());
-//	};
-//
-//	void merge(Text&& other) {
-//		this->sentence_set_.insert(this->end(), std::make_move_iterator(other.begin()), std::make_move_iterator(other.end()));
-//	};
-//
-//	template <typename T>
-//	void remove(const T& target) {
-//		this->sentence_set_.erase(std::remove(this->begin(), this->sentence_set_.end(), Editor::to_String(target)), this->sentence_set_.end());
-//	};
-//
-//	void remove_empty(void) {
-		//this->sentence_set_.erase(std::remove_if(this->begin(), this->end(), [](const std::string& str) {return str.empty(); }), this->end());
-//	};
-//
-//	void replace(const std::string& old_str, const std::string& new_str) {
-//		for (std::string& sentence : this->sentence_set_)
-//			Editor::replace(sentence, old_str, new_str);
-//	};
-//
-//	void write(const std::string& file_path) const;
-//};
-//
-//
-

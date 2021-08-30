@@ -19,12 +19,15 @@ using ushort = unsigned short;
 
 
 namespace ms {
+	class BLAS;
+
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_dot_criteria = 15;
 	
 	template <typename... Args>
 	inline constexpr bool are_arithmetics = (... && std::is_arithmetic_v<Args>);
 }
+
 
 // CLASS TEMPLATE euclidean_vector
 template <size_t dimension_>
@@ -39,28 +42,33 @@ public:
 	template <typename... Args>
 	Euclidean_Vector(Args... args);
 
+public:
 	Euclidean_Vector& operator+=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator-=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator*=(const double scalar);
+
+public:
 	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
 	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
 	Euclidean_Vector operator*(const double scalar) const;
 	bool operator==(const Euclidean_Vector& y) const;
-	//bool operator==(const Dynamic_Euclidean_Vector& y) const;
 	double operator[](const size_t position) const;
 
-	double at(const size_t position) const;
-	auto begin(void) const;
-	auto end(void) const;
-	static constexpr size_t dimension(void);
+public:
+	Euclidean_Vector& be_normalize(void);
+
+public:
+	double at(const size_t position) const;	
+	std::array<double, dimension_>::const_iterator cbegin(void) const;
+	std::array<double, dimension_>::const_iterator cend(void) const;
 	double inner_product(const Euclidean_Vector& y) const;
 	double L1_norm(void) const;
 	double norm(void) const;
 	bool is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const;
 	std::string to_string(void) const;
 
-	Euclidean_Vector& be_normalize(void);
-	double* data(void);
+public:
+	static constexpr size_t dimension(void);
 };
 
 
@@ -80,6 +88,7 @@ class Dynamic_Euclidean_Vector
 private:
 	template <size_t dimension_>
 	friend class Euclidean_Vector;
+	friend class ms::BLAS;
 
 private:
 	std::vector<double> values_;
@@ -93,6 +102,7 @@ public:
 public:
 	Dynamic_Euclidean_Vector& operator-=(const Dynamic_Euclidean_Vector& other);
 
+public:
 	Dynamic_Euclidean_Vector operator-(const Dynamic_Euclidean_Vector& other) const;
 	double operator[](const size_t position) const;
 	bool operator==(const Dynamic_Euclidean_Vector& other) const;
@@ -100,7 +110,6 @@ public:
 public:
 	template <typename Function>
 	void apply(const Function& f);
-
 	void be_absolute(void);
 
 public:
@@ -218,12 +227,12 @@ double Euclidean_Vector<dimension_>::at(const size_t position) const {
 }
 
 template <size_t dimension_>
-auto Euclidean_Vector<dimension_>::begin(void) const {
+std::array<double, dimension_>::const_iterator Euclidean_Vector<dimension_>::cbegin(void) const {
 	return this->values_.cbegin();
 }
 
 template <size_t dimension_>
-auto Euclidean_Vector<dimension_>::end(void) const {
+std::array<double, dimension_>::const_iterator Euclidean_Vector<dimension_>::cend(void) const {
 	return this->values_.cend();
 }
 
@@ -236,12 +245,6 @@ Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::be_normalize(void) {
 template <size_t dimension_>
 constexpr size_t Euclidean_Vector<dimension_>::dimension(void) {
 	return dimension_;
-}
-
-
-template <size_t dimension_>
-double* Euclidean_Vector<dimension_>::data(void) {
-	return this->values_.data();
 }
 
 template <size_t dimension_>

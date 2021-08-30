@@ -110,7 +110,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 
 		//const size_t dimension		= parsed_sentence_set[0].toValue<size_t>();
 		const auto physical_group_index	= ms::string_to_value<ushort>(parsed_sentence_set[1]);
-		const auto name					= ms::erase(parsed_sentence_set[2], "\"");
+		const auto name					= ms::remove(parsed_sentence_set[2], "\"");
 		const auto element_type			= ms::string_to_element_type(name);
 
 		physical_group_index_to_element_type.emplace(physical_group_index, element_type);

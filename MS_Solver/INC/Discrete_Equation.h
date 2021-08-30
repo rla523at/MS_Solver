@@ -1,9 +1,10 @@
 #pragma once
+#include "Debugger.h"
 #include "Semi_Discrete_Equation.h"
 #include "Time_Integral_Method.h"
 #include "Time_Step_Method.h"
-#include "Solve_Condition.h"
-#include "Post_Solution_Data.h"
+#include "Solve_Controller.h"
+#include "Tecplot.h"
 
 template <typename Time_Integral_Method>
 class Discrete_Equation
@@ -15,29 +16,31 @@ public:
     template<typename Time_Step_Method, typename Semi_Discrete_Equation, typename Solution>
     static void solve(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions) {
         double current_time = 0.0;
-        Post_Solution_Data::syncronize_time(current_time);
+        Tecplot::syncronize_time(current_time);
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
+<<<<<<< HEAD
         //Post_Solution_Data::post_solution(solutions, "initial");//post
         Post_Solution_Data::is_time_to_conditionally_post_ = true;
         //Post_AI_Data::is_time_to_conditionally_post_ = true;
+=======
+        Tecplot::post_solution(solutions, "initial");//post
+>>>>>>> ms/dev/DFM
 
         semi_discrete_equation.reconstruct(solutions);
       
         SET_TIME_POINT;
         while (true) {
             if (Solve_Controller::is_time_to_end(current_time)) {
-                Post_Solution_Data::post_solution(solutions, "final");//post
+                Tecplot::post_solution(solutions, "final");//post
                 break;
-            }
+            }                      
 
-            if (Solve_Controller::is_time_to_post(current_time)) {
-                Post_Solution_Data::is_time_to_conditionally_post_ = true;
-                //Post_Solution_Data::post_solution(solutions); //post
-            }
+            if (Solve_Controller::is_time_to_post(current_time))
+                Tecplot::post_solution(solutions);//post
 
             SET_TIME_POINT;
             auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);

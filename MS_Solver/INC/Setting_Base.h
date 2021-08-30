@@ -15,6 +15,7 @@
 #define __CONSTANT1__					33
 #define __CIRCLE_WAVE__					34
 #define __GAUSSIAN_WAVE__				35
+#define __SOD__							36
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41
