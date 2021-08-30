@@ -48,21 +48,14 @@ static void SSPRK33::update_solutions(Semi_Discrete_Equation& semi_discrete_equa
     const auto initial_solutions = solutions;
     const auto initial_RHS = semi_discrete_equation.calculate_RHS(solutions);
 
-<<<<<<< HEAD
     //Post_AI_Data::is_time_to_conditionally_post_ = true;//postAI
-    // 
-=======
->>>>>>> ms/dev/DFM
+
     //stage 1
     for (size_t i = 0; i < num_sol; ++i)
         solutions[i] += time_step * initial_RHS[i];
     semi_discrete_equation.reconstruct(solutions);
 
     const auto stage1_RHS = semi_discrete_equation.calculate_RHS(solutions);
-<<<<<<< HEAD
-    
-=======
->>>>>>> ms/dev/DFM
 
     //stage 2
     for (size_t i = 0; i < num_sol; ++i)

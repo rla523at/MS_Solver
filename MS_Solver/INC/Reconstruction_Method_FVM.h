@@ -144,13 +144,10 @@ public:
 
 private:
     bool is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
-<<<<<<< HEAD
+
     std::vector<size_t> ordering_function_using_solutions(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
     std::vector<size_t> ordering_function_using_cell_indexes(const size_t target_cell_index) const;
 
-=======
-    std::vector<size_t> ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
->>>>>>> ms/dev/DFM
     void limit(Dynamic_Euclidean_Vector& feature) const;
     ANN_Model read_model(void) const;
 

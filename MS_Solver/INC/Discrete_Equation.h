@@ -22,13 +22,9 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-<<<<<<< HEAD
-        //Post_Solution_Data::post_solution(solutions, "initial");//post
-        Post_Solution_Data::is_time_to_conditionally_post_ = true;
+        //Tecplot::post_solution(solutions, "initial");//post
+        Tecplot::post_condition_ = true;
         //Post_AI_Data::is_time_to_conditionally_post_ = true;
-=======
-        Tecplot::post_solution(solutions, "initial");//post
->>>>>>> ms/dev/DFM
 
         semi_discrete_equation.reconstruct(solutions);
       
