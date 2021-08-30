@@ -223,7 +223,6 @@ void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclide
 
 template <ushort num_equation>
 void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-	//size_t num_equation = limiting_value.size();
 
 	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
 		return;
@@ -356,7 +355,6 @@ auto Post_AI_Data::convert_to_solution_strings(const std::vector<Euclidean_Vecto
 template <size_t num_equation, size_t space_dimension>
 std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
 	const auto num_solution = solution_gradients.size();
-	//const auto [num_equation, space_dimension] = solution_gradients.front().size();
 
 	std::vector<std::string> solution_gradient_strings;
 	solution_gradient_strings.reserve(num_solution);

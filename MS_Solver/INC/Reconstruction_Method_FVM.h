@@ -133,8 +133,6 @@ private:
     std::vector<std::vector<size_t>> set_of_face_share_cell_indexes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
-    std::vector<size_t> ordered_indexes_;   //Ãß°¡
-
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
 
@@ -311,11 +309,9 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
     for (size_t i = 0; i < num_solution; ++i) {
 
         if (this->is_constant_region(solutions, i)) {
-            //this->solution_gradients_[i] *= 0.0; //temporal code
             continue;
         }
             
-        //const auto ordered_indexes = this->ordering_function_using_solutions(solutions, i);
         const auto ordered_indexes = this->ordering_function_using_cell_indexes(i);
         const auto num_ordered_index = ordered_indexes.size();
 
@@ -475,7 +471,6 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    //std::ifstream file("RSC/model.bin", std::ios::binary);
     std::ifstream file("RSC/case17.bin", std::ios::binary);
 
     dynamic_require(file.is_open(), "Model file should be open");

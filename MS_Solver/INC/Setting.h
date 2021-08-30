@@ -5,11 +5,11 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug_/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"D:/Code/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						RQ30,RQ40
+#define __GRID_FILE_NAMES__						RQ50
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SQUARE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__FVM__
@@ -33,7 +33,7 @@
 #define __SOLVE_END_CONDITION_CONSTANT__		10
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
-#define __POST_ORDER__							2
+#define __POST_ORDER__							0
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -55,7 +55,7 @@
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				1.0
+#define Y_ADVECTION_SPEED				0.5
 #define Z_ADVECTION_SPEED				0.5
 
 // Sine Wave

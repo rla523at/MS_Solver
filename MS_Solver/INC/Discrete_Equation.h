@@ -22,9 +22,7 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-        //Tecplot::post_solution(solutions, "initial");//post
-        Tecplot::post_condition_ = true;
-        //Post_AI_Data::is_time_to_conditionally_post_ = true;
+        Tecplot::post_solution(solutions, "initial");//post
 
         semi_discrete_equation.reconstruct(solutions);
       
