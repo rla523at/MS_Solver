@@ -68,6 +68,7 @@ namespace ms {
 	std::string remove(const std::string& str, const std::string& target);
 	std::string upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
+	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
 	bool is_there_icase(const std::string& str, const std::string& target);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	Text extract_file_path_text(const std::string& path);

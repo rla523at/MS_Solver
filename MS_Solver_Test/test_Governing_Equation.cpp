@@ -5,12 +5,14 @@
 #include <random>
 
 GTEST_TEST(Linear_Advection_2D, calculate_physical_fluxes_1) {
+	Linear_Advection_2D::initialize({ 1.0,0.5 });
+	
 	constexpr size_t num = 5;
 	
-	std::vector<Linear_Advection_2D<1.0,0.5>::Solution_> solutions(num);
+	std::vector<Linear_Advection_2D::Solution_> solutions(num);
 	for (size_t i = 0; i < num; ++i)
 		solutions[i] = { i };	
-	const auto result = Linear_Advection_2D<1.0,0.5>::physical_fluxes(solutions);
+	const auto result = Linear_Advection_2D::physical_fluxes(solutions);
 
 	std::vector<Matrix<1, 2>> ref(num);
 	for (size_t i = 0; i < num; ++i)
@@ -20,38 +22,43 @@ GTEST_TEST(Linear_Advection_2D, calculate_physical_fluxes_1) {
 }
 
 GTEST_TEST(Linear_Advection_2D, calculate_coordinate_projected_maximum_lambdas_1) {
+	Linear_Advection_2D::initialize({ 1.0,0.5 });
+
+
 	constexpr size_t num = 5;
 
-	std::vector<Linear_Advection_2D<1.0,0.5>::Solution_> solutions(num);
+	std::vector<Linear_Advection_2D::Solution_> solutions(num);
 	for (size_t i = 0; i < num; ++i)
 		solutions[i] = { i };
-	const auto result = Linear_Advection_2D<1.0,0.5>::calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(solutions);
 
 	std::vector<std::array<double, 2>> ref(num, { 1.0,0.5 });
 	EXPECT_EQ(result, ref);
 }
 
 GTEST_TEST(Linear_Advection_2D, calculate_inner_face_maximum_lambdas_1) {	
-	Linear_Advection_2D<1.0,0.5>::Solution_ solution_o = 1;
-	Linear_Advection_2D<1.0,0.5>::Solution_ solution_n = 0;
+	Linear_Advection_2D::initialize({ 1.0,0.5 });
+
+	Linear_Advection_2D::Solution_ solution_o = 1;
+	Linear_Advection_2D::Solution_ solution_n = 0;
 
 	constexpr size_t num = 5;
 	for (size_t i = 0; i < num; ++i) {
-		Linear_Advection_2D<1.0,0.5>::Space_Vector_ normal = { i, i };
-		const auto result = Linear_Advection_2D<1.0,0.5>::inner_face_maximum_lambda(solution_o, solution_n, normal);
+		Linear_Advection_2D::Space_Vector_ normal = { i, i };
+		const auto result = Linear_Advection_2D::inner_face_maximum_lambda(solution_o, solution_n, normal);
 
 		const auto ref = 1.5 * i;
 		EXPECT_EQ(result, ref);
 	}
 }
 GTEST_TEST(Linear_Advection_2D, calculate_inner_face_maximum_lambdas_2) {
-	Linear_Advection_2D<1.0,0.5>::Solution_ solution_o;
-	Linear_Advection_2D<1.0,0.5>::Solution_ solution_n;
+	Linear_Advection_2D::Solution_ solution_o;
+	Linear_Advection_2D::Solution_ solution_n;
 
 	constexpr size_t num = 5;
 	for (int i = 0; i < num; ++i) {
-		Linear_Advection_2D<1.0,0.5>::Space_Vector_ normal = { -1 * i, -1 * i };
-		const auto result = Linear_Advection_2D<1.0,0.5>::inner_face_maximum_lambda(solution_o, solution_n, normal);
+		Linear_Advection_2D::Space_Vector_ normal = { -1 * i, -1 * i };
+		const auto result = Linear_Advection_2D::inner_face_maximum_lambda(solution_o, solution_n, normal);
 
 		const auto ref = 1.5 * i;
 		EXPECT_EQ(result, ref);

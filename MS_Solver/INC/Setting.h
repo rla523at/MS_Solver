@@ -1,13 +1,15 @@
 #pragma once
 #include "Setting_Base.h"
+#include "Inital_Condition.h"
+#include "Discrete_Equation.h"
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug_/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						RQ50
+#define __GRID_FILE_NAMES__						RQ30,RQ40
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SQUARE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__FVM__
@@ -28,16 +30,15 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_ITER__
-#define __SOLVE_END_CONDITION_CONSTANT__		20
+#define __SOLVE_END_CONDITION_CONSTANT__		10
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
-#define __POST_ORDER__							0
+#define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
-
-// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __MODIFIED_SOD__, __CONSTANT1__, __SOD__
+// __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __CONSTANT1__, __SOD__, __MODIFIED_SOD__, __SHU_OSHER__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
@@ -50,7 +51,8 @@
 
 // ######################################### OPTION END ################################################################
 
-// #################################### USER DEFINE SETTING ############################################################
+// #################################### USER DEFINED SETTING ############################################################
+
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
 #define Y_ADVECTION_SPEED				1.0
@@ -61,29 +63,25 @@
 #define Y_WAVE_LENGTH					1.0
 #define Z_WAVE_LENGTH					1.0
 
-// Mode (comment out == turn off)
-//#define POST_AI_DATA_MODE
+// Supersonic Inlet inflow value
+#define INFLOW_RHO						3.857143
+#define INFLOW_RHOU						10.1418522328
+#define INFLOW_RHOV						0.0
+#define INFLOW_RHOE						39.1666684317
 
-#if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
-//#define ERROR_CALCULATION_MODE
-#endif
-
-#if __GOVERNING_EQUATION__		== 		__EULER__
-#if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
-#define PRESSURE_FIX_MODE
-#endif
-#endif
-
-
-
-// ################################# USER DEFINE SETTING END #########################################################
+// ################################# USER DEFINED SETTING END #########################################################
  
 
-
-
-
-
-
+//// Mode (comment out == turn off)		
+//#if __GOVERNING_EQUATION__		== 		__LINEAR_ADVECTION__
+////#define ERROR_CALCULATION_MODE
+//#endif
+//
+//#if __GOVERNING_EQUATION__		== 		__EULER__
+//#if	__SPATIAL_DISCRETE_METHOD__ ==		__HOM__
+//#define PRESSURE_FIX_MODE
+//#endif
+//#endif
 
 // ########################################## MACRO SETTING ##################################################################
 
@@ -96,7 +94,7 @@
 
 #if		__GOVERNING_EQUATION__ == __LINEAR_ADVECTION__
 #if		__DIMENSION__ == 2
-#define GOVERNING_EQUATION		SET_FORMAT1(Linear_Advection, __DIMENSION__)<X_ADVECTION_SPEED,Y_ADVECTION_SPEED>
+#define GOVERNING_EQUATION		SET_FORMAT1(Linear_Advection, __DIMENSION__)
 #endif
 #ifdef  ERROR_CALCULATION_MODE
 #define ERROR_CALCULATION
@@ -111,7 +109,7 @@
 
 #if		__INITIAL_CONDITION__ == __SINE_WAVE__
 #if		__DIMENSION__ == 2
-#define INITIAL_CONDITION	SET_FORMAT1(Sine_Wave, __DIMENSION__)<X_WAVE_LENGTH, Y_WAVE_LENGTH>
+#define INITIAL_CONDITION	SET_FORMAT1(Sine_Wave, __DIMENSION__)
 #endif
 #endif
 #if		__INITIAL_CONDITION__ == __SQUARE_WAVE__
@@ -123,15 +121,20 @@
 #if		__INITIAL_CONDITION__ == __GAUSSIAN_WAVE__
 #define INITIAL_CONDITION	SET_FORMAT1(Gaussian_Wave, __DIMENSION__)
 #endif
-#if		__INITIAL_CONDITION__ == __MODIFIED_SOD__
-#define INITIAL_CONDITION	SET_FORMAT1(Modified_SOD, __DIMENSION__)
-#endif
 #if		__INITIAL_CONDITION__ == __CONSTANT1__
 #define INITIAL_CONDITION	SET_FORMAT1(Constant1, __DIMENSION__)
 #endif
 #if		__INITIAL_CONDITION__ == __SOD__
 #define INITIAL_CONDITION	SET_FORMAT1(SOD, __DIMENSION__)
 #endif
+#if		__INITIAL_CONDITION__ == __MODIFIED_SOD__
+#define INITIAL_CONDITION	SET_FORMAT1(Modified_SOD, __DIMENSION__)
+#endif
+#if		__INITIAL_CONDITION__ == __SHU_OSHER__
+#define INITIAL_CONDITION	SET_FORMAT1(Shu_Osher, __DIMENSION__)
+#endif
+
+
 
 #if		__SPATIAL_DISCRETE_METHOD__ == __FVM__
 #define SPATIAL_DISCRETE_METHOD	FVM
@@ -208,3 +211,15 @@
 #endif
 
 // ########################################## MACRO SETTING END ##################################################################
+
+namespace ms {
+	inline void apply_user_defined_setting(void) {
+		if constexpr (__DIMENSION__ == 2) {
+			Linear_Advection_2D::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
+			Sine_Wave_2D::initialize(X_WAVE_LENGTH, Y_WAVE_LENGTH);
+			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
+				Supersonic_Inlet_2D<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
+
+		}
+	}
+}

@@ -1,8 +1,5 @@
 #pragma once
 #include "Grid_Builder.h"
-#include "Governing_Equation.h"
-#include "Inital_Condition.h"
-#include "Setting.h"
 
 class Post_AI_Data
 {

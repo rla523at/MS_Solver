@@ -49,7 +49,15 @@ private:
     MLP_u1_Limiting_Strategy(void) = delete;
 
 public:
-    static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max);
+    static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
+        if (P1_mode_solution == 0)
+            return 1.0;
+
+        if (P1_mode_solution < 0)
+            return (std::min)((allowable_min - P0_solution) / P1_mode_solution, 1.0);
+        else
+            return (std::min)((allowable_max - P0_solution) / P1_mode_solution, 1.0);
+    };
 };
 
 
@@ -175,16 +183,6 @@ namespace ms {
 template <typename Gradient_Method>
 void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
-}
-
-double MLP_u1_Limiting_Strategy::calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
-    if (P1_mode_solution == 0)
-        return 1.0;
-    
-    if (P1_mode_solution < 0)
-        return (std::min)((allowable_min - P0_solution) / P1_mode_solution, 1.0);
-    else
-        return (std::min)((allowable_max - P0_solution) / P1_mode_solution, 1.0);
 }
 
 template <typename Gradient_Method>

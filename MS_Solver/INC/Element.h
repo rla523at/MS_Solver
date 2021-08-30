@@ -24,7 +24,7 @@ enum class ElementType
 {
 	cell, inner_face,
 	slip_wall_2D,
-	supersonic_outlet_2D,
+	supersonic_inlet_2D,supersonic_outlet_2D,
 	x_periodic, y_periodic,
 	not_in_list
 };

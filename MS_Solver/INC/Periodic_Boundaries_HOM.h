@@ -94,8 +94,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
             normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
             oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);    
             nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, re_ordered_nc_side_qnodes[q]) * re_ordered_nc_side_qweights[q]);
-        }
-        
+        }        
 
        this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
        this->set_of_normals_.push_back(std::move(normals));

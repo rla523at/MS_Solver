@@ -6,22 +6,22 @@
 
 
 //HOM이면 공통으로 사용하는 variable
-template <typename Governing_Equation, typename Reconstruction_Method>
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Boundaries_HOM
 {
 private:
-    static constexpr ushort space_dimension_    = Governing_Equation::space_dimension();
-    static constexpr ushort num_equation_       = Governing_Equation::num_equation();
+    static constexpr ushort space_dimension_    = Numerical_Flux_Function::space_dimension();
+    static constexpr ushort num_equation_       = Numerical_Flux_Function::num_equation();
     static constexpr ushort num_basis_          = Reconstruction_Method::num_basis();
 
-    using This_                 = Boundaries_HOM<Governing_Equation, Reconstruction_Method>;
+    using This_                 = Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
     using Residual_             = Matrix<num_equation_, num_basis_>;
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
 
 protected:
     const Reconstruction_Method& reconstruction_method_;
-    std::vector<std::unique_ptr<Boundary_Flux_Function<Governing_Equation>>> boundary_flux_functions_;
+    std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions_;
     std::vector<uint> oc_indexes_;
     std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
@@ -39,9 +39,9 @@ public:
 
 
 //template definition
-template <typename Governing_Equation, typename Reconstruction_Method>
-Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-    : reconstruction_method_(reconstruction_method){
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+    : reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
     this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
@@ -61,7 +61,7 @@ Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<s
         const auto& boundary_element = boundary_elements[i];
         const auto& boundary_geometry = boundary_element.geometry_;
 
-       this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Governing_Equation>::make(boundary_element.type()));
+       this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(boundary_element.type()));
 
         const auto oc_index =this->oc_indexes_[i];
         const auto& oc_element = cell_elements[oc_index];
@@ -89,8 +89,8 @@ Boundaries_HOM<Governing_Equation, Reconstruction_Method>::Boundaries_HOM(Grid<s
     Log::print();
 }
 
-template <typename Governing_Equation, typename Reconstruction_Method>
-void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const {
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const {
     const auto num_boundary = this->boundary_flux_functions_.size();
 
     for (uint i = 0; i < num_boundary; ++i) {
@@ -104,22 +104,22 @@ void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(st
         const auto& boundary_flux_function = *this->boundary_flux_functions_[i];
         const auto& normals = this->set_of_normals_[i];
 
-        Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
+        Dynamic_Matrix boundary_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
-            numerical_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
+            boundary_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));
         }
 
         Residual_ owner_side_delta_rhs;
-        ms::gemm(numerical_flux_quadrature,this->oc_side_basis_weights_[i], owner_side_delta_rhs);
+        ms::gemm(boundary_flux_quadrature,this->oc_side_basis_weights_[i], owner_side_delta_rhs);
 
         RHS[oc_index] -= owner_side_delta_rhs;
     }
 }
 
 
-template <typename Governing_Equation, typename Reconstruction_Method>
-void Boundaries_HOM<Governing_Equation, Reconstruction_Method>::initialize_scaling_method(void) const {
+template <typename Reconstruction_Method, typename Numerical_Flux_Function>
+void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_scaling_method(void) const {
     const auto num_boundary = this->oc_indexes_.size();
     for (uint i = 0; i < num_boundary; ++i) 
         Solution_Scaler::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    

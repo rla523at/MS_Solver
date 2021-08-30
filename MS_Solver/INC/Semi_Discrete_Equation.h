@@ -20,7 +20,7 @@ private:
     static constexpr size_t space_dimension_ = Governing_Equation::space_dimension();
     static constexpr size_t num_equation_ = Governing_Equation::num_equation();
 
-    using Boundaries_ = Boundaries<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
+    using Boundaries_ = Boundaries<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
     using Cells_ = Cells<Governing_Equation, Spatial_Discrete_Method, Reconstruction_Method>;
     using Periodic_Boundaries_ = Periodic_Boundaries<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
     using Inner_Faces_ = Inner_Faces<Spatial_Discrete_Method, Reconstruction_Method, Numerical_Flux_Function>;
@@ -89,7 +89,12 @@ public:
 
     template <typename Initial_Condition>
     void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
-        this->cells_.estimate_error<Initial_Condition>(computed_solutions, time);
+        if constexpr (std::is_same_v<Initial_Condition, Sine_Wave_2D> && std::is_same_v<Governing_Equation, Linear_Advection_2D>)
+            this->cells_.estimate_error(computed_solutions, time);
+        else
+            Log::content_ << "In this setting, error analysis result does not provided.";
+
+        Log::print();
     }
 
     void reconstruct(std::vector<Discretized_Solution_>& solutions) {

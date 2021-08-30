@@ -147,6 +147,21 @@ namespace ms {
 		return u_str.find(u_target);
 	}
 
+	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n) {
+		if (n < 1)
+			return std::string::npos;
+
+		auto pos = std::string::npos;
+		for (size_t i = 0; i < n; ++i) {
+			if (pos == 0)
+				return std::string::npos;
+
+			pos = object_str.rfind(target_str, pos - 1); //rfind next pos
+		}
+		
+		return pos;
+	}
+
 	std::string upper_case(const std::string& str) {
 		auto result = str;
 		std::transform(result.begin(), result.end(), result.begin(), toupper);
