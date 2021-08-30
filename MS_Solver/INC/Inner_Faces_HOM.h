@@ -67,13 +67,6 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
         auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
         auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
 
-        //if (oc_index == 1204 || nc_index == 1204) { //debug
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "nc_index " << nc_index << "\n";
-        //    std::cout << "inner_face_oc_side_basis_qnode\n" << oc_side_basis_qnode;
-        //    std::cout << "inner_face_nc_side_basis_qnode\n" << nc_side_basis_qnode;
-        //}
-
         this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
 
         const auto num_qnode = qnodes.size();
@@ -87,16 +80,9 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
             nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); 
         }
 
-        //if (oc_index == 1204 || nc_index == 1204) { //debug
-        //    std::cout << "inner_face_oc_side_basis_weight\n" << oc_side_basis_weight;
-        //    std::cout << "inner_face_nc_side_basis_weight\n" << nc_side_basis_weight;
-        //}
-
         this->set_of_normals_.push_back(std::move(normals));
         this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
     }
-
-    //std::exit(523);//debug
 
     Log::content_ << std::left << std::setw(50) << "@ Inner faces HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -135,44 +121,6 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
-
-        //if (Debugger::conditions_[0] && oc_index == 600) {
-        //    std::cout << "innerf_normals\n" << normals << "\n"; //debug
-        //}
-
-        //if (Debugger::conditions_[0] && oc_index == 600) {
-        //    std::cout << "innerf_oc_side_cvariables\n" << oc_side_cvariables; //debug
-        //    std::cout << "innerf_nc_side_cvariables\n" << nc_side_cvariables; //debug
-        //}
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "innerf_owner_nfq\n" << numerical_flux_quadrature; //debug
-        //if (Debugger::conditions_[0] && nc_index == 600)
-        //    std::cout << "innerf_neighbor_nfq\n" << numerical_flux_quadrature; //debug
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "Inner_Face_RHS\n" << -1 * owner_side_delta_rhs; //debug
-        //if (Debugger::conditions_[0] && nc_index == 600)
-        //    std::cout << "Inner_Face_RHS\n" << neighbor_side_delta_rhs; //debug
-
-        //if ((Debugger::conditions_[0] || Debugger::conditions_[1]) && (oc_index == 1200 || nc_index == 1200)) { //debug
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "nc_index " << nc_index << "\n";
-        //    std::cout << "inner_face_owner_side_RHS\n" << owner_side_delta_rhs;
-        //    //std::cout << "inner_face_neighbor_side_RHS\n" << neighbor_side_delta_rhs;
-        //}
-
-        //if ((Debugger::conditions_[0] || Debugger::conditions_[1]) && oc_index == 1202) { //debug
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "nc_index " << nc_index << "\n";
-        //    std::cout << "inner_face_owner_side_RHS\n" << owner_side_delta_rhs;
-        //}
-
-        //if ((Debugger::conditions_[0] || Debugger::conditions_[1]) &&  nc_index == 1202) { //debug
-        //    std::cout << "oc_index " << oc_index << "\n";
-        //    std::cout << "nc_index " << nc_index << "\n";
-        //    std::cout << "inner_face_neighbor_side_RHS\n" << neighbor_side_delta_rhs;
-        //}
     }
 }
 

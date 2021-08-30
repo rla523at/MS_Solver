@@ -277,6 +277,9 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
     Log::content_ << std::left << std::setprecision(16);
     Log::content_ << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
     Log::content_ << std::setw(25) << global_L1_error << std::setw(25) << global_L2_error << global_Linf_error;
+
+    std::string error_str = ms::double_to_string(global_L1_error) + " " + ms::double_to_string(global_L2_error) + " " + ms::double_to_string(global_Linf_error) + "\n";
+    Log::write_error_text(error_str);
 }
 
 template <typename Governing_Equation, typename Reconstruction_Method>

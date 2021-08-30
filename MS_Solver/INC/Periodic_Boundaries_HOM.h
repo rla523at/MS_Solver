@@ -94,8 +94,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
             normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
             oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);    
             nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, re_ordered_nc_side_qnodes[q]) * re_ordered_nc_side_qweights[q]);
-        }
-        
+        }        
 
        this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
        this->set_of_normals_.push_back(std::move(normals));
@@ -138,16 +137,6 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "pbdry_owner_nfq\n" << numerical_flux_quadrature; //debug
-        //if (Debugger::conditions_[0] && nc_index == 600)
-        //    std::cout << "pbdry_neighbor_nfq\n" << numerical_flux_quadrature; //debug
-
-        //if (Debugger::conditions_[0] && oc_index == 600)
-        //    std::cout << "pbdry_RHS\n" << -1 * owner_side_delta_rhs; //debug
-        //if (Debugger::conditions_[0] && nc_index == 600)
-        //    std::cout << "pbdry_RHS\n" << neighbor_side_delta_rhs; //debug
     }
 }
 

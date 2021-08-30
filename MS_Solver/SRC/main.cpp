@@ -49,9 +49,7 @@ int main(void) {
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
 		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
 
-#ifdef ERROR_CALCULATION
 		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
-#endif
 
 		Log::write();
 	}

@@ -38,7 +38,7 @@ public:
 		const auto parsed_str = ms::parse(sub_str, '_');
 		const auto grid_file_name = parsed_str[0];
 
-		Text txt = { grid_file_name + " " + error_string };
+		Text txt = { grid_file_name + "    \t" + error_string };
 
 		auto error_text_path = Log::path_;
 		error_text_path.erase(pos + 1);
