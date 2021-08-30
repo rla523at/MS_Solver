@@ -75,6 +75,55 @@ GTEST_TEST(ms, is_there_icase_2) {
 	EXPECT_EQ(result, ref);
 }
 
+GTEST_TEST(ms, rfind_nth_1) {
+	std::string str = "abcaba";
+	std::string target_str = "a";
+	const auto result = ms::rfind_nth(str, target_str, 0);
+
+	const auto ref = std::string::npos;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, rfind_nth_2) {
+	std::string str = "abcaba";
+	std::string target_str = "a";
+	const auto result = ms::rfind_nth(str, target_str, 1);
+
+	const auto ref = 5;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, rfind_nth_3) {
+	std::string str = "abcaba";
+	std::string target_str = "a";
+	const auto result = ms::rfind_nth(str, target_str, 2);
+
+	const auto ref = 3;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, rfind_nth_4) {
+	std::string str = "abcaba";
+	std::string target_str = "a";
+	const auto result = ms::rfind_nth(str, target_str, 3);
+
+	const auto ref = 0;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, rfind_nth_5) {
+	std::string str = "abcaba";
+	std::string target_str = "a";
+	const auto result = ms::rfind_nth(str, target_str, 4);
+
+	const auto ref = std::string::npos;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, rfind_nth_6) {
+	std::string str = "abcaba";
+	std::string target_str = "b";
+	const auto result = ms::rfind_nth(str, target_str, 3);
+
+	const auto ref = std::string::npos;
+	EXPECT_EQ(result, ref);
+}
+
 //#include "../MS_Solver/INC/Euclidean_Vector.h"
 //GTEST_TEST(ms, extract_file_name_1) {
 //	const std::string path = "C:/Users/KimMinSeok/source/repos/MS_Test/MS_Test/RSC/Quadrature/Standard/Quadrilateral/";

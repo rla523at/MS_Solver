@@ -32,6 +32,15 @@ public:
 		Log::content_.swap(tmp);
 	}
 
+	//static void write_error_text(void) {
+	//	auto error_text_path = Log::path_;
+	//	const auto first_pos = error_text_path.rfind("/");
+	//	const auto second_pos = error_text_path.rfind("/", first_pos);
+
+	//	const auto num_erase = first_pos - second_pos;
+	//	error_text_path.erase(second_pos, num_erase);
+	//}
+
 	static void write(void) {
 		const auto file_path = Log::path_ + "_log.txt";
 		Log::log_txt_.write(file_path);
