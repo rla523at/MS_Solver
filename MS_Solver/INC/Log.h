@@ -32,6 +32,20 @@ public:
 		Log::content_.swap(tmp);
 	}
 
+	static void write_error_text(const std::string& error_string) {		
+		const auto pos = ms::rfind_nth(Log::path_, "/", 2);
+		const auto sub_str = Log::path_.substr(pos + 1);
+		const auto parsed_str = ms::parse(sub_str, '_');
+		const auto grid_file_name = parsed_str[0];
+
+		Text txt = { grid_file_name + "    \t" + error_string };
+
+		auto error_text_path = Log::path_;
+		error_text_path.erase(pos + 1);
+
+		txt.add_write(error_text_path + "error.txt");
+	}
+
 	static void write(void) {
 		const auto file_path = Log::path_ + "_log.txt";
 		Log::log_txt_.write(file_path);

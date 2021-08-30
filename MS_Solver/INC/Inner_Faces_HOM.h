@@ -66,6 +66,7 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
 
         auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
         auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
+
         this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
 
         const auto num_qnode = qnodes.size();

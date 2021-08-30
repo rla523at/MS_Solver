@@ -42,6 +42,8 @@ public:
         This_::end_condition_constant_ = end_condition_constant;
         This_::post_condition_ = post_condition;
         This_::post_condition_constant_ = post_condition_constant;
+        This_::num_post_ = 0;
+        This_::num_iter_ = 0;
     };
 
     static void controll_time_step(const double current_time, double& time_step) {
