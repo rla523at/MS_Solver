@@ -125,6 +125,8 @@ private:
     std::vector<std::vector<size_t>> set_of_face_share_cell_indexes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
+    std::vector<size_t> ordered_indexes_;   //Ãß°¡
+
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
 
@@ -134,7 +136,8 @@ public:
 
 private:
     bool is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
-    std::vector<size_t> ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
+    std::vector<size_t> ordering_function_using_solutions(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
+    std::vector<size_t> ordering_function_using_cell_indexes(const size_t target_cell_index) const;
 
     void limit(Dynamic_Euclidean_Vector& feature) const;
     ANN_Model read_model(void) const;
@@ -336,10 +339,13 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
     for (size_t i = 0; i < num_solution; ++i) {
 
-        if (this->is_constant_region(solutions, i)) 
+        if (this->is_constant_region(solutions, i)) {
+            //this->solution_gradients_[i] *= 0.0; //temporal code
             continue;
-        
-        const auto ordered_indexes = this->ordering_function(solutions, i);
+        }
+            
+        //const auto ordered_indexes = this->ordering_function_using_solutions(solutions, i);
+        const auto ordered_indexes = this->ordering_function_using_cell_indexes(i);
         const auto num_ordered_index = ordered_indexes.size();
 
         const auto num_input_values = 3 * num_ordered_index;    //input : [27x1]
@@ -398,7 +404,7 @@ bool ANN_limiter<Gradient_Method>::is_constant_region(const std::vector<Solution
 
 
 template <typename Gradient_Method>
-std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
+std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function_using_solutions(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
     const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
 
     const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
@@ -443,6 +449,45 @@ std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::v
 }
 
 template <typename Gradient_Method>
+std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function_using_cell_indexes(const size_t target_cell_index) const {
+    const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
+
+    const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
+    const auto num_ordered_indexes = num_vnode_share_cell + 1; // include target cell
+
+    std::vector<size_t> ordered_indexes;
+    ordered_indexes.reserve(num_ordered_indexes);
+
+    ordered_indexes.push_back(target_cell_index);
+
+    while (ordered_indexes.size() != num_ordered_indexes) {
+        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_.at(ordered_indexes.back());
+
+        std::vector<size_t> face_share_cell_indexes_in_chunk;
+        std::set_intersection(vnode_share_cell_indexes.begin(), vnode_share_cell_indexes.end(), face_share_cell_indexes.begin(), face_share_cell_indexes.end(), std::back_inserter(face_share_cell_indexes_in_chunk));
+
+        std::vector<size_t> candidate_cell_indexes;
+        std::set<size_t> ordered_index_set(ordered_indexes.begin(), ordered_indexes.end());
+        std::set_difference(face_share_cell_indexes_in_chunk.begin(), face_share_cell_indexes_in_chunk.end(), ordered_index_set.begin(), ordered_index_set.end(), std::back_inserter(candidate_cell_indexes));
+
+        if (1 < candidate_cell_indexes.size()) {
+
+            std::reverse(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
+
+            const auto max_index_iter = std::max_element(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
+            const auto pos = max_index_iter - candidate_cell_indexes.begin();
+
+            const auto index = *std::next(candidate_cell_indexes.begin(), pos);
+            ordered_indexes.push_back(index);
+        }
+        else
+            ordered_indexes.push_back(candidate_cell_indexes.front());
+    }
+
+    return ordered_indexes;
+}
+
+template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) const {
     static const auto model = this->read_model();
     static const auto num_layer = model.weights.size();
@@ -464,7 +509,9 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    std::ifstream file("RSC/model.bin", std::ios::binary); 
+    //std::ifstream file("RSC/model.bin", std::ios::binary);
+    std::ifstream file("RSC/case17.bin", std::ios::binary);
+
     dynamic_require(file.is_open(), "Model file should be open");
 
     int num_layer;

@@ -23,7 +23,7 @@ public:
 
         //Post_Solution_Data::post_solution(solutions, "initial");//post
         Post_Solution_Data::is_time_to_conditionally_post_ = true;
-        Post_AI_Data::is_time_to_conditionally_post_ = true;
+        //Post_AI_Data::is_time_to_conditionally_post_ = true;
 
         semi_discrete_equation.reconstruct(solutions);
       

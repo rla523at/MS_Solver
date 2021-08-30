@@ -43,7 +43,7 @@ public:
 
 	static void post(void);
 	
-	static void conditionally_post(void);	//Ãß°¡
+	static void conditionally_post(void);
 
 	static void post_scatter_data(const std::vector<double>& limiting_values);
 
