@@ -32,14 +32,19 @@ public:
 		Log::content_.swap(tmp);
 	}
 
-	//static void write_error_text(void) {
-	//	auto error_text_path = Log::path_;
-	//	const auto first_pos = error_text_path.rfind("/");
-	//	const auto second_pos = error_text_path.rfind("/", first_pos);
+	static void write_error_text(const std::string& error_string) {		
+		const auto pos = ms::rfind_nth(Log::path_, "/", 2);
+		const auto sub_str = Log::path_.substr(pos + 1);
+		const auto parsed_str = ms::parse(sub_str, '_');
+		const auto grid_file_name = parsed_str[0];
 
-	//	const auto num_erase = first_pos - second_pos;
-	//	error_text_path.erase(second_pos, num_erase);
-	//}
+		Text txt = { grid_file_name + " " + error_string };
+
+		auto error_text_path = Log::path_;
+		error_text_path.erase(pos + 1);
+
+		txt.add_write(error_text_path);
+	}
 
 	static void write(void) {
 		const auto file_path = Log::path_ + "_log.txt";
