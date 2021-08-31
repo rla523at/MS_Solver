@@ -21,9 +21,6 @@
     <ClCompile Include="SRC\Boundary_Flux_Function.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Governing_Equation.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Grid_File_Type.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

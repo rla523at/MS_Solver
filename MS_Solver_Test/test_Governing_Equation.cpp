@@ -268,3 +268,101 @@ GTEST_TEST(Burgers, calculate_inner_face_maximum_lambdas_2) {
 		EXPECT_EQ(result, ref);
 	}
 }
+
+TEST(Euler, conservative_to_primitive_1) {
+	constexpr ushort space_dimension = 2;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> solution = { 1,1,1,1 };
+	const auto result = Euler<space_dimension>::conservative_to_primitive(solution);
+
+	const Euclidean_Vector<num_equation> ref = { 1,1,0,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Euler, conservative_to_primitive_2) {
+	constexpr ushort space_dimension = 3;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> solution = { 1,1,1,1,1.5 };
+	const auto result = Euler<space_dimension>::conservative_to_primitive(solution);
+
+	const Euclidean_Vector<num_equation> ref = { 1,1,1,0,0 };
+	EXPECT_EQ(result, ref);
+}
+
+TEST(Euler, physical_flux_1) {
+	constexpr ushort space_dimension = 2;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> solution = { 1,1,1,1 };
+	const auto result = Euler<space_dimension>::physical_flux(solution);
+
+	const Matrix<num_equation,space_dimension> ref = { 1,1,1,1,1,1,1,1 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Euler, physical_flux_2) {
+	constexpr ushort space_dimension = 3;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> solution = { 1,1,1,1,1.5 };
+	const auto result = Euler<space_dimension>::physical_flux(solution);
+
+	const Matrix<num_equation, space_dimension> ref = { 1,1,1,1,1,1,1,1,1,1,1,1,1.5,1.5,1.5 };
+	EXPECT_EQ(result, ref);
+}
+
+TEST(Euler, coordinate_projected_maximum_lambda_1) {
+	constexpr ushort space_dimension = 2;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	std::vector<Euclidean_Vector<num_equation>> solution = { { 1,1,1,1 } };
+	const auto result = Euler<space_dimension>::calculate_coordinate_projected_maximum_lambdas(solution);
+
+	const std::array<double, space_dimension> ref = { 1,1 };
+	EXPECT_EQ(result[0], ref);
+}
+TEST(Euler, coordinate_projected_maximum_lambda_2) {
+	constexpr ushort space_dimension = 3;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	std::vector<Euclidean_Vector<num_equation>> solution = { { 1,1,1,1,1.5 } };
+	const auto result = Euler<space_dimension>::calculate_coordinate_projected_maximum_lambdas(solution);
+
+	const std::array<double, space_dimension> ref = { 1,1,1 };
+	EXPECT_EQ(result[0], ref);
+}
+
+TEST(Euler, inner_face_maximum_lambda_1) {
+	constexpr ushort space_dimension = 2;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> oc_solution = { 1,1,1,1 };
+	Euclidean_Vector<num_equation> nc_solution = { 1,0,0,0 };
+
+	Euclidean_Vector<space_dimension> normal = { 1,0 };
+
+	const auto oc_pvariable = Euler<space_dimension>::conservative_to_primitive(oc_solution);
+	const auto nc_pvariable = Euler<space_dimension>::conservative_to_primitive(nc_solution);
+
+	const auto result = Euler<space_dimension>::inner_face_maximum_lambda(oc_pvariable, nc_pvariable, normal);
+
+	const auto ref = 1.0;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euler, inner_face_maximum_lambda_2) {
+	constexpr ushort space_dimension = 3;
+	constexpr ushort num_equation = space_dimension + 2;
+
+	Euclidean_Vector<num_equation> oc_solution = { 1,1,1,1,1.5 };
+	Euclidean_Vector<num_equation> nc_solution = { 1,0,0,0,0 };
+
+	Euclidean_Vector<space_dimension> normal = { 1,0,0 };
+
+	const auto oc_pvariable = Euler<space_dimension>::conservative_to_primitive(oc_solution);
+	const auto nc_pvariable = Euler<space_dimension>::conservative_to_primitive(nc_solution);
+
+	const auto result = Euler<space_dimension>::inner_face_maximum_lambda(oc_pvariable, nc_pvariable, normal);
+
+	const auto ref = 1.0;
+	EXPECT_EQ(result, ref);
+}

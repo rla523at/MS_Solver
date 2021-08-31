@@ -32,6 +32,7 @@ public:
 	template<size_t temp = num_row * num_column, std::enable_if_t<temp != 1, bool> = true>
 	Matrix(const std::array<double, num_row>& values);
 
+public:
 	Matrix& operator+=(const Matrix& A);
 	Matrix& operator-=(const Matrix& A);
 	Matrix& operator*=(const double scalar);
@@ -47,10 +48,13 @@ public:
 
 	bool operator==(const Matrix & A) const;
 
-	template <size_t num_other_column>
-	void change_columns(const size_t column_index, const Matrix<num_row, num_other_column>& A);
+public:
 	void change_columns(const size_t column_index, const Dynamic_Matrix& A);
 
+	template <size_t num_other_column>
+	void change_columns(const size_t column_index, const Matrix<num_row, num_other_column>& A);
+
+public:
 	double at(const size_t row_index, const size_t column_index) const;
 	Euclidean_Vector<num_row> column(const size_t column_index) const;
 	std::string to_string(void) const;

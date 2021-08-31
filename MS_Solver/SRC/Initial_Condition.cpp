@@ -13,6 +13,8 @@ std::string Constant1_2D::name(void) {
 	return "Constant_2D";
 }
 
+
+
 void Sine_Wave_2D::initialize(const double x_wave_length, const double y_wave_length) {
 	This_::x_wave_number_ = 2 * std::numbers::pi / x_wave_length;
 	This_::y_wave_number_ = 2 * std::numbers::pi / y_wave_length;
