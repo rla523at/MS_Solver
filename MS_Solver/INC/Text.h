@@ -8,6 +8,7 @@
 #include <sstream>
 #include <vector>
 
+#define static_require static_assert
 #define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
 
 class Text : public std::vector<std::string>
@@ -61,18 +62,24 @@ public:
 
 namespace ms {
 	std::vector<std::string> parse(const std::string& str, const char delimiter);
-	template<typename T>
-	T string_to_value(const std::string& str);
-	template<typename T>
-	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set);
 	std::string remove(const std::string& str, const std::string& target);
 	std::string upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
-	bool is_there_icase(const std::string& str, const std::string& target);
+	bool contains_icase(const std::string& str, const char* target);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	Text extract_file_path_text(const std::string& path);
 	void make_path(std::string_view file_path);
+
+	template<typename T>
+	T string_to_value(const std::string& str);
+
+	template<typename T>
+	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set);
+
+	template <typename... Args>
+	bool contains_icase(const std::string& str, const Args... args);
+
 }
 
 
@@ -107,5 +114,12 @@ namespace ms {
 			result.push_back(ms::string_to_value<T>(str));
 
 		return result;
+	};
+
+	template <typename... Args>
+	bool contains_icase(const std::string& str, const Args... args) {		
+		static_require((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
+
+		return (ms::contains_icase(str, args) && ...);
 	};
 }

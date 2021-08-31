@@ -169,7 +169,7 @@ namespace ms {
 		return result;
 	}
 
-	bool is_there_icase(const std::string& str, const std::string& target) {
+	bool contains_icase(const std::string& str, const char* target) {
 		return ms::find_icase(str, target) != std::string::npos;
 	}
 

@@ -277,18 +277,20 @@ Text Grid_Element_Builder<Gmsh, space_dimension>::read_about(std::ifstream& grid
 //inline function definition
 namespace ms {
 	inline ElementType string_to_element_type(const std::string& str) {
-		if (ms::is_there_icase(str, "Unspecified"))
+		if (ms::contains_icase(str, "Unspecified"))
 			return ElementType::cell;
-		else if (ms::is_there_icase(str, "slip") && ms::is_there_icase(str, "wall") && ms::is_there_icase(str, "2D"))
-			return ElementType::slip_wall_2D;
-		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "inlet") && ms::is_there_icase(str, "2D"))
+		//else if (ms::is_there_icase(str, "slip") && ms::is_there_icase(str, "wall") && ms::is_there_icase(str, "2D"))
+		//	return ElementType::slip_wall_2D;
+		else if (ms::contains_icase(str, "SuperSonic", "inlet"))
 			return ElementType::supersonic_inlet;
-		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "outlet") && ms::is_there_icase(str, "2D"))
+		else if (ms::contains_icase(str, "SuperSonic", "outlet"))
 			return ElementType::supersonic_outlet;
-		else if (ms::is_there_icase(str, "x") && ms::is_there_icase(str, "periodic"))
+		else if (ms::contains_icase(str, "x", "periodic"))
 			return ElementType::x_periodic;
-		else if (ms::is_there_icase(str, "y") && ms::is_there_icase(str, "periodic"))
+		else if (ms::contains_icase(str, "y", "periodic"))
 			return ElementType::y_periodic;
+		else if (ms::contains_icase(str, "z", "periodic"))
+			return ElementType::z_periodic;
 		else {
 			throw std::runtime_error("wrong element_type");
 			return ElementType::not_in_list;

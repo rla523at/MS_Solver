@@ -62,18 +62,40 @@ GTEST_TEST(ms, find_icase_2) {
 
 GTEST_TEST(ms, is_there_icase_1) {
 	std::string str = "abc_123q";
-	const auto result = ms::is_there_icase(str, "C_12");
+	const auto result = ms::contains_icase(str, "C_12");
 
 	const auto ref = true;
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(ms, is_there_icase_2) {
 	std::string str = "abc_123q";
-	const auto result = ms::is_there_icase(str, "3Q");
+	const auto result = ms::contains_icase(str, "3Q");
 
 	const auto ref = true;
 	EXPECT_EQ(result, ref);
 }
+GTEST_TEST(ms, is_there_icase_3) {
+	std::string str = "abc_123q";
+	const auto result = ms::contains_icase(str, "a","q");
+
+	const auto ref = true;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, is_there_icase_4) {
+	std::string str = "abc_123q";
+	const auto result = ms::contains_icase(str, "ad", "q");
+
+	const auto ref = false;
+	EXPECT_EQ(result, ref);
+}
+GTEST_TEST(ms, is_there_icase_5) {
+	std::string str = "abc_123q";
+	const auto result = ms::contains_icase(str, "ad", "qq");
+
+	const auto ref = false;
+	EXPECT_EQ(result, ref);
+}
+
 
 GTEST_TEST(ms, rfind_nth_1) {
 	std::string str = "abcaba";
