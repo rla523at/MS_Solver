@@ -24,9 +24,6 @@
     <ClCompile Include="SRC\Grid_File_Type.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Initial_Condition.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
