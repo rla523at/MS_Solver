@@ -15,9 +15,9 @@ private:
     static constexpr ushort num_eqation_ = 1;
     static constexpr ushort dimension_ = 2;
 
-    using This_ = Constant1_2D;
+    using This_         = Constant1_2D;
     using Space_Vector_ = Euclidean_Vector<dimension_>;
-    using Solution_ = Euclidean_Vector<num_eqation_>;
+    using Solution_     = Euclidean_Vector<num_eqation_>;
 
 public:
     static std::string name(void);

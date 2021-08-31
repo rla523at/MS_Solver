@@ -21,12 +21,12 @@ public:
 
 
 template <typename Numerical_Flux_Function>
-class Supersonic_Inlet_2D : public Boundary_Flux_Function<Numerical_Flux_Function>
+class Supersonic_Inlet : public Boundary_Flux_Function<Numerical_Flux_Function>
 {
 private:
-	using This_ = Supersonic_Inlet_2D<Numerical_Flux_Function>;
+	using This_			= Supersonic_Inlet<Numerical_Flux_Function>;
 	using Space_Vector_ = This_::Space_Vector_;
-	using Solution_ = This_::Solution_;
+	using Solution_		= This_::Solution_;
 
 private:
 	inline static This_::Solution_ inflow_;
@@ -42,12 +42,12 @@ public:
 
 
 template <typename Numerical_Flux_Function>
-class Supersonic_Outlet_2D : public Boundary_Flux_Function<Numerical_Flux_Function>
+class Supersonic_Outlet : public Boundary_Flux_Function<Numerical_Flux_Function>
 {
 private:
-	using This_ = Supersonic_Outlet_2D<Numerical_Flux_Function>;
+	using This_			= Supersonic_Outlet<Numerical_Flux_Function>;
 	using Space_Vector_ = This_::Space_Vector_;
-	using Solution_ = This_::Solution_;
+	using Solution_		= This_::Solution_;
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
@@ -75,15 +75,14 @@ template <typename Numerical_Flux_Function>
 std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(const ElementType boundary_type) {
 	switch (boundary_type)
 	{
-	case ElementType::supersonic_inlet_2D:
-		return std::make_unique<Supersonic_Inlet_2D<Numerical_Flux_Function>>();
-	case ElementType::supersonic_outlet_2D:
-		return std::make_unique<Supersonic_Outlet_2D<Numerical_Flux_Function>>();
+	case ElementType::supersonic_inlet:
+		return std::make_unique<Supersonic_Inlet<Numerical_Flux_Function>>();
+	case ElementType::supersonic_outlet:
+		return std::make_unique<Supersonic_Outlet<Numerical_Flux_Function>>();
 	//case ElementType::slip_wall_2D:
 	//	return std::make_unique<Slip_Wall_2D>();
 	default:
 		throw std::runtime_error("wrong element type");
 		break;
-	}
-	
+	}	
 }

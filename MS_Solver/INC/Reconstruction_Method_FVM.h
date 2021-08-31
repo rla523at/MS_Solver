@@ -292,8 +292,8 @@ ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :g
     //sorting
     for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
         std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
-    for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
-        std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
+    //for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
+    //    std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
 
 }
 

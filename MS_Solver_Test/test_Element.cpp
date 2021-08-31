@@ -556,7 +556,7 @@ GTEST_TEST(Geometry, faces_nodes_1) {
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
-	const auto result = geometry.calculate_faces_nodes();
+	const auto result = geometry.calculate_set_of_face_nodes();
 
 	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n1} };
 	EXPECT_EQ(result, ref);
@@ -578,7 +578,7 @@ GTEST_TEST(Geometry, faces_nodes_2) {
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
-	const auto result = geometry.calculate_faces_nodes();
+	const auto result = geometry.calculate_set_of_face_nodes();
 
 	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n4}, {n4,n1} };
 	EXPECT_EQ(result, ref);
@@ -951,7 +951,7 @@ GTEST_TEST(Element, vertex_node_indexes_1) {
 }
 
 
-GTEST_TEST(Element, face_node_indexes_set) {
+GTEST_TEST(Element, set_of_face_node_indexes) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
@@ -970,7 +970,7 @@ GTEST_TEST(Element, face_node_indexes_set) {
 	std::vector<uint> indexes = { 5,6,7,8 };
 
 	Element element(element_type, std::move(geometry), std::move(indexes));
-	const auto result = element.face_node_indexes_set();
+	const auto result = element.set_of_face_node_indexes();
 
 	const std::vector<std::vector<uint>> ref = { {5,6},{6,7},{7,8},{8,5} };
 	EXPECT_EQ(ref, result);

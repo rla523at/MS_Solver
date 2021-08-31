@@ -5,15 +5,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/Debug_/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						RQ30,RQ40
-#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__					__SQUARE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__				__FVM__
-#define __RECONSTRUCTION_METHOD__				__ANN_RECONSTRUCTION__
+#define __GRID_FILE_NAMES__						Shu_Osher_OrthoTri_301x7
+#define __GOVERNING_EQUATION__					__EULER__
+#define __INITIAL_CONDITION__					__SHU_OSHER__
+#define __SPATIAL_DISCRETE_METHOD__				__HOM__
+#define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
@@ -26,11 +26,11 @@
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
-#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
+#define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_ITER__
-#define __SOLVE_END_CONDITION_CONSTANT__		10
+#define __SOLVE_END_CONDITION_CONSTANT__		100
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2
@@ -218,7 +218,7 @@ namespace ms {
 			Linear_Advection_2D::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
 			Sine_Wave_2D::initialize(X_WAVE_LENGTH, Y_WAVE_LENGTH);
 			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
-				Supersonic_Inlet_2D<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
+				Supersonic_Inlet<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
 
 		}
 	}

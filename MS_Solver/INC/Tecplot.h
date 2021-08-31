@@ -183,10 +183,10 @@ void Tecplot::record_cell_variables(const std::string& data_name, const std::vec
 
 	auto post_point_datas = This_::convert_cell_data_to_post_point_data(converted_cell_datas);
 
-	if (This_::additioinal_data_name_to_values_.find(data_name) == This_::additioinal_data_name_to_values_.end())
+	if (!This_::additioinal_data_name_to_values_.contains(data_name))
 		This_::additioinal_data_name_to_values_.emplace(data_name, std::move(post_point_datas));
-	else
-		This_::additioinal_data_name_to_values_.at(data_name) = std::move(post_point_datas);
+
+	This_::additioinal_data_name_to_values_.at(data_name) = std::move(post_point_datas);
 }
 
 template <typename T>

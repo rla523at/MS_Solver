@@ -75,9 +75,7 @@ double Cells_FVM<Governing_Equation>::calculate_time_step(const std::vector<Eucl
 
         const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
-
-        //if (!std::isnormal(x_radii) || !std::isnormal(y_radii))
-        //    std::cout << "not normal!"; throw catch 후 post하는 루틴
+        dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "time step should be finite number");
 
         local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
     }
@@ -107,33 +105,22 @@ void Cells_FVM<Governing_Equation>::estimate_error(const std::vector<Euclidean_V
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
 
-    if constexpr (ms::is_Linear_Advection_2D<Governing_Equation>) {
-        double global_L1_error = 0.0;
-        double global_L2_error = 0.0;
-        double global_Linf_error = 0.0;
+    double arithmetic_mean_L1_error = 0.0;
 
-        const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(this->centers_, time);
-        const auto num_solutions = computed_solutions.size();
+    const auto exact_solutions = Initial_Condition::template calculate_exact_solutions<Governing_Equation>(this->centers_, time);
+    const auto num_cell = computed_solutions.size();
 
-        for (size_t i = 0; i < num_solutions; ++i) {
-            const auto local_error = (exact_solutions[i] - computed_solutions[i]).L1_norm();
-            global_L1_error += local_error;
-            global_L2_error += local_error * local_error;
-            global_Linf_error = max(global_Linf_error, local_error);
-        }
-
-        global_L1_error = global_L1_error / num_solutions;
-        global_L2_error = global_L2_error / num_solutions;
-
-        global_L2_error = std::sqrt(global_L2_error);
-
-        Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
-        Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
-
+    for (size_t i = 0; i < num_cell; ++i) {
+        const auto local_diff = (exact_solutions[i] - computed_solutions[i]).L1_norm();
+        const auto local_L1_error = local_diff;
+        arithmetic_mean_L1_error += local_L1_error;
     }
-    else
-        Log::content_ << Governing_Equation::name() << " does not provide error analysis result.\n\n";
 
+    arithmetic_mean_L1_error = arithmetic_mean_L1_error / num_cell;
+
+    Log::content_ << std::left << std::setprecision(16);
+    Log::content_ << std::setw(25) << "L1 error\n";
+    Log::content_ << std::setw(25) << arithmetic_mean_L1_error << "\n";
     Log::print();
 }
 

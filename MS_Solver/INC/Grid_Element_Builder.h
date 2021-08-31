@@ -26,18 +26,21 @@ class Grid_Element_Builder;
 template <ushort space_dimension>
 class Grid_Element_Builder<Gmsh, space_dimension>
 {
+private:
+	Grid_Element_Builder(void) = delete;
+
+private:
+	using This_			= Grid_Element_Builder<Gmsh, space_dimension>;
 	using Space_Vector_ = Euclidean_Vector<space_dimension>;
 
 public:
-	Grid_Element_Builder(void) = delete;
-
 	static Grid_Elements<space_dimension> build_from_grid_file(const std::string& grid_file_name);
 
 	//private: for test
 	static Text read_about(std::ifstream& grid_file_stream, const std::string& target);
 	static std::vector<Space_Vector_> make_node_datas(const Text& node_text);
 	static Grid_Elements<space_dimension> make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Space_Vector_>& node_datas);
-	static std::vector<Element<space_dimension>> make_inner_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements);
+	static std::vector<Element<space_dimension>> make_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements);
 	static std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> match_periodic_boundaries(std::vector<Element<space_dimension>>& periodic_boundary_elements);
 };
 
@@ -56,8 +59,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::buil
 	Log::content_ << "================================================================================\n";
 	Log::content_ << "\t\t\t\t PreProcessing \n";
 	Log::content_ << "================================================================================\n";	
-	Log::print(); 
-		
+	Log::print(); 		
 
 	SET_TIME_POINT;
 	
@@ -66,11 +68,11 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::buil
 	std::ifstream grid_file_stream(grid_file_path);
 	dynamic_require(grid_file_stream.is_open(), "fail to open " + grid_file_path);
 	
-	const auto node_text			= read_about(grid_file_stream, "Nodes");
-	const auto node_datas			= make_node_datas(node_text);
+	const auto node_text			= This_::read_about(grid_file_stream, "Nodes");
+	const auto node_datas			= This_::make_node_datas(node_text);
 	
-	const auto element_text			= read_about(grid_file_stream, "Elements");	
-	const auto physical_name_text	= read_about(grid_file_stream, "PhysicalNames");
+	const auto element_text			= This_::read_about(grid_file_stream, "Elements");	
+	const auto physical_name_text	= This_::read_about(grid_file_stream, "PhysicalNames");
 
 	Log::content_ << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << GET_TIME_DURATION << "s\n\n";
 	Log::print();
@@ -167,8 +169,8 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 		}
 	}
 
-	const auto inner_face_elements = make_inner_face_elements(cell_elements, boundary_elements, periodic_boundary_elements);
-	const auto periodic_boundary_element_pairs = match_periodic_boundaries(periodic_boundary_elements);
+	const auto inner_face_elements = This_::make_face_elements(cell_elements, boundary_elements, periodic_boundary_elements);
+	const auto periodic_boundary_element_pairs = This_::match_periodic_boundaries(periodic_boundary_elements);
 
 	Log::content_ << std::left << std::setw(50) << "@ Make Elements" << " ----------- " << GET_TIME_DURATION << "s\n";
 	Log::content_ << "  " << std::setw(8) << cell_elements.size() << " cell \n";
@@ -180,34 +182,34 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 }
 
 template<ushort space_dimension>
-std::vector<Element<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension>::make_inner_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements) {
-	//construct inner face elements
+std::vector<Element<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension>::make_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements) {
+	//construct face elements
 	std::map<std::vector<uint>, Element<space_dimension>> vnode_indexes_to_inner_face_element;
 
 	for (const auto& cell_element : cell_elements) {
-		auto inner_face_elements = cell_element.make_inner_face_elements();
-		for (auto& inner_face_element : inner_face_elements) {
+		auto face_elements = cell_element.make_face_elements();
+		for (auto& inner_face_element : face_elements) {
 			auto vnode_indexes = inner_face_element.vertex_node_indexes();
-			std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
+			std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order			
 			vnode_indexes_to_inner_face_element.emplace(std::move(vnode_indexes), std::move(inner_face_element));
 		}
 	}
 
-	//erase constructed elements
+	//erase bdry & pbdry 
 	for (const auto& boundray_element : boundary_elements) {
 		auto vnode_indexes = boundray_element.vertex_node_indexes();
 		std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
 		const auto result = vnode_indexes_to_inner_face_element.erase(vnode_indexes);
-		dynamic_require(result == 1, "boundary geometry should be one of inner face");
+		dynamic_require(result == 1, "boundary geometry should be one of face");
 	}
 	for (const auto& periodic_boundray_element : periodic_boundary_elements) {
 		auto vnode_indexes = periodic_boundray_element.vertex_node_indexes();
 		std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
 		const auto result = vnode_indexes_to_inner_face_element.erase(vnode_indexes);
-		dynamic_require(result == 1, "periodic boundary geometry should be one of inner face");
+		dynamic_require(result == 1, "periodic boundary geometry should be one of face");
 	}
 
-	// container change
+	//container change
 	std::vector<Element<space_dimension>> inner_face_elements;
 
 	const auto num_inner_face = vnode_indexes_to_inner_face_element.size();
@@ -220,23 +222,22 @@ std::vector<Element<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension
 }
 
 template<ushort space_dimension>
-std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_Element_Builder<Gmsh, space_dimension>::match_periodic_boundaries(std::vector<Element<space_dimension>>& periodic_boundary_elements) {
-	
+std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_Element_Builder<Gmsh, space_dimension>::match_periodic_boundaries(std::vector<Element<space_dimension>>& periodic_boundary_elements) {	
 	const auto num_periodic_element = periodic_boundary_elements.size();
 	const auto num_pair = static_cast<uint>(0.5 * num_periodic_element);
 
-	std::unordered_set<uint> matched_index;
-	matched_index.reserve(num_periodic_element);
+	std::unordered_set<uint> matched_index_set;
+	matched_index_set.reserve(num_periodic_element);
 
 	std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> matched_periodic_element_pairs;
 	matched_periodic_element_pairs.reserve(num_pair);
 
 	for (uint i = 0; i < num_periodic_element; ++i) {
-		if (matched_index.find(i) != matched_index.end())
+		if (matched_index_set.contains(i))
 			continue;
 
 		for (uint j = i + 1; j < num_periodic_element; ++j) {
-			if (matched_index.find(j) != matched_index.end())
+			if (matched_index_set.contains(j))
 				continue;
 
 			auto& i_element = periodic_boundary_elements[i];
@@ -244,8 +245,8 @@ std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_
 
 			if (i_element.is_periodic_pair(j_element)) {
 				matched_periodic_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(j_element)));
-				matched_index.insert(i);
-				matched_index.insert(j);
+				matched_index_set.insert(i);
+				matched_index_set.insert(j);
 				break;
 			}
 		}
@@ -281,9 +282,9 @@ namespace ms {
 		else if (ms::is_there_icase(str, "slip") && ms::is_there_icase(str, "wall") && ms::is_there_icase(str, "2D"))
 			return ElementType::slip_wall_2D;
 		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "inlet") && ms::is_there_icase(str, "2D"))
-			return ElementType::supersonic_inlet_2D;
+			return ElementType::supersonic_inlet;
 		else if (ms::is_there_icase(str, "SuperSonic") && ms::is_there_icase(str, "outlet") && ms::is_there_icase(str, "2D"))
-			return ElementType::supersonic_outlet_2D;
+			return ElementType::supersonic_outlet;
 		else if (ms::is_there_icase(str, "x") && ms::is_there_icase(str, "periodic"))
 			return ElementType::x_periodic;
 		else if (ms::is_there_icase(str, "y") && ms::is_there_icase(str, "periodic"))
@@ -300,7 +301,7 @@ namespace ms {
 		std::vector<T> extracted_values(num_extracted_value);
 
 		for (ushort i = 0; i < num_extracted_value; ++i)
-			extracted_values[i] = set[indexes[i]]; // index start with 1
+			extracted_values[i] = set[indexes[i]];
 
 		return extracted_values;
 	}

@@ -120,8 +120,8 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
 
         const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
         const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
-
         dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "time step should be finite number");
+
         local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);        
     }
 
@@ -189,7 +189,57 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
     Log::content_ << "================================================================================\n";
     Log::content_ << "\t\t\t\t Error Anlysis\n";
     Log::content_ << "================================================================================\n";
+ 
+    //Version 2
+    const auto num_cell = solution_coefficients.size();
     
+    double arithmetic_mean_L1_error = 0.0;
+    double arithmetic_mean_L2_error = 0.0;
+    double arithmetic_mean_Linf_error = 0.0;
+
+    for (size_t i = 0; i < num_cell; ++i) {
+        const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
+        const auto exact_solutions = Sine_Wave_2D::calculate_exact_solutions(qnodes, time);
+        const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
+
+        const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
+
+        const auto num_qnode = qnodes.size();
+
+        double local_L1_error = 0.0;
+        double local_L2_error = 0.0;
+        double local_Linf_error = 0.0;
+
+        double volume = 0.0;
+        for (size_t q = 0; q < num_qnode; ++q) {
+            const auto local_diff = (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm();
+            local_L1_error += local_diff * qweights[q];
+            local_L2_error += local_diff * local_diff * qweights[q];
+            local_Linf_error = (std::max)(local_Linf_error, local_diff);
+
+            volume += qweights[q];
+        }
+
+        local_L1_error = local_L1_error / volume;
+        local_L2_error = std::sqrt(local_L2_error / volume);
+
+        arithmetic_mean_L1_error += local_L1_error;
+        arithmetic_mean_L2_error += local_L2_error;
+        arithmetic_mean_Linf_error += local_Linf_error;
+    }
+
+    arithmetic_mean_L1_error = arithmetic_mean_L1_error / num_cell;
+    arithmetic_mean_L2_error = arithmetic_mean_L2_error / num_cell;
+    arithmetic_mean_Linf_error = arithmetic_mean_Linf_error / num_cell;
+
+    Log::content_ << std::left << std::setprecision(16);
+    Log::content_ << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
+    Log::content_ << std::setw(25) << arithmetic_mean_L1_error << std::setw(25) << arithmetic_mean_L2_error << arithmetic_mean_Linf_error << "\n";
+
+    std::string error_str = ms::double_to_string(arithmetic_mean_L1_error) + " " + ms::double_to_string(arithmetic_mean_L2_error) + " " + ms::double_to_string(arithmetic_mean_Linf_error) + "\n";
+    Log::write_error_text(error_str);
+
+
 
     ////Version 1
     //const auto num_cell = solution_coefficients.size();
@@ -228,58 +278,6 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 
     //Log::content_ << "L1 error \t\tL2 error \t\tLinf error \n";
     //Log::content_ << ms::double_to_string(global_L1_error) << "\t" << ms::double_to_string(global_L2_error) << "\t" << ms::double_to_string(global_Linf_error) << "\n\n";
-
-
-    //Version 2
-    const auto num_cell = solution_coefficients.size();
-
-    double global_L1_error = 0.0;
-    double global_L2_error = 0.0;
-    double global_Linf_error = 0.0;
-
-    for (size_t i = 0; i < num_cell; ++i) {
-        const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
-        const auto exact_solutions = Sine_Wave_2D::calculate_exact_solutions(qnodes, time);
-        const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
-
-        const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
-
-        const auto num_qnode = qnodes.size();
-
-        double local_L1_error = 0.0;
-        double local_L2_error = 0.0;
-        double local_Linf_error = 0.0;
-
-        double volume = 0.0;
-        for (size_t q = 0; q < num_qnode; ++q) {
-            const auto local_diff = (exact_solutions[q] - computed_solutions.column<This_::num_equation_>(q)).L1_norm();
-            local_L1_error += local_diff * qweights[q];
-            local_L2_error += local_diff * local_diff * qweights[q];
-            local_Linf_error = (std::max)(local_Linf_error, local_diff);
-
-            volume += qweights[q];
-        }
-
-        local_L1_error = local_L1_error / volume;
-        local_L2_error = std::sqrt(local_L2_error / volume);
-
-        //arithmetic mean
-        global_L1_error += local_L1_error;
-        global_L2_error += local_L2_error;
-        global_Linf_error += local_Linf_error;
-    }
-
-    //arithmetic mean
-    global_L1_error = global_L1_error / num_cell;
-    global_L2_error = global_L2_error / num_cell;
-    global_Linf_error = global_Linf_error / num_cell;
-
-    Log::content_ << std::left << std::setprecision(16);
-    Log::content_ << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
-    Log::content_ << std::setw(25) << global_L1_error << std::setw(25) << global_L2_error << global_Linf_error << "\n";
-
-    std::string error_str = ms::double_to_string(global_L1_error) + " " + ms::double_to_string(global_L2_error) + " " + ms::double_to_string(global_Linf_error) + "\n";
-    Log::write_error_text(error_str);
 }
 
 template <typename Governing_Equation, typename Reconstruction_Method>
