@@ -37,11 +37,10 @@ public:
 public:
     double calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const;
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
+    void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const;
 
     template <typename Initial_Condition>
     auto calculate_initial_solutions(void) const;
-
-    void estimate_error(const std::vector<Solution_Coefficient_>& solution_coefficients, const double time) const;
 
 public:
     void initialize_scaling_method(void) const;
@@ -115,18 +114,31 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
     
     std::vector<double> local_time_step(num_cell);
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto [y_projected_volume, x_projected_volume] = this->projected_volumes_[i];
-        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+        if constexpr (This_::space_dimension_ == 2) {
+            const auto [y_projected_volume, x_projected_volume] = this->projected_volumes_[i];
+            const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
 
-        const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
-        const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
-        dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "time step should be finite number");
+            const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
+            const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
+            dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "radii should be finite number");
 
-        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);        
+            local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
+        }
+        else {
+            const auto [yz_projected_volume, xz_projected_volume, xy_projected_volume] = this->projected_volumes_[i];
+            const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda, z_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+
+            const auto x_radii = yz_projected_volume * x_projeced_maximum_lambda;
+            const auto y_radii = xz_projected_volume * y_projeced_maximum_lambda;
+            const auto z_radii = xy_projected_volume * z_projeced_maximum_lambda;
+            dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii) && std::isfinite(z_radii), "radii should be finite number");
+
+            local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii + z_radii);
+        }
     }
 
-    static const auto solution_order = Reconstruction_Method::solution_order();
-    static const auto c = static_cast<double>(1.0 / (2.0 * solution_order + 1.0));
+    constexpr auto solution_order = Reconstruction_Method::solution_order();
+    constexpr auto c = static_cast<double>(1.0 / (2.0 * solution_order + 1.0));
     return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
 }
 

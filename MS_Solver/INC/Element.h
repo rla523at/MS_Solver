@@ -1055,6 +1055,8 @@ double Geometry<space_dimension>::volume(void) const {
 
 template <ushort space_dimension>
 std::array<double, space_dimension> Geometry<space_dimension>::projected_volume(void) const {
+	//This only work for linear mesh and convex geometry.
+
 	if constexpr (space_dimension == 2) {
 		double x_projected_volume = 0.0;
 		double y_projected_volume = 0.0;
@@ -1070,12 +1072,36 @@ std::array<double, space_dimension> Geometry<space_dimension>::projected_volume(
 		}
 
 		return { 0.5 * y_projected_volume, 0.5 * x_projected_volume };
+	}
+	else if constexpr (space_dimension == 3) {
+		double yz_projected_volume = 0.0;
+		double xz_projected_volume = 0.0;
+		double xy_projected_volume = 0.0;
 
+		const auto face_geometries = this->face_geometries();
+		for (const auto& geometry : face_geometries) {
+			const auto normal_vector = geometry.normalized_normal_vector(geometry.center_node());
+
+			Euclidean_Vector yz_plane_normalized_normal_vector = { 1,0,0 };
+			Euclidean_Vector xz_plane_normalized_normal_vector = { 0,1,0 };
+			Euclidean_Vector xy_plane_normalized_normal_vector = { 0,0,1 };
+
+			const auto volume = geometry.volume();
+
+			yz_projected_volume += volume * std::abs(normal_vector.inner_product(yz_plane_normalized_normal_vector));
+			xz_projected_volume += volume * std::abs(normal_vector.inner_product(xz_plane_normalized_normal_vector));
+			xy_projected_volume += volume * std::abs(normal_vector.inner_product(xy_plane_normalized_normal_vector));
+		}
+
+		return { 0.5 * yz_projected_volume, 0.5 * xz_projected_volume, 0.5 * xy_projected_volume };
 	}
 	else {
 		throw std::runtime_error("not supproted dimension");
 		return {};
 	}
+
+
+
 }
 
 template <ushort space_dimension>
