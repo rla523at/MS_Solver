@@ -4,9 +4,6 @@
 #include <initializer_list>
 
 
-using ushort = unsigned short;
-
-
 template<typename Function, ushort range_dimension_>
 class Vector_Function
 {

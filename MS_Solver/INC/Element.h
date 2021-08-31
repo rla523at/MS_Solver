@@ -1,5 +1,4 @@
 #pragma once
-#include "Matrix.h"
 #include "Polynomial.h"
 
 #include <map>
@@ -7,7 +6,7 @@
 #include <unordered_set>
 
 
-using uint		= unsigned int;
+using uint = unsigned int;
 
 
 enum class Figure
@@ -25,7 +24,7 @@ enum class ElementType
 	cell, inner_face,
 	slip_wall_2D,
 	supersonic_inlet, supersonic_outlet,
-	x_periodic, y_periodic,
+	x_periodic, y_periodic, z_periodic,
 	not_in_list
 };
 

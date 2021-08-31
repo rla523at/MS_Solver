@@ -4,10 +4,10 @@
 #include <algorithm>
 #include <iostream>
 
-using ushort = unsigned short;
 
 template <ushort domain_dimension_>
 class Irrational_Function;
+
 
 template <ushort domain_dimension_>
 class Polynomial

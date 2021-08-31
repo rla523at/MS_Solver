@@ -1,9 +1,6 @@
 #pragma once
 #include "Euclidean_Vector.h"
 
-using ushort = unsigned short;
-
-
 class Dynamic_Matrix;
 
 
