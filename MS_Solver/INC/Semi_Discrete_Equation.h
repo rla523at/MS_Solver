@@ -89,7 +89,7 @@ public:
 
     template <typename Initial_Condition>
     void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
-        if constexpr (std::is_same_v<Initial_Condition, Sine_Wave_2D> && std::is_same_v<Governing_Equation, Linear_Advection_2D>)
+        if constexpr (std::is_same_v<Initial_Condition, Sine_Wave_2D> && std::is_same_v<Governing_Equation, Linear_Advection>)
             this->cells_.estimate_error(computed_solutions, time);
         else
             Log::content_ << "In this setting, error analysis result does not provided.";

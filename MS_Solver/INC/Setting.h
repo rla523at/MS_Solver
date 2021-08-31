@@ -215,7 +215,7 @@
 namespace ms {
 	inline void apply_user_defined_setting(void) {
 		if constexpr (__DIMENSION__ == 2) {
-			Linear_Advection_2D::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
+			Linear_Advection::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
 			Sine_Wave_2D::initialize(X_WAVE_LENGTH, Y_WAVE_LENGTH);
 			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
 				Supersonic_Inlet<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });

@@ -45,7 +45,7 @@ std::string Sine_Wave_2D::name(void) {
 
 
 std::vector<Euclidean_Vector<1>> Sine_Wave_2D::calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
-	const auto advection_speed = Linear_Advection_2D::advection_speed();
+	const auto advection_speed = Linear_Advection::advection_speed();
 	const auto x_advection_speed = advection_speed[0];
 	const auto y_advection_speed = advection_speed[1];
 	

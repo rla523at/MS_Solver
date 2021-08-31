@@ -1,101 +1,5 @@
 #include "../INC/Governing_Equation.h"
 
-SCL_2D::Physical_Flux_ Linear_Advection_2D::physical_flux(const Solution_& solution) {
-	const auto sol = solution.at(0);	//scalar
-	const auto x_advection_speed = This_::advection_speeds_[0];
-	const auto y_advection_speed = This_::advection_speeds_[1];
-
-	Physical_Flux_ physical_flux = { x_advection_speed * sol , y_advection_speed * sol };
-	return physical_flux;
-}
-
-std::vector<SCL_2D::Physical_Flux_> Linear_Advection_2D::physical_fluxes(const std::vector<Solution_>& solutions) {
-	const auto num_solution = solutions.size();
-	const auto x_advection_speed = This_::advection_speeds_[0];
-	const auto y_advection_speed = This_::advection_speeds_[1];
-
-	std::vector<Physical_Flux_> physical_fluxes(num_solution);
-	for (size_t i = 0; i < num_solution; ++i) {
-		const auto sol = solutions[i].at(0);	//scalar
-		physical_fluxes[i] = { x_advection_speed * sol , y_advection_speed * sol };
-	}
-
-	return physical_fluxes;
-}
-
-std::vector<std::array<double, Burgers_2D::space_dimension_>> Linear_Advection_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-	const auto num_solution = solutions.size();
-	const auto x_advection_speed = This_::advection_speeds_[0];
-	const auto y_advection_speed = This_::advection_speeds_[1];
-
-	const auto absolute_x_advection_speed = std::abs(x_advection_speed);
-	const auto absolute_y_advection_speed = std::abs(y_advection_speed);
-
-	std::vector<std::array<double, This_::space_dimension_>> projected_maximum_lambdas(num_solution, { absolute_x_advection_speed,absolute_y_advection_speed });
-	return projected_maximum_lambdas;
-}
-
-double Linear_Advection_2D::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
-	return std::abs(nomal_vector.inner_product(This_::advection_speeds_));
-}
-
-
-Burgers_2D::Physical_Flux_ Burgers_2D::physical_flux(const Solution_& solution) {
-	const auto sol = solution.at(0); //scalar
-
-	const auto temp_val = 0.5 * sol * sol;
-	return { temp_val, temp_val };
-}
-
-std::vector<Burgers_2D::Physical_Flux_> Burgers_2D::physical_fluxes(const std::vector<Solution_>& solutions) {
-	const auto num_solution = solutions.size();
-
-
-	std::vector<Physical_Flux_> physical_fluxes(num_solution);
-	for (size_t i = 0; i < num_solution; ++i) {
-		const auto sol = solutions[i].at(0);	//scalar
-		const auto temp_val = 0.5 * sol * sol;
-		physical_fluxes[i] = { temp_val, temp_val };
-	}
-
-	return physical_fluxes;
-}
-
-std::vector<std::array<double, Burgers_2D::space_dimension_>> Burgers_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-	const auto num_solution = solutions.size();
-
-	std::vector<std::array<double, Burgers_2D::space_dimension_>> projected_maximum_lambdas(num_solution);
-	for (size_t i = 0; i < num_solution; ++i) {
-		const auto maximum_lambdas = std::abs(solutions[i].at(0));	//scalar
-		projected_maximum_lambdas[i] = { maximum_lambdas, maximum_lambdas };
-	}
-
-	return projected_maximum_lambdas;
-}
-
-double Burgers_2D::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
-	const auto normal_component_sum = nomal_vector.at(0) + nomal_vector.at(1);
-	return std::max(std::abs(solution_o.at(0) * normal_component_sum), std::abs(solution_n.at(0) * normal_component_sum));
-}
-
-Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conservative_variable) {
-	constexpr auto gamma = 1.4;
-	
-	const auto rho = conservative_variable.at(0);
-	const auto rhou = conservative_variable.at(1);
-	const auto rhov = conservative_variable.at(2);
-	const auto rhoE = conservative_variable.at(3);
-
-	const auto one_over_rho = 1.0 / rho;	
-
-	const auto u = rhou * one_over_rho;
-	const auto v = rhov * one_over_rho;
-	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
-	const auto a = std::sqrt(gamma * p * one_over_rho);
-
-	return { u,v,p,a };
-}
-
 std::vector<std::array<double, Euler_2D::space_dimension_>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables) {
 	auto num_solution = conservative_variables.size();
 
@@ -170,4 +74,22 @@ double Euler_2D::inner_face_maximum_lambda(const Solution_& oc_primitive_variabl
 	const auto nc_side_face_maximum_lambda = std::abs(nc_u * nomal_vector.at(0) + nc_v * nomal_vector.at(1)) + nc_a;
 
 	return std::max(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
+}
+
+Euler_2D::Solution_ Euler_2D::conservative_to_primitive(const Solution_& conservative_variable) {
+	constexpr auto gamma = 1.4;
+
+	const auto rho = conservative_variable.at(0);
+	const auto rhou = conservative_variable.at(1);
+	const auto rhov = conservative_variable.at(2);
+	const auto rhoE = conservative_variable.at(3);
+
+	const auto one_over_rho = 1.0 / rho;
+
+	const auto u = rhou * one_over_rho;
+	const auto v = rhov * one_over_rho;
+	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
+	const auto a = std::sqrt(gamma * p * one_over_rho);
+
+	return { u,v,p,a };
 }
