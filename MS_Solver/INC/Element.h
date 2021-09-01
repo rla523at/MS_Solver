@@ -242,7 +242,7 @@ ReferenceGeometry<space_dimension>::ReferenceGeometry(const Figure figure, const
 	dynamic_require(figure_order > 0, "figure order should be greater than 0");
 
 	auto key = std::make_pair(this->figure_, this->figure_order_);
-	if (ReferenceGeometry::key_to_mapping_nodes_.find(key) == ReferenceGeometry::key_to_mapping_nodes_.end()) {
+	if (!ReferenceGeometry::key_to_mapping_nodes_.contains(key)){	
 		ReferenceGeometry::key_to_mapping_nodes_.emplace(key, this->mapping_nodes());
 		ReferenceGeometry::key_to_mapping_monomial_vector_function_.emplace(key, this->mapping_monomial_vector_function());
 		ReferenceGeometry::key_to_inverse_mapping_monomial_matrix_.emplace(std::move(key), this->inverse_mapping_monomial_matrix());
@@ -720,6 +720,42 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 			}
 			break;
 		}
+		case Figure::tetrahedral: {
+			switch (this->figure_order_)
+			{
+			case 1: {
+				//		   3
+				//		   弛
+				//         弛 
+				//		   弛    
+				//		   0式式式式式式式式2
+				//		  /
+				//		 /   				 
+				//		1     
+
+				return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+			}
+			default:	throw std::runtime_error("unsuported figure order");
+			}
+			break;
+		}
+		case Figure::hexahedral: {
+			switch (this->figure_order_)
+			{
+			case 1: {
+				//	     4式式式式式7
+				//      /弛    /弛
+				//     5式托式式式6 弛 
+				//     弛 0式式式托式3 
+				//	   弛/    弛/
+				//     1式式式式式2
+				
+				return { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 }, { -1, 1, -1 }, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1} };
+			}
+			default:	throw std::runtime_error("unsuported figure order");
+			}
+			break;
+		}
 		default:
 			throw std::runtime_error("not supported element figure");
 			return {};
@@ -731,6 +767,7 @@ template <ushort space_dimension>
 Dynamic_Vector_Function_<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_monomial_vector_function(void) const {
 	Polynomial<space_dimension> r("x0");
 	Polynomial<space_dimension> s("x1");
+	Polynomial<space_dimension> t("x2");
 
 	switch (this->figure_) {
 	case Figure::line: {
@@ -740,8 +777,7 @@ Dynamic_Vector_Function_<Polynomial<space_dimension>> ReferenceGeometry<space_di
 		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
 			mapping_monomial_vector[index++] = (r ^ a);
 
-		return mapping_monomial_vector;	// 1 r r^2 ...
-		//return std::move(mapping_monomial_vector);	// 1 r r^2 ...
+		return mapping_monomial_vector;	// 1 r r^2 ...		
 	}
 	case Figure::triangle: {
 		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);

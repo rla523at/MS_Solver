@@ -266,6 +266,11 @@ std::vector<std::vector<double>> Tecplot::convert_to_binary_data(const std::vect
 				convert_to_binary_data[i].push_back(post_point_solutions[j][i]);
 	}
 	else {
+		//후에 추가적인 processig 부분이 다양하게 필요한 경우
+		//switch 역활을 하는 enum class 만들고 
+		//initialize 부분에서 Governing Equation에 따라서 switch 변수를 할당한뒤
+		//performance loss가 있지만 if 문으로 처리해야 Tecplot:: << 이 형식을 유지할 수 있다.
+
 		constexpr ushort space_dimension = num_equation - 2; //temporary code
 
 		convert_to_binary_data.resize(2 * num_equation - 1);
@@ -275,7 +280,7 @@ std::vector<std::vector<double>> Tecplot::convert_to_binary_data(const std::vect
 
 		for (uint i = 0; i < This_::num_node_; ++i) {
 			const auto& cvariable = post_point_solutions[i];
-			const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable); //space dimension을 모르네..
+			const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
 
 			for (size_t j = 0; j < num_equation; ++j)
 				convert_to_binary_data[j].push_back(cvariable[j]);
