@@ -678,80 +678,73 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 	if constexpr (space_dimension == 2) {
 		switch (this->figure_) {
 		case Figure::line: {
+			// 0 式式式式 1 		
 			switch (this->figure_order_)
 			{
-			case 1: {
-				// 0 式式式式 1 		
-				return { { -1,0 }, { 1,0 } };
-			}
-			case 2: {
-				// 0 式式 2 式式 1
-				return { { -1,0 }, { 1,0 }, { 0,0 } };
-			}
+			case 1:		return { { -1,0 }, { 1,0 } };
+			case 2:		return { { -1,0 }, { 1,0 }, { 0,0 } };
 			default:	throw std::runtime_error("unsuported figure order");
 			}
 			break;
 		}
 		case Figure::triangle: {
+			//	  2
+			//    弛 \ 
+			//	  弛   \
+			//    0式式式式式1
+
 			switch (this->figure_order_)
 			{
-			case 1: {
-				//	  2
-				//    弛 \ 
-				//    弛  \  
-				//	  弛   \
-				//    0式式式式式1
-				return { { -1, -1 }, { 1, -1 }, { -1, 1 } };
-			}
+			case 1:		return { { -1, -1 }, { 1, -1 }, { -1, 1 } };			
 			default:	throw std::runtime_error("unsuported figure order");
 			}
 			break;
 		}
 		case Figure::quadrilateral: {
+			//   3式式式式式2
+			//   弛     弛   
+			//   0式式式式式1
+
 			switch (this->figure_order_)
 			{
-			case 1: {
-				//   3式式式式式2
-				//   弛     弛   
-				//   0式式式式式1
-				return { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-			}
+			case 1:		return { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };			
 			default:	throw std::runtime_error("unsuported figure order");
 			}
 			break;
 		}
+
+		default:
+			throw std::runtime_error("not supported element figure");
+			return {};
+		}
+	}
+	else if constexpr (space_dimension == 3) {
+		switch (this->figure_) {
 		case Figure::tetrahedral: {
+			//   3
+			//   弛    
+			//   0式式式式2
+			//  /   				 
+			// 1     
 			switch (this->figure_order_)
 			{
-			case 1: {
-				//		   3
-				//		   弛
-				//         弛 
-				//		   弛    
-				//		   0式式式式式式式式2
-				//		  /
-				//		 /   				 
-				//		1     
-
-				return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
-			}
+			case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+			case 2:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 }, { 0, -1, -1 }, { -1, 0, -1 }, { -1, -1, 0 }, { 0, 0, -1 }, { 0, -1, 0 }, { -1, 0, 0 } };			
 			default:	throw std::runtime_error("unsuported figure order");
 			}
 			break;
 		}
 		case Figure::hexahedral: {
+			//	     4式式式式式7
+			//      /弛    /弛
+			//     5式托式式式6 弛 
+			//     弛 0式式式托式3 
+			//	   弛/    弛/
+			//     1式式式式式2
+
 			switch (this->figure_order_)
 			{
-			case 1: {
-				//	     4式式式式式7
-				//      /弛    /弛
-				//     5式托式式式6 弛 
-				//     弛 0式式式托式3 
-				//	   弛/    弛/
-				//     1式式式式式2
-				
-				return { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 }, { -1, 1, -1 }, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1} };
-			}
+			case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 }, { -1, 1, -1 }, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1} };			
 			default:	throw std::runtime_error("unsuported figure order");
 			}
 			break;
@@ -761,53 +754,121 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 			return {};
 		}
 	}
+	else {
+		throw std::runtime_error("not supported space dimension");
+		return {};
+	}
 }
 
 template <ushort space_dimension>
 Dynamic_Vector_Function_<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_monomial_vector_function(void) const {
-	Polynomial<space_dimension> r("x0");
-	Polynomial<space_dimension> s("x1");
-	Polynomial<space_dimension> t("x2");
+	if constexpr (space_dimension == 2) {
+		Polynomial<space_dimension> r("x0");
+		Polynomial<space_dimension> s("x1");
 
-	switch (this->figure_) {
-	case Figure::line: {
-		const auto num_monomial = this->figure_order_ + 1;
-		std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+		switch (this->figure_){
+			case Figure::line: {
+				const auto num_monomial = this->figure_order_ + 1;
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
-			mapping_monomial_vector[index++] = (r ^ a);
+				for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
+					mapping_monomial_vector[index++] = (r ^ a);
 
-		return mapping_monomial_vector;	// 1 r r^2 ...		
+				return mapping_monomial_vector;	// 1 r r^2 ...		
+			}
+			case Figure::triangle: {
+				const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+
+				for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
+					for (ushort b = 0; b <= a; ++b)
+						mapping_monomial_vector[index++] = (r ^ (a - b)) * (s ^ b);
+
+				return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...
+			}
+			case Figure::quadrilateral: {
+				const auto n = this->figure_order_;
+				const auto num_monomial = (n + 1) * (n + 1);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+
+				for (ushort a = 0, index = 0; a <= n; ++a) {
+					for (ushort b = 0; b <= a; ++b)
+						mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
+
+					if (a == 0)
+						continue;
+
+					for (int c = static_cast<int>(a - 1); 0 <= c; --c)
+						mapping_monomial_vector[index++] = (r ^ c) * (s ^ a);
+				}
+				return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
+			}
+			default:
+				throw std::runtime_error("not supproted figure");
+				return std::vector<Polynomial<space_dimension>>(NULL);
+			}
 	}
-	case Figure::triangle: {
-		const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);
-		std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+	else if constexpr (space_dimension == 3) {
+		Polynomial<space_dimension> r("x0");
+		Polynomial<space_dimension> s("x1");
+		Polynomial<space_dimension> t("x2");
 
-		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
-			for (ushort b = 0; b <= a; ++b)
-				mapping_monomial_vector[index++] = (r ^ (a - b)) * (s ^ b);
+		switch (this->figure_) {
+			case Figure::tetrahedral: {
+				const auto n = this->figure_order_;
+				const auto num_monomial = static_cast<ushort>(1.5 * (n + 2) * (n - 1) + 4);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-		return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...
-	}
-	case Figure::quadrilateral: {
-		const auto num_monomial = (this->figure_order_ + 1) * (this->figure_order_ + 1);
-		std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+				ushort index = 0;
+				for (ushort a = 0; a <= n; ++a) {
+					for (ushort b = 0; b <= a; ++b)
+						for (ushort c = 0; c <= b; ++c)
+							mapping_monomial_vector[index++] = (r ^ (a - b)) * (s ^ (b - c)) * (t ^ c);
+				}
 
-		for (ushort a = 0, index = 0; a <= this->figure_order_; ++a) {
-			for (ushort b = 0; b <= a; ++b)
-				mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
+				return mapping_monomial_vector; // 1 r s t r^2 rs rt s^2 st t^2 ...
+			}
+			case Figure::hexahedral: {
+				const auto n = this->figure_order_;
+				const auto num_monomial = (n + 1) * (n + 1) * (n + 1);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
 
-			if (a == 0)
-				continue;
+				ushort index = 0;
 
-			for (int c = static_cast<int>(a - 1); 0 <= c; --c)
-				mapping_monomial_vector[index++] = (r ^ c) * (s ^ a);
+				//make bottom monomials
+				//same process with quadrilateral monomials
+				for (ushort a = 0; a <= n; ++a) {					
+					for (ushort b = 0; b <= a; ++b)
+						mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
+
+					if (a == 0)
+						continue;
+
+					for (int c = static_cast<int>(a - 1); 0 <= c; --c)
+						mapping_monomial_vector[index++] = (r ^ c) * (s ^ a);
+				}
+
+				//make higher floor monomials by multiplying t
+				const auto num_bottom_monomial = (n + 1) * (n + 1);
+				const auto num_floor = n;
+
+				for (ushort i = 1; i <= num_floor; ++i) {
+					for (ushort j = 0; j < num_bottom_monomial; ++j)
+						mapping_monomial_vector[index++] = mapping_monomial_vector[j] * (t ^ i);
+				}
+
+				return mapping_monomial_vector; // {1 r s rs} {...} * t
+												// {1 r rs s r^2 r^2s r^2s^2 rs^2 s^2} {...} * t  {...} * t^2 
+			}
+
+		default:
+			throw std::runtime_error("not supproted figure");
+			return std::vector<Polynomial<space_dimension>>(NULL);
 		}
-		return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
 	}
-	default:
-		throw std::runtime_error("not supproted figure");
-		return std::vector<Polynomial<space_dimension>>(NULL);
+	else {
+		throw std::runtime_error("not supported space dimension");
+		return {};
 	}
 }
 

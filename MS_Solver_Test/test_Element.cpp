@@ -2,6 +2,93 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Element.h"
 
+GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r };
+	EXPECT_EQ(ref, result);
+}
+GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+	const Polynomial<space_dimension> s("x1");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s };
+	EXPECT_EQ(ref, result);
+}
+GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
+	constexpr size_t space_dimension = 2;
+
+	const Figure fig = Figure::quadrilateral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+	const Polynomial<space_dimension> s("x1");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
+	EXPECT_EQ(ref, result);
+}
+TEST(ReferenceGeometry, mapping_monomial_vector_function_4) {
+	constexpr size_t space_dimension = 3;
+
+	const Figure fig = Figure::tetrahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+	const Polynomial<space_dimension> s("x1");
+	const Polynomial<space_dimension> t("x2");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s, t };
+	EXPECT_EQ(ref, result);
+}
+TEST(ReferenceGeometry, mapping_monomial_vector_function_5) {
+	constexpr size_t space_dimension = 3;
+
+	const Figure fig = Figure::tetrahedral;
+	const ushort fig_order = 2;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+	const Polynomial<space_dimension> s("x1");
+	const Polynomial<space_dimension> t("x2");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s, t, r^2, r*s , r*t, s^2, s*t, t^2 };
+	EXPECT_EQ(ref, result);
+}
+TEST(ReferenceGeometry, mapping_monomial_vector_function_6) {
+	constexpr size_t space_dimension = 3;
+
+	const Figure fig = Figure::hexahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+	const auto result = ref_geometry.mapping_monomial_vector_function();
+
+	const Polynomial<space_dimension> r("x0");
+	const Polynomial<space_dimension> s("x1");
+	const Polynomial<space_dimension> t("x2");
+
+	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s, t, r * t, r * s * t, s * t };
+	EXPECT_EQ(ref, result);
+}
+
 TEST(ReferenceGeometry, is_simplex_1) {
 	constexpr ushort space_dimension = 2;
 
@@ -55,47 +142,7 @@ GTEST_TEST(ReferenceGeometry, nodes_3) {
 	EXPECT_EQ(ref, result);
 }
 
-GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
-	constexpr size_t space_dimension = 2;
 
-	const Figure fig = Figure::line;
-	const ushort fig_order = 1;
-	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
-	const auto result = ref_geometry.mapping_monomial_vector_function();
-
-	const Polynomial<space_dimension> r("x0");
-
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r };
-	EXPECT_EQ(ref, result);
-}
-GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
-	constexpr size_t space_dimension = 2;
-
-	const Figure fig = Figure::triangle;
-	const ushort fig_order = 1;
-	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
-	const auto result = ref_geometry.mapping_monomial_vector_function();
-
-	const Polynomial<space_dimension> r("x0");
-	const Polynomial<space_dimension> s("x1");
-
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s };
-	EXPECT_EQ(ref, result);
-}
-GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
-	constexpr size_t space_dimension = 2;
-
-	const Figure fig = Figure::quadrilateral;
-	const ushort fig_order = 1;
-	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
-	const auto result = ref_geometry.mapping_monomial_vector_function();
-
-	const Polynomial<space_dimension> r("x0");
-	const Polynomial<space_dimension> s("x1");
-
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
-	EXPECT_EQ(ref, result);
-}
 
 GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_1) {
 	constexpr size_t space_dimension = 2;
