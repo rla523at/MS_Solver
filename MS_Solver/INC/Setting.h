@@ -1,6 +1,6 @@
 #pragma once
 #include "Setting_Base.h"
-#include "Inital_Condition.h"
+#include "Initial_Condition.h"
 #include "Discrete_Equation.h"
 
 // ########################################## OPTION ##################################################################
@@ -9,9 +9,9 @@
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shu_Osher_OrthoTri_301x7
+#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SHU_OSHER__
+#define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
@@ -29,10 +29,10 @@
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__END_BY_ITER__
-#define __SOLVE_END_CONDITION_CONSTANT__		100
+#define __SOLVE_END_CONDITION__					__END_BY_TIME__
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		1
+#define __SOLVE_POST_CONDITION_CONSTANT__		10
 #define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS
@@ -93,45 +93,38 @@
 
 
 #if		__GOVERNING_EQUATION__ == __LINEAR_ADVECTION__
-#if		__DIMENSION__ == 2
-#define GOVERNING_EQUATION		SET_FORMAT1(Linear_Advection, __DIMENSION__)
-#endif
-#ifdef  ERROR_CALCULATION_MODE
-#define ERROR_CALCULATION
-#endif
+#define GOVERNING_EQUATION		Linear_Advection<__DIMENSION__>
 #endif
 #if		__GOVERNING_EQUATION__ ==__BURGERS__
-#define GOVERNING_EQUATION		SET_FORMAT1(Burgers, __DIMENSION__)
+#define GOVERNING_EQUATION		Burgers<__DIMENSION__>
 #endif
 #if		__GOVERNING_EQUATION__ ==__EULER__
-#define GOVERNING_EQUATION		SET_FORMAT1(Euler, __DIMENSION__)
+#define GOVERNING_EQUATION		Euler<__DIMENSION__>
 #endif
 
 #if		__INITIAL_CONDITION__ == __SINE_WAVE__
-#if		__DIMENSION__ == 2
-#define INITIAL_CONDITION	SET_FORMAT1(Sine_Wave, __DIMENSION__)
-#endif
+#define INITIAL_CONDITION	Sine_Wave<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __SQUARE_WAVE__
-#define INITIAL_CONDITION	SET_FORMAT1(Square_Wave, __DIMENSION__)
+#define INITIAL_CONDITION	Square_Wave<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __CIRCLE_WAVE__
-#define INITIAL_CONDITION	SET_FORMAT1(Circle_Wave, __DIMENSION__)
+#define INITIAL_CONDITION	Circle_Wave<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __GAUSSIAN_WAVE__
-#define INITIAL_CONDITION	SET_FORMAT1(Gaussian_Wave, __DIMENSION__)
+#define INITIAL_CONDITION	Gaussian_Wave<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __CONSTANT1__
-#define INITIAL_CONDITION	SET_FORMAT1(Constant1, __DIMENSION__)
+#define INITIAL_CONDITION	Constant1<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __SOD__
-#define INITIAL_CONDITION	SET_FORMAT1(SOD, __DIMENSION__)
+#define INITIAL_CONDITION	SOD<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __MODIFIED_SOD__
-#define INITIAL_CONDITION	SET_FORMAT1(Modified_SOD, __DIMENSION__)
+#define INITIAL_CONDITION	Modified_SOD<__DIMENSION__>
 #endif
 #if		__INITIAL_CONDITION__ == __SHU_OSHER__
-#define INITIAL_CONDITION	SET_FORMAT1(Shu_Osher, __DIMENSION__)
+#define INITIAL_CONDITION	Shu_Osher<__DIMENSION__>
 #endif
 
 
@@ -215,8 +208,8 @@
 namespace ms {
 	inline void apply_user_defined_setting(void) {
 		if constexpr (__DIMENSION__ == 2) {
-			Linear_Advection::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
-			Sine_Wave_2D::initialize(X_WAVE_LENGTH, Y_WAVE_LENGTH);
+			Linear_Advection<__DIMENSION__>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
+			Sine_Wave<__DIMENSION__>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
 			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
 				Supersonic_Inlet<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
 

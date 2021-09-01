@@ -30,9 +30,6 @@
     <ClCompile Include="SRC\Matrix.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Numerical_Flux_Function.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\PostAI.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -170,7 +167,7 @@
     <ClInclude Include="INC\Reconstruction_Method_HOM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Solution_Scaling_Method.h">
+    <ClInclude Include="INC\Solution_Scaler.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Tecplot.h">

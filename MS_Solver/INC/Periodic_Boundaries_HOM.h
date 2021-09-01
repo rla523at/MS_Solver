@@ -2,7 +2,7 @@
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
-#include "Solution_Scaling_Method.h"
+#include "Solution_Scaler.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -148,7 +148,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::in
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
         const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
 
-        Solution_Scaler::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
-        Solution_Scaler::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
+        Solution_Scaler<This_::space_dimension_>::record_face_basis_qnodes(oc_index, oc_side_basis_qnodes);
+        Solution_Scaler<This_::space_dimension_>::record_face_basis_qnodes(nc_index, nc_side_basis_qnodes);
     }
 }

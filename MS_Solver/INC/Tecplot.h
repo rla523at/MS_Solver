@@ -15,6 +15,9 @@ enum class Zone_Type {
 class Tecplot
 {
 private:
+	Tecplot(void) = delete;
+
+private:
 	using This_ = Tecplot;
 	
 public:
@@ -34,9 +37,6 @@ private:
 
 	//For HOM 
 	static inline std::vector<Dynamic_Matrix> set_of_basis_post_points_;
-
-private:
-	Tecplot(void) = delete;
 
 public:
 	static void set_path(const std::string& path) { This_::path_ = path; };
@@ -101,12 +101,12 @@ void Tecplot::initialize(const ushort post_order) {
 	This_::post_order_ = post_order;
 
 	// Binary output
-	if constexpr (ms::is_SCL_2D<Governing_Equation>) {
+	if constexpr (ms::is_SCL<Governing_Equation>) {
 		This_::grid_variables_str_ = "X,Y";
 		This_::solution_variables_str_ = "q";
 		This_::zone_type_ = Zone_Type::FETriangle;
 	}
-	else if constexpr (std::is_same_v<Governing_Equation, Euler_2D>) {
+	else if constexpr (ms::is_Euler<Governing_Equation>) {
 		This_::grid_variables_str_ = "X,Y";
 		This_::solution_variables_str_ = "rho,rhou,rhov,rhoE,u,v,p";
 		This_::zone_type_ = Zone_Type::FETriangle;
@@ -266,6 +266,8 @@ std::vector<std::vector<double>> Tecplot::convert_to_binary_data(const std::vect
 				convert_to_binary_data[i].push_back(post_point_solutions[j][i]);
 	}
 	else {
+		constexpr ushort space_dimension = num_equation - 2; //temporary code
+
 		convert_to_binary_data.resize(2 * num_equation - 1);
 
 		for (auto& post_point_values : convert_to_binary_data)
@@ -273,7 +275,7 @@ std::vector<std::vector<double>> Tecplot::convert_to_binary_data(const std::vect
 
 		for (uint i = 0; i < This_::num_node_; ++i) {
 			const auto& cvariable = post_point_solutions[i];
-			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+			const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable); //space dimension을 모르네..
 
 			for (size_t j = 0; j < num_equation; ++j)
 				convert_to_binary_data[j].push_back(cvariable[j]);

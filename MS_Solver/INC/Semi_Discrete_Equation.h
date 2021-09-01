@@ -3,7 +3,7 @@
 #include "Cells.h"
 #include "Inner_Faces.h"
 #include "Periodic_Boundaries.h"
-#include "Solution_Scaling_Method.h"
+#include "Solution_Scaler.h"
 #include "Numerical_Flux_Function.h"
 #include "Tecplot.h"
 
@@ -89,11 +89,11 @@ public:
 
     template <typename Initial_Condition>
     void estimate_error(const std::vector<Discretized_Solution_>& computed_solutions, const double time) const {
-        if constexpr (std::is_same_v<Initial_Condition, Sine_Wave_2D> && std::is_same_v<Governing_Equation, Linear_Advection>)
+        if constexpr (ms::is_sine_wave<Initial_Condition> && ms::is_linear_advection<Governing_Equation>)
             this->cells_.estimate_error(computed_solutions, time);
         else
             Log::content_ << "In this setting, error analysis result does not provided.";
-
+                
         Log::print();
     }
 
@@ -102,7 +102,7 @@ public:
             this->reconstruction_method_.reconstruct(solutions);
 
         if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
-            Solution_Scaler::inspect_and_scale(solutions);
+            Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
     }
 
 };

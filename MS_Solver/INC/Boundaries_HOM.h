@@ -2,7 +2,7 @@
 #include "Boundary_Flux_Function.h"
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
-#include "Solution_Scaling_Method.h"
+#include "Solution_Scaler.h"
 
 
 //HOM이면 공통으로 사용하는 variable
@@ -122,5 +122,5 @@ template <typename Reconstruction_Method, typename Numerical_Flux_Function>
 void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::initialize_scaling_method(void) const {
     const auto num_boundary = this->oc_indexes_.size();
     for (uint i = 0; i < num_boundary; ++i) 
-        Solution_Scaler::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    
+        Solution_Scaler<This_::space_dimension_>::record_face_basis_qnodes(this->oc_indexes_[i], this->set_of_oc_side_basis_qnodes_[i]);    
 }

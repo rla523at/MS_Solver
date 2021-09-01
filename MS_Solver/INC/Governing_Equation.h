@@ -106,7 +106,11 @@ namespace ms {
     template <typename T>
     inline constexpr bool is_governing_equation = std::is_base_of_v<GE, T>;
     template <typename T>
-    inline constexpr bool is_SCL = std::is_base_of_v<SCL, T>;
+    inline constexpr bool is_SCL = std::is_base_of_v<SCL<T::space_dimension()>, T>;
+    template <typename T>
+    inline constexpr bool is_linear_advection = std::is_same_v<Linear_Advection<T::space_dimension()>, T>;
+    template <typename T>
+    inline constexpr bool is_Euler = std::is_same_v<Euler<T::space_dimension()>, T>;
 }
 
 
@@ -190,7 +194,7 @@ double Burgers<space_dimension>::inner_face_maximum_lambda(const Solution_& solu
     for (ushort i = 0; i < space_dimension; ++i)
         normal_component_sum += normal_vector[i];
             
-    return std::max(std::abs(solution_o.at(0) * normal_component_sum), std::abs(solution_n.at(0) * normal_component_sum));
+    return (std::max)(std::abs(solution_o.at(0) * normal_component_sum), std::abs(solution_n.at(0) * normal_component_sum));
 }
 
 
@@ -330,7 +334,7 @@ double Euler<space_dimension_>::inner_face_maximum_lambda(const Solution_& oc_pr
         nc_side_face_maximum_lambda = std::abs(nc_u * normal_vector[0] + nc_v * normal_vector[1] + nc_w * normal_vector[2]) + nc_a;
     }
 
-    return std::max(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
+    return (std::max)(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
 }
 
 

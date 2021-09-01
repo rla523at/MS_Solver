@@ -4,9 +4,10 @@
 
 namespace ms {
 	template <typename Governing_Equation, typename Spatial_Discrete_Method>
-	inline constexpr bool can_use_scaliling_method = std::is_same_v<Governing_Equation, Euler_2D> && std::is_same_v<Spatial_Discrete_Method, HOM>;
+	inline constexpr bool can_use_scaliling_method = ms::is_Euler<Governing_Equation> && std::is_same_v<Spatial_Discrete_Method, HOM>;
 }
 
+template <ushort space_dimension>
 class Solution_Scaler
 {
 private:
@@ -43,14 +44,13 @@ public:
 
 			for (ushort j = 0; j < num_qnode; ++j) {
 				while (true) {
-					dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
-
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
-					const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+					const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
 					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
 					if (rho <= 0.0 || pressure <= 0.0) {
+						dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
 						fix_count++;
 						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
 						solution_coefficients[i] *= fix_matrix;
@@ -77,7 +77,7 @@ public:
 					dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
 
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
-					const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+					const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
 					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 

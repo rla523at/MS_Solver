@@ -2,7 +2,7 @@
 #include "Governing_Equation.h"
 #include "Grid_Builder.h"
 #include "Reconstruction_Method_HOM.h"
-#include "Solution_Scaling_Method.h"
+#include "Solution_Scaler.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template <typename Governing_Equation, typename Reconstruction_Method>
@@ -211,7 +211,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 
     for (size_t i = 0; i < num_cell; ++i) {
         const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
-        const auto exact_solutions = Sine_Wave_2D::calculate_exact_solutions(qnodes, time);
+        const auto exact_solutions = Sine_Wave<space_dimension_>::calculate_exact_solutions(qnodes, time);
         const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
 
         const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
@@ -294,5 +294,5 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
 
 template <typename Governing_Equation, typename Reconstruction_Method>
 void Cells_HOM<Governing_Equation, Reconstruction_Method>::initialize_scaling_method(void) const {
-    Solution_Scaler::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
+    Solution_Scaler<This_::space_dimension_>::record_cell_basis_qnodes(this->set_of_basis_qnodes_);
 }
