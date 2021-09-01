@@ -14,5 +14,6 @@
     <ClCompile Include="test_PostAI.cpp" />
     <ClCompile Include="test_Text.cpp" />
     <ClCompile Include="test_Vector_Function.cpp" />
+    <ClCompile Include="test_Initial_Condtion.cpp" />
   </ItemGroup>
 </Project>

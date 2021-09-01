@@ -92,7 +92,7 @@
     <ClInclude Include="INC\Grid_File_Type.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Inital_Condition.h">
+    <ClInclude Include="INC\Initial_Condition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Inner_Faces.h">
