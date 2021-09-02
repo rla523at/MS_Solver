@@ -50,7 +50,7 @@ private:
 
 public:
     static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
-        if (P1_mode_solution == 0)
+        if (P1_mode_solution == 0.0)
             return 1.0;
 
         if (P1_mode_solution < 0)
@@ -228,6 +228,13 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
     const auto num_cell = solutions.size();
 
+    //Post_AI_Data::conditionally_record_solution_datas(solutions, solution_gradients);
+
+    //std::vector<double> values1(num_cell);//post
+    //std::vector<double> values2(num_cell);//post
+    //std::vector<double> values3(num_cell);//post
+    //std::vector<double> values4(num_cell);//post
+
     for (uint i = 0; i < num_cell; ++i) {
         const auto& gradient = solution_gradients[i];
         const auto P1_mode_solution_vnodes = gradient * this->center_to_vertex_matrixes_[i];
@@ -248,9 +255,25 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             }
         }
                 
+        //Post_AI_Data::conditionally_record_limiting_value(i, limiting_values);
+
+        //values1[i] = limiting_values[0];
+        //values2[i] = i;
+        //values3[i] = gradient.at(0, 0);
+        //values4[i] = gradient.at(0, 1);
+
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
+
+    //Tecplot::conditionally_record_cell_variables("limiting_value", values1);
+    //Tecplot::conditionally_record_cell_variables("cell_index", values2);
+    //Tecplot::conditionally_record_cell_variables("gradient_x", values3);
+    //Tecplot::conditionally_record_cell_variables("gradient_y", values4);
+    //Tecplot::conditionally_post_solution(solutions);
+
+    //Post_AI_Data::conditionally_post();
+    //Post_AI_Data::post_scatter_data(values1);
 };
 
 
@@ -297,8 +320,8 @@ ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :g
     //sorting
     for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
         std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
-    for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
-        std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
+    //for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
+    //    std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
 
 }
 
@@ -306,12 +329,16 @@ template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
 
-    const auto num_solution = solutions.size();    
+    const auto num_solution = solutions.size();
+
+    //std::vector<uint> cell_indexes(num_solution);//post
+    //std::vector<double> ANN_limiter_values(num_solution, 1);//post
+    //for (uint i = 0; i < num_solution; ++i)
+    //    cell_indexes[i] = i;//post
 
     for (size_t i = 0; i < num_solution; ++i) {
 
         if (this->is_constant_region(solutions, i)) {
-            //this->solution_gradients_[i] *= 0.0; //temporal code
             continue;
         }
             
@@ -334,15 +361,23 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
                 const auto solution_gradient_y_start_index = 2 * num_ordered_index;
 
                 input_values[solution_start_index + k] = solution.at(j);
-                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0);
-                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1);
+                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0) * 1.0 / 50.0;    //non-dimensional
+                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1) * 1.0 / 50.0;    //non-dimensional
             }
         }
 
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code                
+        this->solution_gradients_[i] *= input[0]; //temporal code  
+        
+        //ANN_limiter_values[i] = input[0];//post
     }
+
+    //Tecplot::conditionally_record_cell_variables("limiting_value", ANN_limiter_values);
+    //Tecplot::conditionally_record_cell_variables("cell_index", cell_indexes);
+    //Tecplot::conditionally_post_solution(solutions);
+
+    //Post_AI_Data::post_scatter_data(ANN_limiter_values);
 }
 
 
@@ -475,8 +510,7 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    //std::ifstream file("RSC/model.bin", std::ios::binary);
-    std::ifstream file("RSC/case17.bin", std::ios::binary);
+    std::ifstream file("RSC/model 3.bin", std::ios::binary);
 
     dynamic_require(file.is_open(), "Model file should be open");
 

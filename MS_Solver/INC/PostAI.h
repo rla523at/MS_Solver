@@ -7,7 +7,7 @@ private:
 	using This_ = Post_AI_Data;
 
 public:
-	static inline bool is_time_to_conditionally_post_ = false;
+	static inline bool post_condition_ = false;
 
 public:
 	inline static std::string path_;
@@ -64,9 +64,8 @@ public:
 //template definition part
 template <size_t space_dimension>
 void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
-#ifdef POST_AI_DATA_MODE
 
-	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_indexes;
+	const auto& vnode_index_to_share_cell_indexes = grid.connectivity.vnode_index_to_share_cell_index_set;
 	const auto& cell_elements = grid.elements.cell_elements;
 	This_::num_data_ = cell_elements.size();
 
@@ -165,9 +164,8 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 		//vertex_share_cell_indexes
 		vertex_share_cell_indexes_set_.push_back(std::move(vertex_share_cell_indexes));
 	}
-#endif
-}
 
+}
 
 
 template <size_t num_equation, size_t space_dimension>
@@ -215,7 +213,7 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 
 template <size_t num_equation, size_t space_dimension>
 void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
-	if (This_::is_time_to_conditionally_post_)
+	if (This_::post_condition_)
 		This_::record_solution_datas(solutions, solution_gradients);
 }
 
@@ -223,7 +221,6 @@ void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclide
 
 template <ushort num_equation>
 void Post_AI_Data::record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-	//size_t num_equation = limiting_value.size();
 
 	if (std::find(target_cell_indexes_.begin(), target_cell_indexes_.end(), index) == target_cell_indexes_.end())
 		return;
@@ -235,12 +232,11 @@ void Post_AI_Data::record_limiting_value(const size_t index, const std::array<do
 	limiting_value_string += "\n";
 
 	ai_data_text_set_[index] << std::move(limiting_value_string);
-
 }
 
 template <ushort num_equation>
 void Post_AI_Data::conditionally_record_limiting_value(const size_t index, const std::array<double, num_equation>& limiting_value) {
-	if (This_::is_time_to_conditionally_post_)
+	if (This_::post_condition_)
 		This_::record_limiting_value(index, limiting_value);
 }
 

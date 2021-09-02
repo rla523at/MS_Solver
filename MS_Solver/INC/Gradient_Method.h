@@ -51,7 +51,7 @@ template <ushort num_equation_, ushort space_dimension_>
 std::vector<Matrix<num_equation_, space_dimension_>> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions)  const {
     const auto num_solution = solutions.size();
 
-    std::vector<Solution_gradinet_> solution_gradients(num_solution);
+    std::vector<Matrix<num_equation_, space_dimension_>> solution_gradients(num_solution);
 
     const auto solution_delta_matrixes = this->calculate_solution_delta_matrixes(solutions);
     for (size_t i = 0; i < num_solution; ++i)
