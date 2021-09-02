@@ -52,7 +52,7 @@ int main(void) {
 
 		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
 
-		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
+		//semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
 
 		Log::write();
 	}
