@@ -126,6 +126,20 @@ namespace ms {
 		}
 	};
 
+	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement) {
+		if (target.empty())
+			return;
+		
+		while (true) {
+			const auto pos = str.find(target.data());
+
+			if (pos == std::string::npos)
+				break;
+
+			str.replace(pos, target.size(), replacement.data());
+		}
+	}
+
 	std::string remove(const std::string& str, const std::string& target) {
 		const auto target_size = target.size();
 
