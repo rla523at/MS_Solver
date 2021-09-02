@@ -50,7 +50,7 @@ private:
 
 public:
     static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
-        if (P1_mode_solution == 0)
+        if (P1_mode_solution == 0.0)
             return 1.0;
 
         if (P1_mode_solution < 0)
@@ -245,7 +245,6 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
                 limiting_values[e] = min(limiting_values[e], limiting_value);
             }
         }
-                
         const Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
@@ -295,16 +294,13 @@ ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :g
     //sorting
     for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
         std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
-    for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
-        std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
-
 }
 
 template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
 
-    const auto num_solution = solutions.size();    
+    const auto num_solution = solutions.size();
 
     for (size_t i = 0; i < num_solution; ++i) {
 
@@ -330,14 +326,13 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
                 const auto solution_gradient_y_start_index = 2 * num_ordered_index;
 
                 input_values[solution_start_index + k] = solution.at(j);
-                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0);
-                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1);
+                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0) * 1.0 / 50.0;    //non-dimensional
+                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1) * 1.0 / 50.0;    //non-dimensional
             }
         }
-
         Dynamic_Euclidean_Vector input = std::move(input_values);
         this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code                
+        this->solution_gradients_[i] *= input[0]; //temporal code  
     }
 }
 
@@ -471,7 +466,7 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    std::ifstream file("RSC/case17.bin", std::ios::binary);
+    std::ifstream file("RSC/model 3.bin", std::ios::binary);
 
     dynamic_require(file.is_open(), "Model file should be open");
 

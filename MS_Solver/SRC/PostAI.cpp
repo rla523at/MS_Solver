@@ -2,7 +2,7 @@
 
 
 void Post_AI_Data::conditionally_post(void) {
-	if (This_::is_time_to_conditionally_post_)
+	if (This_::post_condition_)
 		This_::post();
 }
 
@@ -32,6 +32,8 @@ void Post_AI_Data::post(void) {
 		}
 	}
 	target_cell_indexes_.clear();
+
+	Post_AI_Data::post_condition_ = false;
 }
 
 void Post_AI_Data::post_scatter_data(const std::vector<double>& limiting_values) {
