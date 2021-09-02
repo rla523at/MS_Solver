@@ -44,6 +44,21 @@ GTEST_TEST(ms, replace_all_3) {
 	std::string ref = "abc_q,__,,";
 	EXPECT_EQ(str, ref);
 }
+GTEST_TEST(ms, replace_all_4) {
+	std::string str = "abc_qwer,wer__,,";
+	ms::replace_all(str, ',', '_');
+
+	std::string ref = "abc_qwer_wer____";
+	EXPECT_EQ(str, ref);
+}
+
+GTEST_TEST(ms, parse_1) {
+	std::string str = "abc_qwer,wer__,,";
+	const auto result = ms::parse(str, { ',', '_' });
+
+	std::vector<std::string> ref = { "abc","qwer","wer" };
+	EXPECT_EQ(result, ref);
+}
 
 GTEST_TEST(ms, upper_case_1) {
 	std::string str = "abc";

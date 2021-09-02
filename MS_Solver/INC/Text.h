@@ -62,6 +62,8 @@ public:
 
 namespace ms {
 	std::vector<std::string> parse(const std::string& str, const char delimiter);
+	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
+	void replace_all(std::string& str, const char target, const char replacement);
 	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement);
 	std::string remove(const std::string& str, const std::string& target);
 	std::string upper_case(const std::string& str);

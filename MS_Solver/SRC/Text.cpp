@@ -126,6 +126,32 @@ namespace ms {
 		}
 	};
 
+	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) {
+		if (delimiters.empty())
+			return { str };
+
+		const auto num_delimiter = delimiters.size();
+
+		const auto reference_delimiter = delimiters[0];
+		
+		auto temp_str = str;
+		for (size_t i = 1; i < num_delimiter; ++i)
+			ms::replace_all(temp_str, delimiters[i], reference_delimiter);
+
+		return ms::parse(temp_str, reference_delimiter);
+	}
+
+	void replace_all(std::string& str, const char target, const char replacement) {
+		while (true) {
+			const auto pos = str.find(target);
+
+			if (pos == std::string::npos)
+				break;
+
+			str[pos] = replacement;
+		}
+	}
+
 	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement) {
 		if (target.empty())
 			return;
