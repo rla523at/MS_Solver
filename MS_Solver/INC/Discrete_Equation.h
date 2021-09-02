@@ -22,14 +22,8 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
 
-<<<<<<< HEAD
-        Tecplot::post_solution(solutions, "initial");//post
 
-=======
-        //Tecplot::post_solution(solutions, "initial");//post
-        //Tecplot::post_condition_ = true;//post
-        //Post_AI_Data::post_condition_ = true;
->>>>>>> dev/DFM_ds
+        Tecplot::post_solution(solutions, "initial");//post
         semi_discrete_equation.reconstruct(solutions);
       
         SET_TIME_POINT;
@@ -38,6 +32,7 @@ public:
                 Tecplot::post_solution(solutions, "final");//post
                 break;
             }                      
+
 
             if (Solve_Controller::is_time_to_post(current_time)) {
                 //Tecplot::post_condition_ = true;
