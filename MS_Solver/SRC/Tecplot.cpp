@@ -44,8 +44,7 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 		post_file << 2;																					//file type, solution = 2 
 		post_file << This_::convert_to_binary_data("Solution_at_" + std::to_string(*This_::time_ptr_));	//title
 
-		const char delimiter = ',';
-		const auto parsed_solution_variable_strs = ms::parse(This_::solution_variables_str_, delimiter);
+		const auto parsed_solution_variable_strs = ms::parse(This_::solution_variables_str_, ',');
 
 		const auto num_solution_data = static_cast<int>(parsed_solution_variable_strs.size());
 		const auto num_additional_data = static_cast<int>(This_::additioinal_data_name_to_values_.size());
