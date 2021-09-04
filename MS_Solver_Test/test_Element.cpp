@@ -1024,7 +1024,7 @@ GTEST_TEST(Element, set_of_face_node_indexes) {
 }
 
 
-GTEST_TEST(Element, face_vertex_node_indexes_set) {
+GTEST_TEST(Element, set_of_face_vertex_node_indexes) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
@@ -1043,7 +1043,7 @@ GTEST_TEST(Element, face_vertex_node_indexes_set) {
 	std::vector<uint> indexes = { 5,6,7,8 };
 
 	Element element(element_type, std::move(geometry), std::move(indexes));
-	const auto result = element.face_vertex_node_indexes_set();
+	const auto result = element.set_of_face_vertex_node_indexes();
 
 	const std::vector<std::vector<uint>> ref = { {5,6},{6,7},{7,8},{8,5} };
 	EXPECT_EQ(ref, result);

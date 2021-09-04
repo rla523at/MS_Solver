@@ -261,7 +261,7 @@ auto Post_AI_Data::calculate_face_share_cell_indexes_set(const Grid<space_dimens
 		const auto& element = cell_elements[i];
 		const auto& geometry = cell_elements[i].geometry_;
 
-		const auto face_vnode_indexes_set = element.face_vertex_node_indexes_set();
+		const auto face_vnode_indexes_set = element.set_of_face_vertex_node_indexes();
 		const auto num_face = face_vnode_indexes_set.size();
 
 		std::set<size_t> face_share_cell_indexes;

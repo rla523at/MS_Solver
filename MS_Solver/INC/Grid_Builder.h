@@ -64,7 +64,7 @@ std::vector<std::vector<size_t>> Grid<space_dimension>::calculate_set_of_face_sh
 		const auto& element = cell_elements[i];
 		const auto& geometry = element.geometry_;
 
-		const auto face_vnode_indexes_set = element.face_vertex_node_indexes_set();
+		const auto face_vnode_indexes_set = element.set_of_face_vertex_node_indexes();
 		const auto num_face = face_vnode_indexes_set.size();
 
 		std::vector<size_t> face_share_cell_indexes;
