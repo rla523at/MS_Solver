@@ -156,5 +156,20 @@ TEST(ms, Jacobian_1) {
 
 	Matrix_Function<Polynomial<domain_dimension>, domain_dimension, domain_dimension> ref = { y,x,2,1 };
 	EXPECT_EQ(result, ref);
+}
 
+TEST(ms, scalar_triple_product_1) {
+	constexpr ushort domain_dimension = 3;
+
+	Polynomial<domain_dimension> x("x0");
+	Polynomial<domain_dimension> y("x1");
+	Polynomial<domain_dimension> z("x1");
+
+	Vector_Function<Polynomial<domain_dimension>, domain_dimension> a = { x + y, x, y };
+	Vector_Function<Polynomial<domain_dimension>, domain_dimension> b = { x, x, 0 };
+	Vector_Function<Polynomial<domain_dimension>, domain_dimension> c = { -1 * y, y, 1 };
+	const auto result = ms::scalar_triple_product(a, b, c);
+
+	Polynomial<domain_dimension> ref = x * y + 2 * x * (y ^ 2);
+	EXPECT_EQ(result, ref);
 }

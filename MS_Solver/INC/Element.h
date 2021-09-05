@@ -627,6 +627,7 @@ Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_f
 	}
 	case Figure::tetrahedral:
 	case Figure::hexahedral: {
+		const auto Jacobian = ms::Jacobian(mapping_function);
 
 	}
 	default:

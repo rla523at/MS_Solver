@@ -93,6 +93,15 @@ public:
 		return result;
 	}
 
+	Function inner_product(const Vector_Function& other) const {
+		Function result;
+
+		for (ushort i = 0; i < range_dimension_; ++i)
+			result += this->functions_[i] * other.functions_[i];
+
+		return result;
+	}
+
 	auto L2_norm(void) const {
 		Function result(0);
 
@@ -288,5 +297,10 @@ namespace ms {
 		}
 		
 		return functions;
+	}
+
+	template <typename Function>
+	Function scalar_triple_product(const Vector_Function<Function, 3>& a, const Vector_Function<Function, 3>& b, const Vector_Function<Function, 3>& c) {
+		return a.inner_product(b.cross_product(c));
 	}
 }
