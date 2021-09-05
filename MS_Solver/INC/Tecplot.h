@@ -107,12 +107,12 @@ void Tecplot::initialize(const ushort post_order) {
 		This_::zone_type_ = Zone_Type::FETriangle;
 	}
 	else if constexpr (ms::is_Euler<Governing_Equation>) {
-		if constexpr (Governing_Equation::dimension() == 2) {
+		if constexpr (Governing_Equation::space_dimension() == 2) {
 			This_::grid_variables_str_ = "X,Y";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhoE,u,v,p";
 			This_::zone_type_ = Zone_Type::FETriangle;
 		}
-		else if constexpr (Governing_Equation::dimension() == 3) {
+		else if constexpr (Governing_Equation::space_dimension() == 3) {
 			This_::grid_variables_str_ = "X,Y,Z";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhow,rhoE,u,v,w,p";
 			This_::zone_type_ = Zone_Type::FETetraheron;

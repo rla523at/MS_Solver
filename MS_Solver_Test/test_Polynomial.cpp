@@ -11,7 +11,7 @@ TEST(PowerPolyTerm, differentiate_1) {
 	const auto ppt1 = Polynomial<space_dimension>::PoweredPolyTerm(spt2, 2);
 	
 	constexpr size_t variable_index = 0;
-	const auto result = ppt1.differentiate<variable_index>();
+	const auto result = ppt1.differentiate(variable_index);
 
 	const auto pt1 = Polynomial<space_dimension>::PolyTerm(spt2);
 	const auto ref = pt1 * 2;
@@ -31,7 +31,7 @@ TEST(PolyTerm, differentiate_1) {
 	const auto pt3 = pt1 * pt2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = pt3.differentiate<variable_index>();
+	const auto result = pt3.differentiate(variable_index);
 
 	const auto x = Polynomial<space_dimension>("x0");
 	const auto ref = 2 * x + 1;
@@ -48,7 +48,7 @@ TEST(PolyTerm, differentiate_2) {
 	const auto pt2 = pt1 * pt1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = pt2.differentiate<variable_index>();
+	const auto result = pt2.differentiate(variable_index);
 
 	const auto x = Polynomial<space_dimension>("x0");
 	const auto ref = 2 * x + 2;
@@ -546,7 +546,7 @@ GTEST_TEST(Polynomial, differentiate_1) {
 	const auto p = (X + 1) * (X - 1) + 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 2 * X;
 	EXPECT_EQ(result, ref);
@@ -555,7 +555,7 @@ GTEST_TEST(Polynomial, differentiate_2) {
 	const auto p = (X - 1) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 2 * X - 2;
 	EXPECT_EQ(result, ref);
@@ -564,7 +564,7 @@ GTEST_TEST(Polynomial, differentiate_3) {
 	const auto p = (X - 1) ^ 2;
 
 	constexpr size_t variable_index = 1;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 0;
 	EXPECT_EQ(result, ref);
@@ -573,7 +573,7 @@ GTEST_TEST(Polynomial, differentiate_4) {
 	const auto p1 = (X + 1) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = 2 * X + 2;
 	EXPECT_EQ(result, ref);
@@ -582,7 +582,7 @@ GTEST_TEST(Polynomial, differentiate_5) {
 	const auto p1 = (X + Y + 2) * (X + 1);
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = 2 * X + Y + 3;
 	EXPECT_EQ(result, ref);
@@ -591,7 +591,7 @@ GTEST_TEST(Polynomial, differentiate_6) {
 	const auto p1 = (X + Y + 2) * (X + 1);
 
 	constexpr size_t variable_index = 1;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = X + 1;
 	EXPECT_EQ(result, ref);
@@ -600,7 +600,7 @@ GTEST_TEST(Polynomial, differentiate_7) {
 	const auto p1 = (X + 1) * (Y + 1) + X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = Y + 2;
 	EXPECT_EQ(result, ref);
@@ -609,7 +609,7 @@ GTEST_TEST(Polynomial, differentiate_8) {
 	const auto p1 = ((X + 1) ^ 2) * (X + 2);
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = 3 * (X ^ 2) + 8 * X + 5;
 	EXPECT_EQ(result, ref);
@@ -618,7 +618,7 @@ GTEST_TEST(Polynomial, differentiate_9) {
 	const auto p = (2 * X + 3) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 8 * X + 12;
 	EXPECT_EQ(result, ref);
@@ -627,7 +627,7 @@ GTEST_TEST(Polynomial, differentiate_10) {
 	const auto p = ((2 * X + 3) ^ 2) * X;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 12 * (X ^ 2) + 24 * X + 9;
 	EXPECT_EQ(result, ref);
@@ -636,7 +636,7 @@ GTEST_TEST(Polynomial, differentiate_11) {
 	const auto  p = X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	Polynomial<space_dimension> ref = 1;
 	EXPECT_EQ(result, ref);
@@ -645,7 +645,7 @@ GTEST_TEST(Polynomial, differentiate_12) {
 	const auto p = (X ^ 2) - 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate<variable_index>();
+	const auto result = p.differentiate(variable_index);
 
 	const auto ref = 2 * X;
 	EXPECT_EQ(result, ref);
@@ -654,7 +654,7 @@ GTEST_TEST(Polynomial, differentiate_13) {
 	const auto p1 = (X ^ 2) + X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = 2 * X + 1;
 	EXPECT_EQ(result, ref);
@@ -663,7 +663,7 @@ GTEST_TEST(Polynomial, differentiate_14) {
 	const auto p1 = (X ^ 2) + X + 1;
 
 	constexpr size_t variable_index = 1;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = 0; 
 	EXPECT_EQ(result, ref);
@@ -672,7 +672,7 @@ GTEST_TEST(Polynomial, differentiate_15) {
 	const auto p1 = X * Y + X;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate<variable_index>();
+	const auto result = p1.differentiate(variable_index);
 
 	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);
@@ -817,7 +817,7 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 //	VectorFunction<auto> f = { p1,p2,p3 };
 //
 //	constexpr size_t variable_index = 0;
-//	f.differentiate<variable_index>();
+//	f.differentiate(variable_index);
 //
 //	VectorFunction<auto> ref = { 1,1,0 };
 //	EXPECT_EQ(f, ref);
@@ -829,7 +829,7 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 //	VectorFunction<auto> f = { p1,p2,p3 };
 //
 //	constexpr size_t variable_index = 0;
-//	f.differentiate<variable_index>();
+//	f.differentiate(variable_index);
 //
 //	VectorFunction<auto> ref = { Y,1,0 };
 //	EXPECT_EQ(f, ref);
@@ -841,7 +841,7 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 //	VectorFunction<auto> f = { p1,p2,p3 };
 //
 //	constexpr size_t variable_index = 1;
-//	f.differentiate<variable_index>();
+//	f.differentiate(variable_index);
 //
 //	VectorFunction<auto> ref = { X,Z,1 };
 //	EXPECT_EQ(f, ref);
@@ -853,7 +853,7 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 //	VectorFunction<auto> f = { p1,p2,p3 };
 //
 //	constexpr size_t variable_index = 0;
-//	f.differentiate<variable_index>();
+//	f.differentiate(variable_index);
 //
 //	VectorFunction<auto> ref = { 1.5,0,0 };
 //	EXPECT_EQ(f, ref);
@@ -865,7 +865,7 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 //	VectorFunction<auto> f = { p1,p2,p3 };
 //
 //	constexpr size_t variable_index = 1;
-//	f.differentiate<variable_index>();
+//	f.differentiate(variable_index);
 //
 //	VectorFunction<auto> ref = { 0.5,1,0 };
 //	EXPECT_EQ(f, ref);

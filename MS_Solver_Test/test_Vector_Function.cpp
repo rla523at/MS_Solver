@@ -107,7 +107,7 @@ GTEST_TEST(Dynamic_Vector_Function, at_1)
 	Polynomial<2> x("x0");
 	Polynomial<2> y("x1");
 
-	Dynamic_Vector_Function_<Polynomial<2>> vf = { 0 , 2 * x + y };
+	Dynamic_Vector_Function<Polynomial<2>> vf = { 0 , 2 * x + y };
 
 	const auto ref = 2 * x + y;
 	EXPECT_EQ(ref, vf.at(1));
@@ -120,7 +120,7 @@ GTEST_TEST(Dynamic_Vector_Function, operator_call_1)
 	Polynomial<domain_dimension> x("x0");
 	Polynomial<domain_dimension> y("x1");
 
-	Dynamic_Vector_Function_<Polynomial<domain_dimension>> vf = { x + y , 2 * x + y };
+	Dynamic_Vector_Function<Polynomial<domain_dimension>> vf = { x + y , 2 * x + y };
 	Euclidean_Vector v = { 1,1 };
 	const auto result = vf(v);
 

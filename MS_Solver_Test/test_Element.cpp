@@ -12,7 +12,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_1) {
 
 	const Polynomial<space_dimension> r("x0");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
@@ -26,7 +26,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_2) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r, s };
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
@@ -40,7 +40,7 @@ GTEST_TEST(ReferenceGeometry, mapping_monomial_vector_function_3) {
 	const Polynomial<space_dimension> r("x0");
 	const Polynomial<space_dimension> s("x1");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r, r * s, s };
 	EXPECT_EQ(ref, result);
 }
 TEST(ReferenceGeometry, mapping_monomial_vector_function_4) {
@@ -55,7 +55,7 @@ TEST(ReferenceGeometry, mapping_monomial_vector_function_4) {
 	const Polynomial<space_dimension> s("x1");
 	const Polynomial<space_dimension> t("x2");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s, t };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r, s, t };
 	EXPECT_EQ(ref, result);
 }
 TEST(ReferenceGeometry, mapping_monomial_vector_function_5) {
@@ -70,7 +70,7 @@ TEST(ReferenceGeometry, mapping_monomial_vector_function_5) {
 	const Polynomial<space_dimension> s("x1");
 	const Polynomial<space_dimension> t("x2");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, s, t, r^2, r*s , r*t, s^2, s*t, t^2 };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r, s, t, r^2, r*s , r*t, s^2, s*t, t^2 };
 	EXPECT_EQ(ref, result);
 }
 TEST(ReferenceGeometry, mapping_monomial_vector_function_6) {
@@ -85,7 +85,7 @@ TEST(ReferenceGeometry, mapping_monomial_vector_function_6) {
 	const Polynomial<space_dimension> s("x1");
 	const Polynomial<space_dimension> t("x2");
 
-	const Dynamic_Vector_Function_<Polynomial<space_dimension>> ref = { 1, r, r * s, s, t, r * t, r * s * t, s * t };
+	const Dynamic_Vector_Function<Polynomial<space_dimension>> ref = { 1, r, r * s, s, t, r * t, r * s * t, s * t };
 	EXPECT_EQ(ref, result);
 }
 
@@ -353,7 +353,7 @@ TEST(ReferenceGeometry, reference_connectivity_1) {
 	constexpr ushort post_order = 0;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {0,1,2} };
+	const std::vector<std::vector<uint>> ref = { {0,1,2} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_2) {
@@ -366,7 +366,7 @@ TEST(ReferenceGeometry, reference_connectivity_2) {
 	constexpr ushort post_order = 1;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {0,1,3},{1,4,3},{1,2,4},{3,4,5} };
+	const std::vector<std::vector<uint>> ref = { {0,1,3},{1,4,3},{1,2,4},{3,4,5} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_3) {
@@ -379,7 +379,7 @@ TEST(ReferenceGeometry, reference_connectivity_3) {
 	constexpr ushort post_order = 0;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {0,1,2},{1,3,2} };
+	const std::vector<std::vector<uint>> ref = { {0,1,2},{1,3,2} };
 	EXPECT_EQ(result, ref);
 }
 TEST(ReferenceGeometry, reference_connectivity_4) {
@@ -392,7 +392,7 @@ TEST(ReferenceGeometry, reference_connectivity_4) {
 	constexpr ushort post_order = 1;
 	const auto result = ref_geometry.reference_connectivity(post_order);
 
-	const std::vector<std::vector<ushort>> ref = { {0,1,3},{1,4,3},{1,2,4},{2,5,4},{3,4,6},{4,7,6},{4,5,7},{5,8,7} };
+	const std::vector<std::vector<uint>> ref = { {0,1,3},{1,4,3},{1,2,4},{2,5,4},{3,4,6},{4,7,6},{4,5,7},{5,8,7} };
 	EXPECT_EQ(result, ref);
 }
 //GTEST_TEST(ReferenceGeometry, scale_function_1) {

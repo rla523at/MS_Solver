@@ -89,7 +89,7 @@ public:
 				
 		std::array<Function, range_dimension_> result;
 		for (size_t i = 0; i < range_dimension_; ++i)
-			result[i] = this->functions_[i].differentiate<variable_index>();
+			result[i] = this->functions_[i].differentiate(variable_index);
 
 		return result;
 	}
@@ -139,11 +139,7 @@ std::ostream& operator<<(std::ostream& os, const Vector_Function<Function, range
 
 // Vector_Function class template for Range dimension is not compile time constant
 template <typename Function>
-using Dynamic_Vector_Function_ = Vector_Function<Function, 0>;
-
-
-template <typename Function>
-class Vector_Function<Function, 0>
+class Dynamic_Vector_Function
 {
 private:
 	static constexpr size_t domain_dimension_ = Function::domain_dimension();
@@ -152,8 +148,8 @@ private:
 	std::vector<Function> functions_;
 
 public:
-	Vector_Function(std::vector<Function>&& functions) : functions_(std::move(functions)) {};
-	Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
+	Dynamic_Vector_Function(std::vector<Function>&& functions) : functions_(std::move(functions)) {};
+	Dynamic_Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
 
 	Dynamic_Euclidean_Vector operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
 		const auto range_dimension_ = this->range_dimension();
@@ -170,7 +166,7 @@ public:
 		return this->functions_[index];
 	}
 
-	bool operator==(const Vector_Function& other) const {
+	bool operator==(const Dynamic_Vector_Function& other) const {
 		return this->functions_ == other.functions_;
 	}
 
@@ -195,23 +191,8 @@ public:
 
 
 template <typename Function>
-std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function_<Function>& vf) {
+std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function<Function>& vf) {
 	return os << vf.to_string();
-}
-
-
-namespace ms {
-	template <typename Function>
-	void gemv(const Dynamic_Matrix& A, const Dynamic_Vector_Function_<Function>& v, Function* ptr) {
-		//code for dynmaic matrix * dynmaic vector function => vector function
-		const auto [num_row, num_column] = A.size();
-		const auto range_dimension = v.range_dimension();
-		dynamic_require(num_column == range_dimension, "number of column should be same with range dimension");
-
-		for (size_t i = 0; i < num_row; ++i)
-			for (size_t j = 0; j < num_column; ++j)
-				ptr[i] += A.at(i, j) * v.at(j);
-	}
 }
 
 
@@ -270,3 +251,29 @@ private:
 
 
 
+namespace ms {
+	template <typename Function>
+	void gemv(const Dynamic_Matrix& A, const Dynamic_Vector_Function<Function>& v, Function* ptr) {
+		//code for dynmaic matrix * dynmaic vector function => vector function
+		const auto [num_row, num_column] = A.size();
+		const auto range_dimension = v.range_dimension();
+		dynamic_require(num_column == range_dimension, "number of column should be same with range dimension");
+
+		for (size_t i = 0; i < num_row; ++i)
+			for (size_t j = 0; j < num_column; ++j)
+				ptr[i] += A.at(i, j) * v.at(j);
+	}
+
+	template <typename Function, ushort range_dimension>
+	Matrix_Function<Function, range_dimension, range_dimension> Jacobian(const Vector_Function<Function, range_dimension>& vector_function) {
+		constexpr auto num_value = range_dimension * range_dimension;
+		std::array<Function, num_value> functions;
+
+		constexpr std::array<ushort, 3> ar = { 1,2,3 };
+
+		for (ushort i=0; i< 3; ++i)
+			const auto differential_vector_function = vector_function.differentiate<ar[i]>();
+		
+
+	}
+}
