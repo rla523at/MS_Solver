@@ -446,6 +446,38 @@ GTEST_TEST(Polynomial, operator_call_4) {
 	constexpr double ref3 = 6.073291260986822e+02;
 	EXPECT_DOUBLE_EQ(result, ref3);
 }
+TEST(Polynomial, operator_call_5) {
+	constexpr size_t space_dimension = 3;
+
+	const auto x = Polynomial<space_dimension>("x0");
+	const auto y = Polynomial<space_dimension>("x1");
+	const auto z = Polynomial<space_dimension>("x2");
+
+	auto p = x + y + z;
+	p.be_absolute();
+
+	const Euclidean_Vector values = { 4,-7,-8 };
+	const auto result = p(values);
+
+	constexpr auto ref = 11;
+	EXPECT_DOUBLE_EQ(result, ref);
+}
+TEST(Polynomial, operator_call_6) {
+	constexpr size_t space_dimension = 3;
+
+	const auto x = Polynomial<space_dimension>("x0");
+	const auto y = Polynomial<space_dimension>("x1");
+	const auto z = Polynomial<space_dimension>("x2");
+
+	auto p = x + y + z;
+	const Euclidean_Vector values = { 4,-7,-8 };
+	const auto result = p(values);
+
+	constexpr auto ref = -11;
+	EXPECT_DOUBLE_EQ(result, ref);
+}
+
+
 
 GTEST_TEST(Polynomial, operator_power_1) {
 	const auto p = -0.125 * X + 0.125 * Y + 0.5;

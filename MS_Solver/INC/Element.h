@@ -81,6 +81,7 @@ public:
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
 	Vector_Function<Polynomial<space_dimension>, space_dimension> mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const;
 	Irrational_Function<space_dimension> scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
+	//auto scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
 	Quadrature_Rule<space_dimension> quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const;
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
 	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
@@ -609,31 +610,86 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 
 template <ushort space_dimension>
 Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const {
-	switch (this->figure_)
-	{
-	case Figure::line: {
-		constexpr size_t r = 0;
-		const auto T_r = mapping_function.differentiate(r);
-		return T_r.L2_norm();
+	if constexpr (space_dimension == 2) {
+		switch (this->figure_) {
+			case Figure::line: {
+				constexpr size_t r = 0;
+				const auto mf_r = mapping_function.differentiate(r);
+				return mf_r.L2_norm();
+			}
+			case Figure::triangle:
+			case Figure::quadrilateral: {
+				constexpr size_t r = 0;
+				constexpr size_t s = 1;
+				const auto mf_r = mapping_function.differentiate(r);
+				const auto mf_s = mapping_function.differentiate(s);
+				const auto cross_product = mf_r.cross_product(mf_s);
+				return cross_product.L2_norm();
+			}
+			default:
+				throw std::runtime_error("not supported figure");
+				return Irrational_Function<space_dimension>();
+		}
 	}
-	case Figure::triangle:
-	case Figure::quadrilateral: {
-		constexpr size_t r = 0;
-		constexpr size_t s = 1;
-		const auto T_r = mapping_function.differentiate(r);
-		const auto T_s = mapping_function.differentiate(s);
-		const auto cross_product = T_r.cross_product(T_s);
-		return cross_product.L2_norm();
-	}
-	case Figure::tetrahedral:
-	case Figure::hexahedral: {
-		const auto Jacobian = ms::Jacobian(mapping_function);
+	else if constexpr (space_dimension == 3) {
+		switch (this->figure_) {
+			case Figure::triangle:
+			case Figure::quadrilateral: {
+				constexpr size_t r = 0;
+				constexpr size_t s = 1;
+				const auto mf_r = mapping_function.differentiate(r);
+				const auto mf_s = mapping_function.differentiate(s);
+				const auto cross_product = mf_r.cross_product(mf_s);
+				return cross_product.L2_norm();
+			}
+			case Figure::tetrahedral:
+			case Figure::hexahedral: {
+				constexpr ushort r = 0;
+				constexpr ushort s = 1;
+				constexpr ushort t = 2;
+				const auto mf_r = mapping_function.differentiate(r);
+				const auto mf_s = mapping_function.differentiate(s);
+				const auto mf_t = mapping_function.differentiate(t);
 
+				return ms::scalar_triple_product(mf_r, mf_s, mf_t).be_absolute();
+			}
+		default:
+			throw std::runtime_error("not supported figure");
+			return Irrational_Function<space_dimension>();
+		}
 	}
-	default:
-		throw std::runtime_error("not supported figure");
-		return Irrational_Function<space_dimension>();
-	}
+	
+	//switch (this->figure_)
+	//{
+	//case Figure::line: {
+	//	constexpr size_t r = 0;
+	//	const auto mf_r = mapping_function.differentiate(r);
+	//	return mf_r.L2_norm();
+	//}
+	//case Figure::triangle:
+	//case Figure::quadrilateral: {
+	//	constexpr size_t r = 0;
+	//	constexpr size_t s = 1;
+	//	const auto mf_r = mapping_function.differentiate(r);
+	//	const auto mf_s = mapping_function.differentiate(s);
+	//	const auto cross_product = mf_r.cross_product(mf_s);
+	//	return cross_product.L2_norm();
+	//}
+	//case Figure::tetrahedral:
+	//case Figure::hexahedral: {
+	//	constexpr ushort r = 0;
+	//	constexpr ushort s = 1;
+	//	constexpr ushort t = 2;
+	//	const auto mf_r = mapping_function.differentiate(r);
+	//	const auto mf_s = mapping_function.differentiate(s);
+	//	const auto mf_t = mapping_function.differentiate(t);
+
+	//	return ms::scalar_triple_product(mf_r, mf_s, mf_t).be_absolute();		
+	//}
+	//default:
+	//	throw std::runtime_error("not supported figure");
+	//	return Irrational_Function<space_dimension>();
+	//}
 }
 
 template <ushort space_dimension>

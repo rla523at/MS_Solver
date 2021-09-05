@@ -21,6 +21,7 @@ public:
 private:
 	std::vector<PolyTerm> added_poly_term_set_;
 	SimplePolyTerm simple_poly_term_ = 0.0;
+	bool is_absolute_ = false;
 
 public:
 	Polynomial(void) = default;
@@ -42,7 +43,9 @@ public:
 	bool operator==(const Polynomial& other) const;
 
 public:
+	Polynomial& be_absolute(void);
 	Polynomial& be_derivative(const ushort variable_index);
+	
 
 public:
 	Polynomial differentiate(const ushort variable_index) const;
@@ -50,10 +53,8 @@ public:
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
 	Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
-
-
-
 	
+public:
 	static constexpr ushort domain_dimension(void);
 
 
@@ -299,7 +300,11 @@ double Polynomial<domain_dimension_>::operator()(const Euclidean_Vector<domain_d
 	auto result = this->simple_poly_term_(domain_vector);
 	for (const auto& poly_term : this->added_poly_term_set_)
 		result += poly_term(domain_vector);
-	return result;
+
+	if (this->is_absolute_)
+		return std::abs(result);
+	else
+		return result;
 }
 
 template <ushort domain_dimension_>
@@ -313,6 +318,12 @@ bool Polynomial<domain_dimension_>::operator==(const Polynomial& other) const {
 	}
 
 	return true;
+}
+
+template <ushort domain_dimension_>
+Polynomial<domain_dimension_>& Polynomial<domain_dimension_>::be_absolute(void) {
+	this->is_absolute_ = true;
+	return *this;
 }
 
 template <ushort domain_dimension_>
