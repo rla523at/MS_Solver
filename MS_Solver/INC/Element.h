@@ -332,7 +332,7 @@ ushort ReferenceGeometry<space_dimension>::num_vertex(void) const {
 	case Figure::triangle:		return 3;
 	case Figure::quadrilateral:	return 4;
 	case Figure::tetrahedral:	return 4;
-	case Figure::hexahedral:	return 6;
+	case Figure::hexahedral:	return 8;
 	default:
 		throw std::runtime_error("wrong element figure");
 		return NULL;
@@ -658,38 +658,6 @@ Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_f
 			return Irrational_Function<space_dimension>();
 		}
 	}
-	
-	//switch (this->figure_)
-	//{
-	//case Figure::line: {
-	//	constexpr size_t r = 0;
-	//	const auto mf_r = mapping_function.differentiate(r);
-	//	return mf_r.L2_norm();
-	//}
-	//case Figure::triangle:
-	//case Figure::quadrilateral: {
-	//	constexpr size_t r = 0;
-	//	constexpr size_t s = 1;
-	//	const auto mf_r = mapping_function.differentiate(r);
-	//	const auto mf_s = mapping_function.differentiate(s);
-	//	const auto cross_product = mf_r.cross_product(mf_s);
-	//	return cross_product.L2_norm();
-	//}
-	//case Figure::tetrahedral:
-	//case Figure::hexahedral: {
-	//	constexpr ushort r = 0;
-	//	constexpr ushort s = 1;
-	//	constexpr ushort t = 2;
-	//	const auto mf_r = mapping_function.differentiate(r);
-	//	const auto mf_s = mapping_function.differentiate(s);
-	//	const auto mf_t = mapping_function.differentiate(t);
-
-	//	return ms::scalar_triple_product(mf_r, mf_s, mf_t).be_absolute();		
-	//}
-	//default:
-	//	throw std::runtime_error("not supported figure");
-	//	return Irrational_Function<space_dimension>();
-	//}
 }
 
 template <ushort space_dimension>

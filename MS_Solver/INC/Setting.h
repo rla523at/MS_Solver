@@ -7,7 +7,7 @@
 
 #define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
-#define __DIMENSION__							3
+#define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
 #define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
 #define __GOVERNING_EQUATION__					__EULER__
