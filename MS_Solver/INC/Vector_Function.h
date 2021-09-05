@@ -83,9 +83,8 @@ public:
 		return this->functions_.data();
 	}
 
-	template <size_t variable_index>
-	Vector_Function<Function, range_dimension_> differentiate(void) const {
-		static_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");
+	Vector_Function<Function, range_dimension_> differentiate(const ushort variable_index) const {
+		dynamic_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");
 				
 		std::array<Function, range_dimension_> result;
 		for (size_t i = 0; i < range_dimension_; ++i)
@@ -241,6 +240,16 @@ public:
 			this->at(i, column_index) = column_vector[i];		
 	}
 
+	std::string to_string(void) const {
+		std::string str;
+		for (ushort i = 0; i < range_num_row; ++i) {
+			for (ushort j = 0; j < range_num_column; ++j)
+				str += this->at(i, j).to_string() + "\t";
+			str += "\n";
+		}
+		return str;
+	}
+
 private:
 	Function& at(const ushort row_index, const ushort column_index) {
 		dynamic_require(row_index < range_num_row&& column_index < range_num_column, "index can not exceed given range");
@@ -248,7 +257,10 @@ private:
 	}
 };
 
-
+template <typename Function, ushort range_num_row, ushort range_num_column>
+std::ostream& operator<<(std::ostream& os, const Matrix_Function<Function, range_num_row, range_num_column>& mf) {
+	return os << mf.to_string();
+}
 
 
 namespace ms {
@@ -269,11 +281,12 @@ namespace ms {
 		constexpr auto num_value = range_dimension * range_dimension;
 		std::array<Function, num_value> functions;
 
-		constexpr std::array<ushort, 3> ar = { 1,2,3 };
-
-		for (ushort i=0; i< 3; ++i)
-			const auto differential_vector_function = vector_function.differentiate<ar[i]>();
+		for (ushort i = 0; i < range_dimension; ++i) {
+			const auto differential_vector_function = vector_function.differentiate(i);
+			for (ushort j = 0; j < range_dimension; ++j)
+				functions[j * range_dimension + i] = differential_vector_function[j];
+		}
 		
-
+		return functions;
 	}
 }

@@ -38,7 +38,7 @@ GTEST_TEST(Vector_Function, differentiate_1)
 	Polynomial<domain_dimension> y("x1");
 
 	Vector_Function<Polynomial<domain_dimension>,domain_dimension> vf = { x + y , 2 * x + y };
-	const auto result = vf.differentiate<0>();
+	const auto result = vf.differentiate(0);
 
 	Vector_Function<Polynomial<domain_dimension>, domain_dimension> ref = { 1,2 };
 	EXPECT_EQ(ref, result);
@@ -50,7 +50,7 @@ GTEST_TEST(Vector_Function, differentiate_2){
 	Polynomial<domain_dimension> y("x1");
 
 	Vector_Function<Polynomial<domain_dimension>, domain_dimension> vf = { 0.25 * x * y + 1.25 * x + 0.25 * y + 2.25, -0.25 * x * y - 0.75 * x + 0.25 * y + 1.75 };
-	const auto result = vf.differentiate<0>();
+	const auto result = vf.differentiate(0);
 
 	Vector_Function<Polynomial<domain_dimension>, domain_dimension> ref = { 0.25 * y + 1.25,-0.25 * y - 0.75 };
 	EXPECT_EQ(ref, result);
@@ -129,7 +129,7 @@ GTEST_TEST(Dynamic_Vector_Function, operator_call_1)
 }
 
 TEST(Matrix_Function, change_column) {
-	constexpr size_t domain_dimension = 2;
+	constexpr ushort domain_dimension = 2;
 
 	Polynomial<domain_dimension> x("x0");
 	Polynomial<domain_dimension> y("x1");
@@ -142,4 +142,19 @@ TEST(Matrix_Function, change_column) {
 
 	Matrix_Function<Polynomial<domain_dimension>, domain_dimension, domain_dimension> ref = { 1,2,1,1 };
 	EXPECT_EQ(result, ref);
+}
+
+TEST(ms, Jacobian_1) {
+	constexpr ushort domain_dimension = 2;
+
+	Polynomial<domain_dimension> x("x0");
+	Polynomial<domain_dimension> y("x1");
+
+	Vector_Function<Polynomial<domain_dimension>, domain_dimension> vf = { x * y , 2 * x + y };
+
+	const auto result = ms::Jacobian(vf);
+
+	Matrix_Function<Polynomial<domain_dimension>, domain_dimension, domain_dimension> ref = { y,x,2,1 };
+	EXPECT_EQ(result, ref);
+
 }

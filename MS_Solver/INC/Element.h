@@ -299,7 +299,7 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 		dynamic_require(this->figure_ == Figure::line, "In 2D case, normal vector must be determined only for line");
 
 		constexpr ushort r = 0;
-		const auto T_r = mapping_function.differentiate<r>();
+		const auto T_r = mapping_function.differentiate(r);
 
 		std::array<Polynomial<space_dimension>, space_dimension> normal_vector_function = { 0 };
 		normal_vector_function[0] = -1 * T_r.at(1);
@@ -312,8 +312,8 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 
 		constexpr ushort r = 0;
 		constexpr ushort s = 1;
-		const auto T_r = mapping_function.differentiate<r>();
-		const auto T_s = mapping_function.differentiate<s>();
+		const auto T_r = mapping_function.differentiate(r);
+		const auto T_s = mapping_function.differentiate(s);
 
 		return T_r.cross_product(T_s);
 	}
@@ -613,15 +613,15 @@ Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_f
 	{
 	case Figure::line: {
 		constexpr size_t r = 0;
-		const auto T_r = mapping_function.differentiate<r>();
+		const auto T_r = mapping_function.differentiate(r);
 		return T_r.L2_norm();
 	}
 	case Figure::triangle:
 	case Figure::quadrilateral: {
 		constexpr size_t r = 0;
 		constexpr size_t s = 1;
-		const auto T_r = mapping_function.differentiate<r>();
-		const auto T_s = mapping_function.differentiate<s>();
+		const auto T_r = mapping_function.differentiate(r);
+		const auto T_s = mapping_function.differentiate(s);
 		const auto cross_product = T_r.cross_product(T_s);
 		return cross_product.L2_norm();
 	}
