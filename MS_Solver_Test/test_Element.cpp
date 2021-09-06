@@ -107,8 +107,26 @@ TEST(ReferenceGeometry, is_simplex_2) {
 
 	EXPECT_FALSE(ref_geometry.is_simplex());
 }
+TEST(ReferenceGeometry, is_simplex_3) {
+	constexpr ushort space_dimension = 3;
 
-GTEST_TEST(ReferenceGeometry, nodes_1) {
+	const auto fig = Figure::tetrahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	EXPECT_TRUE(ref_geometry.is_simplex());
+}
+TEST(ReferenceGeometry, is_simplex_4) {
+	constexpr ushort space_dimension = 3;
+
+	const auto fig = Figure::hexahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	EXPECT_FALSE(ref_geometry.is_simplex());
+}
+
+GTEST_TEST(ReferenceGeometry, mapping_nodes_1) {
 	constexpr size_t space_dimension = 2;
 	
 	const Figure fig = Figure::line;
@@ -119,7 +137,7 @@ GTEST_TEST(ReferenceGeometry, nodes_1) {
 	const std::vector<Euclidean_Vector<space_dimension>> ref = { { -1,0 }, { 1,0 } };
 	EXPECT_EQ(ref, result);
 }
-GTEST_TEST(ReferenceGeometry, nodes_2) {
+GTEST_TEST(ReferenceGeometry, mapping_nodes_2) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
@@ -130,7 +148,7 @@ GTEST_TEST(ReferenceGeometry, nodes_2) {
 	const std::vector<Euclidean_Vector<space_dimension>> ref = { { -1, -1 }, { 1, -1 }, { -1, 1 } };
 	EXPECT_EQ(ref, result);
 }
-GTEST_TEST(ReferenceGeometry, nodes_3) {
+GTEST_TEST(ReferenceGeometry, mapping_nodes_3) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::quadrilateral;
@@ -271,7 +289,45 @@ GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_6) {
 
 		const auto ref = 4.0;
 		//EXPECT_DOUBLE_EQ(sum, ref);	//round off error
-		EXPECT_NEAR(sum, ref, 9.0E-1);
+		EXPECT_NEAR(sum, ref, 1.0E-13);
+	}
+}
+GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_7) {
+	constexpr size_t space_dimension = 3;
+
+	const auto fig = Figure::tetrahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	for (ushort i = 0; i < 11; ++i) {
+		const auto ref_quad_rule = ref_geometry.reference_quadrature_rule(i);
+
+		double sum = 0.0;
+		for (const auto& weight : ref_quad_rule.weights)
+			sum += weight;
+
+		const auto ref = 8.0/6.0;
+		//EXPECT_DOUBLE_EQ(sum, ref);	//round off error
+		EXPECT_NEAR(sum, ref, 1.0E-13);
+	}
+}
+GTEST_TEST(ReferenceGeometry, reference_quadrature_rule_8) {
+	constexpr size_t space_dimension = 3;
+
+	const auto fig = Figure::hexahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	for (ushort i = 0; i < 21; ++i) {
+		const auto ref_quad_rule = ref_geometry.reference_quadrature_rule(i);
+
+		double sum = 0.0;
+		for (const auto& weight : ref_quad_rule.weights)
+			sum += weight;
+
+		const auto ref = 8.0;
+		//EXPECT_DOUBLE_EQ(sum, ref);	//round off error
+		EXPECT_NEAR(sum, ref, 1.0E-13);
 	}
 }
 
@@ -341,6 +397,68 @@ GTEST_TEST(ReferenceGeometry, mapping_function_3) {
 	EXPECT_EQ(p2, result(rp2));
 	EXPECT_EQ(p3, result(rp3));
 	EXPECT_EQ(p4, result(rp4));
+}
+GTEST_TEST(ReferenceGeometry, mapping_function_4) {
+	constexpr size_t space_dimension = 3;
+
+	const auto fig = Figure::tetrahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	Euclidean_Vector p1 = { 1,2,4 };
+	Euclidean_Vector p2 = { 3,1,5 };
+	Euclidean_Vector p3 = { 4,1,9 };
+	Euclidean_Vector p4 = { 1,3,2 };
+	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3,p4 };
+
+	const auto result = ref_geometry.mapping_function(pv);
+		
+	Euclidean_Vector rp1 = { -1,-1,-1 };
+	Euclidean_Vector rp2 = { 1,-1,-1 };
+	Euclidean_Vector rp3 = { -1,1,-1 };
+	Euclidean_Vector rp4 = { -1,-1,1 };
+
+	EXPECT_EQ(p1, result(rp1));
+	EXPECT_EQ(p2, result(rp2));
+	EXPECT_EQ(p3, result(rp3));
+	EXPECT_EQ(p4, result(rp4));
+}
+GTEST_TEST(ReferenceGeometry, mapping_function_5) {
+	constexpr size_t space_dimension = 3;
+
+	const auto fig = Figure::hexahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	Euclidean_Vector p1 = { 1,2,1 };
+	Euclidean_Vector p2 = { 3,1,2 };
+	Euclidean_Vector p3 = { 4,1,3 };
+	Euclidean_Vector p4 = { 1,3,1 };
+	Euclidean_Vector p5 = { 1,2,4 };
+	Euclidean_Vector p6 = { 3,1,7 };
+	Euclidean_Vector p7 = { 4,1,6 };
+	Euclidean_Vector p8 = { 1,3,8 };
+	std::vector<Euclidean_Vector<space_dimension>> pv = { p1,p2,p3,p4,p5,p6,p7,p8 };
+
+	const auto result = ref_geometry.mapping_function(pv);
+
+	Euclidean_Vector rp1 = { -1,-1,-1 };
+	Euclidean_Vector rp2 = { 1,-1,-1 };
+	Euclidean_Vector rp3 = { 1,1,-1 };
+	Euclidean_Vector rp4 = { -1,1,-1 };
+	Euclidean_Vector rp5 = { -1,-1,1 };
+	Euclidean_Vector rp6 = { 1,-1,1 };
+	Euclidean_Vector rp7 = { 1,1,1 };
+	Euclidean_Vector rp8 = { -1,1,1 };
+
+	EXPECT_EQ(p1, result(rp1));
+	EXPECT_EQ(p2, result(rp2));
+	EXPECT_EQ(p3, result(rp3));
+	EXPECT_EQ(p4, result(rp4));
+	EXPECT_EQ(p5, result(rp5));
+	EXPECT_EQ(p6, result(rp6));
+	EXPECT_EQ(p7, result(rp7));
+	EXPECT_EQ(p8, result(rp8));
 }
 
 TEST(ReferenceGeometry, reference_connectivity_1) {
@@ -835,7 +953,7 @@ GTEST_TEST(Geometry, orthonormal_basis_1) {
 		}
 	}
 
-	constexpr double allowable_error = 9.0E-10;
+	constexpr double allowable_error = 2.0E-9;
 	EXPECT_LE(max_error, allowable_error);
 }
 

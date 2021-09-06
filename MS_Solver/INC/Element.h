@@ -735,8 +735,7 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
 	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
 
-	switch (this->figure_)
-	{
+	switch (this->figure_)	{
 		case Figure::quadrilateral: {
 			//   3式式式式式2
 			//   弛     弛   
@@ -865,38 +864,58 @@ std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension
 	}
 	else if constexpr (space_dimension == 3) {
 		switch (this->figure_) {
-		case Figure::tetrahedral: {
-			//   3
-			//   弛    
-			//   0式式式式2
-			//  /   				 
-			// 1     
-			switch (this->figure_order_)
-			{
-			case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
-			case 2:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 }, { 0, -1, -1 }, { -1, 0, -1 }, { -1, -1, 0 }, { 0, 0, -1 }, { 0, -1, 0 }, { -1, 0, 0 } };			
-			default:	throw std::runtime_error("unsuported figure order");
+			case Figure::triangle: {
+				//	  2
+				//    弛 \ 
+				//	  弛   \
+				//    0式式式式式1
+				switch (this->figure_order_) {
+					case 1:		return { { -1, -1, 0 }, { 1, -1, 0 }, { -1, 1, 0 } };
+					default:	throw std::runtime_error("unsuported figure order");
+				}
+				break;
 			}
-			break;
-		}
-		case Figure::hexahedral: {
-			//	     4式式式式式7
-			//      /弛    /弛
-			//     5式托式式式6 弛 
-			//     弛 0式式式托式3 
-			//	   弛/    弛/
-			//     1式式式式式2
+			case Figure::quadrilateral: {
+				//   3式式式式式2
+				//   弛     弛   
+				//   0式式式式式1
 
-			switch (this->figure_order_)
-			{
-			case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 }, { -1, 1, -1 }, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1} };			
-			default:	throw std::runtime_error("unsuported figure order");
+				switch (this->figure_order_) {
+					case 1:		return { { -1, -1, 0 }, { 1, -1, 0 }, { 1, 1, 0 }, { -1, 1, 0 } };
+					default:	throw std::runtime_error("unsuported figure order");
+				}
+				break;
 			}
-			break;
-		}
-		default:
-			throw std::runtime_error("not supported element figure");
-			return {};
+			case Figure::tetrahedral: {
+				//   3
+				//   弛    
+				//   0式式式式2
+				//  /   				 
+				// 1     
+				switch (this->figure_order_) {
+					case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 } };
+					case 2:		return { { -1, -1, -1 }, { 1, -1, -1 }, { -1, 1, -1 }, { -1, -1, 1 }, { 0, -1, -1 }, { -1, 0, -1 }, { -1, -1, 0 }, { 0, 0, -1 }, { 0, -1, 0 }, { -1, 0, 0 } };			
+					default:	throw std::runtime_error("unsuported figure order");
+				}
+				break;
+			}
+			case Figure::hexahedral: {
+				//	     4式式式式式7
+				//      /弛    /弛
+				//     5式托式式式6 弛 
+				//     弛 0式式式托式3 
+				//	   弛/    弛/
+				//     1式式式式式2
+
+				switch (this->figure_order_) {
+					case 1:		return { { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 }, { -1, 1, -1 }, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1} };			
+					default:	throw std::runtime_error("unsuported figure order");
+				}
+				break;
+			}
+			default:
+				throw std::runtime_error("not supported element figure");
+				return {};
 		}
 	}
 	else {
@@ -1387,25 +1406,17 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_con
 			ushort count = 0;
 			for (ushort j = 0; j < n + 1; j++) {
 				for (ushort i = 0; i < n + 1 - j; i++) {
-					//
-					//
-					//
+					//   I2式式式式I2+1
+					//   弛     弛   
+					//   I1式式式式I1+1
 
-					//	a_(j+1) + i  ------------	a_(j+1) + 1			// a_0		= 0
-					//		|							|				// a_(j+1)	= a_j + (n + 2) - j
-					//		|							|				// By recurrence relation
-					//	a_j + i		-------------	a_j + i + 1			// a_j		= (n + 3) * j - j*(j+1)/2
-
-					const uint a_j = static_cast<uint>((n + 3) * j - j * (j + 1) * 0.5);
-					const uint a_jp1 = static_cast<uint>((n + 3) * (j + 1) - (j + 1) * (j + 2) * 0.5);
-
-					const auto index1 = a_j + i;
-					const auto index2 = a_jp1 + i;
+					const uint I1 = (n + 3) * j - j * (j + 1) / 2 + i;
+					const uint I2 = (n + 3) * (j + 1) - (j + 1) * (j + 2) / 2 + i;
 
 					if (i == n - j)
-						reference_connectivities.push_back({ index1, index1 + 1, index2 });
+						reference_connectivities.push_back({ I1, I1 + 1, I2 });
 					else {
-						auto quadrilateral_connectivityies = this->quadrilateral_connectivities({ index1, index1 + 1, index2, index2 + 1 });
+						auto quadrilateral_connectivityies = this->quadrilateral_connectivities({ I1, I1 + 1, I2, I2 + 1 });
 
 						for (auto& connectivity : quadrilateral_connectivityies)
 							reference_connectivities.push_back(std::move(connectivity));
@@ -1421,18 +1432,14 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_con
 
 			for (ushort j = 0; j <= n; j++) {
 				for (ushort i = 0; i <= n; i++) {
-					//	a_(j+1) + i  ----	a_(j+1) + 1			// a_0		= 0
-					//		|					|				// a_(j+1)	= a_j + n + 2
-					//		|					|				// By recurrence relation
-					//	a_j + i		 ----	a_j + i + 1			// a_j		= (n + 2) * j
+					//   I2式式式式I2+1
+					//   弛     弛   
+					//   I1式式式式I1+1
 
-					const uint a_j = (n + 2) * j;
-					const uint a_jp1 = (n + 2) * (j + 1);
+					const uint I1 = (n + 2) * j + i;
+					const uint I2 = (n + 2) * (j + 1) + i;
 
-					const auto index1 = a_j + i;
-					const auto index2 = a_jp1 + i;
-
-					auto quadrilateral_connectivityies = this->quadrilateral_connectivities({ index1, index1 + 1, index2, index2 + 1  });
+					auto quadrilateral_connectivityies = this->quadrilateral_connectivities({ I1, I1 + 1, I2, I2 + 1  });
 
 					for (auto& connectivity : quadrilateral_connectivityies)
 						reference_connectivities.push_back(std::move(connectivity));
@@ -1448,22 +1455,28 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_con
 			for (int iz = 0; iz <= n; iz++) {
 				for (int iy = 0; iy <= n - iz; iy++) {
 					for (int ix = 0; ix <= n - iz - iy; ix++) {
-						const int sum = ix + iy + iz;
-						
-						const uint index1 = ((n + 1) - iz + 2) * iy - iy * (iy + 1) / 2 + ix + iz * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 12 * (n + 1) + iz * iz - 6 * iz + 11) / 6;
-						const uint index2 = ((n + 1) - iz + 2) * (iy + 1) - (iy + 1) * (iy + 2) / 2 + ix + iz * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 12 * (n + 1) + iz * iz - 6 * iz + 11) / 6;
-						const uint index3 = ((n + 1) - iz + 1) * iy - iy * (iy + 1) / 2 + ix + (iz + 1) * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 9 * (n + 1) + iz * iz - 4 * iz + 6) / 6;
-						const uint index4 = ((n + 1) - iz + 1) * (iy + 1) - (iy + 1) * (iy + 2) / 2 + ix + (iz + 1) * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 9 * (n + 1) + iz * iz - 4 * iz + 6) / 6;
+						const int sum = ix + iy + iz;						
+						//	     I3式式式式I4 
+						//      /弛    /弛
+						//     I3+1式式I4+1 
+						//     弛 I1式式托式I2 
+						//	   弛/    弛/
+						//     I1+1式式I2+1
+
+						const uint I1 = ((n + 1) - iz + 2) * iy - iy * (iy + 1) / 2 + ix + iz * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 12 * (n + 1) + iz * iz - 6 * iz + 11) / 6;
+						const uint I2 = ((n + 1) - iz + 2) * (iy + 1) - (iy + 1) * (iy + 2) / 2 + ix + iz * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 12 * (n + 1) + iz * iz - 6 * iz + 11) / 6;
+						const uint I3 = ((n + 1) - iz + 1) * iy - iy * (iy + 1) / 2 + ix + (iz + 1) * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 9 * (n + 1) + iz * iz - 4 * iz + 6) / 6;
+						const uint I4 = ((n + 1) - iz + 1) * (iy + 1) - (iy + 1) * (iy + 2) / 2 + ix + (iz + 1) * (3 * (n + 1) * (n + 1) - 3 * (n + 1) * iz + 9 * (n + 1) + iz * iz - 4 * iz + 6) / 6;
 
 						if (sum == n) 
-							reference_connectivities.push_back({ index1, index1 + 1, index2, index3 });
+							reference_connectivities.push_back({ I1, I1 + 1, I2, I3 });
 						else if (sum == n - 1) {
-							auto sliced_hexahedral_connectivities = this->sliced_hexahedral_connectivities({ index1, index1 + 1, index2, index2 + 1, index3, index3 + 1, index4 });
+							auto sliced_hexahedral_connectivities = this->sliced_hexahedral_connectivities({ I1, I1 + 1, I2, I2 + 1, I3, I3 + 1, I4 });
 							for (auto& connectivity : sliced_hexahedral_connectivities)
 								reference_connectivities.push_back(std::move(connectivity));
 						}
 						else {
-							auto hexahedral_connectivities = this->hexahedral_connectivities({ index1, index1 + 1, index2, index2 + 1, index3, index3 + 1, index4, index4 + 1 });
+							auto hexahedral_connectivities = this->hexahedral_connectivities({ I1, I1 + 1, I2, I2 + 1, I3, I3 + 1, I4, I4 + 1 });
 							for (auto& connectivity : hexahedral_connectivities)
 								reference_connectivities.push_back(std::move(connectivity));
 						}
@@ -1480,12 +1493,18 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_con
 			for (int iz = 0; iz <= n; iz++) {
 				for (int iy = 0; iy <= n; iy++) {
 					for (int ix = 0; ix <= n; ix++) {
-						const uint index1 = ((n + 1) + 1) * ((n + 1) + 1) * iz + ((n + 1) + 1) * iy + ix;
-						const uint index2 = ((n + 1) + 1) * ((n + 1) + 1) * iz + ((n + 1) + 1) * (iy + 1) + ix;
-						const uint index3 = ((n + 1) + 1) * ((n + 1) + 1) * (iz + 1) + ((n + 1) + 1) * iy + ix;
-						const uint index4 = ((n + 1) + 1) * ((n + 1) + 1) * (iz + 1) + ((n + 1) + 1) * (iy + 1) + ix;
+						//	     I3式式式式I4 
+						//      /弛    /弛
+						//     I3+1式式I4+1 
+						//     弛 I1式式托式I2 
+						//	   弛/    弛/
+						//     I1+1式式I2+1
+						const uint I1 = ((n + 1) + 1) * ((n + 1) + 1) * iz + ((n + 1) + 1) * iy + ix;
+						const uint I2 = ((n + 1) + 1) * ((n + 1) + 1) * iz + ((n + 1) + 1) * (iy + 1) + ix;
+						const uint I3 = ((n + 1) + 1) * ((n + 1) + 1) * (iz + 1) + ((n + 1) + 1) * iy + ix;
+						const uint I4 = ((n + 1) + 1) * ((n + 1) + 1) * (iz + 1) + ((n + 1) + 1) * (iy + 1) + ix;
 
-						auto hexahedral_connectivities = this->hexahedral_connectivities({ index1, index1 + 1, index2, index2 + 1, index3, index3 + 1, index4, index4 + 1 });
+						auto hexahedral_connectivities = this->hexahedral_connectivities({ I1, I1 + 1, I2, I2 + 1, I3, I3 + 1, I4, I4 + 1 });
 						for (auto& connectivity : hexahedral_connectivities)
 							reference_connectivities.push_back(std::move(connectivity));
 					}
@@ -1508,8 +1527,8 @@ ushort ReferenceGeometry<space_dimension>::scale_function_order(void) const {
 		case Figure::line:
 		case Figure::triangle:
 		case Figure::tetrahedral:	return 0;
-		case Figure::quadrilateral:
-		case Figure::hexahedral:	return space_dimension - 1;
+		case Figure::quadrilateral: return 1;
+		case Figure::hexahedral:	return 2;
 		default:
 			throw std::runtime_error("not supported figure");
 			return NULL;
@@ -1521,7 +1540,6 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::quadrilateral
 	//   2式式式式式3
 	//   弛     弛   
 	//   0式式式式式1
-
 	return { { node_indexes[0],node_indexes[1],node_indexes[2] },
 			 { node_indexes[1],node_indexes[3],node_indexes[2] } };
 }
@@ -1534,11 +1552,10 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::sliced_hexahe
 	//     弛 0式式式式式2 
 	//	   弛/     /
 	//     1式式式式式3
-
 	return { { node_indexes[0], node_indexes[1], node_indexes[2], node_indexes[4] },
-      		 { node_indexes[1], node_indexes[2], node_indexes[5], node_indexes[4] },
+      		 { node_indexes[1], node_indexes[2], node_indexes[4], node_indexes[5] },
       		 { node_indexes[2], node_indexes[4], node_indexes[5], node_indexes[6] },
-      		 { node_indexes[1], node_indexes[3], node_indexes[2], node_indexes[5] },
+      		 { node_indexes[1], node_indexes[3], node_indexes[5], node_indexes[2] },
       		 { node_indexes[3], node_indexes[2], node_indexes[5], node_indexes[6] } };
 }
 
@@ -1550,13 +1567,12 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::hexahedral_co
 	//     弛 0式式式托式2 
 	//	   弛/    弛/
 	//     1式式式式式3
-
 	return { { node_indexes[0], node_indexes[1], node_indexes[2], node_indexes[4] },
-			 { node_indexes[1], node_indexes[2], node_indexes[5], node_indexes[4] },
+			 { node_indexes[1], node_indexes[2], node_indexes[4], node_indexes[5] },
 			 { node_indexes[2], node_indexes[4], node_indexes[5], node_indexes[6] },
-			 { node_indexes[1], node_indexes[3], node_indexes[2], node_indexes[5] },
+			 { node_indexes[1], node_indexes[3], node_indexes[5], node_indexes[2] },
 			 { node_indexes[3], node_indexes[2], node_indexes[5], node_indexes[6] },
-			 { node_indexes[3], node_indexes[5], node_indexes[7], node_indexes[6] } };
+			 { node_indexes[3], node_indexes[6], node_indexes[5], node_indexes[7] } };
 }
 
 template <ushort space_dimension>
