@@ -324,7 +324,6 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 	}
 }
 
-
 template <ushort space_dimension>
 ushort ReferenceGeometry<space_dimension>::num_vertex(void) const {
 	switch (this->figure_) {
@@ -341,16 +340,13 @@ ushort ReferenceGeometry<space_dimension>::num_vertex(void) const {
 
 template <ushort space_dimension>
 std::vector<ushort> ReferenceGeometry<space_dimension>::vertex_node_index_orders(void) const {
-	switch (this->figure_) {
-	case Figure::line:			return { 0,1 };
-	case Figure::triangle:		return { 0,1,2 };	
-	case Figure::quadrilateral: return { 0,1,2,3 };
-	case Figure::tetrahedral:	return { 0,1,2,3 };
-	case Figure::hexahedral:	return { 0,1,2,3,4,5,6,7 };
-	default:
-		throw std::runtime_error("wrong element figure");
-		return { 0 };
-	}
+	const auto num_vertex = this->num_vertex();	
+	std::vector<ushort> vnode_index_orders(num_vertex);
+
+	for (ushort i = 0; i < num_vertex; ++i)
+		vnode_index_orders[i] = i;
+
+	return vnode_index_orders;
 }
 
 template <ushort space_dimension>
@@ -480,7 +476,7 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//   0式式式式2
 		//  /   				 
 		// 1 
-		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh");
+		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh yet");
 
 		std::vector<ushort> face0_node_index = { 0,1,2 };
 		std::vector<ushort> face1_node_index = { 0,2,3 };
@@ -495,7 +491,7 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//  弛 0式式式托式3
 		//  弛/    弛/
 		//  1式式式式式2
-		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh");
+		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh yet");
 
 		std::vector<ushort> face0_node_index = { 0,1,2,3 };
 		std::vector<ushort> face1_node_index = { 0,1,5,4 };
@@ -549,8 +545,6 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 		//   0式式式式2
 		//  /   				 
 		// 1 
-		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh");
-
 		const ReferenceGeometry face0_refrence_geometry = { Figure::triangle, this->figure_order_ };
 		const ReferenceGeometry face1_refrence_geometry = { Figure::triangle, this->figure_order_ };
 		const ReferenceGeometry face2_refrence_geometry = { Figure::triangle, this->figure_order_ };
@@ -564,8 +558,6 @@ std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimensio
 		//  弛 0式式式托式3
 		//  弛/    弛/
 		//  1式式式式式2
-		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh");
-
 		const ReferenceGeometry face0_reference_geometry = { Figure::quadrilateral, this->figure_order_ };
 		const ReferenceGeometry face1_reference_geometry = { Figure::quadrilateral, this->figure_order_ };
 		const ReferenceGeometry face2_reference_geometry = { Figure::quadrilateral, this->figure_order_ };
@@ -605,6 +597,7 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 
 	Vector_Function<Polynomial<space_dimension>, space_dimension> mapping_function;
 	ms::gemv(C, monomial_vector_function, mapping_function.data());
+
 	return mapping_function;
 }
 
@@ -613,14 +606,14 @@ Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_f
 	if constexpr (space_dimension == 2) {
 		switch (this->figure_) {
 			case Figure::line: {
-				constexpr size_t r = 0;
+				constexpr ushort r = 0;
 				const auto mf_r = mapping_function.differentiate(r);
 				return mf_r.L2_norm();
 			}
 			case Figure::triangle:
 			case Figure::quadrilateral: {
-				constexpr size_t r = 0;
-				constexpr size_t s = 1;
+				constexpr ushort r = 0;
+				constexpr ushort s = 1;
 				const auto mf_r = mapping_function.differentiate(r);
 				const auto mf_s = mapping_function.differentiate(s);
 				const auto cross_product = mf_r.cross_product(mf_s);
@@ -635,8 +628,8 @@ Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_f
 		switch (this->figure_) {
 			case Figure::triangle:
 			case Figure::quadrilateral: {
-				constexpr size_t r = 0;
-				constexpr size_t s = 1;
+				constexpr ushort r = 0;
+				constexpr ushort s = 1;
 				const auto mf_r = mapping_function.differentiate(r);
 				const auto mf_s = mapping_function.differentiate(s);
 				const auto cross_product = mf_r.cross_product(mf_s);

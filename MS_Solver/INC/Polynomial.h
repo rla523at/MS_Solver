@@ -24,6 +24,9 @@ private:
 	bool is_absolute_ = false;
 
 public:
+	static constexpr ushort domain_dimension(void);
+
+public:
 	Polynomial(void) = default;
 	Polynomial(const double coeeficient) : simple_poly_term_(coeeficient) {};
 	Polynomial(const std::string& variable) : simple_poly_term_(variable) {};
@@ -44,8 +47,7 @@ public:
 
 public:
 	Polynomial& be_absolute(void);
-	Polynomial& be_derivative(const ushort variable_index);
-	
+	Polynomial& be_derivative(const ushort variable_index);	
 
 public:
 	Polynomial differentiate(const ushort variable_index) const;
@@ -53,14 +55,12 @@ public:
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
 	Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
-	
-public:
-	static constexpr ushort domain_dimension(void);
-
 
 private: 
 	void add_assign_poly_term(const PolyTerm& term);
 
+private:
+	bool is_operable(void) const;
 
 //Inner classes defintion
 private: 
@@ -217,6 +217,8 @@ namespace ms {
 
 //template definition part
 template <ushort domain_dimension_> Polynomial<domain_dimension_>& Polynomial<domain_dimension_>::operator+=(const Polynomial& other) {
+	dynamic_require(this->is_operable() && other.is_operable(), "polynomials should be operable");
+
 	this->simple_poly_term_ += other.simple_poly_term_;
 	for (const auto& poly_term : other.added_poly_term_set_)
 		this->add_assign_poly_term(poly_term);
@@ -231,6 +233,8 @@ template <ushort domain_dimension_> Polynomial<domain_dimension_>& Polynomial<do
 template <ushort domain_dimension_> Polynomial<domain_dimension_>& Polynomial<domain_dimension_>::operator*=(const double constant) {
 	if (constant == 0.0)
 		return *this = 0.0;
+
+	dynamic_require(this->is_operable(), "polynomial should be operable");
 
 	for (auto& poly_term : this->added_poly_term_set_)
 		poly_term *= constant;
@@ -251,6 +255,8 @@ template <ushort domain_dimension_> Polynomial<domain_dimension_> Polynomial<dom
 }
 
 template <ushort domain_dimension_> Polynomial<domain_dimension_> Polynomial<domain_dimension_>::operator*(const Polynomial& other) const {
+	dynamic_require(this->is_operable() && other.is_operable(), "polynomials should be operable");
+
 	Polynomial result = 0.0;
 
 	const auto num_this_term = this->added_poly_term_set_.size();
@@ -288,6 +294,8 @@ template <ushort domain_dimension_>
 Polynomial<domain_dimension_> Polynomial<domain_dimension_>::operator^(const ushort power_index) const {
 	if (power_index == 0)
 		return 1;
+
+	dynamic_require(this->is_operable(), "polynomials should be operable");
 
 	auto result = *this;
 	for (ushort i = 1; i < power_index; ++i)
@@ -337,6 +345,8 @@ Polynomial<domain_dimension_> Polynomial<domain_dimension_>::differentiate(const
 	if (domain_dimension_ <= variable_index)
 		return 0.0;
 
+	dynamic_require(this->is_operable(), "polynomials should be operable");
+
 	Polynomial result = 0.0;
 	result.simple_poly_term_ = this->simple_poly_term_.differentiate(variable_index);
 	for (const auto& poly_term : this->added_poly_term_set_)
@@ -349,22 +359,6 @@ template <ushort domain_dimension_>
 constexpr ushort Polynomial<domain_dimension_>::domain_dimension(void) {
 	return domain_dimension_;
 }
-
-//template <ushort domain_dimension_>
-//Vector_Function<Polynomial<domain_dimension_>> Polynomial<domain_dimension_>::gradient(void) const {
-//	return this->gradient(domain_dimension_);
-//}
-
-//template <ushort domain_dimension_>
-//Vector_Function<Polynomial<domain_dimension_>> Polynomial<domain_dimension_>::gradient(const ushort domain_dimension_) const {
-//	Vector_Function<Polynomial<domain_dimension_>> result(domain_dimension_);
-//	for (ushort i = 0; i < domain_dimension_; ++i)
-//		result.push_back(this->differentiate(i));
-//
-//	return result;
-//}
-//
-
 
 template <ushort domain_dimension_> 
 ushort Polynomial<domain_dimension_>::order(void) const {
@@ -399,23 +393,17 @@ Irrational_Function<domain_dimension_> Polynomial<domain_dimension_>::root(const
 template <ushort domain_dimension_>
 Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> Polynomial<domain_dimension_>::gradient(void) const {
 	std::array<Polynomial<domain_dimension_>, domain_dimension_> gradient;
-	
-	if constexpr (domain_dimension_ == 2) {
-		gradient[0] = this->differentiate(0);
-		gradient[1] = this->differentiate(1);
-	}
-	else if constexpr (domain_dimension_ == 3) {
-		gradient[0] = this->differentiate(0);
-		gradient[1] = this->differentiate(1);
-		gradient[2] = this->differentiate(2);
-	}
+
+	for (ushort i = 0; i < domain_dimension_; ++i)
+		gradient[i] = this->differentiate(i);	
 
 	return gradient;
 }
 
-
 template <ushort domain_dimension_> 
 void Polynomial<domain_dimension_>::add_assign_poly_term(const PolyTerm& term) {
+	dynamic_require(this->is_operable(), "polynomials should be operable");
+
 	for (auto iter = this->added_poly_term_set_.begin(); iter != this->added_poly_term_set_.end(); ++iter) {
 		if (iter->has_same_form(term)) {
 			iter->add_assign_with_same_form(term);
@@ -425,6 +413,11 @@ void Polynomial<domain_dimension_>::add_assign_poly_term(const PolyTerm& term) {
 		}
 	}
 	this->added_poly_term_set_.push_back(term);
+}
+
+template <ushort domain_dimension_>
+bool Polynomial<domain_dimension_>::is_operable(void) const {
+	return !this->is_absolute_;
 }
 
 template <ushort domain_dimension_> 
