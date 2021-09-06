@@ -81,7 +81,6 @@ public:
 	std::vector<ReferenceGeometry> face_reference_geometries(void) const;
 	Vector_Function<Polynomial<space_dimension>, space_dimension> mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const;
 	Irrational_Function<space_dimension> scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
-	//auto scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
 	Quadrature_Rule<space_dimension> quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const;
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
 	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
@@ -96,7 +95,8 @@ public:
 	Quadrature_Rule<space_dimension> reference_quadrature_rule(const ushort integrand_order) const;
 	std::vector<Space_Vector_> reference_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<uint>> reference_connectivity(const ushort post_order) const;
-		
+	
+	ushort scale_function_order(void) const;
 	std::vector<std::vector<uint>> quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const;
 	std::vector<std::vector<uint>> sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const;
 	std::vector<std::vector<uint>> hexahedral_connectivities(const std::array<uint, 8>& node_indexes) const;
@@ -657,8 +657,9 @@ template <ushort space_dimension>
 Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const {
 	const auto scale_function = this->scale_function(mapping_function);
 
-	constexpr ushort heuristic_additional_order = 2;
-	const ushort reference_integrand_order = physical_integrand_order + heuristic_additional_order;
+	//constexpr ushort heuristic_additional_order = 2;
+	//const ushort reference_integrand_order = physical_integrand_order + heuristic_additional_order;
+	const auto reference_integrand_order = physical_integrand_order + this->scale_function_order();
 	const auto key = std::make_pair(this->figure_, reference_integrand_order);
 	if (ReferenceGeometry::key_to_reference_quadrature_rule_.find(key) == ReferenceGeometry::key_to_reference_quadrature_rule_.end())
 		ReferenceGeometry::key_to_reference_quadrature_rule_.emplace(key, this->reference_quadrature_rule(reference_integrand_order));
@@ -1496,6 +1497,22 @@ std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_con
 	default:
 		throw std::runtime_error("not supported figure");
 		return reference_connectivities;
+	}
+}
+
+template <ushort space_dimension>
+ushort ReferenceGeometry<space_dimension>::scale_function_order(void) const {
+	dynamic_require(this->figure_order_ == 1, "high order mesh is not supported yet");
+
+	switch (this->figure_)	{
+		case Figure::line:
+		case Figure::triangle:
+		case Figure::tetrahedral:	return 0;
+		case Figure::quadrilateral:
+		case Figure::hexahedral:	return space_dimension - 1;
+		default:
+			throw std::runtime_error("not supported figure");
+			return NULL;
 	}
 }
 
