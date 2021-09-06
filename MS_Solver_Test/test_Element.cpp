@@ -721,7 +721,7 @@ GTEST_TEST(Geometry, faces_nodes_1) {
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
-	const auto result = geometry.calculate_set_of_face_nodes();
+	const auto result = geometry.set_of_face_nodes();
 
 	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n1} };
 	EXPECT_EQ(result, ref);
@@ -743,7 +743,7 @@ GTEST_TEST(Geometry, faces_nodes_2) {
 
 
 	Geometry geometry(ref_geometry, std::move(nodes));
-	const auto result = geometry.calculate_set_of_face_nodes();
+	const auto result = geometry.set_of_face_nodes();
 
 	const std::vector<std::vector<Euclidean_Vector<space_dimension>>> ref = { {n1,n2},{n2,n3},{n3,n4}, {n4,n1} };
 	EXPECT_EQ(result, ref);
@@ -784,7 +784,7 @@ TEST(Geometry, sub_simplex_1) {
 	EXPECT_EQ(result, ref);
 }
 
-GTEST_TEST(Geometry, coordinate_projected_volume_1) {
+GTEST_TEST(Geometry, projected_volume_1) {
 	constexpr size_t space_dimension = 2;
 
 	const Figure fig = Figure::triangle;
@@ -803,7 +803,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_1) {
 	const std::array<double, 2> ref = { 1, 4.47411 - 1.524 };
 	EXPECT_EQ(result, ref);
 }
-GTEST_TEST(Geometry, coordinate_projected_volume_2) {
+GTEST_TEST(Geometry, projected_volume_2) {
 	constexpr size_t space_dimension = 2;
 
 
@@ -824,7 +824,7 @@ GTEST_TEST(Geometry, coordinate_projected_volume_2) {
 	const std::array<double, 2> ref = { 1, 3 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, coordinate_projected_volume_3) {
+TEST(Geometry, projected_volume_3) {
 	constexpr ushort space_dimension = 3;
 
 	const auto fig = Figure::hexahedral;

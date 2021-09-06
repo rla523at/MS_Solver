@@ -144,7 +144,7 @@ public:
 	//auto orthonormal_basis_vector_function(const ushort polynomial_order) const;
 
 	//private: for test
-	std::vector<std::vector<Space_Vector_>> calculate_set_of_face_nodes(void) const;
+	std::vector<std::vector<Space_Vector_>> set_of_face_nodes(void) const;
 	bool is_axis_parallel_node(const Space_Vector_& node, const size_t axis_tag) const;
 };
 
@@ -1652,7 +1652,7 @@ std::array<double, space_dimension> Geometry<space_dimension>::projected_volume(
 		double x_projected_volume = 0.0;
 		double y_projected_volume = 0.0;
 
-		const auto set_of_face_nodes = this->calculate_set_of_face_nodes();
+		const auto set_of_face_nodes = this->set_of_face_nodes();
 		for (const auto& face_nodes : set_of_face_nodes) {
 			const auto& start_node = face_nodes[0];
 			const auto& end_node = face_nodes[1];
@@ -1745,7 +1745,7 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::sub_simplex_ge
 
 
 template <ushort space_dimension>
-std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimension>::calculate_set_of_face_nodes(void) const {
+std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimension>::set_of_face_nodes(void) const {
 	const auto set_of_face_node_index_orders = this->reference_geometry_.set_of_face_node_index_orders();
 	const auto num_face = set_of_face_node_index_orders.size();
 
