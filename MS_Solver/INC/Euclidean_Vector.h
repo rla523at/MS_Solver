@@ -30,7 +30,7 @@ namespace ms {
 }
 
 
-// CLASS TEMPLATE euclidean_vector
+//Template Class Euclidean_Vector
 template <size_t dimension_>
 class Euclidean_Vector
 {
@@ -311,5 +311,4 @@ Euclidean_Vector<dimension_> operator*(const double constant, const Euclidean_Ve
 template <typename Function>
 void Dynamic_Euclidean_Vector::apply(const Function& f) {
 	std::transform(this->values_.begin(), this->values_.end(), this->values_.begin(), f);
-	//std::for_each(this->values_.begin(), this->values_.end(), f);
 }

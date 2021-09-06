@@ -132,7 +132,7 @@ public:
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	std::vector<Geometry> face_geometries(void) const;
 	std::vector<Geometry> sub_simplex_geometries(void) const;
-	bool is_axis_parallel(const Geometry& other) const;
+	bool can_be_periodic_pair(const Geometry& other) const;
 	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 
 	template <ushort polynomial_order>
@@ -1760,7 +1760,7 @@ std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimen
 }
 
 template <ushort space_dimension>
-bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other) const {
+bool Geometry<space_dimension>::can_be_periodic_pair(const Geometry& other) const {
 	if (this->reference_geometry_ != other.reference_geometry_)
 		return false;
 
@@ -1903,12 +1903,13 @@ bool Geometry<space_dimension>::is_on_same_axis(const Geometry& other) const {
 	const auto num_this_node = this->nodes_.size();
 	const auto num_other_node = other.nodes_.size();
 
+	constexpr auto epsilon = 1.0E-10;
 	for (ushort i = 0; i < space_dimension; ++i) {
 		const auto ref = ref_nodes[i];
 
 		bool is_on_same_axis = true;
 		for (ushort j = 1; j < num_this_node; ++j) {
-			if (this->nodes_[j][i] != ref) {
+			if (std::abs(this->nodes_[j][i] - ref) < epsilon) {
 				is_on_same_axis = false;
 				break;
 			}
@@ -1918,7 +1919,7 @@ bool Geometry<space_dimension>::is_on_same_axis(const Geometry& other) const {
 			continue;
 
 		for (ushort j = 0; j < num_other_node; ++j) {
-			if (other.nodes_[j][i] != ref) {
+			if (std::abs(other.nodes_[j][i] - ref) < epsilon) {
 				is_on_same_axis = false;
 				break;
 			}
@@ -2026,7 +2027,7 @@ bool Element<space_dimension>::is_periodic_pair(const Element& other) const {
 	if (this->element_type_ != other.element_type_)
 		return false;
 
-	if (this->geometry_.is_axis_parallel(other.geometry_))
+	if (this->geometry_.can_be_periodic_pair(other.geometry_))
 		return true;
 	else
 		return false;
@@ -2059,7 +2060,7 @@ std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode
 			const auto& other_vnode = other_vnodes[j];
 			const auto other_vnode_index = other_vnode_indexes[j];
 
-			if (matched_other_vnode_index.find(other_vnode_index) != matched_other_vnode_index.end())
+			if (matched_other_vnode_index.contains(other_vnode_index))
 				continue;
 
 			if (this_vnode.is_axis_translation(other_vnode)) {

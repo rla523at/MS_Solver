@@ -942,7 +942,7 @@ GTEST_TEST(Geometry, is_axis_parallel_1) {
 	std::vector<Euclidean_Vector<2>> nodes2 = { n3,n4 };
 	Geometry geometry2(ref_geometry, std::move(nodes2));
 
-	EXPECT_FALSE(geometry.is_axis_parallel(geometry2));
+	EXPECT_FALSE(geometry.can_be_periodic_pair(geometry2));
 }
 
 GTEST_TEST(Geometry, orthonormal_basis_1) {
