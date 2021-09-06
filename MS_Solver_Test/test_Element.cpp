@@ -824,6 +824,29 @@ GTEST_TEST(Geometry, coordinate_projected_volume_2) {
 	const std::array<double, 2> ref = { 1, 3 };
 	EXPECT_EQ(result, ref);
 }
+TEST(Geometry, coordinate_projected_volume_3) {
+	constexpr ushort space_dimension = 3;
+
+	const auto fig = Figure::hexahedral;
+	const ushort fig_order = 1;
+	const ReferenceGeometry <space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1,0 };
+	const Euclidean_Vector n2 = { 2,1,0 };
+	const Euclidean_Vector n3 = { 2,2,0 };
+	const Euclidean_Vector n4 = { 1,2,0 };
+	const Euclidean_Vector n5 = { 1,1,2 };
+	const Euclidean_Vector n6 = { 2,1,2 };
+	const Euclidean_Vector n7 = { 2,2,2 };
+	const Euclidean_Vector n8 = { 1,2,2 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes = { n1,n2,n3,n4,n5,n6,n7,n8 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+	const auto result = geometry.projected_volume();
+
+	const std::array<double, space_dimension> ref = { 2,2,1 };
+	EXPECT_EQ(result, ref);
+}
 
 GTEST_TEST(Geometry, center_1) {
 	constexpr size_t space_dimension = 2;

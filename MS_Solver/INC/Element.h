@@ -94,8 +94,7 @@ public:
 	Dynamic_Matrix inverse_mapping_monomial_matrix(void) const;
 	Quadrature_Rule<space_dimension> reference_quadrature_rule(const ushort integrand_order) const;
 	std::vector<Space_Vector_> reference_post_nodes(const ushort post_order) const;
-	std::vector<std::vector<uint>> reference_connectivity(const ushort post_order) const;
-	
+	std::vector<std::vector<uint>> reference_connectivity(const ushort post_order) const;	
 	ushort scale_function_order(void) const;
 	std::vector<std::vector<uint>> quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const;
 	std::vector<std::vector<uint>> sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const;
@@ -136,10 +135,13 @@ public:
 	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
 	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 
-	template <ushort order>
+	template <ushort polynomial_order>
 	auto initial_basis_function(void) const;
-	template <ushort order>
+	template <ushort polynomial_order>
 	auto orthonormal_basis_vector_function(void) const;
+
+	//auto initial_basis_function(const ushort polynomial_order) const;
+	//auto orthonormal_basis_vector_function(const ushort polynomial_order) const;
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> calculate_set_of_face_nodes(void) const;
@@ -237,6 +239,17 @@ namespace ms {
 		}
 
 		return normalized_functions;
+	}
+
+	template <typename T, typename Index>
+	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<Index>& indexes) {
+		const auto num_extracted_value = indexes.size();
+		std::vector<T> extracted_values(num_extracted_value);
+
+		for (ushort i = 0; i < num_extracted_value; ++i)
+			extracted_values[i] = set[indexes[i]];
+
+		return extracted_values;
 	}
 }
 
@@ -978,6 +991,33 @@ Dynamic_Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dim
 		Polynomial<space_dimension> t("x2");
 
 		switch (this->figure_) {
+			case Figure::triangle: {
+				const auto num_monomial = static_cast<size_t>((this->figure_order_ + 2) * (this->figure_order_ + 1) * 0.5);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+
+				for (ushort a = 0, index = 0; a <= this->figure_order_; ++a)
+					for (ushort b = 0; b <= a; ++b)
+						mapping_monomial_vector[index++] = (r ^ (a - b)) * (s ^ b);
+
+				return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...
+			}
+			case Figure::quadrilateral: {
+				const auto n = this->figure_order_;
+				const auto num_monomial = (n + 1) * (n + 1);
+				std::vector<Polynomial<space_dimension>> mapping_monomial_vector(num_monomial);
+
+				for (ushort a = 0, index = 0; a <= n; ++a) {
+					for (ushort b = 0; b <= a; ++b)
+						mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
+
+					if (a == 0)
+						continue;
+
+					for (int c = static_cast<int>(a - 1); 0 <= c; --c)
+						mapping_monomial_vector[index++] = (r ^ c) * (s ^ a);
+				}
+				return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
+			}
 			case Figure::tetrahedral: {
 				const auto n = this->figure_order_;
 				const auto num_monomial = static_cast<ushort>(1.5 * (n + 2) * (n - 1) + 4);
@@ -1612,8 +1652,8 @@ std::array<double, space_dimension> Geometry<space_dimension>::projected_volume(
 		double x_projected_volume = 0.0;
 		double y_projected_volume = 0.0;
 
-		const auto faces_nodes = this->calculate_set_of_face_nodes();
-		for (const auto& face_nodes : faces_nodes) {
+		const auto set_of_face_nodes = this->calculate_set_of_face_nodes();
+		for (const auto& face_nodes : set_of_face_nodes) {
 			const auto& start_node = face_nodes[0];
 			const auto& end_node = face_nodes[1];
 			const auto node_to_node = end_node - start_node;
@@ -1674,15 +1714,9 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::face_geometrie
 
 	for (size_t i = 0; i < num_face; ++i) {
 		const auto& reference_geometry = face_reference_geometries[i];
+		auto face_nodes = ms::extract_by_index(this->nodes_, set_of_face_node_index_orders[i]);
 
-		const auto& face_node_index_orders = set_of_face_node_index_orders[i];
-		const auto num_node = face_node_index_orders.size();
-
-		std::vector<Space_Vector_> face_nodes(num_node);
-		for (size_t j = 0; j < num_node; ++j) 
-			face_nodes[j] = this->nodes_[face_node_index_orders[j]];
-
-		face_geometries.push_back({ reference_geometry,std::move(face_nodes) });
+		face_geometries.push_back({ reference_geometry, std::move(face_nodes) });
 	}
 
 	return face_geometries;
@@ -1699,13 +1733,7 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::sub_simplex_ge
 
 	for (ushort i = 0; i < num_sub_simplex; ++i) {
 		const auto& reference_geometry = sub_simplex_reference_geometries[i];
-
-		const auto& vnode_index_orders = set_of_sub_simplex_vnode_index_orders[i];
-		const auto num_node = vnode_index_orders.size();
-
-		std::vector<Space_Vector_> sub_simplex_vnodes(num_node);
-		for (size_t j = 0; j < num_node; ++j)
-			sub_simplex_vnodes[j] = this->nodes_[vnode_index_orders[j]];
+		auto sub_simplex_vnodes = ms::extract_by_index(this->nodes_, set_of_sub_simplex_vnode_index_orders[i]);
 
 		sub_simplex_geometries.push_back({ reference_geometry,std::move(sub_simplex_vnodes) });
 	}
@@ -1718,20 +1746,14 @@ std::vector<Geometry<space_dimension>> Geometry<space_dimension>::sub_simplex_ge
 
 template <ushort space_dimension>
 std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimension>::calculate_set_of_face_nodes(void) const {
-	const auto faces_node_index_orders = this->reference_geometry_.set_of_face_node_index_orders();
-	const auto num_face = faces_node_index_orders.size();
+	const auto set_of_face_node_index_orders = this->reference_geometry_.set_of_face_node_index_orders();
+	const auto num_face = set_of_face_node_index_orders.size();
 
-	std::vector<std::vector<Space_Vector_>> set_of_face_nodes(num_face);
-	for (size_t i = 0; i < num_face; ++i) {
-		const auto& face_node_index_orders = faces_node_index_orders[i];
-		const auto num_node = face_node_index_orders.size();
+	std::vector<std::vector<Space_Vector_>> set_of_face_nodes;
+	set_of_face_nodes.reserve(num_face);
 
-		auto& face_nodes = set_of_face_nodes[i];
-		face_nodes.resize(num_node);
-
-		for (size_t j = 0; j < face_node_index_orders.size(); ++j)
-			face_nodes[j] = this->nodes_[face_node_index_orders[j]];
-	}
+	for (size_t i = 0; i < num_face; ++i) 
+		set_of_face_nodes.push_back(ms::extract_by_index(this->nodes_, set_of_face_node_index_orders[i]));
 
 	return set_of_face_nodes;
 }
@@ -1754,16 +1776,14 @@ bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other, const us
 }
 
 template <ushort space_dimension>
-template <ushort order>
+template <ushort polynomial_order>
 auto Geometry<space_dimension>::initial_basis_function(void) const {
-	constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, order);
+	constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, polynomial_order);
 
 	std::array<Polynomial<space_dimension>, num_basis> initial_basis_set = { 0 };
-	
-	if (space_dimension == 2) {
-		ushort index = 0;
 
-		//1 (x - x_c) (y - y_c)  ...
+	ushort index = 0;
+	if (space_dimension == 2) {
 		Polynomial<space_dimension> x("x0");
 		Polynomial<space_dimension> y("x1");
 
@@ -1771,9 +1791,26 @@ auto Geometry<space_dimension>::initial_basis_function(void) const {
 		const auto x_c = center_node.at(0);
 		const auto y_c = center_node.at(1);
 
-		for (ushort a = 0; a <= order; ++a)
+		//1 (x - x_c) (y - y_c)  ...
+		for (ushort a = 0; a <= polynomial_order; ++a)
 			for (ushort b = 0; b <= a; ++b)
 				initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
+	}
+	else if (space_dimension == 3) {
+		Polynomial<space_dimension> x("x0");
+		Polynomial<space_dimension> y("x1");
+		Polynomial<space_dimension> z("x2");
+
+		const auto center_node = this->center_node();
+		const auto x_c = center_node.at(0);
+		const auto y_c = center_node.at(1);
+		const auto z_c = center_node.at(2);
+
+		//1 (x - x_c) (y - y_c) (z - z_c) ...
+		for (ushort a = 0; a <= polynomial_order; ++a)
+			for (ushort b = 0; b <= a; ++b)
+				for (ushort c = 0; c <= b; ++c)
+					initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ (b - c)) * ((z - z_c) ^ c);
 	}
 	else
 		throw std::runtime_error("not supported space dimension");
@@ -1783,11 +1820,60 @@ auto Geometry<space_dimension>::initial_basis_function(void) const {
 }
 
 template <ushort space_dimension>
-template <ushort order>
+template <ushort polynomial_order>
 auto Geometry<space_dimension>::orthonormal_basis_vector_function(void) const {
-	const auto initial_basis_set = this->initial_basis_function<order>();
+	const auto initial_basis_set = this->initial_basis_function<polynomial_order>();
 	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }
+
+//template <ushort space_dimension>
+//auto Geometry<space_dimension>::initial_basis_function(const ushort polynomial_order) const {
+//	constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, polynomial_order);
+//
+//	std::array<Polynomial<space_dimension>, num_basis> initial_basis_set = { 0 };
+//	
+//	ushort index = 0;
+//	if (space_dimension == 2) {
+//		Polynomial<space_dimension> x("x0");
+//		Polynomial<space_dimension> y("x1");
+//
+//		const auto center_node = this->center_node();
+//		const auto x_c = center_node.at(0);
+//		const auto y_c = center_node.at(1);
+//
+//		//1 (x - x_c) (y - y_c)  ...
+//		for (ushort a = 0; a <= polynomial_order; ++a)
+//			for (ushort b = 0; b <= a; ++b)
+//				initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
+//	}
+//	else if (space_dimension == 3) {
+//		Polynomial<space_dimension> x("x0");
+//		Polynomial<space_dimension> y("x1");
+//		Polynomial<space_dimension> z("x2");
+//
+//		const auto center_node = this->center_node();
+//		const auto x_c = center_node.at(0);
+//		const auto y_c = center_node.at(1);
+//		const auto z_c = center_node.at(2);
+//
+//		//1 (x - x_c) (y - y_c) (z - z_c) ...
+//		for (ushort a = 0; a <= polynomial_order; ++a)
+//			for (ushort b = 0; b <= a; ++b)
+//				for (ushort c = 0; c <= b; ++c)
+//					initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ (b - c)) * ((z - z_c) ^ c);
+//	}
+//	else
+//		throw std::runtime_error("not supported space dimension");
+//
+//	Vector_Function<Polynomial<space_dimension>, num_basis> initial_basis_function = initial_basis_set;
+//	return initial_basis_function;
+//}
+//
+//template <ushort space_dimension>
+//auto Geometry<space_dimension>::orthonormal_basis_vector_function(const ushort polynomial_order) const {
+//	const auto initial_basis_set = this->initial_basis_function<order>();
+//	return ms::Gram_Schmidt_process(initial_basis_set, *this);
+//}
 
 template <ushort space_dimension>
 const Quadrature_Rule<space_dimension>& Geometry<space_dimension>::get_quadrature_rule(const ushort integrand_order) const {

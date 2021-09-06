@@ -47,8 +47,8 @@ public:
 
 namespace ms {
 	inline ElementType string_to_element_type(const std::string& str);
-	template <typename T>
-	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes);
+	//template <typename T>
+	//std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes);
 }
 
 
@@ -297,14 +297,14 @@ namespace ms {
 		}
 	}
 
-	template <typename T>
-	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes) {
-		const auto num_extracted_value = indexes.size();
-		std::vector<T> extracted_values(num_extracted_value);
+	//template <typename T>
+	//std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<uint>& indexes) {
+	//	const auto num_extracted_value = indexes.size();
+	//	std::vector<T> extracted_values(num_extracted_value);
 
-		for (ushort i = 0; i < num_extracted_value; ++i)
-			extracted_values[i] = set[indexes[i]];
+	//	for (ushort i = 0; i < num_extracted_value; ++i)
+	//		extracted_values[i] = set[indexes[i]];
 
-		return extracted_values;
-	}
+	//	return extracted_values;
+	//}
 }
