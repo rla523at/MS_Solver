@@ -886,7 +886,7 @@ GTEST_TEST(Geometry, normalized_normal_vector_1) {
 
 	const auto tangent = n2 - n1;
 	const auto normality = tangent.inner_product(normal);
-	const double size = normal.norm();
+	const double size = normal.L2_norm();
 	const double direction = normal.inner_product({ 0,1 });
 
 
@@ -915,7 +915,7 @@ GTEST_TEST(Geometry, normalized_normal_vector_2) {
 
 	const auto tangent = n2 - n1;
 	const auto normality = tangent.inner_product(normal);
-	const double size = normal.norm();
+	const double size = normal.L2_norm();
 
 
 	const double normality_ref = 0;
@@ -942,8 +942,7 @@ GTEST_TEST(Geometry, is_axis_parallel_1) {
 	std::vector<Euclidean_Vector<2>> nodes2 = { n3,n4 };
 	Geometry geometry2(ref_geometry, std::move(nodes2));
 
-	constexpr size_t axis_tag = 0;
-	EXPECT_FALSE(geometry.is_axis_parallel(geometry2, axis_tag));
+	EXPECT_FALSE(geometry.is_axis_parallel(geometry2));
 }
 
 GTEST_TEST(Geometry, orthonormal_basis_1) {

@@ -159,8 +159,7 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make
 		case ElementType::cell:
 			cell_elements.emplace_back(std::move(element));
 			break;
-		case ElementType::x_periodic:
-		case ElementType::y_periodic:
+		case ElementType::periodic:
 			periodic_boundary_elements.emplace_back(std::move(element));
 			break;
 		default:
@@ -285,12 +284,8 @@ namespace ms {
 			return ElementType::supersonic_inlet;
 		else if (ms::contains_icase(str, "SuperSonic", "outlet"))
 			return ElementType::supersonic_outlet;
-		else if (ms::contains_icase(str, "x", "periodic"))
-			return ElementType::x_periodic;
-		else if (ms::contains_icase(str, "y", "periodic"))
-			return ElementType::y_periodic;
-		else if (ms::contains_icase(str, "z", "periodic"))
-			return ElementType::z_periodic;
+		else if (ms::contains_icase(str, "periodic"))
+			return ElementType::periodic;
 		else {
 			throw std::runtime_error("wrong element_type");
 			return ElementType::not_in_list;

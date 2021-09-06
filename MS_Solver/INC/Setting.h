@@ -5,15 +5,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/OrderTest/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SOD__
+#define __GRID_FILE_NAMES__						Quad10,Quad15,Quad20,Quad25,Quad30,Tri10,Tri15,Tri20,Tri25,Tri30,Mix10,Mix15,Mix20,Mix25,Mix30
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__				__POLYNOMIAL_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
@@ -30,7 +30,7 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2
+#define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		100
 #define __POST_ORDER__							2

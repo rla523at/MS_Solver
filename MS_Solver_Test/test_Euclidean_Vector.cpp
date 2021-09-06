@@ -61,7 +61,7 @@ GTEST_TEST(Euclidean_Vector, inner_product_1) {
 
 GTEST_TEST(Euclidean_Vector, norm_1) {
 	const Euclidean_Vector v1 = { 3,4 };
-	const auto result = v1.norm();
+	const auto result = v1.L2_norm();
 
 	const auto ref = 5;
 	EXPECT_EQ(result, ref);

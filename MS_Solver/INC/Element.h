@@ -24,7 +24,7 @@ enum class ElementType
 	cell, inner_face,
 	slip_wall_2D,
 	supersonic_inlet, supersonic_outlet,
-	x_periodic, y_periodic, z_periodic,
+	periodic,
 	not_in_list
 };
 
@@ -132,7 +132,7 @@ public:
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	std::vector<Geometry> face_geometries(void) const;
 	std::vector<Geometry> sub_simplex_geometries(void) const;
-	bool is_axis_parallel(const Geometry& other, const ushort axis_tag) const;
+	bool is_axis_parallel(const Geometry& other) const;
 	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
 
 	template <ushort polynomial_order>
@@ -145,7 +145,8 @@ public:
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> set_of_face_nodes(void) const;
-	bool is_axis_parallel_node(const Space_Vector_& node, const size_t axis_tag) const;
+	bool is_axis_parallel_node(const Space_Vector_& node) const;
+	bool is_on_same_axis(const Geometry& other) const;
 };
 
 
@@ -1759,15 +1760,18 @@ std::vector<std::vector<Euclidean_Vector<space_dimension>>> Geometry<space_dimen
 }
 
 template <ushort space_dimension>
-bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other, const ushort axis_tag) const {
+bool Geometry<space_dimension>::is_axis_parallel(const Geometry& other) const {
 	if (this->reference_geometry_ != other.reference_geometry_)
 		return false;
 
 	if (this->nodes_.size() != other.nodes_.size())
 		return false;
 
+	if (this->is_on_same_axis(other))
+		return false;
+
 	for (const auto& node : other.nodes_) {
-		if (this->is_axis_parallel_node(node, axis_tag))
+		if (this->is_axis_parallel_node(node))
 			continue;
 		else
 			return false;
@@ -1884,13 +1888,49 @@ const Quadrature_Rule<space_dimension>& Geometry<space_dimension>::get_quadratur
 }
 
 template <ushort space_dimension>
-bool Geometry<space_dimension>::is_axis_parallel_node(const Space_Vector_& node, const size_t axis_tag) const {
+bool Geometry<space_dimension>::is_axis_parallel_node(const Space_Vector_& node) const {
 	for (const auto& my_node : this->nodes_) {
-		if (my_node.is_axis_translation(node,axis_tag))
+		if (my_node.is_axis_translation(node))
 			return true;
 	}
 	return false;
 }
+
+template <ushort space_dimension>
+bool Geometry<space_dimension>::is_on_same_axis(const Geometry& other) const {
+	const auto& ref_nodes = this->nodes_.front();
+
+	const auto num_this_node = this->nodes_.size();
+	const auto num_other_node = other.nodes_.size();
+
+	for (ushort i = 0; i < space_dimension; ++i) {
+		const auto ref = ref_nodes[i];
+
+		bool is_on_same_axis = true;
+		for (ushort j = 1; j < num_this_node; ++j) {
+			if (this->nodes_[j][i] != ref) {
+				is_on_same_axis = false;
+				break;
+			}
+		}
+
+		if (!is_on_same_axis)
+			continue;
+
+		for (ushort j = 0; j < num_other_node; ++j) {
+			if (other.nodes_[j][i] != ref) {
+				is_on_same_axis = false;
+				break;
+			}
+		}
+
+		if (is_on_same_axis)
+			return true;
+	}
+	
+	return false;
+}
+
 
 template <ushort space_dimension>
 bool Geometry<space_dimension>::operator==(const Geometry& other) const {
@@ -1986,13 +2026,7 @@ bool Element<space_dimension>::is_periodic_pair(const Element& other) const {
 	if (this->element_type_ != other.element_type_)
 		return false;
 
-	ushort axis_tag;
-	if (this->element_type_ == ElementType::x_periodic)
-		axis_tag = 0;
-	else
-		axis_tag = 1;
-
-	if (this->geometry_.is_axis_parallel(other.geometry_, axis_tag))
+	if (this->geometry_.is_axis_parallel(other.geometry_))
 		return true;
 	else
 		return false;
@@ -2010,14 +2044,6 @@ std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode
 	const auto this_num_vnode = this_vnode_indexes.size();
 	const auto other_num_vnode = other_vnode_indexes.size();
 	dynamic_require(this_num_vnode == other_num_vnode, "periodic pair should have same number of vertex node");
-	
-	ushort axis_tag = 0;
-	if (this->element_type_ == ElementType::x_periodic)
-		axis_tag = 0;
-	else if (this->element_type_ == ElementType::y_periodic)
-		axis_tag = 1;
-	else
-		throw std::runtime_error("wrong element type");
 	dynamic_require(this->element_type_ == other.element_type_, "periodic pair should have same element type");
 
 	std::unordered_set<uint> matched_other_vnode_index;
@@ -2036,9 +2062,9 @@ std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode
 			if (matched_other_vnode_index.find(other_vnode_index) != matched_other_vnode_index.end())
 				continue;
 
-			if (this_vnode.is_axis_translation(other_vnode, axis_tag)) {
+			if (this_vnode.is_axis_translation(other_vnode)) {
 				periodic_vnode_index_pairs.push_back(std::make_pair(this_vnode_index, other_vnode_index));
-				matched_other_vnode_index.emplace(other_vnode_index);
+				matched_other_vnode_index.insert(other_vnode_index);
 			}
 		}
 	}
@@ -2050,11 +2076,7 @@ std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode
 
 template <ushort space_dimension>
 bool Element<space_dimension>::is_periodic_boundary(void) const {
-	switch (this->element_type_)	{
-		case ElementType::x_periodic:
-		case ElementType::y_periodic:	return true;
-		default:						return false;
-	}
+	return this->element_type_ == ElementType::periodic;
 }
 
 template <ushort space_dimension>

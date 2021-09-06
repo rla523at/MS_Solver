@@ -21,6 +21,7 @@ using ushort = unsigned short;
 namespace ms {
 	class BLAS;
 
+	inline constexpr ushort blas_dasum_criteria = 10;
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_dot_criteria = 15;
 	
@@ -63,8 +64,8 @@ public:
 	std::array<double, dimension_>::const_iterator cend(void) const;
 	double inner_product(const Euclidean_Vector& y) const;
 	double L1_norm(void) const;
-	double norm(void) const;
-	bool is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const;
+	double L2_norm(void) const;
+	bool is_axis_translation(const Euclidean_Vector& other) const;
 	std::string to_string(void) const;
 
 public:
@@ -238,7 +239,7 @@ std::array<double, dimension_>::const_iterator Euclidean_Vector<dimension_>::cen
 
 template <size_t dimension_>
 Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::be_normalize(void) {
-	const auto scale_factor = 1.0 / this->norm();
+	const auto scale_factor = 1.0 / this->L2_norm();
 	return (*this) *= scale_factor;
 }
 
@@ -261,28 +262,32 @@ double Euclidean_Vector<dimension_>::inner_product(const Euclidean_Vector& y) co
 
 template <size_t dimension_>
 double Euclidean_Vector<dimension_>::L1_norm(void) const {
-	double L1_norm = 0.0;
-	for (size_t i = 0; i < dimension_; ++i)
-		L1_norm += std::abs(this->values_[i]);
-	return L1_norm;
+	if constexpr (dimension_ < ms::blas_dasum_criteria) {
+		double L1_norm = 0.0;
+		for (size_t i = 0; i < dimension_; ++i)
+			L1_norm += std::abs(this->values_[i]);
+		return L1_norm;
+	}
+	else 
+		return cblas_dasum(static_cast<MKL_INT>(dimension_), this->values_.data(), 1);
 }
 
 template <size_t dimension_>
-double Euclidean_Vector<dimension_>::norm(void) const {
+double Euclidean_Vector<dimension_>::L2_norm(void) const {
 	return std::sqrt(this->inner_product(*this));
 }
 
 template <size_t dimension_>
-bool Euclidean_Vector<dimension_>::is_axis_translation(const Euclidean_Vector& other, const size_t axis_tag) const {
+bool Euclidean_Vector<dimension_>::is_axis_translation(const Euclidean_Vector& other) const {
 	const auto line_vector = *this - other;
-	for (size_t i = 0; i < dimension_; ++i) {
-		if (i == axis_tag)
-			continue;
+	const auto L1_norm = line_vector.L1_norm();
+	const auto L2_norm = line_vector.L2_norm();
 
-		if (std::abs(line_vector.at(i)) > 1.0E-10)
-			return false;
-	}
-	return true;
+	constexpr auto epsilon = 1.0E-10;
+	if (std::abs(L1_norm - L2_norm) <= epsilon)
+		return true;
+	else
+		return false;
 }
 
 template <size_t dimension_> 
