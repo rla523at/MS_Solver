@@ -36,8 +36,8 @@ private:
     Inner_Faces_ inner_faces_;
 
 public:
-    Semi_Discrete_Equation(Grid<space_dimension_>&& grid) : reconstruction_method_(std::move(grid)), boundaries_(std::move(grid), reconstruction_method_),
-        cells_(grid, reconstruction_method_), periodic_boundaries_(std::move(grid), reconstruction_method_), inner_faces_(std::move(grid), reconstruction_method_) {
+    Semi_Discrete_Equation(const Grid<space_dimension_>& grid) : reconstruction_method_(grid), boundaries_(grid, reconstruction_method_),
+        cells_(grid, reconstruction_method_), periodic_boundaries_(grid, reconstruction_method_), inner_faces_(grid, reconstruction_method_) {
 
         if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
             Tecplot::initialize_HOM(grid, this->reconstruction_method_);

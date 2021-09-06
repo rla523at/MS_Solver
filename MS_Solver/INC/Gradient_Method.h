@@ -87,13 +87,13 @@ template <ushort num_equation_, ushort space_dimension_>
 Vertex_Least_Square<num_equation_, space_dimension_>::Vertex_Least_Square(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->near_cell_indexes_set_.reserve(num_cell);
     this->least_square_matrixes_.reserve(num_cell);
 
-    auto set_of_vertex_share_cell_indexes = grid.calculate_set_of_vertex_share_cell_indexes();
+    auto set_of_vertex_share_cell_indexes = grid.set_of_vertex_share_cell_indexes_consider_pbdry();
 
     for (size_t i = 0; i < num_cell; ++i) {
         auto& vertex_share_cell_indexes = set_of_vertex_share_cell_indexes[i];
@@ -132,13 +132,13 @@ template <ushort num_equation_, ushort space_dimension_>
 Face_Least_Square<num_equation_, space_dimension_>::Face_Least_Square(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->near_cell_indexes_set_.reserve(num_cell);
     this->least_square_matrixes_.reserve(num_cell);
 
-    auto set_of_face_share_cell_indexes = grid.calculate_set_of_face_share_cell_indexes();
+    auto set_of_face_share_cell_indexes = grid.set_of_face_share_cell_indexes_consider_pbdry();
 
     for (size_t i = 0; i < num_cell; ++i) {        
         auto& face_share_cell_indexes = set_of_face_share_cell_indexes[i];         

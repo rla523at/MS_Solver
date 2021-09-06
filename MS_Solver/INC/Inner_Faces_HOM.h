@@ -26,7 +26,7 @@ protected:
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
 
 public:
-    Inner_Faces_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
 
@@ -37,14 +37,15 @@ public:
 
 // template definition part
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
     : reconstruction_method_(reconstruction_method){
     SET_TIME_POINT;
 
-    this->oc_nc_index_pairs_ = std::move(grid.connectivity.inner_face_oc_nc_index_pairs);
+    this->oc_nc_index_pairs_ = grid.inner_face_oc_nc_index_pairs();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& inner_face_elements = grid.elements.inner_face_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& inner_face_elements = grid_elements.inner_face_elements;
 
     const auto num_inner_face = inner_face_elements.size();
     this->oc_nc_side_basis_qnodes_pairs_.reserve(num_inner_face);

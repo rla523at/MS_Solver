@@ -16,7 +16,7 @@ protected:
     std::vector<double> areas_;
 
 public:
-    Periodic_Boundaries_FVM_Base(Grid<space_dimension>&& grid);
+    Periodic_Boundaries_FVM_Base(const Grid<space_dimension>& grid);
 };
 
 
@@ -33,7 +33,7 @@ private:
     using Residual_     = Euclidean_Vector< num_equation_>;
 
 public:
-    Periodic_Boundaries_FVM_Constant(Grid<space_dimension_>&& grid) : Periodic_Boundaries_FVM_Base<space_dimension_>(std::move(grid)) {};
+    Periodic_Boundaries_FVM_Constant(const Grid<space_dimension_>& grid) : Periodic_Boundaries_FVM_Base<space_dimension_>(grid) {};
 
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
@@ -56,7 +56,7 @@ private:
     const Reconstruction_Method& reconstruction_method_;
 
 public:
-    Periodic_Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Periodic_Boundaries_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
@@ -65,13 +65,14 @@ public:
 
 //template definition part
 template <ushort space_dimension>
-Periodic_Boundaries_FVM_Base<space_dimension>::Periodic_Boundaries_FVM_Base(Grid<space_dimension>&& grid) {
+Periodic_Boundaries_FVM_Base<space_dimension>::Periodic_Boundaries_FVM_Base(const Grid<space_dimension>& grid) {
     SET_TIME_POINT;
 
-    this->oc_nc_index_pairs_ = std::move(grid.connectivity.periodic_boundary_oc_nc_index_pairs);
+    this->oc_nc_index_pairs_ = grid.periodic_boundary_oc_nc_index_pairs();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& pbdry_element_pairs = grid_elements.periodic_boundary_element_pairs;
 
     const auto num_pbdry_pair = pbdry_element_pairs.size();
     this->areas_.reserve(num_pbdry_pair);
@@ -108,12 +109,13 @@ void Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(st
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-    : Periodic_Boundaries_FVM_Base<space_dimension_>(std::move(grid)), reconstruction_method_(reconstruction_method) {
+Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+    : Periodic_Boundaries_FVM_Base<space_dimension_>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& pbdry_element_pairs = grid_elements.periodic_boundary_element_pairs;
 
     const auto num_pbdry_pair = pbdry_element_pairs.size();
     this->oc_nc_to_oc_nc_side_face_vector_pairs_.reserve(num_pbdry_pair);

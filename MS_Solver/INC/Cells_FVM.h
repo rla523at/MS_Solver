@@ -41,7 +41,7 @@ template <typename Governing_Equation>
 Cells_FVM<Governing_Equation>::Cells_FVM(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->centers_.reserve(num_cell);

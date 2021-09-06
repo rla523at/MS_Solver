@@ -28,7 +28,7 @@ protected:
     std::vector<Dynamic_Matrix> oc_side_basis_weights_;
 
 public:
-    Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
 public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
@@ -40,14 +40,15 @@ public:
 
 //template definition
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>
-Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
     : reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
+    this->oc_indexes_ = grid.boundary_owner_cell_indexes();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& boundary_elements = grid.elements.boundary_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& boundary_elements = grid_elements.boundary_elements;
 
     const auto num_boundary = boundary_elements.size();
     this->boundary_flux_functions_.reserve(num_boundary);

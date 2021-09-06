@@ -9,20 +9,20 @@
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Quad30
+#define __GRID_FILE_NAMES__						Quad50
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__					__SINE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__POLYNOMIAL_RECONSTRUCTION__
+#define __INITIAL_CONDITION__					__SQUARE_WAVE__
+#define __SPATIAL_DISCRETE_METHOD__				__FVM__
+#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
-#define __GRADIENT_METHOD__						__VERTEX_LEAST_SQUARE__
+#define __GRADIENT_METHOD__						__FACE_LEAST_SQUARE__
 #endif
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						2
+#define __SOLUTION_ORDER__						3
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__

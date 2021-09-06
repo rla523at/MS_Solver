@@ -16,8 +16,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Periodic_Boundaries(Grid<space_dimension_>&& grid, const Constant_Reconstruction& reconstruction_method)
-        : Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>(std::move(grid)) {};
+    Periodic_Boundaries(const Grid<space_dimension_>& grid, const Constant_Reconstruction& reconstruction_method)
+        : Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>(grid) {};
 };
 
 
@@ -28,8 +28,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Periodic_Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Periodic_Boundaries(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };
 
 
@@ -40,6 +40,6 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Periodic_Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Periodic_Boundaries(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };

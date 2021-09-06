@@ -122,7 +122,7 @@ void Tecplot::initialize(const ushort post_order) {
 
 template <ushort space_dimension, typename Reconstruction_Method>
 void Tecplot::initialize_HOM(const Grid<space_dimension>& grid, const Reconstruction_Method& reconstruct_method) {
-	const auto& cell_elements = grid.elements.cell_elements;
+	const auto& cell_elements = grid.get_grid_elements().cell_elements;
 	const auto num_cell = cell_elements.size();
 	This_::set_of_basis_post_points_.reserve(num_cell);
 

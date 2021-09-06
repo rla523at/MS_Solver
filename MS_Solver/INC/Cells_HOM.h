@@ -53,7 +53,7 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
     : reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->volumes_.reserve(num_cell);

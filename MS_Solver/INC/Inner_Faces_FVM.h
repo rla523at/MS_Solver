@@ -16,7 +16,7 @@ protected:
     std::vector<double> areas_;
 
 public:
-    Inner_Faces_FVM_Base(Grid<space_dimension>&& grid);
+    Inner_Faces_FVM_Base(const Grid<space_dimension>& grid);
 };
 
 
@@ -33,7 +33,7 @@ private:
     using Residual_ = Euclidean_Vector< num_equation_>;
 
 public:
-    Inner_Faces_FVM_Constant(Grid<space_dimension_>&& grid) : Inner_Faces_FVM_Base<space_dimension_>(std::move(grid)) {};
+    Inner_Faces_FVM_Constant(const Grid<space_dimension_>& grid) : Inner_Faces_FVM_Base<space_dimension_>(grid) {};
 
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
 };
@@ -57,7 +57,7 @@ private:
     const Reconstruction_Method& reconstruction_method_;
 
 public:
-    Inner_Faces_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Inner_Faces_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
 public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_>& solutions) const;
@@ -66,13 +66,14 @@ public:
 
 // template definition part
 template <ushort space_dimension>
-Inner_Faces_FVM_Base<space_dimension>::Inner_Faces_FVM_Base(Grid<space_dimension>&& grid) {
+Inner_Faces_FVM_Base<space_dimension>::Inner_Faces_FVM_Base(const Grid<space_dimension>& grid) {
     SET_TIME_POINT;
 
-    this->oc_nc_index_pairs_ = std::move(grid.connectivity.inner_face_oc_nc_index_pairs);
+    this->oc_nc_index_pairs_ = grid.inner_face_oc_nc_index_pairs();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& inner_face_elements = grid.elements.inner_face_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& inner_face_elements = grid_elements.inner_face_elements;
 
     const auto num_inner_face = inner_face_elements.size();
     this->areas_.reserve(num_inner_face);
@@ -110,20 +111,23 @@ void Inner_Faces_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vecto
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-    : Inner_Faces_FVM_Base<space_dimension_>(std::move(grid)), reconstruction_method_(reconstruction_method) {
+Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+    : Inner_Faces_FVM_Base<space_dimension_>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
     const auto num_inner_face = this->normals_.size();
     this->oc_nc_to_face_vector_pairs_.reserve(num_inner_face);
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& inner_face_elements = grid_elements.inner_face_elements;
+
     for (size_t i = 0; i < num_inner_face; ++i) {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
 
         const auto& oc_geometry = cell_elements[oc_index].geometry_;
         const auto& nc_geometry = cell_elements[nc_index].geometry_;
-        const auto& inner_face_geometry = grid.elements.inner_face_elements[i].geometry_;
+        const auto& inner_face_geometry = inner_face_elements[i].geometry_;
 
         const auto oc_center = oc_geometry.center_node();
         const auto nc_center = nc_geometry.center_node();

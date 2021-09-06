@@ -1,7 +1,7 @@
 
 #include "../INC/Setting.h"
 
-using Grid_Builder_				= Grid_Builder<__DIMENSION__>;
+using Grid_Element_Builder_		= Grid_Element_Builder<GRID_FILE_TYPE, __DIMENSION__>;
 using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, RECONSTRUCTION_METHOD, NUMERICAL_FLUX_FUNCTION>;
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
@@ -42,12 +42,13 @@ int main(void) {
 		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
 		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
-		auto grid = Grid_Builder_::build<GRID_FILE_TYPE>(grid_file_name);
+		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
+		Grid<__DIMENSION__> grid(std::move(grid_element));
 
 		Post_AI_Data::intialize(grid);
-		Tecplot::post_grid(grid.elements.cell_elements); //post
+		Tecplot::post_grid(grid.get_grid_elements().cell_elements); //post
 
-		Semi_Discrete_Equation_ semi_discrete_equation(std::move(grid));
+		Semi_Discrete_Equation_ semi_discrete_equation(grid);
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
 
 		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);

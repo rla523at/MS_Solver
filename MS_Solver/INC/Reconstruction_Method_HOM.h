@@ -87,14 +87,13 @@ protected:
     static constexpr ushort criterion_variable_index_ = 0;    
 
 protected:
-    std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
+    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_indexes_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
-
     std::vector<double> volumes_;
 
 protected:
-    hMLP_Base(Grid<space_dimension_>&& grid);
+    hMLP_Base(const Grid<space_dimension_>& grid);
 
 protected:
     auto Pn_projection_matrix(const ushort Pn) const;
@@ -118,7 +117,7 @@ protected:
     std::vector<double> P0_basis_values_;    
     
 public:
-    hMLP_Reconstruction(Grid<space_dimension_>&& grid);
+    hMLP_Reconstruction(const Grid<space_dimension_>& grid);
 
 public:
     template <ushort num_equation>
@@ -140,7 +139,7 @@ private:
     using This_ = hMLP_BD_Reconstruction<space_dimension_, solution_order_>;
 
 private:
-    std::unordered_map<uint, std::set<uint>> vnode_index_to_matched_vnode_index_set_;
+    const std::unordered_map<uint, std::set<uint>>& pbdry_vnode_index_to_matched_node_index_set_;
 
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
@@ -152,7 +151,7 @@ private:
     std::vector<Dynamic_Euclidean_Vector> set_of_jump_qweights_;
 
 public:
-    hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid);
+    hMLP_BD_Reconstruction(const Grid<space_dimension_>& grid);
 
 public:
     template <ushort num_equation>
@@ -192,7 +191,7 @@ template <ushort space_dimension_, ushort solution_order_>
 Polynomial_Reconstruction<space_dimension_, solution_order_>::Polynomial_Reconstruction(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->basis_vector_functions_.reserve(num_cell);
@@ -251,22 +250,21 @@ double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(Grid<space_dimension_>&& grid)
-    : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid) {
+hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(const Grid<space_dimension_>& grid)
+    : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid), vnode_index_to_share_cell_indexes_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
     SET_TIME_POINT;
 
     for (ushort i = 0; i <= solution_order_; ++i)
         this->num_Pn_projection_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
 
-    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_index_set);
-
-    const auto num_cell = grid.elements.cell_elements.size();
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;    
+    const auto num_cell = cell_elements.size();
     this->set_of_vnode_indexes_.reserve(num_cell);
     this->volumes_.reserve(num_cell);
 
-    for (const auto& cell_element : grid.elements.cell_elements) {
-        this->set_of_vnode_indexes_.push_back(cell_element.vertex_node_indexes());
-        this->volumes_.push_back(cell_element.geometry_.volume());
+    for (const auto& element : cell_elements) {
+        this->set_of_vnode_indexes_.push_back(element.vertex_node_indexes());
+        this->volumes_.push_back(element.geometry_.volume());
     }
 
     Log::content_ << std::left << std::setw(50) << "@ hMLP Base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -310,11 +308,11 @@ auto hMLP_Base<space_dimension_, solution_order_>::limiting_matrix(const double 
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(Grid<space_dimension_>&& grid) 
-    : hMLP_Base<space_dimension_, solution_order_>(std::move(grid)){
+hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(const Grid<space_dimension_>& grid) 
+    : hMLP_Base<space_dimension_, solution_order_>(grid){
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->set_of_basis_vnodes_.reserve(num_cell);
@@ -662,13 +660,11 @@ auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_no
 
 
 template <ushort space_dimension_, ushort solution_order_>
-hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstruction(Grid<space_dimension_>&& grid) 
-    : hMLP_Base<space_dimension_, solution_order_>(std::move(grid)) {
+hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstruction(const Grid<space_dimension_>& grid) 
+    : hMLP_Base<space_dimension_, solution_order_>(grid), pbdry_vnode_index_to_matched_node_index_set_(grid.get_pbdry_vnode_index_to_matched_node_index_set()) {
     SET_TIME_POINT;
 
-    this->vnode_index_to_matched_vnode_index_set_ = std::move(grid.connectivity.vnode_index_to_matched_vnode_index_set);
-
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->set_of_basis_vnodes_.reserve(num_cell);
@@ -717,10 +713,10 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     }
 
 
-    const auto& inner_face_elements = grid.elements.inner_face_elements;
-    const auto& inner_face_oc_nc_index_pairs = grid.connectivity.inner_face_oc_nc_index_pairs;
-    const auto& pbdry_element_pairs = grid.elements.periodic_boundary_element_pairs;
-    const auto& pbdry_oc_nc_index_pairs = grid.connectivity.periodic_boundary_oc_nc_index_pairs;
+    const auto& inner_face_elements = grid.get_grid_elements().inner_face_elements;
+    const auto inner_face_oc_nc_index_pairs = grid.inner_face_oc_nc_index_pairs();
+    const auto& pbdry_element_pairs = grid.get_grid_elements().periodic_boundary_element_pairs;
+    const auto pbdry_oc_nc_index_pairs = grid.periodic_boundary_oc_nc_index_pairs();
     
     const auto num_inner_face = inner_face_elements.size();
     const auto num_pbdry_pair = pbdry_element_pairs.size();
@@ -924,7 +920,7 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
     //consider pbdry
     std::unordered_set<uint> considered_pbdry_node_index_set;
 
-    for (const auto& [vnode_index, matched_vnode_index_set] : this->vnode_index_to_matched_vnode_index_set_) {
+    for (const auto& [vnode_index, matched_vnode_index_set] : this->pbdry_vnode_index_to_matched_node_index_set_) {
         if (considered_pbdry_node_index_set.contains(vnode_index))
             continue;
         

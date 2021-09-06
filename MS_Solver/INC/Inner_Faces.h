@@ -15,8 +15,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Inner_Faces(Grid<space_dimension_>&& grid, const Constant_Reconstruction& reconstruction_method)
-        : Inner_Faces_FVM_Constant<Numerical_Flux_Function>(std::move(grid)) {};
+    Inner_Faces(const Grid<space_dimension_>& grid, const Constant_Reconstruction& reconstruction_method)
+        : Inner_Faces_FVM_Constant<Numerical_Flux_Function>(grid) {};
 };
 
 
@@ -27,8 +27,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Inner_Faces(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Inner_Faces(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };
 
 
@@ -39,6 +39,6 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Inner_Faces(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Inner_Faces(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };

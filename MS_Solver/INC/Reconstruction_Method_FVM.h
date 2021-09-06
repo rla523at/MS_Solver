@@ -73,13 +73,13 @@ private:
 
 private:
     Gradient_Method gradient_method_;
-    std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_indexes_;
+    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_indexes_;
     std::vector<std::vector<uint>> vnode_indexes_set_;
     std::vector<Dynamic_Matrix> center_to_vertex_matrixes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
 public:
-    MLP_u1(Grid<space_dimension_>&& grid);
+    MLP_u1(const Grid<space_dimension_>& grid);
 
     void reconstruct(const std::vector<Solution_>& solutions);
         
@@ -150,10 +150,6 @@ public:
     static std::string name(void) { return "ANN_Reconstruction_" + Gradient_Method::name(); };
 };
 
-
-
-
-
 namespace ms {
 	template <typename T>
 	inline constexpr bool is_reconsturction_method = std::is_base_of_v<RM, T>;
@@ -178,13 +174,10 @@ void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solut
 }
 
 template <typename Gradient_Method>
-MLP_u1<Gradient_Method>::MLP_u1(Grid<space_dimension_>&& grid) : gradient_method_(grid) {
+MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_method_(grid), vnode_index_to_share_cell_indexes_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
     SET_TIME_POINT;
 
-    //vnode index to share cell indexes
-    this->vnode_index_to_share_cell_indexes_ = std::move(grid.connectivity.vnode_index_to_share_cell_index_set);
-
-    const auto& cell_elements = grid.elements.cell_elements;
+    const auto& cell_elements = grid.get_grid_elements().cell_elements;
 
     const auto num_cell = cell_elements.size();
     this->vnode_indexes_set_.reserve(num_cell);
@@ -286,15 +279,12 @@ auto MLP_u1<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(co
 
 template <typename Gradient_Method>
 ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :gradient_method_(grid) {
-    this->set_of_face_share_cell_indexes_    = grid.calculate_set_of_face_share_cell_indexes();
-    this->set_of_vertex_share_cell_indexes_  = grid.calculate_set_of_vertex_share_cell_indexes();
+    this->set_of_face_share_cell_indexes_    = grid.set_of_face_share_cell_indexes_consider_pbdry();
+    this->set_of_vertex_share_cell_indexes_  = grid.set_of_vertex_share_cell_indexes_consider_pbdry();
 
     //sorting
     for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
         std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
-    //for (auto& vertex_share_cell_indexes : this->set_of_vertex_share_cell_indexes_)
-    //    std::sort(vertex_share_cell_indexes.begin(), vertex_share_cell_indexes.end());
-
 }
 
 template <typename Gradient_Method>

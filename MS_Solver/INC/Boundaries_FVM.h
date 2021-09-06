@@ -20,7 +20,7 @@ protected:
     std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions_;
 
 public:
-    Boundaries_FVM_Base(Grid<space_dimension_>&& grid);
+    Boundaries_FVM_Base(const Grid<space_dimension_>& grid);
 };
 
 
@@ -36,7 +36,7 @@ private:
     using Boundary_Flux_    = Euclidean_Vector<num_equation_>;
 
 public:
-    Boundaries_FVM_Constant(Grid<space_dimension_>&& grid) : Boundaries_FVM_Base<Numerical_Flux_Function>(std::move(grid)) {};
+    Boundaries_FVM_Constant(const Grid<space_dimension_>& grid) : Boundaries_FVM_Base<Numerical_Flux_Function>(grid) {};
 
     void calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions) const;
 };
@@ -59,7 +59,7 @@ private:
     const Reconstruction_Method& reconstruction_method_;
 
 public:
-    Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Boundaries_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
     void calculate_RHS(std::vector<Boundary_Flux_>& RHS, const std::vector<Solution_>& solutions) const;
 };
@@ -67,13 +67,14 @@ public:
 
 //template definition
 template <typename Numerical_Flux_Function>
-Boundaries_FVM_Base<Numerical_Flux_Function>::Boundaries_FVM_Base(Grid<space_dimension_>&& grid) {
+Boundaries_FVM_Base<Numerical_Flux_Function>::Boundaries_FVM_Base(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    this->oc_indexes_ = std::move(grid.connectivity.boundary_oc_indexes);
+    this->oc_indexes_ = grid.boundary_owner_cell_indexes();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& boundary_elements = grid.elements.boundary_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& boundary_elements = grid_elements.boundary_elements;
 
     const auto num_boundaries = boundary_elements.size();
     this->areas_.reserve(num_boundaries);
@@ -116,15 +117,16 @@ void Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector
 }
 
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>
-Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_FVM_Linear(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-    : Boundaries_FVM_Base<Numerical_Flux_Function>(std::move(grid)), reconstruction_method_(reconstruction_method) {
+Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_FVM_Linear(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+    : Boundaries_FVM_Base<Numerical_Flux_Function>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
     const auto num_boundary = this->normals_.size();
     this->oc_to_boundary_vectors_.reserve(num_boundary);
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& boundary_elements = grid.elements.boundary_elements;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& boundary_elements = grid_elements.boundary_elements;
 
     for (size_t i = 0; i < num_boundary; ++i) {
         const auto oc_index = this->oc_indexes_[i];

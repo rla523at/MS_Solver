@@ -14,8 +14,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Boundaries(Grid<space_dimension_>&& grid, const Constant_Reconstruction& reconstruction_method)
-        : Boundaries_FVM_Constant<Numerical_Flux_Function>(std::move(grid)) {};
+    Boundaries(const Grid<space_dimension_>& grid, const Constant_Reconstruction& reconstruction_method)
+        : Boundaries_FVM_Constant<Numerical_Flux_Function>(grid) {};
 };
 
 
@@ -26,8 +26,8 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Boundaries(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };
 
 
@@ -38,6 +38,6 @@ private:
     static constexpr size_t space_dimension_ = Numerical_Flux_Function::space_dimension();
 
 public:
-    Boundaries(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
-        : Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>(std::move(grid), reconstruction_method) {};
+    Boundaries(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
+        : Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>(grid, reconstruction_method) {};
 };

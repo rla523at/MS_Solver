@@ -8,7 +8,7 @@ TEST(Grid, set_of_face_share_cell_indexes) {
 	constexpr ushort space_dimension = 2;
 	
 	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
-	const auto set_of_face_share_cell_indexes = grid.calculate_set_of_face_share_cell_indexes();
+	const auto set_of_face_share_cell_indexes = grid.set_of_face_share_cell_indexes_consider_pbdry();
 
 	auto result = set_of_face_share_cell_indexes[0];
 	std::sort(result.begin(), result.end());

@@ -26,7 +26,7 @@ protected:
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
 
 public:
-    Periodic_Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method);
+    Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
 
 public:
     void calculate_RHS(std::vector<Residual_>& RHS, const std::vector<Solution_Coefficient_>& solution_coefficients) const;
@@ -38,14 +38,15 @@ public:
 
 // template definition part
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_HOM(Grid<space_dimension_>&& grid, const Reconstruction_Method& reconstruction_method)
+Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
     : reconstruction_method_(reconstruction_method){
     SET_TIME_POINT;
 
-    this->oc_nc_index_pairs_ = std::move(grid.connectivity.periodic_boundary_oc_nc_index_pairs);
+    this->oc_nc_index_pairs_ = grid.periodic_boundary_oc_nc_index_pairs();
 
-    const auto& cell_elements = grid.elements.cell_elements;
-    const auto& periodic_boundary_element_pairs = grid.elements.periodic_boundary_element_pairs;
+    const auto& grid_elements = grid.get_grid_elements();
+    const auto& cell_elements = grid_elements.cell_elements;
+    const auto& periodic_boundary_element_pairs = grid_elements.periodic_boundary_element_pairs;
 
     const auto num_periodic_pair = periodic_boundary_element_pairs.size();
     this->oc_nc_side_basis_qnodes_pairs_.reserve(num_periodic_pair);
