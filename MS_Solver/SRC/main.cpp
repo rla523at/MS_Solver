@@ -45,15 +45,15 @@ int main(void) {
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
 		Grid<__DIMENSION__> grid(std::move(grid_element));
 
+		////debug
+		//exit(523);
+		////debug
+
 		Post_AI_Data::intialize(grid);
 		Tecplot::post_grid(grid.get_grid_elements().cell_elements); //post
 
 		Semi_Discrete_Equation_ semi_discrete_equation(grid);
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
-
-		//debug
-		exit(523);
-		//debug
 
 		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
 

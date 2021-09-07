@@ -84,11 +84,14 @@ Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 			for (const auto matched_vnode_index : matched_vnode_index_set) {
 				const auto& other_matched_vnode_index_set = this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.at(matched_vnode_index);
 
-				//other matched vnode index should be included my matched vnode index
-				for (const auto other_matched_vnode_index : other_matched_vnode_index_set) {
-					if (other_matched_vnode_index != vnode_index) //except my vnode index
-						matched_vnode_index_set.insert(other_matched_vnode_index);
-				}
+				auto& i_set = matched_vnode_index_set;
+				const auto& j_set = other_matched_vnode_index_set;
+
+				std::vector<uint> difference;
+				std::set_difference(i_set.begin(), i_set.end(), j_set.begin(), j_set.end(), std::back_inserter(difference));
+
+				i_set.insert(difference.begin(), difference.end());
+				i_set.erase(vnode_index);
 			}
 		}
 	}
@@ -101,8 +104,11 @@ Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 			auto& i_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_index);
 			auto& j_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(matched_vnode_index);
 
-			i_set.insert(j_set.begin(), j_set.end());
-			j_set.insert(i_set.begin(), i_set.end());
+			std::vector<uint> difference;
+			std::set_difference(i_set.begin(), i_set.end(), j_set.begin(), j_set.end(), std::back_inserter(difference));
+
+			i_set.insert(difference.begin(), difference.end());
+			j_set.insert(difference.begin(), difference.end());
 		}
 	}
 
