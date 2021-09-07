@@ -82,10 +82,6 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
             nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); 
         }
 
-        ////debug
-        //std::cout <<"oc_nc_index " << oc_index << " " << nc_index << "\n";
-        //std::cout <<"normals " << normals << "\n";
-
         this->set_of_normals_.push_back(std::move(normals));
         this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
     }
@@ -105,17 +101,17 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
         const auto& oc_solution_coefficient = solution_coefficients[oc_index];
         const auto& nc_solution_coefficient = solution_coefficients[nc_index];
 
-        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnodes_pairs_[i];
-        const auto oc_side_cvariables = oc_solution_coefficient * oc_side_basis_qnode;
-        const auto nc_side_cvariables = nc_solution_coefficient * nc_side_basis_qnode;
+        const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
+        const auto oc_side_solution_qnodes = oc_solution_coefficient * oc_side_basis_qnodes;
+        const auto nc_side_solution_qnodes = nc_solution_coefficient * nc_side_basis_qnodes;
 
-        const auto [num_equation, num_qnode] = oc_side_cvariables.size();
+        const auto [num_equation, num_qnode] = oc_side_solution_qnodes.size();
         const auto& normals = this->set_of_normals_[i];
 
         Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
-            const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
-            const auto nc_side_cvariable = nc_side_cvariables.column<This_::num_equation_>(q);
+            const auto oc_side_cvariable = oc_side_solution_qnodes.column<This_::num_equation_>(q);
+            const auto nc_side_cvariable = nc_side_solution_qnodes.column<This_::num_equation_>(q);
 
             numerical_flux_quadrature.change_column(q, Numerical_Flux_Function::calculate(oc_side_cvariable, nc_side_cvariable, normals[q]));
         }
@@ -127,7 +123,21 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
+
+
+        //////debug        
+        //if (oc_index == 100 || nc_index == 100) {
+        //    std::cout << "\n";
+        //    std::cout << "inner_face_index " << i << "\n";
+        //    std::cout << "oc_nc_index " << oc_index << " " << nc_index << "\n";
+        //    //std::cout << "oc_side_solution_qnodes " << oc_side_solution_qnodes;
+        //    //std::cout << "nc_side_solution_qnodes " << nc_side_solution_qnodes;
+        //    std::cout << "normals " << normals << "\n";
+        //    //std::cout << "numerical_flux_quadrature " << numerical_flux_quadrature;
+        //}
     }
+    //std::exit(523);//debug
+
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>

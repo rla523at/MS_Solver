@@ -436,12 +436,31 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//  Β 0ΑΑΑΛΑ3
 		//  Β/    Β/
 		//  1ΑΑΑΑΑ2
+
+		////type1
+		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
+		//std::vector<ushort> face1_node_index = { 0,1,5,4 };
+		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
+		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
+		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
+		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
+
+		////type2
+		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
+		//std::vector<ushort> face1_node_index = { 0,4,5,1 };
+		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
+		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
+		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
+		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
+
+		//type3
 		std::vector<ushort> face0_node_index = { 0,1,2,3 };
-		std::vector<ushort> face1_node_index = { 0,1,5,4 };
-		std::vector<ushort> face2_node_index = { 1,2,6,5 };
-		std::vector<ushort> face3_node_index = { 2,3,7,6 };
+		std::vector<ushort> face1_node_index = { 0,4,5,1 };
+		std::vector<ushort> face2_node_index = { 1,5,6,2 };
+		std::vector<ushort> face3_node_index = { 2,6,7,3 };
 		std::vector<ushort> face4_node_index = { 0,3,7,4 };
-		std::vector<ushort> face5_node_index = { 4,5,6,7 };
+		std::vector<ushort> face5_node_index = { 4,7,6,5 };
+
 		return { face0_node_index, face1_node_index, face2_node_index, face3_node_index, face4_node_index, face5_node_index };
 	}
 	default:
@@ -529,12 +548,22 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//  1ΑΑΑΑΑ2
 		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh yet");
 
+		//type2
+		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
+		//std::vector<ushort> face1_node_index = { 0,4,5,1 };
+		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
+		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
+		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
+		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
+
+		//type3
 		std::vector<ushort> face0_node_index = { 0,1,2,3 };
-		std::vector<ushort> face1_node_index = { 0,1,5,4 };
-		std::vector<ushort> face2_node_index = { 1,2,6,5 };
-		std::vector<ushort> face3_node_index = { 2,3,7,6 };
+		std::vector<ushort> face1_node_index = { 0,4,5,1 };
+		std::vector<ushort> face2_node_index = { 1,5,6,2 };
+		std::vector<ushort> face3_node_index = { 2,6,7,3 };
 		std::vector<ushort> face4_node_index = { 0,3,7,4 };
-		std::vector<ushort> face5_node_index = { 4,5,6,7 };
+		std::vector<ushort> face5_node_index = { 4,7,6,5 };
+
 		return { face0_node_index, face1_node_index, face2_node_index, face3_node_index, face4_node_index, face5_node_index };
 	}
 	default:
@@ -2118,10 +2147,18 @@ FaceType Element<space_dimension>::check_face_type(const Element& owner_cell_ele
 	for (const auto& face_vnode_indexes : set_of_face_vnode_indexes) {
 		if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
 			continue;
-		else if (this_vnode_indexes == face_vnode_indexes) //鉴规氢
+		else if (ms::is_circular_permutation(face_vnode_indexes, this_vnode_indexes))
 			return FaceType::inward_face;
-		else //开规氢
+		else
 			return FaceType::outward_face;
+
+
+		//if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
+		//	continue;
+		//else if (this_vnode_indexes == face_vnode_indexes) //鉴规氢
+		//	return FaceType::inward_face;
+		//else //开规氢
+		//	return FaceType::outward_face;
 	}
 
 	throw std::runtime_error("this face is not input cell element face!");

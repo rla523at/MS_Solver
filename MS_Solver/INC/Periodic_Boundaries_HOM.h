@@ -91,6 +91,9 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
         Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
         Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
 
+        if (i == 29)
+            std::cout << "debug";
+
         for (ushort q = 0; q < num_qnode; ++q) {
             normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
             oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);    
@@ -139,17 +142,18 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
 
-        //debug        
-        if (oc_index == 100 || nc_index == 100) {             
-            std::cout << "\n";
-            std::cout << "oc_nc_index " << oc_index << " " << nc_index << "\n";
-            std::cout << "oc_side_solution_qnodes " << oc_side_solution_qnodes;
-            std::cout << "nc_side_solution_qnodes " << nc_side_solution_qnodes;
-            std::cout << "normals " << normals << "\n";
-            std::cout << "numerical_flux_quadrature " << numerical_flux_quadrature;
-        }
+        //////debug        
+        //if (oc_index == 100 || nc_index == 100) {             
+        //    std::cout << "\n";
+        //    std::cout << "pbdry_pair_index " << i << "\n";
+        //    std::cout << "oc_nc_index " << oc_index << " " << nc_index << "\n";
+        //    //std::cout << "oc_side_solution_qnodes " << oc_side_solution_qnodes;
+        //    //std::cout << "nc_side_solution_qnodes " << nc_side_solution_qnodes;
+        //    std::cout << "normals " << normals << "\n";
+        //    //std::cout << "numerical_flux_quadrature " << numerical_flux_quadrature;
+        //}
     }
-    std::exit(523);//debug
+    //std::exit(523);//debug
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
