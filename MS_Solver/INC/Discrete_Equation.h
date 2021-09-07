@@ -23,7 +23,6 @@ public:
         Log::content_ << "================================================================================\n";
 
         Tecplot::post_solution(solutions, "initial");//post
-
         semi_discrete_equation.reconstruct(solutions);
       
         SET_TIME_POINT;

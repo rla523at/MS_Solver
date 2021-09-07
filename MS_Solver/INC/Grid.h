@@ -88,7 +88,7 @@ Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 				const auto& j_set = other_matched_vnode_index_set;
 
 				std::vector<uint> difference;
-				std::set_difference(i_set.begin(), i_set.end(), j_set.begin(), j_set.end(), std::back_inserter(difference));
+				std::set_difference(j_set.begin(), j_set.end(), i_set.begin(), i_set.end(), std::back_inserter(difference));
 
 				i_set.insert(difference.begin(), difference.end());
 				i_set.erase(vnode_index);
@@ -155,7 +155,20 @@ std::vector<std::pair<uint, uint>> Grid<space_dimension>::periodic_boundary_oc_n
 		const auto oc_index = oc_indexes.front();
 		const auto nc_index = nc_indexes.front();
 		pbdry_oc_nc_index_pairs[i] = { oc_index,nc_index };
+
+		////debug
+		//if (oc_index == 100 || nc_index == 100) {
+		//	std::cout << "pbdry_index " << i << "\n";
+		//	//std::cout << "oc_side_node_indexes " << oc_side_element.vertex_node_indexes() << "\n";
+		//	//std::cout << "nc_side_node_indexes " << nc_side_element.vertex_node_indexes() << "\n";
+		//	//std::cout << "oc_side_nodes " << oc_side_element.geometry_.vertex_nodes() << "\n";
+		//	//std::cout << "nc_side_nodes " << nc_side_element.geometry_.vertex_nodes() << "\n";
+		//	std::cout << "oc_index " << oc_index << "\n";
+		//	std::cout << "nc_index " << nc_index << "\n";
+		//}
+		////debug
 	}
+	//std::exit(523); // debug
 
 	return pbdry_oc_nc_index_pairs;
 }

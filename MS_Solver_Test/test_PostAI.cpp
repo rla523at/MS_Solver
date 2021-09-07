@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/PostAI.h"
 
-using Grid_Builder_			= Grid_Builder<2>;
+//using Grid_Builder_			= Grid_Builder<2>;
 
 
 //GTEST_TEST(PostAI, calculate_face_share_cell_indexes_set1) {

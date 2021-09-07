@@ -77,7 +77,7 @@
     <ClInclude Include="INC\Gradient_Method.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Grid_Builder.h">
+    <ClInclude Include="INC\Grid.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid_Element_Builder.h">

@@ -2,6 +2,7 @@
 #include "../INC/Setting.h"
 
 using Grid_Element_Builder_		= Grid_Element_Builder<GRID_FILE_TYPE, __DIMENSION__>;
+using Grid_						= Grid<__DIMENSION__>;
 using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, RECONSTRUCTION_METHOD, NUMERICAL_FLUX_FUNCTION>;
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
@@ -43,11 +44,7 @@ int main(void) {
 		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
-		Grid<__DIMENSION__> grid(std::move(grid_element));
-
-		////debug
-		//exit(523);
-		////debug
+		Grid_ grid(std::move(grid_element));
 
 		Post_AI_Data::intialize(grid);
 		Tecplot::post_grid(grid.get_grid_elements().cell_elements); //post

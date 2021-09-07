@@ -1329,6 +1329,36 @@ TEST(Element, normalized_normal_vector_2) {
 	EXPECT_EQ(result, ref);
 }
 
+TEST(ms, is_circular_permuation_1) {
+	std::vector<ushort> v1 = { 1,2,3 };
+	std::vector<ushort> v2 = { 3,1,2 };
+	
+	EXPECT_TRUE(ms::is_circular_permutation(v1, v2));
+}
+TEST(ms, is_circular_permuation_2) {
+	std::vector<ushort> v1 = { 1,2,3 };
+	std::vector<ushort> v2 = { 3,2,1 };
+
+	EXPECT_FALSE(ms::is_circular_permutation(v1, v2));
+}
+TEST(ms, is_circular_permuation_3) {
+	std::vector<ushort> v1 = { 1,2,3,4 };
+	std::vector<ushort> v2 = { 2,3,4,1 };
+
+	EXPECT_TRUE(ms::is_circular_permutation(v1, v2));
+}
+TEST(ms, is_circular_permuation_4) {
+	std::vector<ushort> v1 = { 1,2,3,4,5,6 };
+	std::vector<ushort> v2 = { 3,4,5 };
+
+	EXPECT_TRUE(ms::is_circular_permutation(v1, v2));
+}
+TEST(ms, is_circular_permuation_5) {
+	std::vector<ushort> v1 = { 1,2,3,4 };
+	std::vector<ushort> v2 = { 4,1,2,3 };
+
+	EXPECT_TRUE(ms::is_circular_permutation(v1, v2));
+}
 
 //GTEST_TEST(Geometry, periodic_match_2) {
 //	const Figure fig = Figure::line;

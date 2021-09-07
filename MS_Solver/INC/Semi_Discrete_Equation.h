@@ -74,6 +74,17 @@ public:
         const auto num_solution = solutions.size();
         std::vector<Residual_> RHS(num_solution);
 
+        //std::cout << RHS[100] << "\n";//debug
+        //this->boundaries_.calculate_RHS(RHS, solutions);
+        //std::cout << RHS[100] << "\n";//debug
+        //this->periodic_boundaries_.calculate_RHS(RHS, solutions);
+        //std::cout << RHS[100] << "\n";//debug
+        //this->inner_faces_.calculate_RHS(RHS, solutions);
+        //std::cout << RHS[100] << "\n";//debug
+        //this->cells_.calculate_RHS(RHS, solutions);
+        //std::cout << RHS[100] << "\n";//debug
+        //std::exit(523);//debug
+
         this->boundaries_.calculate_RHS(RHS, solutions);
         this->periodic_boundaries_.calculate_RHS(RHS, solutions);
         this->inner_faces_.calculate_RHS(RHS, solutions);

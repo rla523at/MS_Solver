@@ -252,6 +252,28 @@ namespace ms {
 
 		return extracted_values;
 	}
+
+	template <typename T>
+	bool is_circular_permutation(const std::vector<T>& set1, const std::vector<T>& set2) {
+		const auto set1_size = set1.size();
+		const auto set2_size = set2.size();
+				
+		if (set1_size < set2_size)
+			return false;
+
+		std::vector<T> temp;
+		temp.reserve(set1_size * 2);
+		temp.insert(temp.end(), set1.begin(), set1.end());
+		temp.insert(temp.end(), set1.begin(), set1.end());
+
+		auto start_iter = temp.begin();
+		for (size_t i = 0; i < set1_size; ++i, ++start_iter) {
+			if (std::equal(start_iter, start_iter + set2_size, set2.begin()))
+				return true;
+		}
+
+		return false;
+	}
 }
 
 
@@ -1767,6 +1789,12 @@ bool Geometry<space_dimension>::can_be_periodic_pair(const Geometry& other) cons
 	if (this->nodes_.size() != other.nodes_.size())
 		return false;
 
+	//////debug
+	//std::cout << "this_nodes " << this->vertex_nodes() << "\n";
+	//std::cout << "other_nodes " << other.vertex_nodes() << "\n";
+	////std::exit(523);
+	//////debug
+
 	if (this->is_on_same_axis(other))
 		return false;
 
@@ -1909,7 +1937,7 @@ bool Geometry<space_dimension>::is_on_same_axis(const Geometry& other) const {
 
 		bool is_on_same_axis = true;
 		for (ushort j = 1; j < num_this_node; ++j) {
-			if (std::abs(this->nodes_[j][i] - ref) < epsilon) {
+			if (std::abs(this->nodes_[j][i] - ref) > epsilon) {
 				is_on_same_axis = false;
 				break;
 			}
@@ -1919,7 +1947,7 @@ bool Geometry<space_dimension>::is_on_same_axis(const Geometry& other) const {
 			continue;
 
 		for (ushort j = 0; j < num_other_node; ++j) {
-			if (std::abs(other.nodes_[j][i] - ref) < epsilon) {
+			if (std::abs(other.nodes_[j][i] - ref) > epsilon) {
 				is_on_same_axis = false;
 				break;
 			}
@@ -2088,11 +2116,11 @@ FaceType Element<space_dimension>::check_face_type(const Element& owner_cell_ele
 	const auto set_of_face_vnode_indexes = owner_cell_element.set_of_face_vertex_node_indexes();
 
 	for (const auto& face_vnode_indexes : set_of_face_vnode_indexes) {
-		if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin(), this_vnode_indexes.end()))
+		if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
 			continue;
-		else if (this_vnode_indexes == face_vnode_indexes)
+		else if (this_vnode_indexes == face_vnode_indexes) //순방향
 			return FaceType::inward_face;
-		else
+		else //역방향
 			return FaceType::outward_face;
 	}
 

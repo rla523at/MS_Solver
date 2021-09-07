@@ -239,6 +239,15 @@ std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_
 			auto& j_element = periodic_boundary_elements[j];
 
 			if (i_element.is_periodic_pair(j_element)) {
+				//////debug
+				//std::cout << "pbdry_pair_index " << matched_periodic_element_pairs.size() << "\n";
+				//std::cout << "oc_side_node_indexes " << i_element.vertex_node_indexes() << "\n";
+				//std::cout << "nc_side_node_indexes " << j_element.vertex_node_indexes() << "\n";
+				//std::cout << "oc_side_nodes " << i_element.geometry_.vertex_nodes() << "\n";
+				//std::cout << "nc_side_nodes " << j_element.geometry_.vertex_nodes() << "\n";
+				//std::exit(523);
+				//////debug
+
 				matched_periodic_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(j_element)));
 				matched_index_set.insert(i);
 				matched_index_set.insert(j);

@@ -5,13 +5,13 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_Debug/3D/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							3
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Quad10_3D
+#define __GRID_FILE_NAMES__						Quad5_3D
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__					__SINE_WAVE__
+#define __INITIAL_CONDITION__					__CONSTANT1__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__POLYNOMIAL_RECONSTRUCTION__
 
@@ -22,7 +22,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						2
+#define __SOLUTION_ORDER__						0
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__

@@ -1,6 +1,6 @@
 #pragma once
 #include "Governing_Equation.h"
-#include "Grid_Builder.h"
+#include "Grid.h"
 
 
 enum class Post_File_Type {
@@ -204,8 +204,8 @@ void Tecplot::record_cell_variables(const std::string& data_name, const std::vec
 
 	if (!This_::additioinal_data_name_to_values_.contains(data_name))
 		This_::additioinal_data_name_to_values_.emplace(data_name, std::move(post_point_datas));
-
-	This_::additioinal_data_name_to_values_.at(data_name) = std::move(post_point_datas);
+	else
+		This_::additioinal_data_name_to_values_.at(data_name) = std::move(post_point_datas);
 }
 
 template <typename T>

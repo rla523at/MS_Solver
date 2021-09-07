@@ -1,5 +1,5 @@
 #pragma once
-#include "Grid_Builder.h"
+#include "Grid.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
 #include "Solution_Scaler.h"
@@ -116,20 +116,20 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
         const auto& oc_solution_coefficient = solution_coefficients[oc_index];
         const auto& nc_solution_coefficient = solution_coefficients[nc_index];
 
-        const auto& [oc_side_basis_qnode, nc_side_basis_qnode] = this->oc_nc_side_basis_qnodes_pairs_[i];
-        const auto oc_side_cvariables = oc_solution_coefficient * oc_side_basis_qnode;
-        const auto nc_side_cvariables = nc_solution_coefficient * nc_side_basis_qnode;
+        const auto& [oc_side_basis_qnodes, nc_side_basis_qnodes] = this->oc_nc_side_basis_qnodes_pairs_[i];
+        const auto oc_side_solution_qnodes = oc_solution_coefficient * oc_side_basis_qnodes;
+        const auto nc_side_solution_qnodes = nc_solution_coefficient * nc_side_basis_qnodes;
 
-        const auto [num_equation, num_qnode] = oc_side_cvariables.size();
+        const auto [num_equation, num_qnode] = oc_side_solution_qnodes.size();
         const auto& normals = this->set_of_normals_[i];
 
         Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
-            const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
-            const auto nc_side_cvariable = nc_side_cvariables.column<This_::num_equation_>(q);
+            const auto oc_side_solution = oc_side_solution_qnodes.column<This_::num_equation_>(q);
+            const auto nc_side_solution = nc_side_solution_qnodes.column<This_::num_equation_>(q);
 
-            numerical_flux_quadrature.change_column(q, Numerical_Flux_Function::calculate(oc_side_cvariable, nc_side_cvariable, normals[q]));
-        }
+            numerical_flux_quadrature.change_column(q, Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, normals[q]));
+        }               
 
         Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;
         const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_basis_weight_pairs_[i];
@@ -138,7 +138,18 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
+
+        //debug        
+        if (oc_index == 100 || nc_index == 100) {             
+            std::cout << "\n";
+            std::cout << "oc_nc_index " << oc_index << " " << nc_index << "\n";
+            std::cout << "oc_side_solution_qnodes " << oc_side_solution_qnodes;
+            std::cout << "nc_side_solution_qnodes " << nc_side_solution_qnodes;
+            std::cout << "normals " << normals << "\n";
+            std::cout << "numerical_flux_quadrature " << numerical_flux_quadrature;
+        }
     }
+    std::exit(523);//debug
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>

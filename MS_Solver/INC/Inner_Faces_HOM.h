@@ -1,8 +1,9 @@
 #pragma once
-#include "Grid_Builder.h"
+#include "Grid.h"
 #include "Reconstruction_Method_HOM.h"
 #include "Numerical_Flux_Function.h"
 #include "Solution_Scaler.h"
+#include "Debugger.h"
 
 //HOM이면 공통으로 사용하는 variable & method
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -80,6 +81,10 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
             oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);          
             nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); 
         }
+
+        ////debug
+        //std::cout <<"oc_nc_index " << oc_index << " " << nc_index << "\n";
+        //std::cout <<"normals " << normals << "\n";
 
         this->set_of_normals_.push_back(std::move(normals));
         this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });

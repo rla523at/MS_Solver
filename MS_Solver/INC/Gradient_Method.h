@@ -1,5 +1,5 @@
 #pragma once
-#include "Grid_Builder.h"
+#include "Grid.h"
 
 
 template <ushort num_equation_, ushort space_dimension_>

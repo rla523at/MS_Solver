@@ -1,13 +1,14 @@
 #pragma once
 #include "gtest/gtest.h"
 
-#include "../MS_Solver/INC/Grid_Builder.h"
+#include "../MS_Solver/INC/Grid.h"
 
 
 TEST(Grid, set_of_face_share_cell_indexes) {
 	constexpr ushort space_dimension = 2;
 	
-	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
+	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
+	const auto grid = Grid<space_dimension>(std::move(grid_elements));
 	const auto set_of_face_share_cell_indexes = grid.set_of_face_share_cell_indexes_consider_pbdry();
 
 	auto result = set_of_face_share_cell_indexes[0];
@@ -20,8 +21,9 @@ TEST(Grid, set_of_face_share_cell_indexes) {
 TEST(Grid, vnode_index_to_matched_vnode_index_set_1) {
 	constexpr ushort space_dimension = 2;
 
-	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
-	const auto result = grid.connectivity.vnode_index_to_matched_vnode_index_set.at(0);
+	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
+	const auto grid = Grid<space_dimension>(std::move(grid_elements));
+	const auto result = grid.get_pbdry_vnode_index_to_matched_node_index_set().at(0);
 
 	const std::set<uint> ref = { 3,12,15 };
 	EXPECT_EQ(ref, result);
@@ -30,8 +32,9 @@ TEST(Grid, vnode_index_to_matched_vnode_index_set_1) {
 TEST(Grid, vnode_index_to_share_cell_indexes_1) {
 	constexpr ushort space_dimension = 2;
 
-	const auto grid = Grid_Builder<space_dimension>::build<Gmsh>("Quad3");
-	const auto result = grid.connectivity.vnode_index_to_share_cell_index_set.at(0);
+	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
+	const auto grid = Grid<space_dimension>(std::move(grid_elements));
+	const auto result = grid.get_vnode_index_to_share_cell_index_set_consider_pbdry().at(0);
 
 	const std::set<uint> ref = { 0,2,6,8 };
 	EXPECT_EQ(ref, result);
