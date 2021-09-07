@@ -1113,6 +1113,51 @@ GTEST_TEST(Geometry, orthonormal_basis_5) {
 	EXPECT_LE(max_error, allowable_error);
 }
 
+TEST(Geometry, is_on_same_axis_1) {
+	constexpr ushort space_dimension = 3;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 0 };
+	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218, 0 };
+	const Euclidean_Vector n3 = { 0.3309655464243111, 0.3010404355350647, 0 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes1 = { n1,n2,n3 };
+
+	const Euclidean_Vector n4 = { 0.3635520579711813, 0.1973431147402148, 0 };
+	const Euclidean_Vector n5 = { 0.3512301560533574, 0.2184608229801218, 0 };
+	const Euclidean_Vector n6 = { 0.3309655464243111, 0.2010404355350647, 0 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes2 = { n4,n5,n6 };
+
+	Geometry geometry1(ref_geometry, std::move(nodes1));
+	Geometry geometry2(ref_geometry, std::move(nodes2));
+
+	EXPECT_TRUE(geometry1.is_on_same_axis(geometry2));
+}
+TEST(Geometry, is_on_same_axis_2) {
+	constexpr ushort space_dimension = 3;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 1 };
+	const Euclidean_Vector n2 = { 0.3512301560533574, 0.2973431147402148, 2 };
+	const Euclidean_Vector n3 = { 0.3309655464243111, 0.2973431147402148, 3 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes1 = { n1,n2,n3 };
+
+	const Euclidean_Vector n4 = { 0.3635520579711813, 0.2973431147402148, 3 };
+	const Euclidean_Vector n5 = { 0.3512301560533574, 0.2973431147402148, 2 };
+	const Euclidean_Vector n6 = { 0.3309655464243111, 0.2973431147402148, 1 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes2 = { n4,n5,n6 };
+
+	Geometry geometry1(ref_geometry, std::move(nodes1));
+	Geometry geometry2(ref_geometry, std::move(nodes2));
+
+	EXPECT_TRUE(geometry1.is_on_same_axis(geometry2));
+}
+
 GTEST_TEST(Element, vertex_node_indexes_1) {
 	constexpr size_t space_dimension = 2;
 
