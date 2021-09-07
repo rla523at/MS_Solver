@@ -124,7 +124,7 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
 
             local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
         }
-        else {
+        else if (This_::space_dimension_ == 3) {
             const auto [yz_projected_volume, xz_projected_volume, xy_projected_volume] = this->projected_volumes_[i];
             const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda, z_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
 
@@ -135,6 +135,8 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
 
             local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii + z_radii);
         }
+        else
+            throw std::runtime_error("not supproted order");
     }
 
     constexpr auto solution_order = Reconstruction_Method::solution_order();
@@ -191,6 +193,14 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
         }
 
         ms::gemm(initial_solution_qnodes, basis_weight, initial_solution_coefficients[i]);
+
+        //debug
+        //std::cout << initial_solution_qnodes;
+        //std::cout << basis_weight;
+        //std::cout << initial_solution_coefficients[i];
+        //std::cout << qnodes;        
+        //std::exit(523);
+        //debug
     }
 
     return initial_solution_coefficients;

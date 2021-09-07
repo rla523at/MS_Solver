@@ -256,14 +256,14 @@ std::vector<Euclidean_Vector<1>> Sine_Wave<space_dimension_>::calculate_solution
 }
 
 template<ushort space_dimension_>
-std::vector<Euclidean_Vector<1>> Sine_Wave<space_dimension_>::calculate_exact_solutions(const std::vector<Space_Vector_>& cell_centers, const double end_time) {
+std::vector<Euclidean_Vector<1>> Sine_Wave<space_dimension_>::calculate_exact_solutions(const std::vector<Space_Vector_>& space_vectors, const double end_time) {
     const auto advection_speed = Linear_Advection<space_dimension_>::advection_speed();
 
-    const auto num_cell = cell_centers.size();
+    const auto num_cell = space_vectors.size();
     std::vector<Euclidean_Vector<1>> exact_solutions(num_cell);
 
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto& cell_center = cell_centers[i];
+        const auto& cell_center = space_vectors[i];
         
         double exact_solution = 1.0;
 

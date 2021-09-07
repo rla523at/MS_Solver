@@ -9,7 +9,7 @@ enum class Post_File_Type {
 
 enum class Zone_Type {
 	FETriangle = 2,
-	FETetraheron = 4
+	FETetrahedron = 4
 };
 
 class Tecplot
@@ -78,6 +78,9 @@ public:	//for HOM
 	static void conditionally_post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment = "");
 
 private:
+	static Text write_ASCII_header(const Post_File_Type file_type);
+	static void write_ASCII_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
+
 	static void write_binary_header(const Post_File_Type file_type, const std::string_view post_file_path);
 	static void write_binary_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
 	static void write_binary_solution_post_file(const std::vector<std::vector<double>>& post_solution_binary_datas, const std::string& comment = "");
@@ -101,22 +104,31 @@ void Tecplot::initialize(const ushort post_order) {
 	This_::post_order_ = post_order;
 
 	// Binary output
-	if constexpr (ms::is_SCL<Governing_Equation>) {
-		This_::grid_variables_str_ = "X,Y";
-		This_::solution_variables_str_ = "q";
-		This_::zone_type_ = Zone_Type::FETriangle;
-	}
-	else if constexpr (ms::is_Euler<Governing_Equation>) {
-		if constexpr (Governing_Equation::space_dimension() == 2) {
+	if constexpr (Governing_Equation::space_dimension() == 2) {
+		if constexpr (ms::is_SCL<Governing_Equation>) {
+			This_::grid_variables_str_ = "X,Y";
+			This_::solution_variables_str_ = "q";
+			This_::zone_type_ = Zone_Type::FETriangle;
+		}
+		else if constexpr (ms::is_Euler<Governing_Equation>) {
+
 			This_::grid_variables_str_ = "X,Y";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhoE,u,v,p";
 			This_::zone_type_ = Zone_Type::FETriangle;
+		}		
+	}
+	else if constexpr (Governing_Equation::space_dimension() == 3) {
+		if constexpr (ms::is_SCL<Governing_Equation>) {
+			This_::grid_variables_str_ = "X,Y,Z";
+			This_::solution_variables_str_ = "q";
+			This_::zone_type_ = Zone_Type::FETetrahedron;
 		}
-		else if constexpr (Governing_Equation::space_dimension() == 3) {
+		else if constexpr (ms::is_Euler<Governing_Equation>) {
+
 			This_::grid_variables_str_ = "X,Y,Z";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhow,rhoE,u,v,w,p";
-			This_::zone_type_ = Zone_Type::FETetraheron;
-		}
+			This_::zone_type_ = Zone_Type::FETetrahedron;
+		}		
 	}
 };
 
@@ -320,6 +332,8 @@ std::vector<T> Tecplot::convert_cell_data_to_post_point_data(const std::vector<T
 
 //ASCII
 
+
+
 //template <typename Governing_Equation>
 //void Post_Solution_Data::initialize(const ushort post_order) {
 //	This_::post_order_ = post_order;
@@ -374,54 +388,54 @@ std::vector<T> Tecplot::convert_cell_data_to_post_point_data(const std::vector<T
 //		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
 //
 //	return header;
-//}
+////}
 
 //template <ushort space_dimension>
 //void Post_Solution_Data::post_grid(const std::vector<Element<space_dimension>>& cell_elements) {
 
-//	//const auto num_cell = cell_elements.size();
-//	//This_::num_post_points_.resize(num_cell);
-//
-//	//ushort str_per_line = 1;
-//	//size_t connectivity_start_index = 1;
-//
-//	//Text grid_post_data_text(space_dimension);
-//	//for (uint i = 0; i < num_cell; ++i) {
-//	//	const auto& geometry = cell_elements[i].geometry_;
-//
-//	//	const auto post_nodes = geometry.post_nodes(This_::post_order_);
-//	//	for (const auto& node : post_nodes) {
-//	//		for (ushort i = 0; i < space_dimension; ++i, ++str_per_line) {
-//	//			grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
-//	//			if (str_per_line == 10) {
-//	//				grid_post_data_text[i] += "\n";
-//	//				str_per_line = 1;
-//	//			}
-//	//		}
-//	//	}
-//
-//	//	const auto connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
-//
-//	//	std::string connectivity_str;
-//	//	for (const auto& connectivity : connectivities) {
-//	//		for (const auto index : connectivity)
-//	//			connectivity_str += std::to_string(index) + " ";
-//
-//	//		grid_post_data_text << std::move(connectivity_str);
-//	//	}
-//
-//	//	const auto num_post_node = post_nodes.size();
-//	//	connectivity_start_index += num_post_node;
-//	//	This_::num_node_ += num_post_node;
-//	//	This_::num_element_ += connectivities.size();
-//	//	This_::num_post_points_[i] = num_post_node;
-//	//}
-//
-//	//auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
-//
-//	//const auto grid_file_path = This_::path_ + "grid.plt";
-//	//grid_post_header_text.write(grid_file_path);
-//	//grid_post_data_text.add_write(grid_file_path);
+	//const auto num_cell = cell_elements.size();
+	//This_::num_post_points_.resize(num_cell);
+
+	//ushort str_per_line = 1;
+	//size_t connectivity_start_index = 1;
+
+	//Text grid_post_data_text(space_dimension);
+	//for (uint i = 0; i < num_cell; ++i) {
+	//	const auto& geometry = cell_elements[i].geometry_;
+
+	//	const auto post_nodes = geometry.post_nodes(This_::post_order_);
+	//	for (const auto& node : post_nodes) {
+	//		for (ushort i = 0; i < space_dimension; ++i, ++str_per_line) {
+	//			grid_post_data_text[i] += ms::double_to_string(node.at(i)) + " ";
+	//			if (str_per_line == 10) {
+	//				grid_post_data_text[i] += "\n";
+	//				str_per_line = 1;
+	//			}
+	//		}
+	//	}
+
+	//	const auto connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
+
+	//	std::string connectivity_str;
+	//	for (const auto& connectivity : connectivities) {
+	//		for (const auto index : connectivity)
+	//			connectivity_str += std::to_string(index) + " ";
+
+	//		grid_post_data_text << std::move(connectivity_str);
+	//	}
+
+	//	const auto num_post_node = post_nodes.size();
+	//	connectivity_start_index += num_post_node;
+	//	This_::num_node_ += num_post_node;
+	//	This_::num_element_ += connectivities.size();
+	//	This_::num_post_points_[i] = num_post_node;
+	//}
+
+	//auto grid_post_header_text = This_::header_text(Post_File_Type::Grid);
+
+	//const auto grid_file_path = This_::path_ + "grid.plt";
+	//grid_post_header_text.write(grid_file_path);
+	//grid_post_data_text.add_write(grid_file_path);
 //}
 
 

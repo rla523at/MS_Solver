@@ -5,15 +5,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
-#define __DIMENSION__							2
+#define __DIMENSION__							3
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Quad50
+#define __GRID_FILE_NAMES__						Quad10_3D
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__					__SQUARE_WAVE__
-#define __SPATIAL_DISCRETE_METHOD__				__FVM__
-#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
+#define __SPATIAL_DISCRETE_METHOD__				__HOM__
+#define __RECONSTRUCTION_METHOD__				__POLYNOMIAL_RECONSTRUCTION__
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
@@ -22,7 +22,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						3
+#define __SOLUTION_ORDER__						2
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
@@ -32,7 +32,7 @@
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
 #define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		100
+#define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS
@@ -56,7 +56,7 @@
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
 #define Y_ADVECTION_SPEED				2.0
-#define Z_ADVECTION_SPEED				0.5
+#define Z_ADVECTION_SPEED				1.0
 
 // Sine Wave
 #define X_WAVE_LENGTH					1.0
@@ -212,7 +212,12 @@ namespace ms {
 			Sine_Wave<__DIMENSION__>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
 			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
 				Supersonic_Inlet<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
-
 		}
+		else if constexpr (__DIMENSION__ == 3) {
+			Linear_Advection<__DIMENSION__>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED, Z_ADVECTION_SPEED });
+			Sine_Wave<__DIMENSION__>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH, Z_WAVE_LENGTH });
+		}
+		else
+			throw std::runtime_error("not supported dimension");
 	}
 }

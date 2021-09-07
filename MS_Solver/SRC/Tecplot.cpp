@@ -180,3 +180,78 @@ std::vector<int> Tecplot::convert_to_binary_data(const std::string& str) {
 	tecplot_binary_format.push_back(0); // null
 	return tecplot_binary_format;
 }
+
+
+Text Tecplot::write_ASCII_header(const Post_File_Type file_type) {	
+	static size_t strand_id = 0;
+
+	Text header;
+	header.reserve(10);
+	if (file_type == Post_File_Type::Grid) {
+		header << "Title = Grid";
+		header << "FileType = Grid";
+		header << "Variables = X Y Z";
+		header << "Zone T = Grid";
+	}
+	else {
+		std::string solution_variable_str = "Variables = q";
+		if (!This_::additioinal_data_name_to_values_.empty()) {
+			for (const auto& [info_name, info_values] : This_::additioinal_data_name_to_values_)
+				solution_variable_str += ", " + info_name;
+		}
+
+		header << "Title = Solution_at_" + ms::double_to_string(*time_ptr_);
+		header << "FileType = Solution";
+		header << solution_variable_str;
+		header << "Zone T = Solution_at_" + ms::double_to_string(*time_ptr_);
+
+		strand_id++;
+	}
+
+	header << "ZoneType = FETetrahedron";
+	header << "Nodes = " + std::to_string(num_node_);
+	header << "Elements = " + std::to_string(num_element_);
+	header << "DataPacking = Block";
+	header << "StrandID = " + std::to_string(strand_id);
+
+	if (file_type == Post_File_Type::Grid)
+		header << "SolutionTime = 0.0 \n\n";
+	else
+		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
+
+	return header;
+}
+
+void Tecplot::write_ASCII_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities) {
+	ushort str_per_line = 0;
+
+	const auto space_dimension = coordinates.size();
+	const auto num_line = space_dimension + connectivities.size();
+	Text grid_post_data_text;
+	grid_post_data_text.reserve(num_line);
+
+	std::string coordinate_str;
+	for (ushort i = 0; i < space_dimension; ++i) {		
+		for (const auto coordinate : coordinates[i]) {
+			str_per_line++;
+			coordinate_str += ms::double_to_str_sp(coordinate) + " ";
+			if (str_per_line == 10) {
+				str_per_line = 0;
+				coordinate_str += "\n";
+			}
+		};
+		grid_post_data_text << std::move(coordinate_str);
+	}
+
+	std::string connectivity_str;
+	for (const auto& connectivity : connectivities) {
+		for (const auto index : connectivity)
+			connectivity_str += std::to_string(index + 1) + " ";
+		grid_post_data_text << std::move(connectivity_str);
+	}
+	auto grid_post_header_text = This_::write_ASCII_header(Post_File_Type::Grid);
+
+	const auto grid_file_path = This_::path_ + "grid.plt";
+	grid_post_header_text.write(grid_file_path);
+	grid_post_data_text.add_write(grid_file_path);
+}
