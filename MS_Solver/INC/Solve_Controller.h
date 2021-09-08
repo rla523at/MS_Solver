@@ -57,6 +57,8 @@ public:
 
         Log::print();
 
+        This_::num_iter_++;
+
         if (This_::end_condition_ == Controll_Condition::by_time) {
             const double expect_time = current_time + time_step;
             if (This_::end_condition_constant_ <= expect_time) {
@@ -79,7 +81,7 @@ public:
             }
         }
 
-        This_::num_iter_++;
+        //This_::num_iter_++;
     }
 
     static bool is_time_to_end(const double current_time) {                

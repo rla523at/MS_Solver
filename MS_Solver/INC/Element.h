@@ -122,18 +122,18 @@ public:
 
 public:
 	bool operator==(const Geometry& other) const;
-		
+
 public:
 	Space_Vector_ center_node(void) const;
 	std::vector<Space_Vector_> post_nodes(const ushort post_order) const;
-	std::vector<Space_Vector_> vertex_nodes(void) const;
+	std::vector<Space_Vector_> vertex_nodes(void) const;	
 	double volume(void) const;
 	std::array<double, space_dimension> projected_volume(void) const;
 	Space_Vector_ normalized_normal_vector(const Space_Vector_& node) const;
 	std::vector<Geometry> face_geometries(void) const;
 	std::vector<Geometry> sub_simplex_geometries(void) const;
 	bool can_be_periodic_pair(const Geometry& other) const;
-	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;
+	const Quadrature_Rule<space_dimension>& get_quadrature_rule(const ushort integrand_order) const;	
 
 	template <ushort polynomial_order>
 	auto initial_basis_function(void) const;
@@ -142,6 +142,9 @@ public:
 
 	//auto initial_basis_function(const ushort polynomial_order) const;
 	//auto orthonormal_basis_vector_function(const ushort polynomial_order) const;
+
+public:
+	const std::vector<Space_Vector_>& get_nodes(void) const { return nodes_; };
 
 	//private: for test
 	std::vector<std::vector<Space_Vector_>> set_of_face_nodes(void) const;
@@ -170,8 +173,10 @@ public:
 	std::vector<Element> make_face_elements(void) const;
 	bool is_periodic_pair(const Element& other) const;
 	std::vector<std::pair<uint, uint>> find_periodic_vnode_index_pairs(const Element& other) const;
+	std::vector<uint> find_matched_periodic_node_indexes(const Element& other) const;
 	std::vector<std::vector<uint>> set_of_face_node_indexes(void) const;
 	std::vector<std::vector<uint>> set_of_face_vertex_node_indexes(void) const;
+	std::vector<Euclidean_Vector<space_dimension>> nodes_at_indexes(const std::vector<uint>& indexes) const;
 
 	//private:
 	bool is_periodic_boundary(void) const;
@@ -423,10 +428,11 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//   0────2
 		//  /   				 
 		// 1 
+		//index 순서대로 transformation 되었을 때, cell 중심부를 바라보게
 		std::vector<ushort> face0_node_index = { 0,1,2 };
 		std::vector<ushort> face1_node_index = { 0,2,3 };
 		std::vector<ushort> face2_node_index = { 0,3,1 };
-		std::vector<ushort> face3_node_index = { 1,2,3 };
+		std::vector<ushort> face3_node_index = { 1,3,2 };
 		return { face0_node_index,face1_node_index, face2_node_index,face3_node_index };
 	}
 	case Figure::hexahedral: {
@@ -436,24 +442,7 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//  │ 0───┼─3
 		//  │/    │/
 		//  1─────2
-
-		////type1
-		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
-		//std::vector<ushort> face1_node_index = { 0,1,5,4 };
-		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
-		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
-		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
-		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
-
-		////type2
-		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
-		//std::vector<ushort> face1_node_index = { 0,4,5,1 };
-		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
-		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
-		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
-		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
-
-		//type3
+		//index 순서대로 transformation 되었을 때, cell 중심부를 바라보게
 		std::vector<ushort> face0_node_index = { 0,1,2,3 };
 		std::vector<ushort> face1_node_index = { 0,4,5,1 };
 		std::vector<ushort> face2_node_index = { 1,5,6,2 };
@@ -531,12 +520,13 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//   0────2
 		//  /   				 
 		// 1 
+		//index 순서대로 transformation 되었을 때, cell 중심부를 바라보게
 		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh yet");
-
 		std::vector<ushort> face0_node_index = { 0,1,2 };
 		std::vector<ushort> face1_node_index = { 0,2,3 };
 		std::vector<ushort> face2_node_index = { 0,3,1 };
-		std::vector<ushort> face3_node_index = { 1,2,3 };
+		std::vector<ushort> face3_node_index = { 1,3,2 };
+
 		return { face0_node_index,face1_node_index, face2_node_index,face3_node_index };
 	}
 	case Figure::hexahedral: {
@@ -546,17 +536,8 @@ std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face
 		//  │ 0───┼─3
 		//  │/    │/
 		//  1─────2
+		//index 순서대로 transformation 되었을 때, cell 중심부를 바라보게
 		dynamic_require(this->figure_order_ == 1, "this figure does not support high order mesh yet");
-
-		//type2
-		//std::vector<ushort> face0_node_index = { 0,1,2,3 };
-		//std::vector<ushort> face1_node_index = { 0,4,5,1 };
-		//std::vector<ushort> face2_node_index = { 1,2,6,5 };
-		//std::vector<ushort> face3_node_index = { 2,3,7,6 };
-		//std::vector<ushort> face4_node_index = { 0,3,7,4 };
-		//std::vector<ushort> face5_node_index = { 4,5,6,7 };
-
-		//type3
 		std::vector<ushort> face0_node_index = { 0,1,2,3 };
 		std::vector<ushort> face1_node_index = { 0,4,5,1 };
 		std::vector<ushort> face2_node_index = { 1,5,6,2 };
@@ -2078,6 +2059,27 @@ std::vector<std::vector<uint>> Element<space_dimension>::set_of_face_vertex_node
 }
 
 template <ushort space_dimension>
+std::vector<Euclidean_Vector<space_dimension>> Element<space_dimension>::nodes_at_indexes(const std::vector<uint>& indexes) const {
+	const auto num_index = indexes.size();	
+	std::vector<Euclidean_Vector<space_dimension>> nodes;
+	nodes.reserve(num_index);
+
+	const auto& this_nodes = this->geometry_.get_nodes();
+
+	for (const auto index : indexes) {
+		const auto index_iter = std::find(this->node_indexes_.begin(), this->node_indexes_.end(), index);
+
+		if (index_iter == this->node_indexes_.end())
+			throw std::runtime_error("this is not my node");
+
+		const auto pos = index_iter - this->node_indexes_.begin();
+		nodes.push_back(this_nodes[pos]);
+	}
+
+	return nodes;
+}
+
+template <ushort space_dimension>
 bool Element<space_dimension>::is_periodic_pair(const Element& other) const {
 	dynamic_require(this->is_periodic_boundary() && other.is_periodic_boundary(), "both elemets should be periodic boundary");
 
@@ -2131,6 +2133,43 @@ std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode
 	return periodic_vnode_index_pairs;
 }
 
+template <ushort space_dimension>
+std::vector<uint> Element<space_dimension>::find_matched_periodic_node_indexes(const Element& other) const {	
+	dynamic_require(this->element_type_ == ElementType::periodic && other.element_type_ == ElementType::periodic, "both element should be periodic");
+
+	const auto this_num_node = this->node_indexes_.size();
+	const auto other_num_node = other.node_indexes_.size();
+	dynamic_require(this_num_node == other_num_node, "periodic pair should have same number of node");
+
+	std::unordered_set<uint> matched_other_vnode_index;
+	matched_other_vnode_index.reserve(other_num_node);
+
+	std::vector<uint> matched_periodic_node_indexes(this_num_node);
+
+	const auto& this_nodes = this->geometry_.get_nodes();
+	const auto& other_nodes = other.geometry_.get_nodes();
+
+	for (ushort i = 0; i < this_num_node; ++i) {
+		const auto& this_node = this_nodes[i];
+		const auto this_node_index = this->node_indexes_[i];
+
+		for (ushort j = 0; j < other_num_node; ++j) {
+			const auto& other_node = other_nodes[j];
+			const auto other_node_index = other.node_indexes_[j];
+
+			if (matched_other_vnode_index.contains(other_node_index))
+				continue;
+
+			if (this_node.is_axis_translation(other_node)) {
+				matched_periodic_node_indexes[i] = other_node_index;
+				matched_other_vnode_index.insert(other_node_index);
+			}
+		}
+	}
+
+	dynamic_require(matched_periodic_node_indexes.size() == this_num_node, "every node should have pair");
+	return matched_periodic_node_indexes;
+}
 
 template <ushort space_dimension>
 bool Element<space_dimension>::is_periodic_boundary(void) const {

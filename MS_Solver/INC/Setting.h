@@ -5,11 +5,13 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_TEST/OrderTest_3D/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_Debug/3D_ordertest/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							3
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Quad3_3D,Quad5_3D,Quad7_3D,Quad8_3D,Quad10_3D
+#define __GRID_FILE_NAMES__						3D_Quad9,3D_Quad12
+//#define __GRID_FILE_NAMES__						Quad3_3D,Quad5_3D,Quad7_3D,Quad8_3D,Quad10_3D
+//#define __GRID_FILE_NAMES__						Quad10,Quad15,Quad20,Quad25,Quad30
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
@@ -32,7 +34,7 @@
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
 #define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		100
+#define __SOLVE_POST_CONDITION_CONSTANT__		10
 #define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS
@@ -208,14 +210,14 @@
 namespace ms {
 	inline void apply_user_defined_setting(void) {
 		if constexpr (__DIMENSION__ == 2) {
-			Linear_Advection<__DIMENSION__>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
-			Sine_Wave<__DIMENSION__>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
+			Linear_Advection<2>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
+			Sine_Wave<2>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
 			if constexpr (__GOVERNING_EQUATION__ == __EULER__)
 				Supersonic_Inlet<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO,INFLOW_RHOU,INFLOW_RHOV,INFLOW_RHOE });
 		}
 		else if constexpr (__DIMENSION__ == 3) {
-			Linear_Advection<__DIMENSION__>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED, Z_ADVECTION_SPEED });
-			Sine_Wave<__DIMENSION__>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH, Z_WAVE_LENGTH });
+			Linear_Advection<3>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED, Z_ADVECTION_SPEED });
+			Sine_Wave<3>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH, Z_WAVE_LENGTH });
 		}
 		else
 			throw std::runtime_error("not supported dimension");

@@ -61,9 +61,14 @@ Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 	this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.reserve(num_vnode);
 
 	for (const auto& [oc_side_element, nc_side_element] : this->elements.periodic_boundary_element_pairs) {
-		const auto periodic_vnode_index_pairs = oc_side_element.find_periodic_vnode_index_pairs(nc_side_element);
+		const auto oc_side_vnode_indexes = oc_side_element.vertex_node_indexes();
+		const auto nc_side_vnode_indexes = nc_side_element.vertex_node_indexes();
 
-		for (const auto [i_vnode_index, j_vnode_index] : periodic_vnode_index_pairs) {
+		const auto num_vnode = oc_side_vnode_indexes.size();
+		for (ushort i = 0; i < num_vnode; ++i) {
+			const auto i_vnode_index = oc_side_vnode_indexes[i];
+			const auto j_vnode_index = nc_side_vnode_indexes[i];
+
 			if (!this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.contains(i_vnode_index))
 				this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.emplace(i_vnode_index, std::set<uint>());
 
@@ -73,6 +78,20 @@ Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 			this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.at(i_vnode_index).insert(j_vnode_index);
 			this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.at(j_vnode_index).insert(i_vnode_index);
 		}
+
+
+		//const auto periodic_vnode_index_pairs = oc_side_element.find_periodic_vnode_index_pairs(nc_side_element);
+
+		//for (const auto [i_vnode_index, j_vnode_index] : periodic_vnode_index_pairs) {
+			//if (!this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.contains(i_vnode_index))
+			//	this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.emplace(i_vnode_index, std::set<uint>());
+
+			//if (!this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.contains(j_vnode_index))
+			//	this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.emplace(j_vnode_index, std::set<uint>());
+
+			//this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.at(i_vnode_index).insert(j_vnode_index);
+			//this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set_.at(j_vnode_index).insert(i_vnode_index);
+		//}
 	}
 
 	//consider periodic boundary conner
@@ -156,17 +175,17 @@ std::vector<std::pair<uint, uint>> Grid<space_dimension>::periodic_boundary_oc_n
 		const auto nc_index = nc_indexes.front();
 		pbdry_oc_nc_index_pairs[i] = { oc_index,nc_index };
 
-		////debug
+		//debug
 		//if (oc_index == 100 || nc_index == 100) {
-		//	std::cout << "pbdry_index " << i << "\n";
-		//	//std::cout << "oc_side_node_indexes " << oc_side_element.vertex_node_indexes() << "\n";
-		//	//std::cout << "nc_side_node_indexes " << nc_side_element.vertex_node_indexes() << "\n";
-		//	//std::cout << "oc_side_nodes " << oc_side_element.geometry_.vertex_nodes() << "\n";
-		//	//std::cout << "nc_side_nodes " << nc_side_element.geometry_.vertex_nodes() << "\n";
-		//	std::cout << "oc_index " << oc_index << "\n";
-		//	std::cout << "nc_index " << nc_index << "\n";
+			//std::cout << "pbdry_index " << i << "\n";
+			//std::cout << "oc_side_node_indexes " << oc_side_element.vertex_node_indexes() << "\n";
+			//std::cout << "nc_side_node_indexes " << nc_side_element.vertex_node_indexes() << "\n";
+			//std::cout << "oc_side_nodes " << oc_side_element.geometry_.vertex_nodes() << "\n";
+			//std::cout << "nc_side_nodes " << nc_side_element.geometry_.vertex_nodes() << "\n";
+			//std::cout << "oc_index " << oc_index << "\n";
+			//std::cout << "nc_index " << nc_index << "\n";
 		//}
-		////debug
+		//debug
 	}
 	//std::exit(523); // debug
 
