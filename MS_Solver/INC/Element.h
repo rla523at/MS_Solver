@@ -1799,12 +1799,6 @@ bool Geometry<space_dimension>::can_be_periodic_pair(const Geometry& other) cons
 	if (this->nodes_.size() != other.nodes_.size())
 		return false;
 
-	//////debug
-	//std::cout << "this_nodes " << this->vertex_nodes() << "\n";
-	//std::cout << "other_nodes " << other.vertex_nodes() << "\n";
-	////std::exit(523);
-	//////debug
-
 	if (this->is_on_same_axis(other))
 		return false;
 
