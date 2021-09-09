@@ -183,6 +183,17 @@ GTEST_TEST(ms, rfind_nth_6) {
 	EXPECT_EQ(result, ref);
 }
 
+//TEST(ms, rename) {
+//	const std::string path = "D:/CODE/MS_Solver/MS_Solver/RSC/Grid/3D/";
+//	const auto file_paths = ms::file_paths_in_path(path);
+//
+//	for (const auto& file_path : file_paths) {
+//		const auto file_name = ms::remove(file_path, path);
+//		const auto new_name = ms::replace_all(file_name, "Quad", "Hexa");
+//		ms::rename(path, file_name, new_name);
+//	}
+//}
+
 //#include "../MS_Solver/INC/Euclidean_Vector.h"
 //GTEST_TEST(ms, extract_file_name_1) {
 //	const std::string path = "C:/Users/KimMinSeok/source/repos/MS_Test/MS_Test/RSC/Quadrature/Standard/Quadrilateral/";

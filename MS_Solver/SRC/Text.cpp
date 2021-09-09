@@ -166,6 +166,13 @@ namespace ms {
 		}
 	}
 
+	std::string replace_all(const std::string& str, const std::string_view target, const std::string_view replacement) {
+		auto result = str;
+		ms::replace_all(result, target, replacement);
+		return result;
+	}
+
+
 	std::string remove(const std::string& str, const std::string& target) {
 		const auto target_size = target.size();
 
@@ -219,8 +226,8 @@ namespace ms {
 		return os.str();
 	}
 
-	Text extract_file_path_text(const std::string& path) {
-		Text file_name_text;
+	std::vector<std::string> file_paths_in_path(const std::string& path) {
+		std::vector<std::string> file_name_text;
 
 		std::filesystem::directory_iterator iter(path);
 		while (iter != std::filesystem::end(iter)) {
@@ -231,7 +238,7 @@ namespace ms {
 				continue;
 			}
 
-			file_name_text << entry.path().string();
+			file_name_text.push_back(entry.path().string());
 			iter++;
 		}
 
@@ -250,6 +257,10 @@ namespace ms {
 			return;
 		else
 			std::filesystem::create_directories(p);
+	}
+
+	void rename(const std::string& path, const std::string& old_name, const std::string& new_name) {
+		std::filesystem::rename(path + old_name, path + new_name);
 	}
 }
 

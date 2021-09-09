@@ -1,6 +1,6 @@
 #pragma once
 #include <algorithm>
-#include <fstream>	//file stream
+#include <fstream>
 #include <filesystem>
 #include <stdexcept>
 #include <string>
@@ -65,14 +65,16 @@ namespace ms {
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
 	void replace_all(std::string& str, const char target, const char replacement);
 	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement);
+	std::string replace_all(const std::string& str, const std::string_view target, const std::string_view replacement);
 	std::string remove(const std::string& str, const std::string& target);
 	std::string upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
 	bool contains_icase(const std::string& str, const char* target);
 	std::string double_to_str_sp(const double value); //double to string with show point
-	Text extract_file_path_text(const std::string& path);
+	std::vector<std::string> file_paths_in_path(const std::string& path);
 	void make_path(std::string_view file_path);
+	void rename(const std::string& path, const std::string& old_name, const std::string& new_name);
 
 	template<typename T>
 	T string_to_value(const std::string& str);
