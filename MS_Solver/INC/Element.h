@@ -85,6 +85,7 @@ public:
 	std::vector<Space_Vector_> post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const;
 	std::vector<std::vector<size_t>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	bool is_simplex(void) const;
+	bool is_line(void) const;
 	std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const;
 
@@ -775,6 +776,10 @@ bool ReferenceGeometry<space_dimension>::is_simplex(void) const {
 	}
 }
 
+template <ushort space_dimension>
+bool ReferenceGeometry<space_dimension>::is_line(void) const {
+	return this->figure_ == Figure::line;
+}
 
 template <ushort space_dimension>
 std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimension>::sub_simplex_reference_geometries(void) const {
@@ -2180,18 +2185,18 @@ FaceType Element<space_dimension>::check_face_type(const Element& owner_cell_ele
 	for (const auto& face_vnode_indexes : set_of_face_vnode_indexes) {
 		if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
 			continue;
-		else if (ms::is_circular_permutation(face_vnode_indexes, this_vnode_indexes))
+
+		if (this->geometry_.reference_geometry_.is_line()) {
+			if (this_vnode_indexes == face_vnode_indexes)
+				return FaceType::inward_face;
+			else
+				return FaceType::outward_face;
+		}
+
+		if (ms::is_circular_permutation(face_vnode_indexes, this_vnode_indexes))
 			return FaceType::inward_face;
 		else
 			return FaceType::outward_face;
-
-
-		//if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
-		//	continue;
-		//else if (this_vnode_indexes == face_vnode_indexes) //순방향
-		//	return FaceType::inward_face;
-		//else //역방향
-		//	return FaceType::outward_face;
 	}
 
 	throw std::runtime_error("this face is not input cell element face!");

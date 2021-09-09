@@ -61,7 +61,9 @@ Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::buil
 
 	SET_TIME_POINT;
 	
-	const auto grid_file_path = "RSC/Grid/" + grid_file_name + ".msh";
+	//const auto grid_file_path = "RSC/Grid/" + grid_file_name + ".msh";
+	const auto grid_file_path = "RSC/Grid/" + std::to_string(space_dimension) + "D/" + grid_file_name + ".msh";
+
 
 	std::ifstream grid_file_stream(grid_file_path);
 	dynamic_require(grid_file_stream.is_open(), "fail to open " + grid_file_path);
