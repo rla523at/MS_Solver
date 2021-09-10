@@ -166,19 +166,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
 
         RHS[oc_index] -= owner_side_delta_rhs;
         RHS[nc_index] += neighbor_side_delta_rhs;
-
-        //////debug        
-        //if (oc_index == 100 || nc_index == 100) {             
-        //    std::cout << "\n";
-        //    std::cout << "pbdry_pair_index " << i << "\n";
-        //    std::cout << "oc_nc_index " << oc_index << " " << nc_index << "\n";
-        //    //std::cout << "oc_side_solution_qnodes " << oc_side_solution_qnodes;
-        //    //std::cout << "nc_side_solution_qnodes " << nc_side_solution_qnodes;
-        //    std::cout << "normals " << normals << "\n";
-        //    //std::cout << "numerical_flux_quadrature " << numerical_flux_quadrature;
-        //}
     }
-    //std::exit(523);//debug
 }
 
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>

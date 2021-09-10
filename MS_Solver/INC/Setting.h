@@ -5,13 +5,11 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/Code/Result/MS_Solver/_Debug/3D_ordertest/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Debug/OrderTest_3D/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							3
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						3D_Quad9,3D_Quad12
-//#define __GRID_FILE_NAMES__						Quad3_3D,Quad5_3D,Quad7_3D,Quad8_3D,Quad10_3D
-//#define __GRID_FILE_NAMES__						Quad10,Quad15,Quad20,Quad25,Quad30
+#define __GRID_FILE_NAMES__						Hexa3
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__

@@ -554,21 +554,21 @@ GTEST_TEST(Polynomial, complex_operation_6) {
 
 GTEST_TEST(Polynomial, order_1) {
 	const Polynomial<space_dimension> p = 0;
-	const auto result = p.order();
+	const auto result = p.degree();
 
 	constexpr size_t ref = 0;
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(Polynomial, order_2) {
 	const auto p = X;
-	const auto result = p.order();
+	const auto result = p.degree();
 
 	constexpr size_t ref = 1;
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(Polynomial, order_3) {
 	const auto p = (X * Y)^2;
-	const auto result = p.order();
+	const auto result = p.degree();
 
 	constexpr size_t ref = 4;
 	EXPECT_EQ(result, ref);

@@ -50,8 +50,9 @@ public:
 	Polynomial& be_derivative(const ushort variable_index);	
 
 public:
+	size_t num_term(void) const { return this->added_poly_term_set_.size(); };
 	Polynomial differentiate(const ushort variable_index) const;
-	ushort order(void) const;
+	ushort degree(void) const;
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
 	Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
@@ -89,7 +90,7 @@ private:
 	public:
 		double be_constant(void) const;
 		double differentiate(const ushort variable_index) const;
-		ushort order(void) const;
+		ushort degree(void) const;
 		bool is_constant(void) const;
 		std::string to_string(void) const;
 	};
@@ -121,7 +122,7 @@ private:
 		bool has_same_base(const PoweredPolyTerm& other) const;
 		bool is_constant(void) const;
 		bool is_simple(void) const;
-		ushort order(void) const;
+		ushort degree(void) const;
 		std::string to_string(void) const;		
 	};
 
@@ -157,7 +158,7 @@ private:
 		double be_constant(void) const;
 		SimplePolyTerm be_simple(void) const;
 		Polynomial differentiate(const ushort variable_index) const;
-		ushort order(void) const;
+		ushort degree(void) const;
 		bool has_same_form(const PolyTerm& other) const;
 		bool is_simple(void) const;
 		bool is_zero(void) const;
@@ -317,7 +318,7 @@ double Polynomial<domain_dimension_>::operator()(const Euclidean_Vector<domain_d
 
 template <ushort domain_dimension_>
 bool Polynomial<domain_dimension_>::operator==(const Polynomial& other) const {
-	const auto max_order = std::max(this->order(), other.order());
+	const auto max_order = std::max(this->degree(), other.degree());
 	const auto compare_node_set = ms::polynomial_compare_node_set<domain_dimension_>(max_order);
 
 	for (const auto& compare_node : compare_node_set) {
@@ -361,10 +362,10 @@ constexpr ushort Polynomial<domain_dimension_>::domain_dimension(void) {
 }
 
 template <ushort domain_dimension_> 
-ushort Polynomial<domain_dimension_>::order(void) const {
-	ushort result = this->simple_poly_term_.order();
+ushort Polynomial<domain_dimension_>::degree(void) const {
+	ushort result = this->simple_poly_term_.degree();
 	for (const auto& term : this->added_poly_term_set_)
-		result = std::max(result, term.order());
+		result = std::max(result, term.degree());
 	return result;
 }
 
@@ -536,7 +537,7 @@ double Polynomial<domain_dimension_>::SimplePolyTerm::differentiate(const ushort
 //	return this->domain_dimension__;
 //}
 
-template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::SimplePolyTerm::order(void) const {
+template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::SimplePolyTerm::degree(void) const {
 	if (this->is_constant())
 		return 0;
 	else
@@ -657,7 +658,7 @@ bool Polynomial<domain_dimension_>::PoweredPolyTerm::is_simple(void) const {
 	return this->exponent_ == 1;
 }
 
-template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::PoweredPolyTerm::order(void) const {
+template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::PoweredPolyTerm::degree(void) const {
 	if (this->is_constant())
 		return 0;
 	else
@@ -813,11 +814,11 @@ Polynomial<domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::different
 }
 
 template <ushort domain_dimension_> 
-ushort Polynomial<domain_dimension_>::PolyTerm::order(void) const {
+ushort Polynomial<domain_dimension_>::PolyTerm::degree(void) const {
 	ushort result = 0;
 
 	for (ushort i = 0; i < this->num_term_; ++i)
-		result += this->data_ptr_[i].order();
+		result += this->data_ptr_[i].degree();
 
 	return result;
 }

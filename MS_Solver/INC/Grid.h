@@ -174,20 +174,7 @@ std::vector<std::pair<uint, uint>> Grid<space_dimension>::periodic_boundary_oc_n
 		const auto oc_index = oc_indexes.front();
 		const auto nc_index = nc_indexes.front();
 		pbdry_oc_nc_index_pairs[i] = { oc_index,nc_index };
-
-		//debug
-		//if (oc_index == 100 || nc_index == 100) {
-			//std::cout << "pbdry_index " << i << "\n";
-			//std::cout << "oc_side_node_indexes " << oc_side_element.vertex_node_indexes() << "\n";
-			//std::cout << "nc_side_node_indexes " << nc_side_element.vertex_node_indexes() << "\n";
-			//std::cout << "oc_side_nodes " << oc_side_element.geometry_.vertex_nodes() << "\n";
-			//std::cout << "nc_side_nodes " << nc_side_element.geometry_.vertex_nodes() << "\n";
-			//std::cout << "oc_index " << oc_index << "\n";
-			//std::cout << "nc_index " << nc_index << "\n";
-		//}
-		//debug
 	}
-	//std::exit(523); // debug
 
 	return pbdry_oc_nc_index_pairs;
 }

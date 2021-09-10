@@ -200,13 +200,23 @@ namespace ms {
 
 	template <ushort space_dimension>
 	double integrate(const Polynomial<space_dimension>& integrand, const Geometry<space_dimension>& geometry) {
-		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.order());
+		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.degree());
 		return ms::integrate(integrand, quadrature_rule);
 	}
 
 	template <ushort space_dimension>
 	double inner_product(const Polynomial<space_dimension>& f1, const Polynomial<space_dimension>& f2, const Geometry<space_dimension>& geometry) {
-		return ms::integrate(f1 * f2, geometry);
+		const auto integrand_degree = f1.degree() + f2.degree();
+
+		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_degree);
+		const auto& QP_set = quadrature_rule.points;
+		const auto& QW_set = quadrature_rule.weights;
+
+		double result = 0.0;
+		for (ushort i = 0; i < QP_set.size(); ++i)
+			result += f1(QP_set[i]) * f2(QP_set[i]) * QW_set[i];
+
+		return result;
 	}
 
 	template <ushort space_dimension>
