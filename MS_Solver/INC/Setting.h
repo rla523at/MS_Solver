@@ -5,11 +5,11 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Debug/OrderTest_3D/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Debug/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							3
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Hexa3
+#define __GRID_FILE_NAMES__						Hexa12
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
@@ -22,7 +22,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						4
+#define __SOLUTION_ORDER__						2
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
@@ -32,7 +32,7 @@
 #define __SOLVE_END_CONDITION__					__END_BY_TIME__
 #define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		10
+#define __SOLVE_POST_CONDITION_CONSTANT__		1
 #define __POST_ORDER__							2
 
 // AVAILABLE OPTIONS

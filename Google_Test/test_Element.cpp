@@ -1403,6 +1403,33 @@ TEST(ms, is_circular_permuation_5) {
 	EXPECT_TRUE(ms::is_circular_permutation(v1, v2));
 }
 
+TEST(ms, contains_1) {
+	std::vector<int> v1 = { 1,2,3,4,5 };
+
+	EXPECT_TRUE(ms::contains(v1, 3));
+}
+TEST(ms, contains_2) {
+	std::vector<int> v1 = { 1,2,3,4,5 };
+
+	EXPECT_FALSE(ms::contains(v1, 6));
+}
+
+TEST(ms, has_intersection_1) {
+	std::vector<int> v1 = { 1,2,3,4,5 };
+	std::vector<int> v2 = { 66,7,8,9,1 };
+	EXPECT_TRUE(ms::has_intersection(v1, v2));
+}
+TEST(ms, has_intersection_2) {
+	std::vector<int> v1 = { 1,2,3,4,5 };
+	std::vector<int> v2 = { 66,7,8,9 };
+	EXPECT_FALSE(ms::has_intersection(v1, v2));
+}
+TEST(ms, has_intersection_3) {
+	std::vector<int> v1 = { 1,2,3,4,5 };
+	std::vector<int> v2;
+	EXPECT_FALSE(ms::has_intersection(v1, v2));
+}
+
 //GTEST_TEST(Geometry, periodic_match_2) {
 //	const Figure fig = Figure::line;
 //	const order_t fig_order = 1;

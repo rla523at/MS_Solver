@@ -240,15 +240,16 @@ std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> Grid_
 			
 			const auto& j_element = periodic_boundary_elements[j];
 
-			if (i_element.is_periodic_pair(j_element)) {
-				//modify j_element based on i_element
-				auto matched_periodic_node_indexes = i_element.find_matched_periodic_node_indexes(j_element);
+			auto matched_periodic_node_indexes = i_element.find_matched_periodic_node_indexes(j_element);
+
+			if (!matched_periodic_node_indexes.empty()) {
+				//modify j_element based on i_element				
 				auto matched_periodic_nodes = j_element.nodes_at_indexes(matched_periodic_node_indexes);
 
 				const auto j_reference_geometry = j_element.geometry_.reference_geometry_;
 				Geometry matched_j_geometry(j_reference_geometry, std::move(matched_periodic_nodes));
 				Element matched_j_element(ElementType::periodic, std::move(matched_j_geometry), std::move(matched_periodic_node_indexes));
-				
+
 				matched_periodic_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(matched_j_element)));
 				matched_index_set.insert(i);
 				matched_index_set.insert(j);

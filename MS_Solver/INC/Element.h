@@ -173,7 +173,7 @@ public:
 	std::vector<uint> vertex_node_indexes(void) const;
 	std::vector<Element> make_face_elements(void) const;
 	bool is_periodic_pair(const Element& other) const;
-	std::vector<std::pair<uint, uint>> find_periodic_vnode_index_pairs(const Element& other) const;
+	//std::vector<std::pair<uint, uint>> find_periodic_vnode_index_pairs(const Element& other) const;
 	std::vector<uint> find_matched_periodic_node_indexes(const Element& other) const;
 	std::vector<std::vector<uint>> set_of_face_node_indexes(void) const;
 	std::vector<std::vector<uint>> set_of_face_vertex_node_indexes(void) const;
@@ -289,6 +289,25 @@ namespace ms {
 		}
 
 		return false;
+	}
+
+	template <typename T>
+	bool contains(const std::vector<T>& vec, const T& val) {
+		return std::find(vec.begin(), vec.end(), val) != vec.end();
+	}
+
+	template <typename T>
+	bool has_intersection(const std::vector<T>& vec1, const std::vector<T>& vec2) {
+		auto tmp1 = vec1;
+		auto tmp2 = vec2;
+
+		std::sort(tmp1.begin(), tmp1.end());
+		std::sort(tmp2.begin(), tmp2.end());
+
+		std::vector<T> intersection;
+		std::set_intersection(tmp1.begin(), tmp1.end(), tmp2.begin(), tmp2.end(), std::back_inserter(intersection));
+
+		return !intersection.empty();
 	}
 }
 
@@ -2102,53 +2121,16 @@ bool Element<space_dimension>::is_periodic_pair(const Element& other) const {
 }
 
 template <ushort space_dimension>
-std::vector<std::pair<uint, uint>> Element<space_dimension>::find_periodic_vnode_index_pairs(const Element& other) const {
-	//both element should be periodic pair
-	const auto this_vnode_indexes = this->vertex_node_indexes();
-	const auto other_vnode_indexes = other.vertex_node_indexes();
-
-	const auto this_vnodes = this->geometry_.vertex_nodes();
-	const auto other_vnodes = other.geometry_.vertex_nodes();
-
-	const auto this_num_vnode = this_vnode_indexes.size();
-	const auto other_num_vnode = other_vnode_indexes.size();
-	dynamic_require(this_num_vnode == other_num_vnode, "periodic pair should have same number of vertex node");
-	dynamic_require(this->element_type_ == other.element_type_, "periodic pair should have same element type");
-
-	std::unordered_set<uint> matched_other_vnode_index;
-	matched_other_vnode_index.reserve(other_num_vnode);
-
-	std::vector<std::pair<uint, uint>> periodic_vnode_index_pairs;
-	periodic_vnode_index_pairs.reserve(this_num_vnode);
-
-	for (ushort i = 0; i < this_num_vnode; ++i) {
-		const auto& this_vnode = this_vnodes[i];
-		const auto this_vnode_index = this_vnode_indexes[i];
-		for (ushort j = 0; j < other_num_vnode; ++j) {
-			const auto& other_vnode = other_vnodes[j];
-			const auto other_vnode_index = other_vnode_indexes[j];
-
-			if (matched_other_vnode_index.contains(other_vnode_index))
-				continue;
-
-			if (this_vnode.is_axis_translation(other_vnode)) {
-				periodic_vnode_index_pairs.push_back(std::make_pair(this_vnode_index, other_vnode_index));
-				matched_other_vnode_index.insert(other_vnode_index);
-			}
-		}
-	}
-	
-	dynamic_require(periodic_vnode_index_pairs.size() == this_num_vnode, "every vnode should have pair");
-	return periodic_vnode_index_pairs;
-}
-
-template <ushort space_dimension>
 std::vector<uint> Element<space_dimension>::find_matched_periodic_node_indexes(const Element& other) const {	
 	dynamic_require(this->element_type_ == ElementType::periodic && other.element_type_ == ElementType::periodic, "both element should be periodic");
 
+	if (this->geometry_.reference_geometry_ != other.geometry_.reference_geometry_ ||
+		this->geometry_.is_on_same_axis(other.geometry_)||
+		ms::has_intersection(this->node_indexes_, other.node_indexes_))
+		return {};
+
 	const auto this_num_node = this->node_indexes_.size();
 	const auto other_num_node = other.node_indexes_.size();
-	dynamic_require(this_num_node == other_num_node, "periodic pair should have same number of node");
 
 	std::unordered_set<uint> matched_other_vnode_index;
 	matched_other_vnode_index.reserve(other_num_node);
@@ -2172,11 +2154,16 @@ std::vector<uint> Element<space_dimension>::find_matched_periodic_node_indexes(c
 			if (this_node.is_axis_translation(other_node)) {
 				matched_periodic_node_indexes[i] = other_node_index;
 				matched_other_vnode_index.insert(other_node_index);
+				break;
 			}
 		}
+
+		//when i can not find pari
+		if (i + 1 != matched_other_vnode_index.size())
+			return {};
 	}
 
-	dynamic_require(matched_periodic_node_indexes.size() == this_num_node, "every node should have pair");
+	dynamic_require(matched_other_vnode_index.size() == this_num_node, "every node should have pair");
 	return matched_periodic_node_indexes;
 }
 
