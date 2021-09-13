@@ -69,7 +69,7 @@ public:
     static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
 
 public:
-    static std::string name(void) { return "Burgers<space_dimension>"; };    
+    static std::string name(void) { return "Burgers_" + std::to_string(space_dimension) + "D"; };
 };
 
 

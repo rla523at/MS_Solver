@@ -38,7 +38,6 @@ int main(void) {
 
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
 		Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
-		Post_AI_Data::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/" + "AI_Data/");
 
 		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__);
 		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
@@ -46,7 +45,6 @@ int main(void) {
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
 		Grid_ grid(std::move(grid_element));
 
-		Post_AI_Data::intialize(grid);
 		Tecplot::post_grid(grid.get_grid_elements().cell_elements); //post
 
 		Semi_Discrete_Equation_ semi_discrete_equation(grid);

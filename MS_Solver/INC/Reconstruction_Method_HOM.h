@@ -901,14 +901,14 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& vnode_index_to_simplex_P0_criterion_values) const {
+auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& set_of_vnode_index_to_simplex_P0_criterion_value) const {
     const auto num_vnode = this->vnode_index_to_share_cell_indexes_.size();
 
     //gathering P0 criterion values at vertex
     std::unordered_map<uint, std::vector<double>> vnode_index_to_simplex_P0_criterion_values;
     vnode_index_to_simplex_P0_criterion_values.reserve(num_vnode);
 
-    for (const auto& vnode_index_to_simplex_P0_criterion_value : vnode_index_to_simplex_P0_criterion_values) {
+    for (const auto& vnode_index_to_simplex_P0_criterion_value : set_of_vnode_index_to_simplex_P0_criterion_value) {
         for (const auto& [vnode_index, simplex_P0_criterion_value] : vnode_index_to_simplex_P0_criterion_value) {
             if (!vnode_index_to_simplex_P0_criterion_values.contains(vnode_index))
                 vnode_index_to_simplex_P0_criterion_values.emplace(vnode_index, std::vector<double>());

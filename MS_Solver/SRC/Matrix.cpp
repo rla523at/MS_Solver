@@ -64,15 +64,6 @@ std::string Dynamic_Matrix::to_string(void) const {
 		oss << "\n";
 	}
 	return oss.str();
-
-	
-	//std::string result;
-	//for (size_t i = 0; i < this->num_row_; ++i) {
-	//	for (size_t j = 0; j < this->num_column_; ++j)
-	//		result += ms::double_to_string(this->at(i, j)) + " ";
-	//	result += "\n";
-	//}
-	//return result;
 }
 
 Dynamic_Matrix Dynamic_Matrix::inverse(void) const {
