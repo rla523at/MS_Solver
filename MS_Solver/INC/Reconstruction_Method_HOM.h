@@ -1,4 +1,5 @@
 #pragma once
+#include "Debugger.h" //debug
 #include "Reconstruction_Method_FVM.h"
 #include "Polynomial.h"
 
@@ -145,6 +146,7 @@ private:
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P0_projected_basis_vnodes_;
 
+    std::vector<double> face_volume_;
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;
@@ -162,7 +164,7 @@ private:
     auto calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& cell_index_to_vnode_index_to_simplex_P0_criterion_values) const;
     template <ushort num_equation>
-    std::vector<ushort> calculate_set_of_num_trouble_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    std::vector<ushort> calculate_set_of_num_troubled_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
     template <ushort projection_order>
     auto calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const Geometry<space_dimension_>& sub_simplex_geometry) const;
     bool is_typeI_subcell_oscillation(const ushort num_trouble_boundaries) const;
@@ -722,6 +724,7 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     const auto num_pbdry_pair = pbdry_element_pairs.size();
 
     const auto num_face_without_bdry = num_inner_face + num_pbdry_pair;
+    this->face_volume_.reserve(num_face_without_bdry);
     this->face_characteristic_lengths_.reserve(num_face_without_bdry);
     this->face_oc_nc_index_pairs_.reserve(num_face_without_bdry);
     this->face_oc_nc_side_basis_jump_qnodes_pairs_.reserve(num_face_without_bdry);
@@ -729,8 +732,11 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
 
     for (uint i = 0; i < num_inner_face; ++i) {
         const auto& geometry = inner_face_elements[i].geometry_;
-        
-        const auto charactersitic_length = std::pow(geometry.volume(), 1.0 / (space_dimension_ - 1));
+
+        const auto face_volume = geometry.volume();
+        this->face_volume_.push_back(face_volume);
+
+        const auto charactersitic_length = std::pow(face_volume, 1.0 / (space_dimension_ - 1));
         this->face_characteristic_lengths_.push_back(charactersitic_length);
         
         const auto [oc_index, nc_index] = inner_face_oc_nc_index_pairs[i];
@@ -748,7 +754,10 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
         const auto& oc_side_geometry = oc_side_element.geometry_;
         const auto& nc_side_geometry = nc_side_element.geometry_;
 
-        const auto characteristic_length = std::pow(oc_side_geometry.volume(), 1.0 / (space_dimension_ - 1));
+        const auto face_volume = oc_side_geometry.volume();
+        this->face_volume_.push_back(face_volume);
+
+        const auto characteristic_length = std::pow(face_volume, 1.0 / (space_dimension_ - 1));
         this->face_characteristic_lengths_.push_back(characteristic_length);
 
         const auto [oc_index, nc_index] = pbdry_oc_nc_index_pairs[i];
@@ -789,10 +798,10 @@ template <ushort num_equation>
 void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto set_of_vnode_index_to_simplex_P0_criterion_value = this->calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(solution_coefficients);
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(set_of_vnode_index_to_simplex_P0_criterion_value);
-    const auto set_of_num_trobule_boundary = this->calculate_set_of_num_trouble_boundary(solution_coefficients);
+    const auto set_of_num_troubled_boundary = this->calculate_set_of_num_troubled_boundary(solution_coefficients);     
 
     const auto num_cell = solution_coefficients.size();
-    
+
     for (uint i = 0; i < num_cell; ++i) {
         auto temporal_solution_order = solution_order_;
 
@@ -802,7 +811,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
         const auto& vnode_index_to_simplex_P0_criterion_value = set_of_vnode_index_to_simplex_P0_criterion_value[i];
 
         const auto volume = this->volumes_[i];
-        const auto num_trouble_boundary = set_of_num_trobule_boundary[i];
+        const auto num_troubled_boundary = set_of_num_troubled_boundary[i];
         auto& solution_coefficient = solution_coefficients[i];
 
         while (true) {
@@ -827,16 +836,16 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     continue;
 
                 if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                    if (this->is_typeI_subcell_oscillation(num_trouble_boundary)) {
+                    if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
                         temporal_solution_order = 1;
                         is_normal_cell = false;
                         break;
                     }
                     continue;
                 }
-
+                
                 if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
-                    this->is_typeII_subcell_oscillation(num_trouble_boundary)) {
+                    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
                     is_normal_cell = false;
                     break;
                 }
@@ -957,7 +966,7 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_num_trouble_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_num_troubled_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
 
     std::vector<ushort> set_of_num_trouble_boundary(num_cell);
@@ -966,7 +975,7 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
     for (uint i = 0; i < num_face; ++i) {
         //calculate jump criterion
         const auto characteristic_length = this->face_characteristic_lengths_[i];
-        const auto jump_criterion = std::pow(characteristic_length, 0.5 * (solution_order_ + 1));
+        const auto threshold_value = std::pow(characteristic_length, 0.5 * (solution_order_ + 1));
 
         //calculate jump
         const auto [oc_index, nc_index] = this->face_oc_nc_index_pairs_[i];
@@ -975,16 +984,17 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
         const auto oc_side_solution_jump_qnodes = solution_coefficients[oc_index] * oc_side_basis_jump_qnodes;
         const auto nc_side_solution_jump_qnodes = solution_coefficients[nc_index] * nc_side_basis_jump_qnodes;
 
-        const auto oc_side_cirterion_solution_jump_qnodes = oc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
-        const auto nc_side_cirterion_solution_jump_qnodes = nc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
-        auto criterion_solution_diff_jump_qnodes = oc_side_cirterion_solution_jump_qnodes - nc_side_cirterion_solution_jump_qnodes;
+        const auto oc_side_criterion_solution_jump_qnodes = oc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
+        const auto nc_side_criterion_solution_jump_qnodes = nc_side_solution_jump_qnodes.row(This_::criterion_variable_index_);
+        auto criterion_solution_diff_jump_qnodes = oc_side_criterion_solution_jump_qnodes - nc_side_criterion_solution_jump_qnodes;
 
         criterion_solution_diff_jump_qnodes.be_absolute();
 
         const auto jump = criterion_solution_diff_jump_qnodes.inner_product(this->set_of_jump_qweights_[i]);
+        const auto smooth_boundary_indicator = jump / this->face_volume_[i];
 
         //compare and reflect
-        if (jump > jump_criterion) {
+        if (smooth_boundary_indicator > threshold_value) {
             set_of_num_trouble_boundary[oc_index]++;
             set_of_num_trouble_boundary[nc_index]++;
         }
@@ -1012,13 +1022,13 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_simple
 
 
 template <ushort space_dimension_, ushort solution_order_>
-bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeI_subcell_oscillation(const ushort num_trouble_boundary) const {
+bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeI_subcell_oscillation(const ushort num_troubled_boundary) const {
     constexpr ushort typeI_threshold_value = 2;
-    return typeI_threshold_value <= num_trouble_boundary;
+    return typeI_threshold_value <= num_troubled_boundary;
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeII_subcell_oscillation(const ushort num_trouble_boundary) const {
+bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeII_subcell_oscillation(const ushort num_troubled_boundary) const {
     constexpr ushort typeI_threshold_value = 1;
-    return typeI_threshold_value <= num_trouble_boundary;
+    return typeI_threshold_value <= num_troubled_boundary;
 }

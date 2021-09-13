@@ -5,7 +5,7 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
@@ -15,8 +15,8 @@
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 
-#if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #if		__RECONSTRUCTION_METHOD__	!=			__CONSTANT_RECONSTRUCTION__
+#if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
 #define __GRADIENT_METHOD__						__FACE_LEAST_SQUARE__
 #endif
 #endif
@@ -29,10 +29,10 @@
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__END_BY_TIME__
+#define __SOLVE_END_CONDITION__					__BY_TIME__
 #define __SOLVE_END_CONDITION_CONSTANT__		0.4
-#define __SOLVE_POST_CONDITION__				__POST_BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		1
+#define __SOLVE_POST_CONDITION__				__BY_TIME__
+#define __SOLVE_POST_CONDITION_CONSTANT__		0.4
 #define __POST_ORDER__							4
 
 // AVAILABLE OPTIONS
@@ -189,17 +189,17 @@
 #define TIME_STEP_METHOD Constant_Dt<__TIME_STEP_CONSTANT__>
 #endif
 
-#if		__SOLVE_END_CONDITION__ == __END_BY_TIME__
+#if		__SOLVE_END_CONDITION__ == __BY_TIME__
 #define SOLVE_END_CONDITION		Controll_Condition::by_time, __SOLVE_END_CONDITION_CONSTANT__
 #endif
-#if		__SOLVE_END_CONDITION__ == __END_BY_ITER__
+#if		__SOLVE_END_CONDITION__ == __BY_ITER__
 #define SOLVE_END_CONDITION		Controll_Condition::by_iter, __SOLVE_END_CONDITION_CONSTANT__
 #endif
 
-#if		__SOLVE_POST_CONDITION__ == __POST_BY_TIME__
+#if		__SOLVE_POST_CONDITION__ == __BY_TIME__
 #define SOLVE_POST_CONDITION	Controll_Condition::by_time, __SOLVE_POST_CONDITION_CONSTANT__
 #endif
-#if		__SOLVE_POST_CONDITION__ == __POST_BY_ITER__
+#if		__SOLVE_POST_CONDITION__ == __BY_ITER__
 #define SOLVE_POST_CONDITION	Controll_Condition::by_iter, __SOLVE_POST_CONDITION_CONSTANT__
 #endif
 

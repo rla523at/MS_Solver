@@ -36,12 +36,9 @@
 // TIME STEP METHOD
 #define __CFL__							80
 #define __CONSTANT_DT__					81
-// SOLVE END CONDITION
-#define __END_BY_TIME__					90
-#define __END_BY_ITER__					91
-// SOLVE POST CONDITION
-#define __POST_BY_TIME__				100
-#define __POST_BY_ITER__				101
+// END/POST CONDITION
+#define __BY_TIME__						90
+#define __BY_ITER__						91
 // GRADIENT METHOD
 #define __VERTEX_LEAST_SQUARE__			110
 #define __FACE_LEAST_SQUARE__			111
