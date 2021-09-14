@@ -35,8 +35,6 @@ void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
 		if (++index == num_read_line)
 			break;
 	}
-
-	//file_stream.close();
 }
 
 Text& Text::remove_empty_line(void) {

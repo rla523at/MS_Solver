@@ -29,7 +29,7 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 	post_file << 1;				//byte order, default
 
 	//iii. Title and variable names
-	if (file_type == Post_File_Type::Grid) {
+	if (file_type == Post_File_Type::grid) {
 		post_file << 1;												//file type, grid = 1 
 		post_file << This_::convert_to_binary_data("Grid");	//title
 
@@ -59,7 +59,7 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 	//iiii. zones
 	post_file << 299.0f;	//zone marker
 
-	if (file_type == Post_File_Type::Grid)
+	if (file_type == Post_File_Type::grid)
 		post_file << convert_to_binary_data("Grid");												//zone name
 	else {
 		post_file << convert_to_binary_data("Solution_at_" + std::to_string(*This_::time_ptr_));	//zone name
@@ -69,7 +69,7 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 	post_file << -1;									//parent zone, default
 	post_file << strand_id;								//strand id
 
-	if (file_type == Post_File_Type::Grid)
+	if (file_type == Post_File_Type::grid)
 		post_file << 0.0;								//solution time
 	else
 		post_file << *This_::time_ptr_;					//solution time	
@@ -87,7 +87,7 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 
 void Tecplot::write_binary_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities) {
 	const auto grid_file_path = This_::path_ + "grid.plt";
-	This_::write_binary_header(Post_File_Type::Grid, grid_file_path);
+	This_::write_binary_header(Post_File_Type::grid, grid_file_path);
 
 	//II. DATA SECTION		
 	const auto num_variable = coordinates.size();
@@ -125,7 +125,7 @@ void Tecplot::write_binary_solution_post_file(const std::vector<std::vector<doub
 	else
 		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
 
-	This_::write_binary_header(Post_File_Type::Solution, solution_file_path);
+	This_::write_binary_header(Post_File_Type::solution, solution_file_path);
 
 	//II. DATA SECTION
 	Binary_Writer solution_binary_file(solution_file_path, std::ios::app);
@@ -186,10 +186,10 @@ void Tecplot::write_ASCII_header(const Post_File_Type file_type, const std::stri
 
 	Text header;
 	header.reserve(10);
-	if (file_type == Post_File_Type::Grid) {
+	if (file_type == Post_File_Type::grid) {
 		header << "Title = Grid";
 		header << "FileType = Grid";
-		header << "Varialbes = " + This_::grid_variables_str_;
+		header << "Variables = " + This_::grid_variables_str_;
 		header << "Zone T = Grid";
 	}
 	else {
@@ -213,7 +213,7 @@ void Tecplot::write_ASCII_header(const Post_File_Type file_type, const std::stri
 	header << "DataPacking = Block";
 	header << "StrandID = " + std::to_string(strand_id);
 
-	if (file_type == Post_File_Type::Grid)
+	if (file_type == Post_File_Type::grid)
 		header << "SolutionTime = 0.0 \n\n";
 	else
 		header << "SolutionTime = " + ms::double_to_string(*time_ptr_) + "\n\n";
@@ -245,17 +245,17 @@ void Tecplot::write_ASCII_grid_post_file(const std::vector<std::vector<double>>&
 	std::string connectivity_str;
 	for (const auto& connectivity : connectivities) {
 		for (const auto index : connectivity)
-			connectivity_str += std::to_string(index + 1) + " ";
+			connectivity_str += std::to_string(index + 1) + " "; // ASCII format connectivity start with 1
 		grid_post_data_text << std::move(connectivity_str);
 	}
 
 	const auto grid_file_path = This_::path_ + "grid.plt";
 
-	This_::write_ASCII_header(Post_File_Type::Grid, grid_file_path);
+	This_::write_ASCII_header(Post_File_Type::grid, grid_file_path);
 	grid_post_data_text.add_write(grid_file_path);
 }
 
-void Tecplot::write_ASCII_solution_post_file(const std::vector<std::vector<double>>& set_of_post_solution_datas, const std::string& comment = "") {
+void Tecplot::write_ASCII_solution_post_file(const std::vector<std::vector<double>>& set_of_post_solution_datas, const std::string& comment) {
 	//convert data to ASCII text
 	size_t str_per_line = 1;
 
@@ -284,17 +284,17 @@ void Tecplot::write_ASCII_solution_post_file(const std::vector<std::vector<doubl
 		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
 
 	//write ASCII file
-	This_::write_ASCII_header(Post_File_Type::Solution, solution_file_path);
+	This_::write_ASCII_header(Post_File_Type::solution, solution_file_path);
 	ASCII_text.add_write(solution_file_path);
 
+
+	//finalize
+	This_::additioinal_data_name_to_values_.clear();
 	This_::post_condition_ = false;
 	if (comment == "final") {
 		count = 1;
 		This_::reset();
 	}
-
-	//This_::additioinal_data_name_to_values_.clear();
-	//This_::is_time_to_post_ = false;
 }
 
 
