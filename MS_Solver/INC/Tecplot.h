@@ -78,8 +78,10 @@ public:	//for HOM
 	static void conditionally_post_solution(const std::vector<Matrix<num_equation, num_basis>>& solution_coefficients, const std::string& comment = "");
 
 private:
-	static Text write_ASCII_header(const Post_File_Type file_type);
+	static void write_ASCII_header(const Post_File_Type file_type, const std::string_view post_file_path);
 	static void write_ASCII_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
+	static void write_ASCII_solution_post_file(const std::vector<std::vector<double>>& post_solution_datas, const std::string& comment = "");
+
 
 	static void write_binary_header(const Post_File_Type file_type, const std::string_view post_file_path);
 	static void write_binary_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
@@ -97,13 +99,15 @@ private:
 	static std::vector<T> convert_cell_data_to_post_point_data(const std::vector<T>& cell_datas);
 };
 
+namespace ms {
+	std::string to_string(const Zone_Type zone_type);
+}
 
 //template definition part
 template <typename Governing_Equation>
 void Tecplot::initialize(const ushort post_order) {
 	This_::post_order_ = post_order;
 
-	// Binary output
 	if constexpr (Governing_Equation::space_dimension() == 2) {
 		if constexpr (ms::is_SCL<Governing_Equation>) {
 			This_::grid_variables_str_ = "X,Y";
@@ -111,7 +115,6 @@ void Tecplot::initialize(const ushort post_order) {
 			This_::zone_type_ = Zone_Type::FETriangle;
 		}
 		else if constexpr (ms::is_Euler<Governing_Equation>) {
-
 			This_::grid_variables_str_ = "X,Y";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhoE,u,v,p";
 			This_::zone_type_ = Zone_Type::FETriangle;
@@ -124,7 +127,6 @@ void Tecplot::initialize(const ushort post_order) {
 			This_::zone_type_ = Zone_Type::FETetrahedron;
 		}
 		else if constexpr (ms::is_Euler<Governing_Equation>) {
-
 			This_::grid_variables_str_ = "X,Y,Z";
 			This_::solution_variables_str_ = "rho,rhou,rhov,rhow,rhoE,u,v,w,p";
 			This_::zone_type_ = Zone_Type::FETetrahedron;
@@ -441,91 +443,91 @@ std::vector<T> Tecplot::convert_cell_data_to_post_point_data(const std::vector<T
 
 //template <ushort num_equation>
 //void Post_Solution_Data::write_solution_post_file(const std::vector<Euclidean_Vector<num_equation>>& post_point_solutions, const std::string& comment) {
-//	static size_t count = 1;
-//
-//	std::string solution_file_path;
-//	if (comment.empty())
-//		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
-//	else
-//		solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
-//
-//	//solution post header text
-//	//auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
-//	//solution_post_header_text.write(solution_file_path);
-//
-//
-//	//solution post data text
-//	size_t str_per_line = 1;
-//
-//	Text solution_post_data_text;
-//
-//	if constexpr (This_::is_scalar_equation(num_equation)) {
-//		solution_post_data_text.resize(num_equation);
-//
-//		for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
-//			const auto& solution = post_point_solutions[i];
-//			solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
-//			if (str_per_line == 10) {
-//				solution_post_data_text[0] += "\n";
-//				str_per_line = 1;
-//			}
-//		}
-//	}
-//	else {
-//		solution_post_data_text.resize(2 * num_equation);
-//
-//		for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
-//			const auto& cvariable = post_point_solutions[i];
-//			const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
-//
-//			//write conservative variable
-//			for (size_t k = 0; k < num_equation; ++k)
-//				solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
-//
-//			//write primitive variable without a
-//			for (size_t k = 0; k < num_equation - 1; ++k)
-//				solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
-//
-//			if (str_per_line == 10) {
-//				for (auto& sentence : solution_post_data_text)
-//					sentence += "\n";
-//
-//				str_per_line = 1;
-//			}
-//		}
-//	}
-//
-//	//additional data
-//	str_per_line = 1;
-//
-//	const auto num_additional_data = This_::additioinal_data_name_to_values_.size();
-//	Text additional_data_text;
-//	additional_data_text.reserve(num_additional_data);
-//
-//	std::string data_str;
-//	for (const auto& [name, values] : This_::additioinal_data_name_to_values_) {
-//		for (size_t j = 0; j < This_::num_node_; ++j, ++str_per_line) {
-//			data_str += ms::double_to_string(values[j]) + " ";
-//
-//			if (str_per_line == 10) {
-//				data_str += "\n";
-//
-//				str_per_line = 1;
-//			}
-//		}
-//
-//		additional_data_text << std::move(data_str);
-//	}
-//
-//	//merge & wirte
-//	solution_post_data_text.merge(std::move(additional_data_text));
-//	solution_post_data_text.add_write(solution_file_path);
-//
-//
-//	This_::additioinal_data_name_to_values_.clear();
-//	This_::is_time_to_post_ = false;
-//	if (comment == "final") {
-//		count = 1;
-//		This_::reset();
-//	}
+	//static size_t count = 1;
+
+	//std::string solution_file_path;
+	//if (comment.empty())
+	//	solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + ".plt";
+	//else
+	//	solution_file_path = This_::path_ + "solution_" + std::to_string(count++) + "_" + comment + ".plt";
+
+	////solution post header text
+	////auto solution_post_header_text = This_::header_text(Post_File_Type::Solution);
+	////solution_post_header_text.write(solution_file_path);
+
+
+	////solution post data text
+	//size_t str_per_line = 1;
+
+	//Text solution_post_data_text;
+
+	//if constexpr (This_::is_scalar_equation(num_equation)) {
+	//	solution_post_data_text.resize(num_equation);
+
+	//	for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
+	//		const auto& solution = post_point_solutions[i];
+	//		solution_post_data_text[0] += ms::double_to_string(solution.at(0)) + " ";
+	//		if (str_per_line == 10) {
+	//			solution_post_data_text[0] += "\n";
+	//			str_per_line = 1;
+	//		}
+	//	}
+	//}
+	//else {
+	//	solution_post_data_text.resize(2 * num_equation);
+
+	//	for (size_t i = 0; i < This_::num_node_; ++i, ++str_per_line) {
+	//		const auto& cvariable = post_point_solutions[i];
+	//		const auto pvariable = Euler_2D::conservative_to_primitive(cvariable);
+
+	//		//write conservative variable
+	//		for (size_t k = 0; k < num_equation; ++k)
+	//			solution_post_data_text[k] += ms::double_to_string(cvariable.at(k)) + " ";
+
+	//		//write primitive variable without a
+	//		for (size_t k = 0; k < num_equation - 1; ++k)
+	//			solution_post_data_text[k + 4] += ms::double_to_string(pvariable.at(k)) + " ";
+
+	//		if (str_per_line == 10) {
+	//			for (auto& sentence : solution_post_data_text)
+	//				sentence += "\n";
+
+	//			str_per_line = 1;
+	//		}
+	//	}
+	//}
+
+	////additional data
+	//str_per_line = 1;
+
+	//const auto num_additional_data = This_::additioinal_data_name_to_values_.size();
+	//Text additional_data_text;
+	//additional_data_text.reserve(num_additional_data);
+
+	//std::string data_str;
+	//for (const auto& [name, values] : This_::additioinal_data_name_to_values_) {
+	//	for (size_t j = 0; j < This_::num_node_; ++j, ++str_per_line) {
+	//		data_str += ms::double_to_string(values[j]) + " ";
+
+	//		if (str_per_line == 10) {
+	//			data_str += "\n";
+
+	//			str_per_line = 1;
+	//		}
+	//	}
+
+	//	additional_data_text << std::move(data_str);
+	//}
+
+	////merge & wirte
+	//solution_post_data_text.merge(std::move(additional_data_text));
+	//solution_post_data_text.add_write(solution_file_path);
+
+
+	//This_::additioinal_data_name_to_values_.clear();
+	//This_::is_time_to_post_ = false;
+	//if (comment == "final") {
+	//	count = 1;
+	//	This_::reset();
+	//}
 //}
