@@ -31,6 +31,10 @@ public:
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
     Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
     double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& node) const;
+
+public:
+    template<ushort num_equation>
+    auto solution_function(const uint cell_index, const Matrix<num_equation, num_basis_>& coefficient) const;
 };
 
 
@@ -249,6 +253,13 @@ double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P
     const auto& P0_basis_function = basis_function[0];
 
     return P0_basis_function(node);
+}
+
+template <ushort space_dimension_, ushort solution_order_>
+template<ushort num_equation>
+auto Polynomial_Reconstruction<space_dimension_, solution_order_>::solution_function(const uint cell_index, const Matrix<num_equation, num_basis_>& coefficient) const {
+    dynamic_require(cell_index < basis_vector_functions_.size(), "cell index should be less than number of cell");
+    return coefficient * this->basis_vector_functions_[cell_index];
 }
 
 template <ushort space_dimension_, ushort solution_order_>

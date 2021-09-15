@@ -26,12 +26,12 @@ public:
 public:
 	void merge(Text&& other);
 	Text& remove_empty_line(void);
-	Text& read_line_by_line(const std::string& read_file_path);
+	void read(const std::string& read_file_path);
 	void read(std::ifstream& file, const size_t num_read_line);
 
 public:
-	void add_write(const std::string& write_file_path) const;
-	void write(const std::string& write_file_path) const;
+	void add_write(const std::string_view write_file_path) const;
+	void write(const std::string_view write_file_path) const;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Text& text);

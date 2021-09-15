@@ -5,13 +5,19 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/ASCII_Post/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
+<<<<<<< HEAD
 #define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
 #define __GOVERNING_EQUATION__					__EULER__
 #define __INITIAL_CONDITION__					__MODIFIED_SOD__
+=======
+#define __GRID_FILE_NAMES__						Tri20
+#define __GOVERNING_EQUATION__					__BURGERS__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
+>>>>>>> dev/3D
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 
@@ -30,10 +36,17 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
+<<<<<<< HEAD
 #define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		100
+=======
+#define __SOLVE_END_CONDITION_CONSTANT__		0.4
+#define __SOLVE_POST_CONDITION__				__BY_ITER__
+#define __SOLVE_POST_CONDITION_CONSTANT__		10
+>>>>>>> dev/3D
 #define __POST_ORDER__							4
+#define __POST_FILE_FORMAT__					__BINARY__
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -48,6 +61,7 @@
 // __TIME_STEP_METHOD__				__CFL__, __CONSTANT_DT__
 // __SOLVE_END_CONDITION__			__END_BY_TIME__, __END_BY_ITER__
 // __SOLVE_POST_CONDITION__			__POST_BY_TIME__, __POST_BY_ITER__
+// __POST_MODE__					__ASCII__, __BINARY__
 
 // ######################################### OPTION END ################################################################
 
@@ -201,6 +215,13 @@
 #endif
 #if		__SOLVE_POST_CONDITION__ == __BY_ITER__
 #define SOLVE_POST_CONDITION	Controll_Condition::by_iter, __SOLVE_POST_CONDITION_CONSTANT__
+#endif
+
+#if		__POST_FILE_FORMAT__ == __ASCII__
+#define POST_FILE_FORMAT  Post_File_Format::ASCII
+#endif
+#if		__POST_FILE_FORMAT__ == __BINARY__
+#define POST_FILE_FORMAT  Post_File_Format::binary
 #endif
 
 // ########################################## MACRO SETTING END ##################################################################

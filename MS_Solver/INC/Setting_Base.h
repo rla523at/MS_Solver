@@ -39,6 +39,8 @@
 // END/POST CONDITION
 #define __BY_TIME__						90
 #define __BY_ITER__						91
+#define __ASCII__						92
+#define __BINARY__						93
 // GRADIENT METHOD
 #define __VERTEX_LEAST_SQUARE__			110
 #define __FACE_LEAST_SQUARE__			111

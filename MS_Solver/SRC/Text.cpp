@@ -14,20 +14,7 @@ Text& Text::operator<<(std::string&& str) {
 	return *this;
 }
 
-void Text::add_write(const std::string& file_path) const {
-	ms::make_path(file_path);
-	std::ofstream output_file(file_path, std::ios::app);
-	dynamic_require(output_file.is_open(), "Fail to open file" + file_path);
-
-	const auto num_sentence = this->size();
-	for (auto i = this->begin(); i != this->end() - 1; ++i)
-		output_file << *i << "\n";
-	output_file << this->back();
-
-	output_file.close();
-}
-
-Text& Text::read_line_by_line(const std::string& file_path) {	
+void Text::read(const std::string& file_path) {	
 	std::ifstream file_stream(file_path);
 	dynamic_require(file_stream.is_open(), "Fail to open file" + file_path);
 
@@ -36,7 +23,6 @@ Text& Text::read_line_by_line(const std::string& file_path) {
 		this->push_back(std::move(str));
 
 	file_stream.close();
-	return *this;
 }
 
 void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
@@ -49,8 +35,6 @@ void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
 		if (++index == num_read_line)
 			break;
 	}
-
-	//file_stream.close();
 }
 
 Text& Text::remove_empty_line(void) {
@@ -58,10 +42,23 @@ Text& Text::remove_empty_line(void) {
 	return *this;
 }
 
-void Text::write(const std::string& file_path) const {
+void Text::add_write(const std::string_view file_path) const {
+	ms::make_path(file_path);
+	std::ofstream output_file(file_path, std::ios::app);
+	dynamic_require(output_file.is_open(), "output file stream should be opend before write");
+
+	const auto num_sentence = this->size();
+	for (auto i = this->begin(); i != this->end() - 1; ++i)
+		output_file << *i << "\n";
+	output_file << this->back();
+
+	output_file.close();
+}
+
+void Text::write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path);
-	dynamic_require(output_file.is_open(), "Fail to open file" + file_path); 
+	dynamic_require(output_file.is_open(), "output file stream should be opend before write"); 
 
 	const auto num_sentence = this->size();
 	for (auto i = this->begin(); i != this->end() - 1; ++i)

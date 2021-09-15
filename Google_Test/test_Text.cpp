@@ -16,7 +16,7 @@ GTEST_TEST(Text, write) {
 	txt.write("test.txt");
 
 	Text txt2;
-	txt2.read_line_by_line("test.txt");
+	txt2.read("test.txt");
 	const auto result = txt2.size();
 
 	const auto ref = 5;
