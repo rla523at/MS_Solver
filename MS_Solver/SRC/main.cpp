@@ -50,7 +50,16 @@ int main(void) {
 		Semi_Discrete_Equation_ semi_discrete_equation(grid);
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();
 
-		Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions);
+
+		try { Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions); }
+		catch (const std::exception& exception) {
+			std::cout << "\n================================================================================\n";
+			std::cout << "\t\t\t Abnormal Termination\n";
+			std::cout << "================================================================================\n";
+			std::cout << "Essential requirement is not satisfied => " << exception.what() << "\n";
+			Tecplot::post_solution(solutions, "abnormal_termination");
+			std::exit(523);
+		}
 
 		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
 

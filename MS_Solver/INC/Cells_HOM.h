@@ -121,8 +121,6 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
             const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
             const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
 
-            dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii), "radii should be finite number");
-
             local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
         }
         else if (This_::space_dimension_ == 3) {
@@ -132,7 +130,6 @@ double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step
             const auto x_radii = yz_projected_volume * x_projeced_maximum_lambda;
             const auto y_radii = xz_projected_volume * y_projeced_maximum_lambda;
             const auto z_radii = xy_projected_volume * z_projeced_maximum_lambda;
-            dynamic_require(std::isfinite(x_radii) && std::isfinite(y_radii) && std::isfinite(z_radii), "radii should be finite number");
 
             local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii + z_radii);
         }

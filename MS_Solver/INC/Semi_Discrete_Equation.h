@@ -64,19 +64,8 @@ public:
     double calculate_time_step(const std::vector<Discretized_Solution_>& solutions) const {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
 
-        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) {            
-            try { return this->cells_.calculate_time_step(solutions, time_step_constant_); }
-            catch(const std::exception& exception){
-                std::cout << "================================================================================\n";
-                std::cout << "\t\t\t Abnormal Termination\n";
-                std::cout << "================================================================================\n";
-                std::cout << "Essential requirement is not satisfied => "<< exception.what() << "\n";
-                Tecplot::record_cell_indexes(); //debug
-                Tecplot::post_solution(solutions, "abnormal_termination");
-                std::exit(523);
-                return NULL;
-            }
-        }
+        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>)            
+            return this->cells_.calculate_time_step(solutions, time_step_constant_);
         else
             return time_step_constant_;
     }
