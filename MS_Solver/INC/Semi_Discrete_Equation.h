@@ -40,7 +40,7 @@ public:
         cells_(grid, reconstruction_method_), periodic_boundaries_(grid, reconstruction_method_), inner_faces_(grid, reconstruction_method_) {
 
         if constexpr (std::is_same_v<Spatial_Discrete_Method, HOM>)
-            Tecplot::initialize_HOM(grid, this->reconstruction_method_);
+            Tecplot::initialize_HOM(grid, this->reconstruction_method_); //post
 
         if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>) {
             SET_TIME_POINT;
@@ -64,8 +64,19 @@ public:
     double calculate_time_step(const std::vector<Discretized_Solution_>& solutions) const {
         static constexpr double time_step_constant_ = Time_Step_Method::constant();
 
-        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>)
-            return this->cells_.calculate_time_step(solutions, time_step_constant_);
+        if constexpr (std::is_same_v<Time_Step_Method, CFL<time_step_constant_>>) {            
+            try { return this->cells_.calculate_time_step(solutions, time_step_constant_); }
+            catch(const std::exception& exception){
+                std::cout << "================================================================================\n";
+                std::cout << "\t\t\t Abnormal Termination\n";
+                std::cout << "================================================================================\n";
+                std::cout << "Essential requirement is not satisfied => "<< exception.what() << "\n";
+                Tecplot::record_cell_indexes(); //debug
+                Tecplot::post_solution(solutions, "abnormal_termination");
+                std::exit(523);
+                return NULL;
+            }
+        }
         else
             return time_step_constant_;
     }
@@ -101,8 +112,9 @@ public:
         if constexpr (!ms::is_default_reconstruction<Spatial_Discrete_Method, Reconstruction_Method>)
             this->reconstruction_method_.reconstruct(solutions);
 
-        if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
-            Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
+        //이거 어떻게 못하나..
+        //if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
+        //    Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
     }
 
 };
