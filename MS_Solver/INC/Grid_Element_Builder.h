@@ -285,10 +285,12 @@ namespace ms {
 	inline ElementType string_to_element_type(const std::string& str) {
 		if (ms::contains_icase(str, "Unspecified"))
 			return ElementType::cell;
-		//else if (ms::is_there_icase(str, "slip") && ms::is_there_icase(str, "wall") && ms::is_there_icase(str, "2D"))
-		//	return ElementType::slip_wall_2D;
-		else if (ms::contains_icase(str, "SuperSonic", "inlet"))
-			return ElementType::supersonic_inlet;
+		else if (ms::contains_icase(str, "slip", "wall"))
+			return ElementType::slip_wall;
+		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))
+			return ElementType::supersonic_inlet1;
+		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))
+			return ElementType::supersonic_inlet2;
 		else if (ms::contains_icase(str, "SuperSonic", "outlet"))
 			return ElementType::supersonic_outlet;
 		else if (ms::contains_icase(str, "periodic"))

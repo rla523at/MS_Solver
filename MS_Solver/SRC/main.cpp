@@ -17,6 +17,9 @@ int main(void) {
 	for (auto& grid_file_name : grid_file_names) {
 		ms::remove(grid_file_name, " ");
 
+		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__, POST_FILE_FORMAT); //post
+		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
+
 		const auto date_str = Log::date_string();
 
 		Log::content_ << "current date : " << date_str << "\n\n";
@@ -38,9 +41,6 @@ int main(void) {
 
 		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
 		Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/"); //post
-
-		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__, POST_FILE_FORMAT); //post
-		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
 
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
 		Grid_ grid(std::move(grid_element));

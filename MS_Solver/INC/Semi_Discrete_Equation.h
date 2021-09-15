@@ -102,8 +102,8 @@ public:
             this->reconstruction_method_.reconstruct(solutions);
 
         //이거 어떻게 못하나..
-        //if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
-        //    Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
+        if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
+            Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
     }
 
 };

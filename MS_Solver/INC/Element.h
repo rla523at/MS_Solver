@@ -22,8 +22,9 @@ enum class Figure
 enum class ElementType
 {
 	cell, inner_face,
-	slip_wall_2D,
-	supersonic_inlet, supersonic_outlet,
+	slip_wall,
+	supersonic_inlet1, supersonic_inlet2,
+	supersonic_outlet,
 	periodic,
 	not_in_list
 };

@@ -18,7 +18,7 @@ public:
     static constexpr ushort num_basis(void) { return num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
-    static std::string name(void) { return "Polynomial_Reconstruction_P" + std::to_string(solution_order_); };
+    static std::string name(void) { return "Polynomial_Reconstruction_D" + std::to_string(solution_order_); };
 
 protected:
     std::vector<Vector_Function<Polynomial<space_dimension_>, num_basis_>> basis_vector_functions_;
@@ -601,6 +601,12 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
     const auto num_cell = solution_coefficients.size();
 
+    ////test
+    //const auto before_limiting = solution_coefficients;
+    //std::vector<ushort> type_I_flag(num_cell);
+    //std::vector<ushort> type_II_flag(num_cell);    
+    ////test
+
     for (uint i = 0; i < num_cell; ++i) {
         auto temporal_solution_order = solution_order_;
 
@@ -631,7 +637,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 const auto simplex_higher_mode_criterion_value = criterion_value - simplex_P1_projected_criterion_value;
                 const auto simplex_P1_mode_criterion_value = simplex_P1_projected_criterion_value - simplex_P0_criterion_value;
  
-                ////not use BD
+                ////////NoBD
+
                 //if (!Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume) &&
                 //    !P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) &&
                 //    !MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
@@ -639,7 +646,58 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 //    break;
                 //}
 
-                //use BD
+                ////////NoBD
+
+                //BD                
+
+                ////default
+                 
+                //if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                //    continue;
+                //if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                //    if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                //        //type_I_flag[i] = 1;//post
+                //        temporal_solution_order = 1;
+                //        is_normal_cell = false;
+                //        break;
+                //    }
+                //    continue;
+                //}
+
+                //if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                //    is_normal_cell = false;
+                //    break;
+                //}
+                 
+                ////default
+
+
+
+                //////super TypeI
+
+                //if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                //    continue;
+                //if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                //    if (num_troubled_boundary == 1) {
+                //        temporal_solution_order = 1;
+                //        is_normal_cell = false;
+                //        break;
+                //    }
+                //    continue;
+                //}
+
+                //if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                //    is_normal_cell = false;
+                //    break;
+                //}
+
+                //////super TypeI              
+
+
+                ////off typeII    
+                             
                 if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
                     continue;
 
@@ -651,12 +709,23 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     }
                     continue;
                 }
-                
-                if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
-                    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+
+                if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
                     is_normal_cell = false;
                     break;
                 }
+                 
+                ////off typeII
+
+
+
+                ////post
+                //if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) &&
+                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                //    type_II_flag[i] = 1;
+                //    Tecplot::post_condition_ = true;
+                //}                    
+                ////post
             }
 
             if (is_normal_cell)
@@ -688,6 +757,25 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 solution_coefficient *= this->Pn_projection_matrix(--temporal_solution_order); //limiting highest mode
         }
     }
+
+    //post
+    //Tecplot::record_cell_indexes();
+    //Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
+    //Tecplot::record_cell_variables("TypeI_flag", type_I_flag);
+    //Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
+    //Tecplot::post_solution(before_limiting, "before");
+    //Tecplot::record_cell_indexes();
+    //Tecplot::post_solution(solution_coefficients, "after");
+    
+    //if (Tecplot::post_condition_ == true) {
+    //    Tecplot::record_cell_indexes();
+    //    Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
+    //    Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
+    //    Tecplot::post_solution(before_limiting, "before");
+    //    Tecplot::record_cell_indexes();
+    //    Tecplot::post_solution(solution_coefficients, "after");
+    //}
+    //post
 }
 
 template <ushort space_dimension_, ushort solution_order_>

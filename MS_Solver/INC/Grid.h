@@ -228,7 +228,7 @@ std::vector<std::vector<size_t>> Grid<space_dimension>::set_of_face_share_cell_i
 			this_face_share_cell_indexes.erase(my_index_pos_iter);
 			dynamic_require(this_face_share_cell_indexes.size() <= 1, "face share cell should be unique or absent");
 
-			face_share_cell_indexes.push_back(this_face_share_cell_indexes.front());
+			face_share_cell_indexes.push_back(this_face_share_cell_indexes.front());//need to fix
 		}
 
 		set_of_face_share_cell_indexes.push_back(std::move(face_share_cell_indexes));

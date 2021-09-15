@@ -14,6 +14,9 @@ class LLF : public NFF  // Local Lax Fridrich method
 private:
     LLF(void) = delete;
 
+public:
+    using Governing_Equation_ = Governing_Equation;
+
 private:
     static_require(ms::is_governing_equation<Governing_Equation>, "It should be Governing Equation");
 
@@ -40,7 +43,10 @@ template<ushort space_dimension_>
 class LLF<Euler<space_dimension_>> : public NFF
 {
 private:
-LLF(void) = delete; 
+    LLF(void) = delete; 
+
+public:
+    using Governing_Equation_ = Euler<space_dimension_>;
 
 private:
     static constexpr ushort num_equation_       = Euler<space_dimension_>::num_equation();

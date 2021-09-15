@@ -17,6 +17,7 @@
 #define __SOD__							35
 #define __MODIFIED_SOD__				36
 #define __SHU_OSHER__					37
+#define __EXPLOSION_PROBLEM__			38
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41
