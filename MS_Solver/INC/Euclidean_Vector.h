@@ -140,6 +140,19 @@ namespace ms {
 
 		return d1 - ULP_precision * lower_ULP <= d2 && d2 <= d1 + ULP_precision * upper_ULP;
 	}
+
+	template <size_t dimension>
+	Euclidean_Vector<dimension> arithmetic_mean(const std::vector<Euclidean_Vector<dimension>>& euclidean_vectors) {
+		Euclidean_Vector<dimension> arithmetic_mean;
+
+		for (const auto& vector : euclidean_vectors)
+			arithmetic_mean += vector;
+
+		const auto num_vector = euclidean_vectors.size();
+		arithmetic_mean *= 1.0 / num_vector;
+
+		return arithmetic_mean;
+	}
 }
 
 

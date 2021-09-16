@@ -171,8 +171,8 @@ namespace ms {
 	}
 
 	template<size_t num_row, size_t num_column>
-	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& C) {
-		ms::BLAS::gemm(A, B, C);
+	void gemm(const Dynamic_Matrix& A, const Dynamic_Matrix& B, Matrix<num_row, num_column>& result) {
+		ms::BLAS::gemm(A, B, result);
 	}
 }
 

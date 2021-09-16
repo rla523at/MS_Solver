@@ -16,7 +16,7 @@ protected:
 	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
 
 public:
-	virtual Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const abstract;
+	virtual Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const abstract; //virtual은 함수 템플릿에서 사용할 수 없습니다.
 };
 
 
@@ -33,6 +33,7 @@ private:
 
 public:
 	static void initialize(const Solution_& inflow) { This_::inflow_ = inflow; };
+	static This_::Solution_ inflow(void) { return This_::inflow_; };
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
@@ -53,6 +54,7 @@ private:
 
 public:
 	static void initialize(const Solution_& inflow) { This_::inflow_ = inflow; };
+	static This_::Solution_ inflow(void) { return This_::inflow_; };
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {

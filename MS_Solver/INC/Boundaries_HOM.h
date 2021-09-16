@@ -25,7 +25,7 @@ protected:
     std::vector<uint> oc_indexes_;
     std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
-    std::vector<Dynamic_Matrix> oc_side_basis_weights_;
+    std::vector<Dynamic_Matrix> set_of_oc_side_basis_weights_;
 
 public:
     Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -45,46 +45,34 @@ Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(c
     SET_TIME_POINT;
 
     this->oc_indexes_ = grid.boundary_owner_cell_indexes();
+    this->boundary_flux_functions_ = grid.boundary_flux_functions<Numerical_Flux_Function>();
 
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& boundary_elements = grid_elements.boundary_elements;
+    constexpr auto integrand_degree = 2 * Reconstruction_Method::solution_order() + 1;
+    auto boundary_quadrature_rules = grid.boundary_quadrature_rules(integrand_degree);
 
-    const auto num_boundary = boundary_elements.size();
-    this->boundary_flux_functions_.reserve(num_boundary);
+    const auto num_boundary = this->oc_indexes_.size();
     this->set_of_oc_side_basis_qnodes_.reserve(num_boundary);
-    this->set_of_normals_.reserve(num_boundary);
-    this->oc_side_basis_weights_.reserve(num_boundary);
+    this->set_of_oc_side_basis_weights_.reserve(num_boundary);
 
-    constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
+    std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_qnodes;
+    set_of_qnodes.reserve(num_boundary);
 
     for (uint i = 0; i < num_boundary; ++i) {
-        const auto& boundary_element = boundary_elements[i];
-        const auto& boundary_geometry = boundary_element.geometry_;
-
-       this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(boundary_element.type()));
-
-        const auto oc_index =this->oc_indexes_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
-        const auto& quadrature_rule = boundary_geometry.get_quadrature_rule(integrand_order);
-        const auto& qnodes = quadrature_rule.points;
+        auto& quadrature_rule = boundary_quadrature_rules[i];
+        auto& qnodes = quadrature_rule.points;
         const auto& qweights = quadrature_rule.weights;
         const auto num_qnode = qnodes.size();
 
-       this->set_of_oc_side_basis_qnodes_.push_back(reconstruction_method.calculate_basis_nodes(oc_index, qnodes));
-
-       std::vector<Space_Vector_> normals(num_qnode);
-       Dynamic_Matrix basis_weight(num_qnode, This_::num_basis_);
-
-       for (ushort q = 0; q < num_qnode; ++q) {
-           normals[q] = boundary_element.normalized_normal_vector(oc_element, qnodes[q]);
-           basis_weight.change_row(q, reconstruction_method.calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
-        }
-
-        this->set_of_normals_.push_back(std::move(normals));
-        this->oc_side_basis_weights_.push_back(std::move(basis_weight));
+        Dynamic_Matrix basis_weights(num_qnode, This_::num_basis_);
+        for (ushort q = 0; q < num_qnode; ++q) 
+            basis_weights.change_row(q, reconstruction_method.calculate_basis_node(this->oc_indexes_[i], qnodes[q]) * qweights[q]);
+        
+        this->set_of_oc_side_basis_qnodes_.push_back(reconstruction_method.calculate_basis_nodes(this->oc_indexes_[i], qnodes));
+        this->set_of_oc_side_basis_weights_.push_back(std::move(basis_weights));
+        set_of_qnodes.push_back(std::move(qnodes));
     }
+
+    this->set_of_normals_ = grid.boundary_set_of_normals(this->oc_indexes_, set_of_qnodes);
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries HOM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -112,7 +100,7 @@ void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_R
         }
 
         Residual_ owner_side_delta_rhs;
-        ms::gemm(boundary_flux_quadrature,this->oc_side_basis_weights_[i], owner_side_delta_rhs);
+        ms::gemm(boundary_flux_quadrature,this->set_of_oc_side_basis_weights_[i], owner_side_delta_rhs);
 
         RHS[oc_index] -= owner_side_delta_rhs;
     }

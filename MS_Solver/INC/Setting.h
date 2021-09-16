@@ -5,15 +5,15 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/Compare/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shu_Osher_Quad_301x7
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SHU_OSHER__
-#define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
+#define __GRID_FILE_NAMES__						OrthoTri40
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
+#define __SPATIAL_DISCRETE_METHOD__				__FVM__
+#define __RECONSTRUCTION_METHOD__				__LINEAR_RECONSTRUCTION__
 
 #if		__RECONSTRUCTION_METHOD__	!=	__CONSTANT_RECONSTRUCTION__
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
@@ -26,14 +26,14 @@
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__
-#define __TIME_INTEGRAL_METHOD__				__SSPRK54__
+#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		1.8
-#define __SOLVE_POST_CONDITION__				__BY_TIME__
-#define __SOLVE_POST_CONDITION_CONSTANT__		0.2
-#define __POST_ORDER__							4
+#define __SOLVE_END_CONDITION_CONSTANT__		2.0
+#define __SOLVE_POST_CONDITION__				__BY_ITER__
+#define __SOLVE_POST_CONDITION_CONSTANT__		10
+#define __POST_ORDER__							1
 #define __POST_FILE_FORMAT__					__BINARY__
 
 // AVAILABLE OPTIONS
@@ -58,7 +58,7 @@
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				2.0
+#define Y_ADVECTION_SPEED				0.5
 #define Z_ADVECTION_SPEED				1.0
 
 // Sine Wave

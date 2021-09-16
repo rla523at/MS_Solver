@@ -16,7 +16,7 @@ private:
 protected:
     std::vector<Space_Vector_> normals_;
     std::vector<uint> oc_indexes_;
-    std::vector<double> areas_;
+    std::vector<double> volumes_;
     std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions_;
 
 public:
@@ -42,7 +42,7 @@ public:
 };
 
 
-//FVM이고 Constant Reconstruction이면 공통으로 사용하는 variable & Method
+//FVM이고 Linear Reconstruction이면 공통으로 사용하는 variable & Method
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>
 class Boundaries_FVM_Linear : public Boundaries_FVM_Base<Numerical_Flux_Function>
 {
@@ -71,32 +71,40 @@ Boundaries_FVM_Base<Numerical_Flux_Function>::Boundaries_FVM_Base(const Grid<spa
     SET_TIME_POINT;
 
     this->oc_indexes_ = grid.boundary_owner_cell_indexes();
-
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& boundary_elements = grid_elements.boundary_elements;
-
-    const auto num_boundaries = boundary_elements.size();
-    this->areas_.reserve(num_boundaries);
-    this->boundary_flux_functions_.reserve(num_boundaries);
-    this->normals_.reserve(num_boundaries);
-
-    for (uint i = 0; i < num_boundaries; ++i) {
-        const auto& boundary_element = boundary_elements[i];
-
-        this->areas_.push_back(boundary_element.geometry_.volume());
-        this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(boundary_element.type()));
-
-        const auto oc_index = this->oc_indexes_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
-        const auto center = boundary_element.geometry_.center_node();
-
-        this->normals_.push_back(boundary_element.normalized_normal_vector(oc_element, center));
-    }
+    this->volumes_ = grid.boundary_volumes();
+    this->boundary_flux_functions_ = grid.boundary_flux_functions<Numerical_Flux_Function>();
+    this->normals_ = grid.boundary_normals_at_centers(this->oc_indexes_);
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
+
+    //this->oc_indexes_ = grid.boundary_owner_cell_indexes();
+
+    //const auto& grid_elements = grid.get_grid_elements();
+    //const auto& cell_elements = grid_elements.cell_elements;
+    //const auto& boundary_elements = grid_elements.boundary_elements;
+
+    //const auto num_boundaries = boundary_elements.size();
+    //this->areas_.reserve(num_boundaries);
+    //this->boundary_flux_functions_.reserve(num_boundaries);
+    //this->normals_.reserve(num_boundaries);
+
+    //for (uint i = 0; i < num_boundaries; ++i) {
+    //    const auto& boundary_element = boundary_elements[i];
+
+    //    this->volumes_.push_back(boundary_element.geometry_.volume());
+    //    this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(boundary_element.type()));
+
+    //    const auto oc_index = this->oc_indexes_[i];
+    //    const auto& oc_element = cell_elements[oc_index];
+
+    //    const auto center = boundary_element.geometry_.center_node();
+
+    //    this->normals_.push_back(boundary_element.normalized_normal_vector(oc_element, center));
+    //}
+
+    //Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    //Log::print();
 }
 
 template <typename Numerical_Flux_Function>
@@ -121,28 +129,33 @@ Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Boundarie
     : Boundaries_FVM_Base<Numerical_Flux_Function>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto num_boundary = this->normals_.size();
-    this->oc_to_boundary_vectors_.reserve(num_boundary);
-
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& boundary_elements = grid_elements.boundary_elements;
-
-    for (size_t i = 0; i < num_boundary; ++i) {
-        const auto oc_index = this->oc_indexes_[i];
-        const auto& oc_geometry = cell_elements[oc_index].geometry_;
-        const auto& boundary_geometry = boundary_elements[i].geometry_;
-
-        const auto oc_center = oc_geometry.center_node();
-        const auto boundary_center = boundary_geometry.center_node();
-
-        const auto oc_to_face_vector = boundary_center - oc_center;
-
-        this->oc_to_boundary_vectors_.push_back(oc_to_face_vector);
-    }
+    this->oc_to_boundary_vectors_ = grid.owner_cell_center_to_boundary_center_vectors(this->oc_indexes_);
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
+
+    //const auto num_boundary = this->normals_.size();
+    //this->oc_to_boundary_vectors_.reserve(num_boundary);
+
+    //const auto& grid_elements = grid.get_grid_elements();
+    //const auto& cell_elements = grid_elements.cell_elements;
+    //const auto& boundary_elements = grid_elements.boundary_elements;
+
+    //for (size_t i = 0; i < num_boundary; ++i) {
+    //    const auto oc_index = this->oc_indexes_[i];
+    //    const auto& oc_geometry = cell_elements[oc_index].geometry_;
+    //    const auto& boundary_geometry = boundary_elements[i].geometry_;
+
+    //    const auto oc_center = oc_geometry.center_node();
+    //    const auto boundary_center = boundary_geometry.center_node();
+
+    //    const auto oc_to_face_vector = boundary_center - oc_center;
+
+    //    this->oc_to_boundary_vectors_.push_back(oc_to_face_vector);
+    //}
+
+    //Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    //Log::print();
 };
 
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>
@@ -165,7 +178,7 @@ void Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::calc
 
         const auto boundary_flux = boundary_flux_function->calculate(oc_side_solution, normal);
 
-        const auto delta_RHS = this->areas_[i] * boundary_flux;
+        const auto delta_RHS = this->volumes_[i] * boundary_flux;
 
         RHS[oc_index] -= delta_RHS;
     }

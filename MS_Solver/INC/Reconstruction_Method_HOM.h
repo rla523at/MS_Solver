@@ -30,7 +30,7 @@ public:
     auto calculate_set_of_transposed_gradient_basis(void) const;
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
     Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
-    double calculate_P0_basis_value(const uint cell_index, const Space_Vector_& node) const;
+    double calculate_P0_basis_value(const uint cell_index) const;
 
 public:
     template<ushort num_equation>
@@ -248,11 +248,11 @@ Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::cal
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_value(const uint cell_index, const Space_Vector_& node) const {
+double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_value(const uint cell_index) const {
     const auto& basis_function = this->basis_vector_functions_[cell_index];
     const auto& P0_basis_function = basis_function[0];
 
-    return P0_basis_function(node);
+    return P0_basis_function.to_constant();
 }
 
 template <ushort space_dimension_, ushort solution_order_>

@@ -26,7 +26,7 @@ protected:
 
     std::vector<double> volumes_;
     std::vector<std::array<double, space_dimension_>> projected_volumes_;
-    std::vector<const Quadrature_Rule<space_dimension_>*> quadrature_rule_ptrs_;
+    std::vector<Quadrature_Rule<space_dimension_>> quadrature_rules_;
     std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
     std::vector<Dynamic_Matrix> gradient_basis_weights_;
     std::vector<double> P0_basis_values_;
@@ -53,45 +53,34 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
     : reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;
+    const auto set_of_transposed_gradient_basis = this->reconstruction_method_.calculate_set_of_transposed_gradient_basis();
+    constexpr auto solution_degree = Reconstruction_Method::solution_order();
+    constexpr auto integrand_degree = 2 * solution_degree;
 
-    const auto num_cell = cell_elements.size();
-    this->volumes_.reserve(num_cell);
-    this->projected_volumes_.reserve(num_cell);
-    this->quadrature_rule_ptrs_.reserve(num_cell);
+    this->volumes_ = grid.cell_volumes();
+    this->projected_volumes_ = grid.cell_projected_volumes();
+    this->quadrature_rules_ = grid.cell_quadrature_rules(integrand_degree);
+
+    const auto num_cell = this->volumes_.size();
+    this->P0_basis_values_.reserve(num_cell);
     this->set_of_basis_qnodes_.reserve(num_cell);
     this->gradient_basis_weights_.reserve(num_cell);
-    this->P0_basis_values_.reserve(num_cell);
-
-    const auto set_of_transposed_gradient_basis = this->reconstruction_method_.calculate_set_of_transposed_gradient_basis();
-    constexpr auto solution_order = Reconstruction_Method::solution_order();
-    constexpr auto integrand_order = 2 * solution_order;
 
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& geometry = cell_elements[i].geometry_;
+        const auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];
+        const auto& qnodes = this->quadrature_rules_[i].points;
+        const auto& qweights = this->quadrature_rules_[i].weights;
+        const auto num_qnode = qnodes.size();
 
-        this->volumes_.push_back(geometry.volume());
-        this->projected_volumes_.push_back(geometry.projected_volume());
-        this->P0_basis_values_.push_back(this->reconstruction_method_.calculate_P0_basis_value(i, geometry.center_node()));
+        Dynamic_Matrix gradient_basis_weight(num_qnode * this->space_dimension_, this->num_basis_);
 
-        const auto& quadrature_rule = geometry.get_quadrature_rule(integrand_order);
-        this->quadrature_rule_ptrs_.push_back(&quadrature_rule);
-        this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.calculate_basis_nodes(i, quadrature_rule.points));
-        
-        const auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];        
-        const auto num_quadrature_point = quadrature_rule.points.size();
-        
-        Dynamic_Matrix gradient_basis_weight(num_quadrature_point * this->space_dimension_, this->num_basis_);
-
-        for (ushort q = 0; q < num_quadrature_point; ++q) {
-            const auto& quadrature_point = quadrature_rule.points[q];
-            const auto quadrature_weight = quadrature_rule.weights[q];
-            
-            const auto part_of_gradient_basis_weight = transposed_gradient_basis(quadrature_point) * quadrature_weight;
-
+        for (ushort q = 0; q < num_qnode; ++q) {
+            const auto part_of_gradient_basis_weight = transposed_gradient_basis(qnodes[q]) * qweights[q];
             gradient_basis_weight.change_rows(q * this->space_dimension_, part_of_gradient_basis_weight);
         }
 
+        this->P0_basis_values_.push_back(this->reconstruction_method_.calculate_P0_basis_value(i));
+        this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.calculate_basis_nodes(i, qnodes));
         this->gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
     }
 
@@ -169,12 +158,12 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
 template <typename Governing_Equation, typename Reconstruction_Method>
 template <typename Initial_Condition>
 auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_solutions(void) const {
-    const auto num_cell = this->quadrature_rule_ptrs_.size();
+    const auto num_cell = this->quadrature_rules_.size();
     std::vector<Matrix<This_::num_equation_, This_::num_basis_>> initial_solution_coefficients(num_cell);
     
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
-        const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
+        const auto& qnodes = this->quadrature_rules_[i].points;
+        const auto& qweights = this->quadrature_rules_[i].weights;
 
         const auto num_qnode = qnodes.size();
 
@@ -205,13 +194,12 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::estimate_error(const 
     double arithmetic_mean_Linf_error = 0.0;
 
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto& qnodes = this->quadrature_rule_ptrs_[i]->points;
+        const auto& qnodes = this->quadrature_rules_[i].points;
+        const auto& qweights = this->quadrature_rules_[i].weights;
+        const auto num_qnode = qnodes.size();
+
         const auto exact_solutions = Sine_Wave<space_dimension_>::calculate_exact_solutions(qnodes, time);
         const auto computed_solutions = solution_coefficients[i] * this->set_of_basis_qnodes_[i];
-
-        const auto& qweights = this->quadrature_rule_ptrs_[i]->weights;
-
-        const auto num_qnode = qnodes.size();
 
         double local_L1_error = 0.0;
         double local_L2_error = 0.0;

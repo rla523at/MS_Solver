@@ -53,6 +53,7 @@ public:
 	size_t num_term(void) const { return this->added_poly_term_set_.size(); };
 	Polynomial differentiate(const ushort variable_index) const;
 	ushort degree(void) const;
+	double to_constant(void) const;
 	std::string to_string(void) const;
 	Irrational_Function<domain_dimension_> root(const double root_index) const;
 	Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
@@ -88,7 +89,7 @@ private:
 		bool operator>(const SimplePolyTerm& other) const;
 
 	public:
-		double be_constant(void) const;
+		double to_constant(void) const;
 		double differentiate(const ushort variable_index) const;
 		ushort degree(void) const;
 		bool is_constant(void) const;
@@ -116,7 +117,7 @@ private:
 		bool operator>(const PoweredPolyTerm& other) const;
 
 	public:
-		double be_constant(void) const;
+		double to_constant(void) const;
 		SimplePolyTerm be_simple(void) const;
 		PolyTerm differentiate(const ushort variable_index) const;
 		bool has_same_base(const PoweredPolyTerm& other) const;
@@ -155,7 +156,7 @@ private:
 		bool operator!=(const PolyTerm& other) const;
 
 	public:
-		double be_constant(void) const;
+		double to_constant(void) const;
 		SimplePolyTerm be_simple(void) const;
 		Polynomial differentiate(const ushort variable_index) const;
 		ushort degree(void) const;
@@ -276,9 +277,9 @@ template <ushort domain_dimension_> Polynomial<domain_dimension_> Polynomial<dom
 
 	if (this->simple_poly_term_ != 0.0 && other.simple_poly_term_ != 0.0) {
 		if (this->simple_poly_term_.is_constant())
-			result.simple_poly_term_ = other.simple_poly_term_ * this->simple_poly_term_.be_constant();
+			result.simple_poly_term_ = other.simple_poly_term_ * this->simple_poly_term_.to_constant();
 		else if (other.simple_poly_term_.is_constant())
-			result.simple_poly_term_ = this->simple_poly_term_ * other.simple_poly_term_.be_constant();
+			result.simple_poly_term_ = this->simple_poly_term_ * other.simple_poly_term_.to_constant();
 		else
 			result.add_assign_poly_term(PolyTerm(this->simple_poly_term_) * other.simple_poly_term_);
 	}
@@ -369,7 +370,19 @@ ushort Polynomial<domain_dimension_>::degree(void) const {
 	return result;
 }
 
-template <ushort domain_dimension_> std::string Polynomial<domain_dimension_>::to_string(void) const {
+template <ushort domain_dimension_>
+double Polynomial<domain_dimension_>::to_constant(void) const {
+	dynamic_require(this->added_poly_term_set_.empty(), "constant polynomial should have empty poly term set");
+
+	if (this->is_absolute_)
+		return std::abs(this->simple_poly_term_.to_constant());
+	else
+		return this->simple_poly_term_.to_constant();
+}
+
+
+template <ushort domain_dimension_> 
+std::string Polynomial<domain_dimension_>::to_string(void) const {
 	if (this->added_poly_term_set_.empty())
 		return this->simple_poly_term_.to_string();
 
@@ -524,7 +537,8 @@ bool Polynomial<domain_dimension_>::SimplePolyTerm::operator>(const SimplePolyTe
 }
 
 template <ushort domain_dimension_> 
-double Polynomial<domain_dimension_>::SimplePolyTerm::be_constant(void) const {
+double Polynomial<domain_dimension_>::SimplePolyTerm::to_constant(void) const {
+	dynamic_require(this->is_constant(), "to be a constant, it should be constant");
 	return this->constant_;
 }
 
@@ -532,10 +546,6 @@ template <ushort domain_dimension_>
 double Polynomial<domain_dimension_>::SimplePolyTerm::differentiate(const ushort variable_index) const {
 	return this->coefficients_[variable_index];
 }
-
-//ushort Polynomial::SimplePolyTerm::domain_dimension_(void) const {
-//	return this->domain_dimension__;
-//}
 
 template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::SimplePolyTerm::degree(void) const {
 	if (this->is_constant())
@@ -546,12 +556,6 @@ template <ushort domain_dimension_> ushort Polynomial<domain_dimension_>::Simple
 
 template <ushort domain_dimension_> bool Polynomial<domain_dimension_>::SimplePolyTerm::is_constant(void) const {
 	return this->coefficients_ == std::array<double, domain_dimension_>();
-
-/*	for (const auto& coefficient : this->coefficients_) {
-		if (coefficient != 0)
-			return false;
-	}
-	return true*/;
 }
 
 template <ushort domain_dimension_> std::string Polynomial<domain_dimension_>::SimplePolyTerm::to_string(void) const {
@@ -617,8 +621,8 @@ bool Polynomial<domain_dimension_>::PoweredPolyTerm::operator>(const PoweredPoly
 }
 
 template <ushort domain_dimension_>
-double Polynomial<domain_dimension_>::PoweredPolyTerm::be_constant(void) const {
-	return std::pow(this->base_.be_constant(), this->exponent_);
+double Polynomial<domain_dimension_>::PoweredPolyTerm::to_constant(void) const {
+	return std::pow(this->base_.to_constant(), this->exponent_);
 }
 
 template <ushort domain_dimension_>
@@ -678,14 +682,14 @@ std::string Polynomial<domain_dimension_>::PoweredPolyTerm::to_string(void) cons
 template <ushort domain_dimension_> 
 Polynomial<domain_dimension_>::PolyTerm::PolyTerm(const SimplePolyTerm& simple_poly_term) {
 	if (simple_poly_term.is_constant())
-		this->coefficient_ = simple_poly_term.be_constant();
+		this->coefficient_ = simple_poly_term.to_constant();
 	else
 		this->data_ptr_[this->num_term_++] = simple_poly_term;
 }
 
 template <ushort domain_dimension_> Polynomial<domain_dimension_>::PolyTerm::PolyTerm(const PoweredPolyTerm& powered_poly_term) {
 	if (powered_poly_term.is_constant())
-		this->coefficient_ = powered_poly_term.be_constant();
+		this->coefficient_ = powered_poly_term.to_constant();
 	else
 		this->data_ptr_[this->num_term_++] = powered_poly_term;
 }
@@ -767,7 +771,7 @@ typename Polynomial<domain_dimension_>::PolyTerm& Polynomial<domain_dimension_>:
 }
 
 template <ushort domain_dimension_> 
-double Polynomial<domain_dimension_>::PolyTerm::be_constant(void) const {
+double Polynomial<domain_dimension_>::PolyTerm::to_constant(void) const {
 	return this->coefficient_;
 }
 

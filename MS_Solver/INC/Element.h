@@ -171,14 +171,16 @@ public:
 
 	ElementType type(void) const;
 	Euclidean_Vector<space_dimension> normalized_normal_vector(const Element& owner_cell_element, const Euclidean_Vector<space_dimension>& node) const;
+	std::vector<Euclidean_Vector<space_dimension>> normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector<space_dimension>>& nodes) const;
 	std::vector<uint> vertex_node_indexes(void) const;
 	std::vector<Element> make_face_elements(void) const;
 	bool is_periodic_pair(const Element& other) const;
-	//std::vector<std::pair<uint, uint>> find_periodic_vnode_index_pairs(const Element& other) const;
 	std::vector<uint> find_matched_periodic_node_indexes(const Element& other) const;
 	std::vector<std::vector<uint>> set_of_face_node_indexes(void) const;
 	std::vector<std::vector<uint>> set_of_face_vertex_node_indexes(void) const;
+	Euclidean_Vector<space_dimension> node_at_index(const uint index) const;
 	std::vector<Euclidean_Vector<space_dimension>> nodes_at_indexes(const std::vector<uint>& indexes) const;
+
 
 	//private:
 	bool is_periodic_boundary(void) const;
@@ -2022,6 +2024,23 @@ Euclidean_Vector<space_dimension> Element<space_dimension>::normalized_normal_ve
 }
 
 template <ushort space_dimension>
+std::vector<Euclidean_Vector<space_dimension>> Element<space_dimension>::normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector<space_dimension>>& nodes) const {
+	const auto num_node = nodes.size();	
+	std::vector<Euclidean_Vector<space_dimension>> normalized_normal_vectors(num_node);
+
+	for (uint i = 0; i < num_node; ++i)
+		normalized_normal_vectors[i] = this->geometry_.normalized_normal_vector(nodes[i]);
+
+	const auto face_type = this->check_face_type(owner_cell_element);
+	if (face_type == FaceType::inward_face) {
+		for (auto& normal_vector : normalized_normal_vectors)
+			normal_vector *= -1;
+	}
+
+	return normalized_normal_vectors;
+}
+
+template <ushort space_dimension>
 std::vector<uint> Element<space_dimension>::vertex_node_indexes(void) const {
 	const auto num_vertex = this->geometry_.reference_geometry_.num_vertex();
 
@@ -2088,22 +2107,23 @@ std::vector<std::vector<uint>> Element<space_dimension>::set_of_face_vertex_node
 }
 
 template <ushort space_dimension>
-std::vector<Euclidean_Vector<space_dimension>> Element<space_dimension>::nodes_at_indexes(const std::vector<uint>& indexes) const {
-	const auto num_index = indexes.size();	
-	std::vector<Euclidean_Vector<space_dimension>> nodes;
-	nodes.reserve(num_index);
+Euclidean_Vector<space_dimension> Element<space_dimension>::node_at_index(const uint index) const {
+	const auto index_iter = std::find(this->node_indexes_.begin(), this->node_indexes_.end(), index);
+	dynamic_require(index_iter != this->node_indexes_.end(), "index should be included in node indexes");
+
+	const auto pos = index_iter - this->node_indexes_.begin();
 
 	const auto& this_nodes = this->geometry_.get_nodes();
+	return this_nodes[pos];
+}
 
-	for (const auto index : indexes) {
-		const auto index_iter = std::find(this->node_indexes_.begin(), this->node_indexes_.end(), index);
+template <ushort space_dimension>
+std::vector<Euclidean_Vector<space_dimension>> Element<space_dimension>::nodes_at_indexes(const std::vector<uint>& indexes) const {
+	const auto num_index = indexes.size();	
+	std::vector<Euclidean_Vector<space_dimension>> nodes(num_index);
 
-		if (index_iter == this->node_indexes_.end())
-			throw std::runtime_error("this is not my node");
-
-		const auto pos = index_iter - this->node_indexes_.begin();
-		nodes.push_back(this_nodes[pos]);
-	}
+	for (ushort i = 0; i < num_index; ++i) 
+		nodes[i] = this->node_at_index(indexes[i]);
 
 	return nodes;
 }
