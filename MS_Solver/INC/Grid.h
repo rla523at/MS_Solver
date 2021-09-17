@@ -89,6 +89,7 @@ public:
 
 public:
 	std::vector<Ghost_Cell<space_dimension>> make_ghost_cells(void) const;
+	std::vector<std::array<uint, 9>> ANN_indexes(void) const; //temporary
 
 	
 	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_ignore_pbdry(void) const;
@@ -123,6 +124,14 @@ namespace ms {
 		std::set_intersection(container1.begin(), container1.end(), container2.begin(), container2.end(), std::back_inserter(intersection));
 
 		return intersection;
+	}
+
+	template <typename Container1, typename Container2, std::enable_if_t<std::is_same_v<typename Container1::value_type, typename Container2::value_type>, bool> = true>
+	std::vector<typename Container1::value_type> set_difference(const Container1& container1, const Container2& container2) {
+		std::vector<typename Container1::value_type> difference;
+		std::set_difference(container1.begin(), container1.end(), container2.begin(), container2.end(), std::back_inserter(difference));
+
+		return difference;
 	}
 }
 
@@ -785,7 +794,54 @@ std::vector<Ghost_Cell<space_dimension>> Grid<space_dimension>::make_ghost_cells
 }
 
 
+template <ushort space_dimension>
+std::vector<std::array<uint, 9>> Grid<space_dimension>::ANN_indexes(void) const {
 
+	const auto& cell_elements = this->elements.cell_elements;
+	
+	const auto num_cell = cell_elements.size();
+	std::vector<std::array<uint, 9>> set_of_ANN_indexes(num_cell);
+
+	std::array<uint, 4> location1 = { 5,3,1,7 };
+	std::array<uint, 4> location2 = { 6,4,2,8 };
+
+	for (uint i = 0; i < num_cell; ++i) {
+		const auto& element = cell_elements[i];
+		
+		std::array<uint, 9> ANN_indexes;
+		ANN_indexes.fill(999999);
+		ANN_indexes[0] = i;
+		
+		auto set_of_face_vnode_indexes = element.set_of_face_vertex_node_indexes();
+		const auto num_face = set_of_face_vnode_indexes.size();
+		
+		for (ushort j = 0; j < num_face; ++j) {
+			const auto face_vnode_indexes = set_of_face_vnode_indexes[j];						
+			const auto face_share_cell_index = this->find_face_share_cell_index_consider_pbdry(i, face_vnode_indexes);
+			ANN_indexes[location1[j]] = face_share_cell_index.value();
+		}
+
+		const auto vnode_indexes = element.vertex_node_indexes();
+		const auto num_vnode = vnode_indexes.size();
+
+		for (ushort j = 0; j < num_vnode; ++j) {
+			const auto vnode_index = vnode_indexes[j];
+			auto vnode_share_cell_index_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_index);
+			vnode_share_cell_index_set.erase(i);
+
+			std::set<uint> temp(ANN_indexes.begin(), ANN_indexes.end());
+
+			auto difference_indexes = ms::set_difference(vnode_share_cell_index_set, temp);
+			dynamic_require(difference_indexes.size() == 1, "difference indexes should be unique");
+
+			ANN_indexes[location2[j]] = difference_indexes.front();
+		}
+
+		set_of_ANN_indexes[i] = ANN_indexes;
+	}
+
+	return set_of_ANN_indexes;
+}
 
 
 

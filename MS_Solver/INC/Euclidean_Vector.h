@@ -102,6 +102,8 @@ public:
 
 public:
 	Dynamic_Euclidean_Vector& operator-=(const Dynamic_Euclidean_Vector& other);
+	Dynamic_Euclidean_Vector& operator*=(const double constant);
+
 
 public:
 	Dynamic_Euclidean_Vector operator-(const Dynamic_Euclidean_Vector& other) const;

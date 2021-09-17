@@ -1,6 +1,6 @@
 #pragma once
 #include "Matrix.h"
-
+#include "Debugger.h"
 
 class GE {}; // Governing Equation
 

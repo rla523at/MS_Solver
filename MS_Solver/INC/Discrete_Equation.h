@@ -22,6 +22,7 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
                 
+
         Tecplot::post_solution(solutions, "initial");//post
         semi_discrete_equation.reconstruct(solutions);
       

@@ -119,10 +119,10 @@ void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Functi
         const auto oc_side_solution = oc_solution + oc_solution_gradient * oc_to_oc_side_face_vector;
         const auto nc_side_solution = nc_solution + nc_solution_gradient * nc_to_nc_side_face_vector;
         const auto& pbdry_normal = this->normals_[i];
-
+    
         const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, pbdry_normal);
         const auto delta_RHS = this->volumes_[i] * numerical_flux;
         RHS[oc_index] -= delta_RHS;
-        RHS[nc_index] += delta_RHS;
+        RHS[nc_index] += delta_RHS;   
     }
 }

@@ -107,6 +107,13 @@ public:
     };
 };
 
+class Sigmoid {
+public:
+    double operator()(const double value) {
+        return 1.0 / (1.0 + std::exp(-value));
+    };
+};
+
 
 class HardTanh {
 public:
@@ -127,10 +134,11 @@ private:
     using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
 
 private:
-    Gradient_Method gradient_method_;
-    std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes_;
-    std::vector<std::vector<size_t>> set_of_face_share_cell_indexes_;
+    Gradient_Method gradient_method_;    
     std::vector<Solution_Gradient_> solution_gradients_;
+
+    std::vector<double> chracteristic_length_;
+    std::vector<std::array<uint, 9>> set_of_indexes_;//temporary
 
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
@@ -140,9 +148,7 @@ public:
     const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
 
 private:
-    bool is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
-    std::vector<size_t> ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const;
-    void limit(Dynamic_Euclidean_Vector& feature) const;
+    double limit(Dynamic_Euclidean_Vector& feature) const;
     ANN_Model read_model(void) const;
 
 public:
@@ -201,37 +207,6 @@ MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_m
 
     Log::content_ << std::left << std::setw(50) << "@ MLP u1 precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
-
-    //const auto& cell_elements = grid.get_grid_elements().cell_elements;
-
-    //const auto num_cell = cell_elements.size();
-    //this->vnode_indexes_set_.reserve(num_cell);
-    //this->center_to_vertex_matrixes_.reserve(num_cell);
-    //this->solution_gradients_.resize(num_cell);
-
-    //for (size_t i = 0; i < num_cell; ++i) {
-    //    const auto& element = cell_elements[i];
-    //    const auto& geometry = element.geometry_;
-
-    //    // vnode indexes set
-    //    this->vnode_indexes_set_.push_back(element.vertex_node_indexes());
-
-    //    //center to vertex matrix
-    //    const auto center_node = geometry.center_node();
-    //    const auto vertex_nodes = geometry.vertex_nodes();
-    //    const auto num_vertex = vertex_nodes.size();
-
-    //    Dynamic_Matrix center_to_vertex_matrix(space_dimension_, num_vertex);
-    //    for (size_t i = 0; i < num_vertex; ++i) {
-    //        const auto center_to_vertex = vertex_nodes[i] - center_node;
-    //        center_to_vertex_matrix.change_column(i, center_to_vertex);
-    //    }
-
-    //    this->center_to_vertex_matrixes_.push_back(std::move(center_to_vertex_matrix));
-    //}
-
-    //Log::content_ << std::left << std::setw(50) << "@ MLP u1 precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    //Log::print();
 }
 
 
@@ -304,158 +279,70 @@ auto MLP_u1<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(co
 
 template <typename Gradient_Method>
 ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :gradient_method_(grid) {
-    this->set_of_face_share_cell_indexes_    = grid.set_of_face_share_cell_indexes_consider_pbdry();
-    this->set_of_vertex_share_cell_indexes_  = grid.set_of_vertex_share_cell_indexes_consider_pbdry();
+    this->set_of_indexes_ = grid.ANN_indexes();
 
-    //sorting
-    for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
-        std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
+    const auto cell_volumes = grid.cell_volumes();
+    const auto num_cell = cell_volumes.size();
+    this->chracteristic_length_.resize(num_cell);
 
-    const auto num_cell = this->set_of_face_share_cell_indexes_.size();
-    this->set_of_ordered_indexes_.reserve(num_cell);
+    for (uint i = 0; i < num_cell; ++i)
+        this->chracteristic_length_[i] = std::pow(cell_volumes[i], 1.0 / space_dimension_);
 
-    for (ushort i = 0; i < num_cell; ++i) {
-        const auto target_cell_index = i;
-
-        const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
-
-        const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
-        const auto num_ordered_indexes = num_vnode_share_cell + 1; // include target cell
-
-        std::vector<size_t> ordered_indexes;
-        ordered_indexes.reserve(num_ordered_indexes);
-
-        ordered_indexes.push_back(target_cell_index);
-
-        while (ordered_indexes.size() != num_ordered_indexes) {
-            const auto& face_share_cell_indexes = set_of_face_share_cell_indexes_.at(ordered_indexes.back());
-
-            std::vector<size_t> face_share_cell_indexes_in_chunk;
-            std::set_intersection(vnode_share_cell_indexes.begin(), vnode_share_cell_indexes.end(), face_share_cell_indexes.begin(), face_share_cell_indexes.end(), std::back_inserter(face_share_cell_indexes_in_chunk));
-
-            std::vector<size_t> candidate_cell_indexes;
-            std::set<size_t> ordered_index_set(ordered_indexes.begin(), ordered_indexes.end());
-            std::set_difference(face_share_cell_indexes_in_chunk.begin(), face_share_cell_indexes_in_chunk.end(), ordered_index_set.begin(), ordered_index_set.end(), std::back_inserter(candidate_cell_indexes));
-
-            if (1 < candidate_cell_indexes.size()) {
-                const auto max_index = *std::max_element(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
-                ordered_indexes.push_back(max_index);
-            }
-            else
-                ordered_indexes.push_back(candidate_cell_indexes.front());
-        }
-
-        this->set_of_ordered_indexes_.push_back(std::move(ordered_indexes));
-    }
 }
 
 template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
+    const auto initial_solution_gradients = this->solution_gradients_;
 
     const auto num_cell = solutions.size();    
 
+    std::vector<double> post_limiter_value(num_cell);//post
+
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto ordered_indexes = this->ordering_function(solutions, i);
+        const auto ordered_indexes = this->set_of_indexes_[i];
         const auto num_ordered_index = ordered_indexes.size();
 
         const auto num_input_values = 3 * num_ordered_index; //temporal code
-        std::vector<double> input_values(num_input_values);
+
+        std::array<double, num_equation_> limiting_values = { 1 };
 
         for (size_t j = 0; j < num_equation_; ++j) {
+            std::vector<double> input_values(num_input_values);
+
             for (size_t k = 0; k < num_ordered_index; ++k) {
                 const auto index = ordered_indexes[k];
 
                 const auto& solution = solutions[index];
-                const auto& solution_gradient = solution_gradients_[index];
+                const auto& solution_gradient = initial_solution_gradients[index];
 
                 const auto solution_start_index = 0;
                 const auto solution_gradient_x_start_index = num_ordered_index;
                 const auto solution_gradient_y_start_index = 2 * num_ordered_index;
 
                 input_values[solution_start_index + k] = solution.at(j);
-                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0);
-                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1);
+                input_values[solution_gradient_x_start_index + k] = solution_gradient.at(j, 0) * this->chracteristic_length_[i];
+                input_values[solution_gradient_y_start_index + k] = solution_gradient.at(j, 1) * this->chracteristic_length_[i];
             }
+
+            Dynamic_Euclidean_Vector input = std::move(input_values);
+            limiting_values[j] = this->limit(input);
         }
 
-        Dynamic_Euclidean_Vector input = std::move(input_values);
-        this->limit(input);
-        this->solution_gradients_[i] *= input[0]; //temporal code                
+
+        post_limiter_value[i] = limiting_values[0];//post
+
+        const Matrix limiting_matrix = limiting_values;
+        this->solution_gradients_[i] = limiting_matrix * this->solution_gradients_[i];
     }
 }
 
-
 template <typename Gradient_Method>
-bool ANN_limiter<Gradient_Method>::is_constant_region(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
-    const auto& vertex_share_cell_index_set = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
-    const auto num_vertex_share_cell = vertex_share_cell_index_set.size();
-
-    std::vector<double> vertex_share_cell_solutions;
-    vertex_share_cell_solutions.reserve(num_vertex_share_cell);
-
-    for (const auto vertex_share_cell_index : vertex_share_cell_index_set)
-        vertex_share_cell_solutions.push_back(solutions[vertex_share_cell_index][0]);
-
-    const auto min_solution = *std::min_element(vertex_share_cell_solutions.begin(), vertex_share_cell_solutions.end());
-    const auto max_solution = *std::max_element(vertex_share_cell_solutions.begin(), vertex_share_cell_solutions.end());
-    const auto solution_diff = max_solution - min_solution;
-
-    return solution_diff < 0.01;
-}
-
-
-template <typename Gradient_Method>
-std::vector<size_t> ANN_limiter<Gradient_Method>::ordering_function(const std::vector<Solution_>& solutions, const size_t target_cell_index) const {
-    const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
-
-    const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
-    const auto num_ordered_indexes = num_vnode_share_cell + 1; // include target cell
-
-    std::vector<size_t> ordered_indexes;
-    ordered_indexes.reserve(num_ordered_indexes);
-
-    ordered_indexes.push_back(target_cell_index);
-
-    while (ordered_indexes.size() != num_ordered_indexes) {
-        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_.at(ordered_indexes.back());
-
-        std::vector<size_t> face_share_cell_indexes_in_chunk;
-        std::set_intersection(vnode_share_cell_indexes.begin(), vnode_share_cell_indexes.end(), face_share_cell_indexes.begin(), face_share_cell_indexes.end(), std::back_inserter(face_share_cell_indexes_in_chunk));
-
-        std::vector<size_t> candidate_cell_indexes;
-        std::set<size_t> ordered_index_set(ordered_indexes.begin(), ordered_indexes.end());
-        std::set_difference(face_share_cell_indexes_in_chunk.begin(), face_share_cell_indexes_in_chunk.end(), ordered_index_set.begin(), ordered_index_set.end(), std::back_inserter(candidate_cell_indexes));
-
-        if (1 < candidate_cell_indexes.size()) {
-            std::vector<double> temporary_solutions;
-            temporary_solutions.reserve(candidate_cell_indexes.size());
-
-            for (const auto candidate_cell_index : candidate_cell_indexes)
-                temporary_solutions.push_back(solutions[candidate_cell_index].at(0));
-
-            std::reverse(temporary_solutions.begin(), temporary_solutions.end());
-            std::reverse(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
-
-            const auto max_solution_iter = std::max_element(temporary_solutions.begin(), temporary_solutions.end());
-            const auto pos = max_solution_iter - temporary_solutions.begin();
-
-            const auto index = *std::next(candidate_cell_indexes.begin(), pos);
-            ordered_indexes.push_back(index);
-        }
-        else
-            ordered_indexes.push_back(candidate_cell_indexes.front());
-    }
-
-    return ordered_indexes;
-}
-
-template <typename Gradient_Method>
-void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) const {
+double ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) const {
     static const auto model = this->read_model();
     static const auto num_layer = model.weights.size();
     static const ReLU activation_function;
-    static const HardTanh output_function;
+    static const Sigmoid output_function;
 
     //hidden layer
     for (ushort i = 0; i < num_layer - 1; ++i) {
@@ -472,11 +359,13 @@ void ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) cons
     ms::gemvpv(model.weights[num_layer - 1], feature, new_feature);
     new_feature.apply(output_function);
     feature = std::move(new_feature);
+
+    return feature[0];
 }
 
 template <typename Gradient_Method>
 ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    std::ifstream file("RSC/model.bin", std::ios::binary); 
+    std::ifstream file("RSC/test_square.bin", std::ios::binary); 
     dynamic_require(file.is_open(), "Model file should be open");
 
     int num_layer;

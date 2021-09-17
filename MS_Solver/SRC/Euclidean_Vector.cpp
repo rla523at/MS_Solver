@@ -7,6 +7,11 @@ Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator-=(const Dynamic_Euc
 	return *this;
 }
 
+Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator*=(const double constant) {
+	cblas_dscal(this->dimension(), constant, this->values_.data(), 1);
+	return *this;
+}
+
 Dynamic_Euclidean_Vector Dynamic_Euclidean_Vector::operator-(const Dynamic_Euclidean_Vector& other) const {
 	auto result = *this;
 	return result -= other;

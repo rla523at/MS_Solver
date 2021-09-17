@@ -123,9 +123,21 @@ void Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::cal
         const auto nc_side_solution = nc_solution + nc_solution_gradient * nc_to_face_vector;
         const auto& inner_face_normal = this->normals_[i];
 
-        const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, inner_face_normal);
-        const auto delta_RHS = this->volumes_[i] * numerical_flux;
-        RHS[oc_index] -= delta_RHS;
-        RHS[nc_index] += delta_RHS;
+        try {
+            const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, inner_face_normal);
+            const auto delta_RHS = this->volumes_[i] * numerical_flux;
+            RHS[oc_index] -= delta_RHS;
+            RHS[nc_index] += delta_RHS;
+        }
+        catch (std::exception& except) {
+            const auto numerical_flux = Numerical_Flux_Function::calculate(oc_solution, nc_solution, inner_face_normal);
+            const auto delta_RHS = this->volumes_[i] * numerical_flux;
+            RHS[oc_index] -= delta_RHS;
+            RHS[nc_index] += delta_RHS;
+
+            std::cout << except.what() << "\n";
+            std::cout << "oc_index " << oc_index << "\n";
+            std::cout << "nc_index " << nc_index << "\n";
+        }
     }
 }
