@@ -24,7 +24,7 @@ protected:
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_qweights_basis_pairs_;
 
 public:
     Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -42,49 +42,44 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
     : reconstruction_method_(reconstruction_method){
     SET_TIME_POINT;
 
+    constexpr auto integrand_degree = 2 * Reconstruction_Method::solution_order() + 1;
+
     this->oc_nc_index_pairs_ = grid.inner_face_oc_nc_index_pairs();
+    auto inner_face_quadrature_rules = grid.inner_face_quadrature_rules(integrand_degree);
 
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& inner_face_elements = grid_elements.inner_face_elements;
-
-    const auto num_inner_face = inner_face_elements.size();
+    const auto num_inner_face = this->oc_nc_index_pairs_.size();
     this->oc_nc_side_basis_qnodes_pairs_.reserve(num_inner_face);
-    this->set_of_normals_.reserve(num_inner_face);
-    this->oc_nc_side_basis_weight_pairs_.reserve(num_inner_face);
+    this->oc_nc_side_qweights_basis_pairs_.reserve(num_inner_face);
 
-    constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
+    std::vector<uint> oc_indexes(num_inner_face);
+    std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_qnodes(num_inner_face);
 
     for (uint i = 0; i < num_inner_face; ++i) {
-        const auto& inner_face_element = inner_face_elements[i];
-        const auto& inner_face_geometry = inner_face_element.geometry_;
-
-        const auto& quadrature_rule = inner_face_geometry.get_quadrature_rule(integrand_order);
-        const auto& qnodes = quadrature_rule.points;
+        auto& quadrature_rule = inner_face_quadrature_rules[i];
+        auto& qnodes = quadrature_rule.points;
         const auto& qweights = quadrature_rule.weights;
+        const auto num_qnode = qnodes.size();
 
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto& oc_element = cell_elements[oc_index];
+        auto oc_side_basis_qnodes = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
+        auto nc_side_basis_qnodes = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
 
-        auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
-        auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
-
-        this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
-
-        const auto num_qnode = qnodes.size();
-        std::vector<Space_Vector_> normals(num_qnode);
-        Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
-        Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
+        Dynamic_Matrix oc_side_qweights_basis(num_qnode, This_::num_basis_);
+        Dynamic_Matrix nc_side_qweights_basis(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
-            normals[q] = inner_face_element.normalized_normal_vector(oc_element, qnodes[q]);
-            oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);          
-            nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, qnodes[q]) * qweights[q]); 
+            oc_side_qweights_basis.change_row(q, reconstruction_method.calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
+            nc_side_qweights_basis.change_row(q, reconstruction_method.calculate_basis_node(nc_index, qnodes[q]) * qweights[q]);
         }
 
-        this->set_of_normals_.push_back(std::move(normals));
-        this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
+        this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnodes), std::move(nc_side_basis_qnodes) });
+        this->oc_nc_side_qweights_basis_pairs_.push_back({ std::move(oc_side_qweights_basis), std::move(nc_side_qweights_basis) });
+
+        oc_indexes[i] = oc_index;
+        set_of_qnodes[i] = std::move(qnodes);
     }
+
+    this->set_of_normals_ = grid.inner_face_set_of_normals(oc_indexes, set_of_qnodes);
 
     Log::content_ << std::left << std::setw(50) << "@ Inner faces HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -117,7 +112,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
         }
 
         Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;
-        const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_basis_weight_pairs_[i];
+        const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_qweights_basis_pairs_[i];
         ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, owner_side_delta_rhs);
         ms::gemm(numerical_flux_quadrature, nc_side_basis_weight, neighbor_side_delta_rhs);
 

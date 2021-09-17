@@ -23,7 +23,7 @@ protected:
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_weight_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_qweights_basis_pairs_;
 
 public:
     Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -51,7 +51,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
     const auto num_periodic_pair = periodic_boundary_element_pairs.size();
     this->oc_nc_side_basis_qnodes_pairs_.reserve(num_periodic_pair);
     this->set_of_normals_.reserve(num_periodic_pair);
-    this->oc_nc_side_basis_weight_pairs_.reserve(num_periodic_pair);
+    this->oc_nc_side_qweights_basis_pairs_.reserve(num_periodic_pair);
 
     constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
 
@@ -87,47 +87,7 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
 
         this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
         this->set_of_normals_.push_back(std::move(normals));
-        this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
-
-
-
-
-
-
-
-
-       // auto re_ordered_nc_side_qnodes = nc_side_qnodes;
-       // auto re_ordered_nc_side_qweights = nc_side_qweights;
-
-       // const auto oc_side_normal_vector = oc_side_geometry.normalized_normal_vector(oc_side_geometry.center_node());
-       // const auto nc_side_normal_vector = nc_side_geometry.normalized_normal_vector(nc_side_geometry.center_node());
-       // const auto inner_product = oc_side_normal_vector.inner_product(nc_side_normal_vector);
-
-       // if (inner_product < 0) {
-       //     std::reverse(re_ordered_nc_side_qnodes.begin(), re_ordered_nc_side_qnodes.end());
-       //     std::reverse(re_ordered_nc_side_qweights.begin(), re_ordered_nc_side_qweights.end());
-       // }   
-
-       // const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-       // const auto& oc_element = cell_elements[oc_index];
-
-       // auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, oc_side_qnodes);
-       // auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, re_ordered_nc_side_qnodes);
-
-       // const auto num_qnode = oc_side_qnodes.size();
-       // std::vector<Space_Vector_> normals(num_qnode);
-       // Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
-       // Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
-
-       // for (ushort q = 0; q < num_qnode; ++q) {
-       //     normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
-       //     oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);    
-       //     nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, re_ordered_nc_side_qnodes[q]) * re_ordered_nc_side_qweights[q]);
-       // }        
-
-       //this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
-       //this->set_of_normals_.push_back(std::move(normals));
-       //this->oc_nc_side_basis_weight_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
+        this->oc_nc_side_qweights_basis_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Periodic Boundaries HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -160,7 +120,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
         }               
 
         Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;
-        const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_basis_weight_pairs_[i];
+        const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_qweights_basis_pairs_[i];
         ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, owner_side_delta_rhs);
         ms::gemm(numerical_flux_quadrature, nc_side_basis_weight, neighbor_side_delta_rhs);
 

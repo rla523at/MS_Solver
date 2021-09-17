@@ -13,7 +13,7 @@ private:
 protected:
     std::vector<Space_Vector_> normals_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<double> areas_;
+    std::vector<double> volumes_;
 
 public:
     Periodic_Boundaries_FVM_Base(const Grid<space_dimension>& grid);
@@ -69,27 +69,8 @@ Periodic_Boundaries_FVM_Base<space_dimension>::Periodic_Boundaries_FVM_Base(cons
     SET_TIME_POINT;
 
     this->oc_nc_index_pairs_ = grid.periodic_boundary_oc_nc_index_pairs();
-
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& pbdry_element_pairs = grid_elements.periodic_boundary_element_pairs;
-
-    const auto num_pbdry_pair = pbdry_element_pairs.size();
-    this->areas_.reserve(num_pbdry_pair);
-    this->normals_.reserve(num_pbdry_pair);
-
-    for (uint i = 0; i < num_pbdry_pair; ++i) {
-        const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
-
-        this->areas_.push_back(oc_side_element.geometry_.volume());
-
-        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
-        const auto oc_side_center = oc_side_element.geometry_.center_node();
-
-        this->normals_.push_back(oc_side_element.normalized_normal_vector(oc_element, oc_side_center));
-    }
+    this->volumes_ = grid.periodic_boundary_volumes();
+    this->normals_ = grid.periodic_boundary_normals_at_center(this->oc_nc_index_pairs_);
 
     Log::content_ << std::left << std::setw(50) << "@ Periodic boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -102,7 +83,7 @@ void Periodic_Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(st
     const auto num_pbdry_pair = this->normals_.size();
     for (size_t i = 0; i < num_pbdry_pair; ++i) {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto delta_RHS = this->areas_[i] * numerical_fluxes[i];
+        const auto delta_RHS = this->volumes_[i] * numerical_fluxes[i];
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }
@@ -113,34 +94,9 @@ Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::
     : Periodic_Boundaries_FVM_Base<space_dimension_>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& pbdry_element_pairs = grid_elements.periodic_boundary_element_pairs;
+    this->oc_nc_to_oc_nc_side_face_vector_pairs_ = grid.periodic_boundary_oc_nc_to_oc_nc_side_face_pairs(this->oc_nc_index_pairs_);
 
-    const auto num_pbdry_pair = pbdry_element_pairs.size();
-    this->oc_nc_to_oc_nc_side_face_vector_pairs_.reserve(num_pbdry_pair);
-
-    for (size_t i = 0; i < num_pbdry_pair; ++i) {
-        const auto& [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto& oc_geometry = cell_elements[oc_index].geometry_;
-        const auto& nc_geometry = cell_elements[nc_index].geometry_;
-
-        const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
-        const auto& oc_side_geometry = oc_side_element.geometry_;
-        const auto& nc_side_geometry = nc_side_element.geometry_;
-
-        const auto oc_center = oc_geometry.center_node();
-        const auto nc_center = nc_geometry.center_node();
-        const auto oc_side_center = oc_side_geometry.center_node();
-        const auto nc_side_center = nc_side_geometry.center_node();
-
-        const auto oc_to_oc_side_vector = oc_side_center - oc_center;
-        const auto nc_to_nc_side_vector = nc_side_center - nc_center;
-
-        this->oc_nc_to_oc_nc_side_face_vector_pairs_.push_back(std::make_pair(oc_to_oc_side_vector, nc_to_nc_side_vector));
-    }
-
-    Log::content_ << std::left << std::setw(50) << "@ Periodic boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    Log::content_ << std::left << std::setw(50) << "@ Inner faces FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 }
 
@@ -165,7 +121,7 @@ void Periodic_Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Functi
         const auto& pbdry_normal = this->normals_[i];
 
         const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, pbdry_normal);
-        const auto delta_RHS = this->areas_[i] * numerical_flux;
+        const auto delta_RHS = this->volumes_[i] * numerical_flux;
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }

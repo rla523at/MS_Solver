@@ -27,6 +27,9 @@ private:
     using Solution_             = Euclidean_Vector<num_equation_>;
     using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
 
+public:
+    static std::string name(void) { return "Linear_Reconstruction_" + Gradient_Method::name(); };
+
 private:
     Gradient_Method gradient_method_;
     std::vector<Solution_Gradient_> solution_gradients_;
@@ -34,12 +37,9 @@ private:
 public:
     Linear_Reconstruction(const Grid<space_dimension_>& grid) : gradient_method_(grid) {};
     
-    void reconstruct(const std::vector<Solution_>& solutions);
-        
-    const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
-
 public:
-    static std::string name(void) { return "Linear_Reconstruction_" + Gradient_Method::name(); };
+    void reconstruct(const std::vector<Solution_>& solutions);        
+    const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return solution_gradients_; };
 };
 
 
@@ -71,26 +71,25 @@ private:
     using Solution_ = Euclidean_Vector<num_equation_>;
     using Solution_Gradient_ = Matrix<num_equation_, space_dimension_>;
 
+public:
+    static std::string name(void) { return "MLP_u1_" + Gradient_Method::name(); };
+
 private:
     Gradient_Method gradient_method_;
     const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_indexes_;
-    std::vector<std::vector<uint>> vnode_indexes_set_;
+    std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::vector<Dynamic_Matrix> center_to_vertex_matrixes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
 public:
     MLP_u1(const Grid<space_dimension_>& grid);
 
-    void reconstruct(const std::vector<Solution_>& solutions);
-        
 public:
+    void reconstruct(const std::vector<Solution_>& solutions);
     const std::vector<Solution_Gradient_>& get_solution_gradients(void) const { return this->solution_gradients_; };
 
 protected:
     auto calculate_vertex_node_index_to_min_max_solution(const std::vector<Solution_>& solutions) const;
-
-public:
-    static std::string name(void) { return "MLP_u1_" + Gradient_Method::name(); };
 };
 
 
@@ -177,28 +176,23 @@ template <typename Gradient_Method>
 MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_method_(grid), vnode_index_to_share_cell_indexes_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;
+    this->set_of_vnode_indexes_ = grid.cell_set_of_vnode_indexes();
 
-    const auto num_cell = cell_elements.size();
-    this->vnode_indexes_set_.reserve(num_cell);
-    this->center_to_vertex_matrixes_.reserve(num_cell);
+    const auto num_cell = set_of_vnode_indexes_.size();
     this->solution_gradients_.resize(num_cell);
+    this->center_to_vertex_matrixes_.reserve(num_cell);
+
+    const auto cell_center_nodes = grid.cell_center_nodes();
+    const auto cell_set_of_vdnoes = grid.cell_set_of_vnodes();
 
     for (size_t i = 0; i < num_cell; ++i) {
-        const auto& element = cell_elements[i];
-        const auto& geometry = element.geometry_;
-
-        // vnode indexes set
-        this->vnode_indexes_set_.push_back(element.vertex_node_indexes());
-
-        //center to vertex matrix
-        const auto center_node = geometry.center_node();
-        const auto vertex_nodes = geometry.vertex_nodes();
-        const auto num_vertex = vertex_nodes.size();
+        const auto center_node = cell_center_nodes[i];
+        const auto& vnodes = cell_set_of_vdnoes[i];
+        const auto num_vertex = vnodes.size();
 
         Dynamic_Matrix center_to_vertex_matrix(space_dimension_, num_vertex);
         for (size_t i = 0; i < num_vertex; ++i) {
-            const auto center_to_vertex = vertex_nodes[i] - center_node;
+            const auto center_to_vertex = vnodes[i] - center_node;
             center_to_vertex_matrix.change_column(i, center_to_vertex);
         }
 
@@ -207,6 +201,37 @@ MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_m
 
     Log::content_ << std::left << std::setw(50) << "@ MLP u1 precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
+
+    //const auto& cell_elements = grid.get_grid_elements().cell_elements;
+
+    //const auto num_cell = cell_elements.size();
+    //this->vnode_indexes_set_.reserve(num_cell);
+    //this->center_to_vertex_matrixes_.reserve(num_cell);
+    //this->solution_gradients_.resize(num_cell);
+
+    //for (size_t i = 0; i < num_cell; ++i) {
+    //    const auto& element = cell_elements[i];
+    //    const auto& geometry = element.geometry_;
+
+    //    // vnode indexes set
+    //    this->vnode_indexes_set_.push_back(element.vertex_node_indexes());
+
+    //    //center to vertex matrix
+    //    const auto center_node = geometry.center_node();
+    //    const auto vertex_nodes = geometry.vertex_nodes();
+    //    const auto num_vertex = vertex_nodes.size();
+
+    //    Dynamic_Matrix center_to_vertex_matrix(space_dimension_, num_vertex);
+    //    for (size_t i = 0; i < num_vertex; ++i) {
+    //        const auto center_to_vertex = vertex_nodes[i] - center_node;
+    //        center_to_vertex_matrix.change_column(i, center_to_vertex);
+    //    }
+
+    //    this->center_to_vertex_matrixes_.push_back(std::move(center_to_vertex_matrix));
+    //}
+
+    //Log::content_ << std::left << std::setw(50) << "@ MLP u1 precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+    //Log::print();
 }
 
 
@@ -223,7 +248,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
         std::array<double, num_equation_> limiting_values;
         limiting_values.fill(1);
 
-        const auto& vnode_indexes = this->vnode_indexes_set_[i];
+        const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
         const auto num_vertex = vnode_indexes.size();
 
         for (ushort j = 0; j < num_vertex; ++j) {
@@ -285,19 +310,52 @@ ANN_limiter<Gradient_Method>::ANN_limiter(const Grid<space_dimension_>& grid) :g
     //sorting
     for (auto& face_share_cell_indexes : this->set_of_face_share_cell_indexes_)
         std::sort(face_share_cell_indexes.begin(), face_share_cell_indexes.end());
+
+    const auto num_cell = this->set_of_face_share_cell_indexes_.size();
+    this->set_of_ordered_indexes_.reserve(num_cell);
+
+    for (ushort i = 0; i < num_cell; ++i) {
+        const auto target_cell_index = i;
+
+        const auto& vnode_share_cell_indexes = this->set_of_vertex_share_cell_indexes_.at(target_cell_index);
+
+        const auto num_vnode_share_cell = vnode_share_cell_indexes.size();
+        const auto num_ordered_indexes = num_vnode_share_cell + 1; // include target cell
+
+        std::vector<size_t> ordered_indexes;
+        ordered_indexes.reserve(num_ordered_indexes);
+
+        ordered_indexes.push_back(target_cell_index);
+
+        while (ordered_indexes.size() != num_ordered_indexes) {
+            const auto& face_share_cell_indexes = set_of_face_share_cell_indexes_.at(ordered_indexes.back());
+
+            std::vector<size_t> face_share_cell_indexes_in_chunk;
+            std::set_intersection(vnode_share_cell_indexes.begin(), vnode_share_cell_indexes.end(), face_share_cell_indexes.begin(), face_share_cell_indexes.end(), std::back_inserter(face_share_cell_indexes_in_chunk));
+
+            std::vector<size_t> candidate_cell_indexes;
+            std::set<size_t> ordered_index_set(ordered_indexes.begin(), ordered_indexes.end());
+            std::set_difference(face_share_cell_indexes_in_chunk.begin(), face_share_cell_indexes_in_chunk.end(), ordered_index_set.begin(), ordered_index_set.end(), std::back_inserter(candidate_cell_indexes));
+
+            if (1 < candidate_cell_indexes.size()) {
+                const auto max_index = *std::max_element(candidate_cell_indexes.begin(), candidate_cell_indexes.end());
+                ordered_indexes.push_back(max_index);
+            }
+            else
+                ordered_indexes.push_back(candidate_cell_indexes.front());
+        }
+
+        this->set_of_ordered_indexes_.push_back(std::move(ordered_indexes));
+    }
 }
 
 template <typename Gradient_Method>
 void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     this->solution_gradients_ = this->gradient_method_.calculate_solution_gradients(solutions);
 
-    const auto num_solution = solutions.size();    
+    const auto num_cell = solutions.size();    
 
-    for (size_t i = 0; i < num_solution; ++i) {
-
-        if (this->is_constant_region(solutions, i)) 
-            continue;
-        
+    for (size_t i = 0; i < num_cell; ++i) {
         const auto ordered_indexes = this->ordering_function(solutions, i);
         const auto num_ordered_index = ordered_indexes.size();
 

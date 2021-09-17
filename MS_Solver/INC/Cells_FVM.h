@@ -52,28 +52,6 @@ Cells_FVM<Governing_Equation>::Cells_FVM(const Grid<space_dimension_>& grid) {
 
     Log::content_ << std::left << std::setw(50) << "@ Cells FVM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
-
-
-    //const auto& cell_elements = grid.get_grid_elements().cell_elements;
-
-    //const auto num_cell = cell_elements.size();
-    //this->centers_.reserve(num_cell);
-    //this->volumes_.reserve(num_cell);
-    //this->projected_volumes_.reserve(num_cell);
-    //this->residual_scale_factors_.reserve(num_cell);
-
-    //for (const auto& cell_elemnt : cell_elements) {
-    //    const auto& geometry = cell_elemnt.geometry_;
-    //    const auto volume = geometry.volume();
-
-    //    this->centers_.push_back(geometry.center_node());
-    //    this->volumes_.push_back(volume);
-    //    this->projected_volumes_.push_back(geometry.projected_volume());
-    //    this->residual_scale_factors_.push_back(1.0 / volume);
-    //}
-
-    //Log::content_ << std::left << std::setw(50) << "@ Cells FVM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    //Log::print();
 };
 
 template <typename Governing_Equation>

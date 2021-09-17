@@ -28,7 +28,7 @@ protected:
     std::vector<std::array<double, space_dimension_>> projected_volumes_;
     std::vector<Quadrature_Rule<space_dimension_>> quadrature_rules_;
     std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
-    std::vector<Dynamic_Matrix> gradient_basis_weights_;
+    std::vector<Dynamic_Matrix> qweights_gradient_basis_;
     std::vector<double> P0_basis_values_;
 
 public:
@@ -64,7 +64,7 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
     const auto num_cell = this->volumes_.size();
     this->P0_basis_values_.reserve(num_cell);
     this->set_of_basis_qnodes_.reserve(num_cell);
-    this->gradient_basis_weights_.reserve(num_cell);
+    this->qweights_gradient_basis_.reserve(num_cell);
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& transposed_gradient_basis = set_of_transposed_gradient_basis[i];
@@ -72,16 +72,16 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
         const auto& qweights = this->quadrature_rules_[i].weights;
         const auto num_qnode = qnodes.size();
 
-        Dynamic_Matrix gradient_basis_weight(num_qnode * this->space_dimension_, this->num_basis_);
+        Dynamic_Matrix qweight_gradient_basis(num_qnode * this->space_dimension_, this->num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto part_of_gradient_basis_weight = transposed_gradient_basis(qnodes[q]) * qweights[q];
-            gradient_basis_weight.change_rows(q * this->space_dimension_, part_of_gradient_basis_weight);
+            qweight_gradient_basis.change_rows(q * this->space_dimension_, part_of_gradient_basis_weight);
         }
 
         this->P0_basis_values_.push_back(this->reconstruction_method_.calculate_P0_basis_value(i));
         this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.calculate_basis_nodes(i, qnodes));
-        this->gradient_basis_weights_.push_back(std::move(gradient_basis_weight));
+        this->qweights_gradient_basis_.push_back(std::move(qweight_gradient_basis));
     }
 
     Log::content_ << std::left << std::setw(50) << "@ Cells HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -149,7 +149,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
         }
 
         Residual_ delta_rhs;
-        ms::gemm(flux_quadrature_points, This_::gradient_basis_weights_[i], delta_rhs);
+        ms::gemm(flux_quadrature_points, This_::qweights_gradient_basis_[i], delta_rhs);
 
         RHS[i] += delta_rhs;
     }

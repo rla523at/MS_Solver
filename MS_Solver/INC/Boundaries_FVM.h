@@ -77,34 +77,6 @@ Boundaries_FVM_Base<Numerical_Flux_Function>::Boundaries_FVM_Base(const Grid<spa
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
-
-    //this->oc_indexes_ = grid.boundary_owner_cell_indexes();
-
-    //const auto& grid_elements = grid.get_grid_elements();
-    //const auto& cell_elements = grid_elements.cell_elements;
-    //const auto& boundary_elements = grid_elements.boundary_elements;
-
-    //const auto num_boundaries = boundary_elements.size();
-    //this->areas_.reserve(num_boundaries);
-    //this->boundary_flux_functions_.reserve(num_boundaries);
-    //this->normals_.reserve(num_boundaries);
-
-    //for (uint i = 0; i < num_boundaries; ++i) {
-    //    const auto& boundary_element = boundary_elements[i];
-
-    //    this->volumes_.push_back(boundary_element.geometry_.volume());
-    //    this->boundary_flux_functions_.push_back(Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(boundary_element.type()));
-
-    //    const auto oc_index = this->oc_indexes_[i];
-    //    const auto& oc_element = cell_elements[oc_index];
-
-    //    const auto center = boundary_element.geometry_.center_node();
-
-    //    this->normals_.push_back(boundary_element.normalized_normal_vector(oc_element, center));
-    //}
-
-    //Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    //Log::print();
 }
 
 template <typename Numerical_Flux_Function>
@@ -118,7 +90,7 @@ void Boundaries_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vector
         const auto& normal = this->normals_[i];
 
         const auto boundary_flux = boundary_flux_function->calculate(solutions[oc_index], normal);
-        const auto delta_RHS = this->areas_[i] * boundary_flux;
+        const auto delta_RHS = this->volumes_[i] * boundary_flux;
 
         RHS[oc_index] -= delta_RHS;
     }
@@ -133,29 +105,6 @@ Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Boundarie
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
-
-    //const auto num_boundary = this->normals_.size();
-    //this->oc_to_boundary_vectors_.reserve(num_boundary);
-
-    //const auto& grid_elements = grid.get_grid_elements();
-    //const auto& cell_elements = grid_elements.cell_elements;
-    //const auto& boundary_elements = grid_elements.boundary_elements;
-
-    //for (size_t i = 0; i < num_boundary; ++i) {
-    //    const auto oc_index = this->oc_indexes_[i];
-    //    const auto& oc_geometry = cell_elements[oc_index].geometry_;
-    //    const auto& boundary_geometry = boundary_elements[i].geometry_;
-
-    //    const auto oc_center = oc_geometry.center_node();
-    //    const auto boundary_center = boundary_geometry.center_node();
-
-    //    const auto oc_to_face_vector = boundary_center - oc_center;
-
-    //    this->oc_to_boundary_vectors_.push_back(oc_to_face_vector);
-    //}
-
-    //Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    //Log::print();
 };
 
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>

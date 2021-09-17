@@ -85,7 +85,7 @@ std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::
 
         for (size_t j = 0; j < num_near_ghost_cell; ++j) {
             const auto& ghost_cell = this->ghost_cells_[near_ghost_cell_indexes[j]];
-            const auto ghost_cell_solution = ghost_cell.solution(solutions[ghost_cell.related_cell_index]);
+            const auto ghost_cell_solution = ghost_cell.solution(solutions[ghost_cell.solution_related_cell_index]);
 
             const auto solution_delta = ghost_cell_solution - solutions[i];
             solution_delta_matrix.change_column(num_near_cell + j, solution_delta);
@@ -221,39 +221,4 @@ Face_Least_Square<num_equation_, space_dimension_>::Face_Least_Square(const Grid
 
     Log::content_ << std::left << std::setw(50) << "@ Face Least Sqaure precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
-
-    //const auto& cell_elements = grid.get_grid_elements().cell_elements;
-
-    //const auto num_cell = cell_elements.size();
-    //this->near_cell_indexes_set_.reserve(num_cell);
-    //this->least_square_matrixes_.reserve(num_cell);
-
-    //auto set_of_face_share_cell_indexes = grid.set_of_face_share_cell_indexes_consider_pbdry();
-
-    //for (size_t i = 0; i < num_cell; ++i) {        
-    //    auto& face_share_cell_indexes = set_of_face_share_cell_indexes[i];         
-    //    const auto num_face_share_cell = face_share_cell_indexes.size();
-
-    //    const auto target_cell_element = cell_elements[i];
-    //    const auto target_cell_center = target_cell_element.geometry_.center_node();
-
-    //    Dynamic_Matrix center_to_center_matrix(space_dimension_, num_face_share_cell);
-    //    for (size_t j = 0; j < num_face_share_cell; ++j) {
-    //        const auto& neighbor_geometry = cell_elements[face_share_cell_indexes[j]].geometry_;
-    //        const auto neighbor_center = neighbor_geometry.center_node();
-    //        const auto center_to_center = neighbor_center - target_cell_center;
-
-    //        center_to_center_matrix.change_column(j, center_to_center);
-    //    }
-
-    //    const auto& Rc = center_to_center_matrix;
-    //    auto RcT = Rc.transpose();
-    //    auto least_square_matrix = RcT * (Rc * RcT).be_inverse();
-
-    //    this->near_cell_indexes_set_.push_back(std::move(face_share_cell_indexes));
-    //    this->least_square_matrixes_.push_back(std::move(least_square_matrix));
-    //}
-
-    //Log::content_ << std::left << std::setw(50) << "@ Face Least Sqaure precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-    //Log::print();
 }

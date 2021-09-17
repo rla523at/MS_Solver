@@ -9,7 +9,7 @@
 
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						OrthoTri40
+#define __GRID_FILE_NAMES__						Quad50
 #define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
 #define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__FVM__
@@ -22,7 +22,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						4
+#define __SOLUTION_ORDER__						3
 #endif 
 
 #define __NUMERICAL_FLUX__						__LLF__

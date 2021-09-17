@@ -13,7 +13,7 @@ private:
 protected:
     std::vector<Space_Vector_> normals_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<double> areas_;
+    std::vector<double> volumes_;
 
 public:
     Inner_Faces_FVM_Base(const Grid<space_dimension>& grid);
@@ -70,27 +70,8 @@ Inner_Faces_FVM_Base<space_dimension>::Inner_Faces_FVM_Base(const Grid<space_dim
     SET_TIME_POINT;
 
     this->oc_nc_index_pairs_ = grid.inner_face_oc_nc_index_pairs();
-
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& inner_face_elements = grid_elements.inner_face_elements;
-
-    const auto num_inner_face = inner_face_elements.size();
-    this->areas_.reserve(num_inner_face);
-    this->normals_.reserve(num_inner_face);
-
-    for (uint i = 0; i < num_inner_face; ++i) {
-        const auto& inner_face_element = inner_face_elements[i];
-
-        this->areas_.push_back(inner_face_element.geometry_.volume());
-
-        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
-        const auto inner_face_center = inner_face_element.geometry_.center_node();
-
-        this->normals_.push_back(inner_face_element.normalized_normal_vector(oc_element, inner_face_center));
-    }
+    this->volumes_ = grid.inner_face_volumes();
+    this->normals_ = grid.inner_face_normals_at_center(this->oc_nc_index_pairs_);
 
     Log::content_ << std::left << std::setw(50) << "@ Inner faces FVM base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -104,7 +85,7 @@ void Inner_Faces_FVM_Constant<Numerical_Flux_Function>::calculate_RHS(std::vecto
 
     for (size_t i = 0; i < num_inner_face; ++i) {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto delta_RHS = this->areas_[i] * numerical_fluxes[i];
+        const auto delta_RHS = this->volumes_[i] * numerical_fluxes[i];
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }
@@ -115,30 +96,8 @@ Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Inner_Fa
     : Inner_Faces_FVM_Base<space_dimension_>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    const auto num_inner_face = this->normals_.size();
-    this->oc_nc_to_face_vector_pairs_.reserve(num_inner_face);
-
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& inner_face_elements = grid_elements.inner_face_elements;
-
-    for (size_t i = 0; i < num_inner_face; ++i) {
-        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-
-        const auto& oc_geometry = cell_elements[oc_index].geometry_;
-        const auto& nc_geometry = cell_elements[nc_index].geometry_;
-        const auto& inner_face_geometry = inner_face_elements[i].geometry_;
-
-        const auto oc_center = oc_geometry.center_node();
-        const auto nc_center = nc_geometry.center_node();
-        const auto inner_face_center = inner_face_geometry.center_node();
-
-        const auto oc_to_face_vector = inner_face_center - oc_center;
-        const auto nc_to_face_vector = inner_face_center - nc_center;
-
-        this->oc_nc_to_face_vector_pairs_.push_back(std::make_pair(oc_to_face_vector, nc_to_face_vector));
-    }
-
+    this->oc_nc_to_face_vector_pairs_ = grid.inner_face_oc_nc_to_face_pairs(this->oc_nc_index_pairs_);
+ 
     Log::content_ << std::left << std::setw(50) << "@ Inner faces FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
 };
@@ -165,7 +124,7 @@ void Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::cal
         const auto& inner_face_normal = this->normals_[i];
 
         const auto numerical_flux = Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, inner_face_normal);
-        const auto delta_RHS = this->areas_[i] * numerical_flux;
+        const auto delta_RHS = this->volumes_[i] * numerical_flux;
         RHS[oc_index] -= delta_RHS;
         RHS[nc_index] += delta_RHS;
     }
