@@ -5,23 +5,23 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/DFM/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__MODIFIED_SOD__
-#define __SPATIAL_DISCRETE_METHOD__				__FVM__
-#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
+#define __GRID_FILE_NAMES__						Quad40
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
+#define __INITIAL_CONDITION__					__SQUARE_WAVE__
+#define __SPATIAL_DISCRETE_METHOD__				__HOM__
+#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
-#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
+#define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2				
+#define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		10
-#define __POST_ORDER__							1
+#define __POST_ORDER__							4
 #define __POST_FILE_FORMAT__					__BINARY__
 
 // CONDITIONAL OPTIONS
@@ -30,7 +30,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						3
+#define __SOLUTION_ORDER__						4
 #endif 
 
 
@@ -50,7 +50,7 @@
 // __POST_MODE__					__ASCII__, __BINARY__
 
 // Reference Constant
-// END TIME : Modified SOD(0.2), Double Rarefaction Wave(0.15), Harten Lax(0.15), Shu_Osher(1.8)
+// END TIME : Modified SOD(0.2), Double Rarefaction Wave & Harten Lax(0.15), Shu_Osher(1.8)
 
 // ######################################### OPTION END ################################################################
 
@@ -58,7 +58,7 @@
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				0.5
+#define Y_ADVECTION_SPEED				2.0
 #define Z_ADVECTION_SPEED				1.0
 
 // Sine Wave

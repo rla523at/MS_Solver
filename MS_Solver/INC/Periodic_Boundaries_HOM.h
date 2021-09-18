@@ -19,11 +19,10 @@ private:
     using Residual_             = Matrix<num_equation_, num_basis_>;
 
 protected:
-    const Reconstruction_Method& reconstruction_method_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
-    std::vector<std::vector<Space_Vector_>> set_of_normals_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_qweights_basis_pairs_;
+    std::vector<std::vector<Space_Vector_>> set_of_normals_;
 
 public:
     Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -38,57 +37,53 @@ public:
 
 // template definition part
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
-    : reconstruction_method_(reconstruction_method){
+Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodic_Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method){
     SET_TIME_POINT;
 
+    constexpr auto integrand_degree = 2 * Reconstruction_Method::solution_order() + 1;
+
     this->oc_nc_index_pairs_ = grid.periodic_boundary_oc_nc_index_pairs();
+    auto pbdry_quadrature_rule_pairs = grid.periodic_boundary_quadrature_rule_pairs(integrand_degree);
 
-    const auto& grid_elements = grid.get_grid_elements();
-    const auto& cell_elements = grid_elements.cell_elements;
-    const auto& periodic_boundary_element_pairs = grid_elements.periodic_boundary_element_pairs;
-
-    const auto num_periodic_pair = periodic_boundary_element_pairs.size();
+    const auto num_periodic_pair = oc_nc_index_pairs_.size();
     this->oc_nc_side_basis_qnodes_pairs_.reserve(num_periodic_pair);
-    this->set_of_normals_.reserve(num_periodic_pair);
     this->oc_nc_side_qweights_basis_pairs_.reserve(num_periodic_pair);
 
-    constexpr auto integrand_order = 2 * Reconstruction_Method::solution_order() + 1;
+    std::vector<uint> oc_indexes(num_periodic_pair);
+    std::vector<std::vector<Euclidean_Vector<space_dimension_>>> set_of_oc_side_qnodes(num_periodic_pair);
 
     for (uint i = 0; i < num_periodic_pair; ++i) {
-        const auto& [oc_side_element, nc_side_element] = periodic_boundary_element_pairs[i];
-        const auto& oc_side_geometry = oc_side_element.geometry_;
-        const auto& nc_side_geometry = nc_side_element.geometry_;
-
-        const auto& oc_side_quadrature_rule = oc_side_geometry.get_quadrature_rule(integrand_order);
+        const auto& [oc_side_quadrature_rule, nc_side_quadrature_rule] = pbdry_quadrature_rule_pairs[i];
+        
         const auto& oc_side_qnodes = oc_side_quadrature_rule.points;
         const auto& oc_side_qweights = oc_side_quadrature_rule.weights;
 
-        const auto& nc_side_quadrature_rule = nc_side_geometry.get_quadrature_rule(integrand_order);
         const auto& nc_side_qnodes = nc_side_quadrature_rule.points;
         const auto& nc_side_qweights = nc_side_quadrature_rule.weights;
 
-         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        const auto& oc_element = cell_elements[oc_index];
-
-        auto oc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(oc_index, oc_side_qnodes);
-        auto nc_side_basis_qnode = this->reconstruction_method_.calculate_basis_nodes(nc_index, nc_side_qnodes);
+        const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
+        auto oc_side_basis_qnode = reconstruction_method.basis_nodes(oc_index, oc_side_qnodes);
+        auto nc_side_basis_qnode = reconstruction_method.basis_nodes(nc_index, nc_side_qnodes);
 
         const auto num_qnode = oc_side_qnodes.size();
-        std::vector<Space_Vector_> normals(num_qnode);
+
         Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
         Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
-            normals[q] = oc_side_element.normalized_normal_vector(oc_element, oc_side_qnodes[q]);
-            oc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);
-            nc_side_basis_weight.change_row(q, this->reconstruction_method_.calculate_basis_node(nc_index, nc_side_qnodes[q]) * nc_side_qweights[q]);
+            oc_side_basis_weight.change_row(q, reconstruction_method.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);
+            nc_side_basis_weight.change_row(q, reconstruction_method.calculate_basis_node(nc_index, nc_side_qnodes[q]) * nc_side_qweights[q]);
         }
 
         this->oc_nc_side_basis_qnodes_pairs_.push_back({ std::move(oc_side_basis_qnode), std::move(nc_side_basis_qnode) });
-        this->set_of_normals_.push_back(std::move(normals));
         this->oc_nc_side_qweights_basis_pairs_.push_back({ std::move(oc_side_basis_weight), std::move(nc_side_basis_weight) });
+
+        oc_indexes[i] = oc_index;
+        set_of_oc_side_qnodes[i] = std::move(oc_side_qnodes);
     }
+
+    this->set_of_normals_ = grid.periodic_boundary_set_of_normals(oc_indexes, set_of_oc_side_qnodes);
+
 
     Log::content_ << std::left << std::setw(50) << "@ Periodic Boundaries HOM precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();

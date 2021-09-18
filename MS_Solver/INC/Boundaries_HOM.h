@@ -20,7 +20,6 @@ private:
     using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
 
 protected:
-    const Reconstruction_Method& reconstruction_method_;
     std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions_;
     std::vector<uint> oc_indexes_;
     std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
@@ -40,8 +39,7 @@ public:
 
 //template definition
 template <typename Reconstruction_Method, typename Numerical_Flux_Function>
-Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
-    : reconstruction_method_(reconstruction_method) {
+Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method) {
     SET_TIME_POINT;
 
     this->oc_indexes_ = grid.boundary_owner_cell_indexes();
@@ -62,11 +60,13 @@ Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(c
         const auto& qweights = quadrature_rule.weights;
         const auto num_qnode = qnodes.size();
 
+        auto basis_qnodes = reconstruction_method.basis_nodes(this->oc_indexes_[i], qnodes);
+
         Dynamic_Matrix qweight_basis(num_qnode, This_::num_basis_);
         for (ushort q = 0; q < num_qnode; ++q) 
             qweight_basis.change_row(q, reconstruction_method.calculate_basis_node(this->oc_indexes_[i], qnodes[q]) * qweights[q]);
         
-        this->set_of_oc_side_basis_qnodes_.push_back(reconstruction_method.calculate_basis_nodes(this->oc_indexes_[i], qnodes));
+        this->set_of_oc_side_basis_qnodes_.push_back(std::move(basis_qnodes));
         this->set_of_oc_side_qweights_basis_.push_back(std::move(qweight_basis));
         set_of_qnodes[i] = std::move(qnodes);
     }

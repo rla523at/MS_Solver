@@ -45,7 +45,7 @@ int main(void) {
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
 		Grid_ grid(std::move(grid_element));
 
-		Tecplot::post_grid(grid.get_grid_elements().cell_elements); //post
+		Tecplot::post_grid(grid); //post
 
 		Semi_Discrete_Equation_ semi_discrete_equation(grid);
 		auto solutions = semi_discrete_equation.calculate_initial_solutions<INITIAL_CONDITION>();

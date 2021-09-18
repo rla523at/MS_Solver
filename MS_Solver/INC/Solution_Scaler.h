@@ -51,11 +51,12 @@ public:
 
 					if (rho <= 0.0 || pressure <= 0.0) {
 						dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
-						fix_count++;
-						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
-						solution_coefficients[i] *= fix_matrix;
+						fix_count++;						
+						solution_coefficients[i] *= This_::calculate_fix_matrix<num_basis>();
 
 						solution_qnodes = solution_coefficients[i] * This_::set_of_cell_basis_qnodes_[i];
+
+						Log::content_ << "\n" << i << " cell has negative density or pressure, fix " << fix_count << " time\n";
 						continue;
 					}
 
@@ -74,19 +75,19 @@ public:
 
 			for (ushort j = 0; j < num_qnode; ++j) {
 				while (true) {
-					dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
-
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
 					const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
 					const auto rho = cvariable[0];
 					const auto pressure = pvariable[2];
 
 					if (rho <= 0.0 || pressure <= 0.0) {
+						dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
 						fix_count++;
-						const auto fix_matrix = This_::calculate_fix_matrix<num_basis>();
-						solution_coefficients[cell_index] *= fix_matrix;
+						solution_coefficients[cell_index] *= This_::calculate_fix_matrix<num_basis>();
 
 						solution_qnodes = solution_coefficients[cell_index] * basis_qnodes;
+
+						Log::content_ << "\n" << cell_index << " cell has negative density or pressure, fix " << fix_count << " time\n";
 						continue;
 					}
 

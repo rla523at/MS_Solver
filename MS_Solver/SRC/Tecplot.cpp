@@ -85,12 +85,12 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 	post_file << 357.0f;								//EOH_marker
 }
 
-void Tecplot::write_binary_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities) {
+void Tecplot::write_binary_grid_post_file(const std::vector<std::vector<double>>& post_coordinate_blocks, const std::vector<std::vector<int>>& connectivities) {
 	const auto grid_file_path = This_::path_ + "grid.plt";
 	This_::write_binary_header(Post_File_Type::grid, grid_file_path);
 
 	//II. DATA SECTION		
-	const auto num_variable = coordinates.size();
+	const auto num_variable = post_coordinate_blocks.size();
 
 	Binary_Writer grid_binary_file(grid_file_path, std::ios::app);
 
@@ -103,14 +103,14 @@ void Tecplot::write_binary_grid_post_file(const std::vector<std::vector<double>>
 	grid_binary_file << 0 << 0 << -1;	//has passive variable, has variable sharing, zone number to share connectivity, default
 
 	for (ushort i = 0; i < num_variable; ++i) {
-		const auto min_value = *std::min_element(coordinates[i].begin(), coordinates[i].end());
-		const auto max_value = *std::max_element(coordinates[i].begin(), coordinates[i].end());
+		const auto min_value = *std::min_element(post_coordinate_blocks[i].begin(), post_coordinate_blocks[i].end());
+		const auto max_value = *std::max_element(post_coordinate_blocks[i].begin(), post_coordinate_blocks[i].end());
 
 		grid_binary_file << min_value << max_value;	//min,max value of each variable
 	}
 
 	for (ushort i = 0; i < num_variable; ++i)
-		grid_binary_file << coordinates[i];			//values of each variable
+		grid_binary_file << post_coordinate_blocks[i];			//values of each variable
 
 	for (const auto& connectivity : connectivities)
 		grid_binary_file << connectivity;			//connectivity
@@ -221,17 +221,17 @@ void Tecplot::write_ASCII_header(const Post_File_Type file_type, const std::stri
 	header.write(post_file_path);
 }
 
-void Tecplot::write_ASCII_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities) {
+void Tecplot::write_ASCII_grid_post_file(const std::vector<std::vector<double>>& post_coordinate_blocks, const std::vector<std::vector<int>>& connectivities) {
 	ushort str_per_line = 0;
 
-	const auto space_dimension = coordinates.size();
+	const auto space_dimension = post_coordinate_blocks.size();
 	const auto num_line = space_dimension + connectivities.size();
 	Text grid_post_data_text;
 	grid_post_data_text.reserve(num_line);
 
 	std::string coordinate_str;
 	for (ushort i = 0; i < space_dimension; ++i) {		
-		for (const auto coordinate : coordinates[i]) {
+		for (const auto coordinate : post_coordinate_blocks[i]) {
 			str_per_line++;
 			coordinate_str += ms::double_to_str_sp(coordinate) + " ";
 			if (str_per_line == 10) {

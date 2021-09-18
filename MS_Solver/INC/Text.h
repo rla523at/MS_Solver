@@ -122,7 +122,7 @@ namespace ms {
 	};
 
 	template <typename... Args>
-	bool contains_icase(const std::string& str, const Args... args) {		
+	bool contains_icase(const std::string& str, const char* target, const Args... args) {		
 		static_require((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};

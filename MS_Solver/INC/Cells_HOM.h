@@ -80,7 +80,7 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
         }
 
         this->P0_basis_values_.push_back(this->reconstruction_method_.calculate_P0_basis_value(i));
-        this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.calculate_basis_nodes(i, qnodes));
+        this->set_of_basis_qnodes_.push_back(this->reconstruction_method_.basis_nodes(i, qnodes));
         this->qweights_gradient_basis_.push_back(std::move(qweight_gradient_basis));
     }
 

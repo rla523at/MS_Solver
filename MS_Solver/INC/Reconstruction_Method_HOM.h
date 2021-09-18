@@ -29,7 +29,7 @@ public:
 public:
     auto calculate_set_of_transposed_gradient_basis(void) const;
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
-    Dynamic_Matrix calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
+    Dynamic_Matrix basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
     double calculate_P0_basis_value(const uint cell_index) const;
 
 public:
@@ -92,9 +92,9 @@ protected:
     static constexpr ushort criterion_variable_index_ = 0;    
 
 protected:
-    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_indexes_;
-    std::vector<std::vector<uint>> set_of_vnode_indexes_;
+    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_index_set_;
     std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
+    std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::vector<double> volumes_;
 
 protected:
@@ -150,10 +150,10 @@ private:
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P0_projected_basis_vnodes_;
 
-    std::vector<double> face_volume_;
+    std::vector<double> face_volumes_;
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;
+    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;    
     std::vector<Dynamic_Euclidean_Vector> set_of_jump_qweights_;
 
 public:
@@ -189,6 +189,19 @@ namespace ms {
     template <typename Spatial_Discrete_Method, typename Reconstruction_Method>
     inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
         = ms::is_polynomial_reconustruction<Reconstruction_Method>;
+
+    template <typename T, typename... Args>
+    std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args) {
+        static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+
+        vec1.reserve(vec1.size() + vec2.size());
+        vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
+
+        if constexpr (sizeof...(Args) == 0) 
+            return vec1;
+        else 
+            return ms::merge(vec1, std::move(args)...);
+    }
 }
 
 
@@ -197,16 +210,7 @@ template <ushort space_dimension_, ushort solution_order_>
 Polynomial_Reconstruction<space_dimension_, solution_order_>::Polynomial_Reconstruction(const Grid<space_dimension_>& grid) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;
-
-    const auto num_cell = cell_elements.size();
-    this->basis_vector_functions_.reserve(num_cell);
-
-    for (uint i = 0; i < num_cell; ++i) {
-        const auto& cell_geometry = cell_elements[i].geometry_;
-
-        this->basis_vector_functions_.push_back(cell_geometry.orthonormal_basis_vector_function<solution_order_>());
-    }
+    this->basis_vector_functions_ = grid.cell_basis_vector_functions<solution_order_>();
 
     Log::content_ << std::left << std::setw(50) << "@ Polynomial reconstruction precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -235,7 +239,7 @@ auto Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_bas
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const {
+Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const {
     const auto& basis_functions = this->basis_vector_functions_[cell_index];
 
     const auto num_node = nodes.size();
@@ -264,21 +268,14 @@ auto Polynomial_Reconstruction<space_dimension_, solution_order_>::solution_func
 
 template <ushort space_dimension_, ushort solution_order_>
 hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(const Grid<space_dimension_>& grid)
-    : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid), vnode_index_to_share_cell_indexes_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
+    : Polynomial_Reconstruction<space_dimension_, solution_order_>(grid), vnode_index_to_share_cell_index_set_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
     SET_TIME_POINT;
 
     for (ushort i = 0; i <= solution_order_; ++i)
         this->num_Pn_projection_basis_[i] = ms::combination_with_repetition(1 + space_dimension_, i);
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;    
-    const auto num_cell = cell_elements.size();
-    this->set_of_vnode_indexes_.reserve(num_cell);
-    this->volumes_.reserve(num_cell);
-
-    for (const auto& element : cell_elements) {
-        this->set_of_vnode_indexes_.push_back(element.vertex_node_indexes());
-        this->volumes_.push_back(element.geometry_.volume());
-    }
+    this->set_of_vnode_indexes_ = grid.cell_set_of_vnode_indexes();
+    this->volumes_ = grid.cell_volumes();
 
     Log::content_ << std::left << std::setw(50) << "@ hMLP Base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -325,20 +322,16 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(cons
     : hMLP_Base<space_dimension_, solution_order_>(grid){
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;
+    constexpr ushort P1 = 1;
+    const auto set_of_vnodes = grid.cell_set_of_vnodes();
 
-    const auto num_cell = cell_elements.size();
+    const auto num_cell = this->volumes_.size();
     this->set_of_basis_vnodes_.reserve(num_cell);
     this->set_of_P1_projected_basis_vnodes_.reserve(num_cell);
     this->P0_basis_values_.reserve(num_cell);
 
-    constexpr ushort P1 = 1;
-
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& cell_geometry = cell_elements[i].geometry_;
-        const auto vnodes = cell_geometry.vertex_nodes();
-
-        auto basis_vnodes = this->calculate_basis_nodes(i, vnodes);
+        auto basis_vnodes = this->basis_nodes(i, set_of_vnodes[i]);
         auto P1_projected_basis_vnodes = this->Pn_projection_matrix(P1) * basis_vnodes;
         const auto P0_basis_value = P1_projected_basis_vnodes.at(0, 0);
 
@@ -437,12 +430,12 @@ auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_P0_criter
 
 template <ushort space_dimension_, ushort solution_order_>
 auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<double>& P0_criterion_values) const {
-    const auto num_vnode = this->vnode_index_to_share_cell_indexes_.size();
+    const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 
     std::unordered_map<uint, std::pair<double, double>> vnode_index_to_allowable_min_max_criterion_value;
     vnode_index_to_allowable_min_max_criterion_value.reserve(num_vnode);
 
-    for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_indexes_) {
+    for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_index_set_) {
         const auto num_share_cell = share_cell_indexes.size();
         std::vector<double> criterion_variables;
         criterion_variables.reserve(num_share_cell);
@@ -465,9 +458,11 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     : hMLP_Base<space_dimension_, solution_order_>(grid), pbdry_vnode_index_to_matched_node_index_set_(grid.get_pbdry_vnode_index_to_matched_node_index_set()) {
     SET_TIME_POINT;
 
-    const auto& cell_elements = grid.get_grid_elements().cell_elements;
+    const auto set_of_vnodes = grid.cell_set_of_vnodes();
+    const auto simplex_flags = grid.cell_simplex_flags();
+    const auto set_of_sub_simplex_geometries = grid.cell_set_of_sub_simplex_geometries(simplex_flags);
 
-    const auto num_cell = cell_elements.size();
+    const auto num_cell = set_of_vnodes.size();
     this->set_of_basis_vnodes_.reserve(num_cell);
     this->set_of_simplex_P1_projected_basis_vnodes_.reserve(num_cell);
     this->set_of_simplex_P0_projected_basis_vnodes_.reserve(num_cell);
@@ -475,14 +470,10 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     constexpr ushort P0 = 0;
     constexpr ushort P1 = 1;
     for (uint i = 0; i < num_cell; ++i) {
-        const auto& cell_geometry = cell_elements[i].geometry_;
-
-        const auto vnodes = cell_geometry.vertex_nodes();
-        auto basis_vnodes = this->calculate_basis_nodes(i, vnodes);
+        const auto& vnodes = set_of_vnodes[i];
+        auto basis_vnodes = this->basis_nodes(i, vnodes);
                 
-        const auto& reference_geometry = cell_geometry.reference_geometry_;
-                
-        if (reference_geometry.is_simplex()) {
+        if (simplex_flags[i]) {
             auto P0_projected_basis_vnodes = this->Pn_projection_matrix(P0) * basis_vnodes;
             auto P1_projected_basis_vnodes = this->Pn_projection_matrix(P1) * basis_vnodes;
 
@@ -490,7 +481,7 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
             this->set_of_simplex_P1_projected_basis_vnodes_.push_back(std::move(P1_projected_basis_vnodes));            
         }
         else {
-            const auto sub_simplex_geometries = cell_geometry.sub_simplex_geometries();
+            const auto& sub_simplex_geometries = set_of_sub_simplex_geometries[i];
 
             const auto num_vnode = vnodes.size();
             Dynamic_Matrix simplex_P0_projected_basis_vnodes(This_::num_basis_, num_vnode);
@@ -513,79 +504,40 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
         this->set_of_basis_vnodes_.push_back(std::move(basis_vnodes));
     }
 
+    ms::merge(this->face_volumes_, grid.inner_face_volumes(), grid.periodic_boundary_volumes());
+    ms::merge(this->face_oc_nc_index_pairs_, grid.inner_face_oc_nc_index_pairs(), grid.periodic_boundary_oc_nc_index_pairs());
 
-    const auto& inner_face_elements = grid.get_grid_elements().inner_face_elements;
-    const auto inner_face_oc_nc_index_pairs = grid.inner_face_oc_nc_index_pairs();
-    const auto& pbdry_element_pairs = grid.get_grid_elements().periodic_boundary_element_pairs;
-    const auto pbdry_oc_nc_index_pairs = grid.periodic_boundary_oc_nc_index_pairs();
-    
-    const auto num_inner_face = inner_face_elements.size();
-    const auto num_pbdry_pair = pbdry_element_pairs.size();
-
-    const auto num_face_without_bdry = num_inner_face + num_pbdry_pair;
-    this->face_volume_.reserve(num_face_without_bdry);
+    const auto num_face_without_bdry = face_volumes_.size();
     this->face_characteristic_lengths_.reserve(num_face_without_bdry);
-    this->face_oc_nc_index_pairs_.reserve(num_face_without_bdry);
     this->face_oc_nc_side_basis_jump_qnodes_pairs_.reserve(num_face_without_bdry);
     this->set_of_jump_qweights_.reserve(num_face_without_bdry);
 
+    const auto inner_face_quadrature_rules = grid.inner_face_quadrature_rules(solution_order_);
+    const auto pbdry_quadrature_rule_pairs = grid.periodic_boundary_quadrature_rule_pairs(solution_order_);
+
+    const auto num_inner_face = inner_face_quadrature_rules.size();
+    const auto num_pbdry_pair = pbdry_quadrature_rule_pairs.size();
+
     for (uint i = 0; i < num_inner_face; ++i) {
-        const auto& geometry = inner_face_elements[i].geometry_;
-
-        const auto face_volume = geometry.volume();
-        this->face_volume_.push_back(face_volume);
-
-        const auto charactersitic_length = std::pow(face_volume, 1.0 / (space_dimension_ - 1));
+        const auto charactersitic_length = std::pow(this->face_volumes_[i], 1.0 / (space_dimension_ - 1));
         this->face_characteristic_lengths_.push_back(charactersitic_length);
-        
-        const auto [oc_index, nc_index] = inner_face_oc_nc_index_pairs[i];
-        this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
-        
-        const auto& quadrature_rule = geometry.get_quadrature_rule(solution_order_);
-        auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, quadrature_rule.points);
-        auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, quadrature_rule.points);
-        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
-        this->set_of_jump_qweights_.push_back(quadrature_rule.weights);        
+
+        const auto [oc_index, nc_index] = this->face_oc_nc_index_pairs_[i];
+        const auto& quadrature_rule = inner_face_quadrature_rules[i];
+
+        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ this->basis_nodes(oc_index, quadrature_rule.points), this->basis_nodes(nc_index, quadrature_rule.points) });
+        this->set_of_jump_qweights_.push_back(quadrature_rule.weights);
     }
 
     for (uint i = 0; i < num_pbdry_pair; ++i) {
-        const auto& [oc_side_element, nc_side_element] = pbdry_element_pairs[i];
-        const auto& oc_side_geometry = oc_side_element.geometry_;
-        const auto& nc_side_geometry = nc_side_element.geometry_;
-
-        const auto face_volume = oc_side_geometry.volume();
-        this->face_volume_.push_back(face_volume);
-
-        const auto characteristic_length = std::pow(face_volume, 1.0 / (space_dimension_ - 1));
+        const auto characteristic_length = std::pow(this->face_volumes_[num_inner_face + i], 1.0 / (space_dimension_ - 1));
         this->face_characteristic_lengths_.push_back(characteristic_length);
 
-        const auto [oc_index, nc_index] = pbdry_oc_nc_index_pairs[i];
-        this->face_oc_nc_index_pairs_.push_back({ oc_index,nc_index });
+        const auto [oc_index, nc_index] = this->face_oc_nc_index_pairs_[num_inner_face + i];
+        const auto& [oc_side_quadrature_rule, nc_side_quadrature_rule] = pbdry_quadrature_rule_pairs[i];
 
-        const auto& oc_side_quadrature_rule = oc_side_geometry.get_quadrature_rule(solution_order_);
-        const auto& oc_side_qnodes = oc_side_quadrature_rule.points;
-        const auto& oc_side_qweights = oc_side_quadrature_rule.weights;
-
-        const auto& nc_side_quadrature_rule = nc_side_geometry.get_quadrature_rule(solution_order_);
-        const auto& nc_side_qnodes = nc_side_quadrature_rule.points;
-        const auto& nc_side_qweights = nc_side_quadrature_rule.weights;
-                
-        auto re_ordered_nc_side_qnodes = nc_side_qnodes;
-        auto re_ordered_nc_side_qweights = nc_side_qweights;
-
-        const auto oc_side_normal_vector = oc_side_geometry.normalized_normal_vector(oc_side_geometry.center_node());
-        const auto nc_side_normal_vector = nc_side_geometry.normalized_normal_vector(nc_side_geometry.center_node());
-        const auto inner_product = oc_side_normal_vector.inner_product(nc_side_normal_vector);
-
-        if (inner_product < 0) {
-            std::reverse(re_ordered_nc_side_qnodes.begin(), re_ordered_nc_side_qnodes.end());
-            std::reverse(re_ordered_nc_side_qweights.begin(), re_ordered_nc_side_qweights.end());
-        }
-
-        auto oc_side_basis_jump_qnodes = this->calculate_basis_nodes(oc_index, oc_side_qnodes);
-        auto nc_side_basis_jump_qnodes = this->calculate_basis_nodes(nc_index, re_ordered_nc_side_qnodes);
-        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ std::move(oc_side_basis_jump_qnodes),std::move(nc_side_basis_jump_qnodes) });
-        this->set_of_jump_qweights_.push_back(oc_side_qweights); // oc side qweights == nc side qweights
+        this->face_oc_nc_side_basis_jump_qnodes_pairs_.push_back({ this->basis_nodes(oc_index, oc_side_quadrature_rule.points), this->basis_nodes(nc_index, nc_side_quadrature_rule.points) });
+        this->set_of_jump_qweights_.push_back(oc_side_quadrature_rule.weights); // oc side qweights == nc side qweights
     }
 
     Log::content_ << std::left << std::setw(50) << "@ hMLP_BD precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
@@ -656,7 +608,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 //    continue;
                 //if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
                 //    if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
-                //        //type_I_flag[i] = 1;//post
                 //        temporal_solution_order = 1;
                 //        is_normal_cell = false;
                 //        break;
@@ -782,7 +733,7 @@ template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
 auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
-    const auto num_vnode = this->vnode_index_to_share_cell_indexes_.size();
+    const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 
     std::vector<std::map<uint, double>> vnode_index_to_simplex_P0_criterion_values;
     vnode_index_to_simplex_P0_criterion_values.reserve(num_cell);
@@ -807,7 +758,7 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of
 
 template <ushort space_dimension_, ushort solution_order_>
 auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& set_of_vnode_index_to_simplex_P0_criterion_value) const {
-    const auto num_vnode = this->vnode_index_to_share_cell_indexes_.size();
+    const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 
     //gathering P0 criterion values at vertex
     std::unordered_map<uint, std::vector<double>> vnode_index_to_simplex_P0_criterion_values;
@@ -887,7 +838,7 @@ std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::c
         criterion_solution_diff_jump_qnodes.be_absolute();
 
         const auto jump = criterion_solution_diff_jump_qnodes.inner_product(this->set_of_jump_qweights_[i]);
-        const auto smooth_boundary_indicator = jump / this->face_volume_[i];
+        const auto smooth_boundary_indicator = jump / this->face_volumes_[i];
 
         //compare and reflect
         if (smooth_boundary_indicator > threshold_value) {

@@ -52,3 +52,14 @@ TEST(hMLP_Reconstruction, P1_projected_MLP_condition_2) {
 	const auto ref = false;
 	EXPECT_EQ(result, ref);
 }
+
+TEST(ms, merge_1) {
+	std::vector<ushort> v1 = { 1,2,3 };
+	std::vector<ushort> v2 = { 1,2,3 };
+	std::vector<ushort> v3 = { 1,2,3 };
+
+	ms::merge(v1, std::move(v2), std::move(v3));
+
+	std::vector<ushort> ref = { 1,2,3,1,2,3,1,2,3 };
+	EXPECT_EQ(v1, ref);
+}

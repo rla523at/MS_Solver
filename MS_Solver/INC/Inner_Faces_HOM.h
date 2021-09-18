@@ -20,7 +20,6 @@ private:
     using Residual_             = Matrix<num_equation_, num_basis_>;
 
 protected:
-    const Reconstruction_Method& reconstruction_method_;
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
     std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
@@ -38,8 +37,7 @@ public:
 
 // template definition part
 template<typename Reconstruction_Method, typename Numerical_Flux_Function>
-Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method)
-    : reconstruction_method_(reconstruction_method){
+Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method) {
     SET_TIME_POINT;
 
     constexpr auto integrand_degree = 2 * Reconstruction_Method::solution_order() + 1;
@@ -61,8 +59,8 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
         const auto num_qnode = qnodes.size();
 
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
-        auto oc_side_basis_qnodes = this->reconstruction_method_.calculate_basis_nodes(oc_index, qnodes);
-        auto nc_side_basis_qnodes = this->reconstruction_method_.calculate_basis_nodes(nc_index, qnodes);
+        auto oc_side_basis_qnodes = reconstruction_method.basis_nodes(oc_index, qnodes);
+        auto nc_side_basis_qnodes = reconstruction_method.basis_nodes(nc_index, qnodes);
 
         Dynamic_Matrix oc_side_qweights_basis(num_qnode, This_::num_basis_);
         Dynamic_Matrix nc_side_qweights_basis(num_qnode, This_::num_basis_);

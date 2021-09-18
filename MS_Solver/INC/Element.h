@@ -1906,9 +1906,9 @@ auto Geometry<space_dimension>::initial_basis_function(void) const {
 }
 
 template <ushort space_dimension>
-template <ushort polynomial_order>
+template <ushort polynomial_degree>
 auto Geometry<space_dimension>::orthonormal_basis_vector_function(void) const {
-	const auto initial_basis_set = this->initial_basis_function<polynomial_order>();
+	const auto initial_basis_set = this->initial_basis_function<polynomial_degree>();
 	return ms::Gram_Schmidt_process(initial_basis_set, *this);
 }
 

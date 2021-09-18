@@ -68,7 +68,7 @@ public:
 	static void initialize(const ushort post_order, const Post_File_Format format);
 
 	template <ushort space_dimension>
-	static void post_grid(const std::vector<Element<space_dimension>>& cell_elements);
+	static void post_grid(const Grid<space_dimension>& grid);
 
 public: //for FVM
 	template <ushort num_equation>	
@@ -89,12 +89,12 @@ public:	//for HOM
 
 private:
 	static void write_ASCII_header(const Post_File_Type file_type, const std::string_view post_file_path);
-	static void write_ASCII_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
+	static void write_ASCII_grid_post_file(const std::vector<std::vector<double>>& post_coordinate_blocks, const std::vector<std::vector<int>>& connectivities);
 	static void write_ASCII_solution_post_file(const std::vector<std::vector<double>>& post_solution_datas, const std::string& comment = "");
 
 
 	static void write_binary_header(const Post_File_Type file_type, const std::string_view post_file_path);
-	static void write_binary_grid_post_file(const std::vector<std::vector<double>>& coordinates, const std::vector<std::vector<int>>& connectivities);
+	static void write_binary_grid_post_file(const std::vector<std::vector<double>>& post_coordinate_blocks, const std::vector<std::vector<int>>& connectivities);
 	static void write_binary_solution_post_file(const std::vector<std::vector<double>>& post_solution_binary_datas, const std::string& comment = "");
 
 private:
@@ -147,61 +147,34 @@ void Tecplot::initialize(const ushort post_order, const Post_File_Format format)
 
 template <ushort space_dimension, typename Reconstruction_Method>
 void Tecplot::initialize_HOM(const Grid<space_dimension>& grid, const Reconstruction_Method& reconstruct_method) {
-	const auto& cell_elements = grid.get_grid_elements().cell_elements;
-	const auto num_cell = cell_elements.size();
+	const auto set_of_post_nodes = grid.cell_set_of_post_nodes(This_::post_order_);
+	
+	const auto num_cell = set_of_post_nodes.size();
 	This_::set_of_basis_post_points_.reserve(num_cell);
 
-	for (uint i = 0; i < num_cell; ++i) {
-		const auto& geometry = cell_elements[i].geometry_;
-
-		auto post_nodes = geometry.post_nodes(This_::post_order_);
-		This_::set_of_basis_post_points_.push_back(reconstruct_method.calculate_basis_nodes(i, post_nodes));
-	}
+	for (uint i = 0; i < num_cell; ++i) 
+		This_::set_of_basis_post_points_.push_back(reconstruct_method.basis_nodes(i, set_of_post_nodes[i]));
 }
 
 template <ushort space_dimension>
-void Tecplot::post_grid(const std::vector<Element<space_dimension>>& cell_elements) {
-	//post processing grid data	
-	const auto num_cell = cell_elements.size();
-	This_::num_post_points_.resize(num_cell);
+void Tecplot::post_grid(const Grid<space_dimension>& grid) {
+	const auto set_of_post_nodes = grid.cell_set_of_post_nodes(This_::post_order_);
+	
+	const auto num_cell = set_of_post_nodes.size();
+	This_::num_post_points_.reserve(num_cell);
+	for (const auto& post_nodes : set_of_post_nodes)
+		This_::num_post_points_.push_back(post_nodes.size());
 
-	size_t connectivity_start_index = 0;											
+	const auto post_coordinate_blocks = grid.cell_post_coordinate_blocks(set_of_post_nodes);
+	const auto connectivities = grid.cell_set_of_connectivities(post_order_, set_of_post_nodes);
 
-	std::vector<std::vector<double>> coordinates(space_dimension);
-	std::vector<std::vector<int>> connectivities;
-
-	for (uint i = 0; i < num_cell; ++i) {
-		const auto& geometry = cell_elements[i].geometry_;
-
-		const auto post_nodes = geometry.post_nodes(This_::post_order_);
-		for (const auto& node : post_nodes) {
-			for (ushort j = 0; j < space_dimension; ++j) 
-				coordinates[j].push_back(node[j]);
-		}
-
-		const auto post_connectivities = geometry.reference_geometry_.post_connectivities(This_::post_order_, connectivity_start_index);
-
-		for (const auto& connectivity : post_connectivities) {
-			const auto num_point = connectivity.size();			
-			std::vector<int> temp(num_point);
-
-			for (uint j = 0; j < num_point; ++j)
-				temp[j] = static_cast<int>(connectivity[j]);
-
-			connectivities.push_back(std::move(temp));
-		}
-
-		const auto num_post_node = post_nodes.size();
-		connectivity_start_index += num_post_node;
-		This_::num_node_ += num_post_node;
-		This_::num_element_ += post_connectivities.size();
-		This_::num_post_points_[i] = num_post_node;
-	}
+	This_::num_node_ = post_coordinate_blocks.front().size();
+	This_::num_element_ = connectivities.size();
 
 	if (This_::file_format_ == Post_File_Format::binary)
-		This_::write_binary_grid_post_file(coordinates, connectivities);
+		This_::write_binary_grid_post_file(post_coordinate_blocks, connectivities);
 	else
-		This_::write_ASCII_grid_post_file(coordinates, connectivities);
+		This_::write_ASCII_grid_post_file(post_coordinate_blocks, connectivities);
 }
 
 template <typename T>
