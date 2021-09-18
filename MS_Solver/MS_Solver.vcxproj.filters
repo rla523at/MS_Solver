@@ -36,9 +36,6 @@
     <ClCompile Include="SRC\Text.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Polynomial.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

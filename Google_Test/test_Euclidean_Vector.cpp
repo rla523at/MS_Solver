@@ -82,3 +82,27 @@ TEST(Dynamic_Euclidean_Vector, inner_product_1) {
 	const auto ref = 25;
 	EXPECT_EQ(result, ref);
 }
+
+TEST(ms, min_value_gathering_vector_1) {
+	Euclidean_Vector v1 = { 1,2,3 };
+	Euclidean_Vector v2 = { 2,3,1 };
+	Euclidean_Vector v3 = { 3,1,2 };
+
+	std::vector<Euclidean_Vector<3>> vec = { v1,v2,v3 };
+
+	const auto result = ms::min_value_gathering_vector(vec);
+	const Euclidean_Vector ref = { 1,1,1 };
+	EXPECT_EQ(result, ref);
+}
+
+TEST(ms, max_value_gathering_vector_1) {
+	Euclidean_Vector v1 = { 1,2,3 };
+	Euclidean_Vector v2 = { 2,3,1 };
+	Euclidean_Vector v3 = { 3,2,1 };
+
+	std::vector<Euclidean_Vector<3>> vec = { v1,v2,v3 };
+
+	const auto result = ms::max_value_gathering_vector(vec);
+	const Euclidean_Vector ref = { 3,3,3 };
+	EXPECT_EQ(result, ref);
+}

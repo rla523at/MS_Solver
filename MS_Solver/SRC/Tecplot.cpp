@@ -72,8 +72,8 @@ void Tecplot::write_binary_header(const Post_File_Type file_type, const std::str
 	if (file_type == Post_File_Type::grid)
 		post_file << 0.0;								//solution time
 	else
-		//post_file << *This_::time_ptr_;					//solution time	
-		post_file << strand_id * 1.0E-3;				//debug
+		post_file << *This_::time_ptr_;					//solution time	
+		//post_file << strand_id * 1.0E-3;				//debug
 
 	post_file << -1;									//not used
 	post_file << static_cast<int>(This_::zone_type_);	//zone type

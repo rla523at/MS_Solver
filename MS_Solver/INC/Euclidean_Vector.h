@@ -44,6 +44,11 @@ public:
 	Euclidean_Vector(Args... args);
 
 public:
+	template <size_t temp = dimension_, std::enable_if_t<temp == 1, bool> = true>
+	operator double(void) const { return values_[0]; };
+	operator std::array<double, dimension_>(void) const { return values_; };
+
+public:
 	Euclidean_Vector& operator+=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator-=(const Euclidean_Vector& y);
 	Euclidean_Vector& operator*=(const double scalar);
@@ -155,6 +160,37 @@ namespace ms {
 
 		return arithmetic_mean;
 	}
+
+	template <size_t dimension>
+	Euclidean_Vector<dimension> min_value_gathering_vector(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
+		dynamic_require(!euclideean_vectors.empty(), "min value can not collected from empty");
+		
+		const auto num_vector = euclideean_vectors.size();
+
+		std::array<double, dimension> result = euclideean_vectors.front();
+		for (size_t i = 1; i < num_vector; ++i) {
+			for (size_t j = 0; j < dimension; ++j) 
+				result[j] = (std::min)(result[j], euclideean_vectors[i][j]);
+		}
+
+		return result;
+	}
+
+	template <size_t dimension>
+	Euclidean_Vector<dimension> max_value_gathering_vector(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
+		dynamic_require(!euclideean_vectors.empty(), "min value can not collected from empty");
+
+		const auto num_vector = euclideean_vectors.size();
+
+		std::array<double, dimension> result = euclideean_vectors.front();
+		for (size_t i = 1; i < num_vector; ++i) {
+			for (size_t j = 0; j < dimension; ++j)
+				result[j] = (std::max)(result[j], euclideean_vectors[i][j]);
+		}
+
+		return result;
+	}
+
 }
 
 

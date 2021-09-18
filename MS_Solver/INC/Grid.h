@@ -16,20 +16,8 @@ struct Ghost_Cell
 	uint solution_related_cell_index;
 	uint face_share_cell_index;
 
-
 	template <ushort num_equation>
-	Euclidean_Vector<num_equation> solution(const Euclidean_Vector<num_equation>& related_cell_solution) const {
-		switch (this->related_type)
-		{
-		case ElementType::periodic: 
-		case ElementType::supersonic_outlet: 
-		case ElementType::supersonic_inlet1:
-		case ElementType::supersonic_inlet2: return related_cell_solution; //temporary code
-		default:
-			throw std::runtime_error("not supproted element type");
-			return {};
-		}
-	}
+	Euclidean_Vector<num_equation> solution(const Euclidean_Vector<num_equation>& related_cell_solution) const;
 };
 
 
@@ -57,7 +45,7 @@ public:
 	std::vector<Euclidean_Vector<space_dimension>> boundary_normals_at_centers(const std::vector<uint>& oc_indexes) const;
 	std::vector<std::vector<Euclidean_Vector<space_dimension>>> boundary_set_of_normals(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_nodes) const;
 	std::vector<Euclidean_Vector<space_dimension>> boundary_center_nodes(void) const;
-	std::vector<Euclidean_Vector<space_dimension>> owner_cell_center_to_boundary_center_vectors(const std::vector<uint>& oc_indexes) const;
+	std::vector<Euclidean_Vector<space_dimension>> boundary_owner_cell_to_faces(const std::vector<uint>& oc_indexes) const;
 	std::vector<Quadrature_Rule<space_dimension>> boundary_quadrature_rules(const ushort polynomial_degree) const;
 	
 	template <typename Numerical_Flux_Function>
@@ -70,6 +58,7 @@ public:
 	std::vector<Euclidean_Vector<space_dimension>> cell_center_nodes(void) const;
 	std::vector<std::vector<uint>> cell_set_of_vnode_indexes(void) const;
 	std::vector<std::vector<Euclidean_Vector<space_dimension>>> cell_set_of_vnodes(void) const;
+	std::vector<Dynamic_Matrix> cell_center_to_vertex_matrixes(void) const;
 
 public:
 	std::vector<std::pair<uint, uint>> inner_face_oc_nc_index_pairs(void) const;
@@ -89,7 +78,7 @@ public:
 
 public:
 	std::vector<Ghost_Cell<space_dimension>> make_ghost_cells(void) const;
-	std::vector<std::array<uint, 9>> ANN_indexes(void) const; //temporary
+	std::vector<std::vector<uint>> ANN_indexes(void) const; //temporary
 
 	
 	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_ignore_pbdry(void) const;
@@ -136,6 +125,22 @@ namespace ms {
 }
 
 //Template Definition
+
+template <ushort space_dimension>
+template <ushort num_equation>
+Euclidean_Vector<num_equation> Ghost_Cell<space_dimension>::solution(const Euclidean_Vector<num_equation>& related_cell_solution) const {
+	switch (this->related_type)
+	{
+	case ElementType::periodic:
+	case ElementType::supersonic_outlet: return related_cell_solution;
+	case ElementType::supersonic_inlet1: return Supersonic_Inlet1_Neighbor_Solution<num_equation>::calculate();
+	case ElementType::supersonic_inlet2: return Supersonic_Inlet2_Neighbor_Solution<num_equation>::calculate();
+	default:
+		throw std::runtime_error("not supproted element type");
+		return {};
+	}
+}
+
 template <ushort space_dimension>
 Grid<space_dimension>::Grid(Grid_Elements<space_dimension>&& grid_elements) {
 	SET_TIME_POINT;
@@ -324,7 +329,7 @@ std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::boundary_c
 }
 
 template <ushort space_dimension>
-std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::owner_cell_center_to_boundary_center_vectors(const std::vector<uint>& oc_indexes) const {
+std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::boundary_owner_cell_to_faces(const std::vector<uint>& oc_indexes) const {
 	const auto& cell_elements = this->elements.cell_elements;
 	const auto& boundary_elements = this->elements.boundary_elements;
 
@@ -457,6 +462,34 @@ std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension
 
 	return set_of_vnodes;
 }
+
+template <ushort space_dimension>
+std::vector<Dynamic_Matrix> Grid<space_dimension>::cell_center_to_vertex_matrixes(void) const {
+	const auto& cell_elements = this->elements.cell_elements;
+	const auto num_cell = cell_elements.size();
+
+	std::vector<Dynamic_Matrix> center_to_vertex_matrixes;
+	center_to_vertex_matrixes.reserve(num_cell);
+
+	for (size_t i = 0; i < num_cell; ++i) {
+		const auto& geometry = cell_elements[i].geometry_;
+
+		const auto center_node = geometry.center_node();
+		const auto vnodes = geometry.vertex_nodes();
+		const auto num_vertex = vnodes.size();
+
+		Dynamic_Matrix center_to_vertex_matrix(space_dimension, num_vertex);
+		for (size_t i = 0; i < num_vertex; ++i) {
+			const auto center_to_vertex = vnodes[i] - center_node;
+			center_to_vertex_matrix.change_column(i, center_to_vertex);
+		}
+
+		center_to_vertex_matrixes.push_back(std::move(center_to_vertex_matrix));
+	}
+
+	return center_to_vertex_matrixes;
+}
+
 
 template <ushort space_dimension>
 std::vector<std::pair<uint, uint>> Grid<space_dimension>::inner_face_oc_nc_index_pairs(void) const {
@@ -748,7 +781,7 @@ std::vector<Ghost_Cell<space_dimension>> Grid<space_dimension>::make_ghost_cells
 
 	const auto cell_center_nodes = this->cell_center_nodes();
 
-	const auto oc_to_boundary = this->owner_cell_center_to_boundary_center_vectors(bdry_owner_cell_indexes);
+	const auto oc_to_boundary = this->boundary_owner_cell_to_faces(bdry_owner_cell_indexes);
 
 	for (uint i = 0; i < num_boundary; ++i) {
 		const auto& bdry_element = this->elements.boundary_elements[i];
@@ -795,24 +828,28 @@ std::vector<Ghost_Cell<space_dimension>> Grid<space_dimension>::make_ghost_cells
 
 
 template <ushort space_dimension>
-std::vector<std::array<uint, 9>> Grid<space_dimension>::ANN_indexes(void) const {
-
+std::vector<std::vector<uint>> Grid<space_dimension>::ANN_indexes(void) const {
 	const auto& cell_elements = this->elements.cell_elements;
 	
-	const auto num_cell = cell_elements.size();
-	std::vector<std::array<uint, 9>> set_of_ANN_indexes(num_cell);
+	const auto bdry_oc_indexes = this->boundary_owner_cell_indexes();
 
+	const auto num_cell = cell_elements.size();
+	std::vector<std::vector<uint>> set_of_ANN_indexes(num_cell);
+		
+	//only work RQ mesh
 	std::array<uint, 4> location1 = { 5,3,1,7 };
 	std::array<uint, 4> location2 = { 6,4,2,8 };
 
 	for (uint i = 0; i < num_cell; ++i) {
-		const auto& element = cell_elements[i];
+		if (ms::contains(bdry_oc_indexes, i))
+			continue;
+
+		const auto& cell_element = cell_elements[i];
 		
-		std::array<uint, 9> ANN_indexes;
-		ANN_indexes.fill(999999);
+		std::vector<uint> ANN_indexes(9, -1);
 		ANN_indexes[0] = i;
 		
-		auto set_of_face_vnode_indexes = element.set_of_face_vertex_node_indexes();
+		auto set_of_face_vnode_indexes = cell_element.set_of_face_vertex_node_indexes();
 		const auto num_face = set_of_face_vnode_indexes.size();
 		
 		for (ushort j = 0; j < num_face; ++j) {
@@ -821,7 +858,7 @@ std::vector<std::array<uint, 9>> Grid<space_dimension>::ANN_indexes(void) const 
 			ANN_indexes[location1[j]] = face_share_cell_index.value();
 		}
 
-		const auto vnode_indexes = element.vertex_node_indexes();
+		const auto vnode_indexes = cell_element.vertex_node_indexes();
 		const auto num_vnode = vnode_indexes.size();
 
 		for (ushort j = 0; j < num_vnode; ++j) {
@@ -832,7 +869,7 @@ std::vector<std::array<uint, 9>> Grid<space_dimension>::ANN_indexes(void) const 
 			std::set<uint> temp(ANN_indexes.begin(), ANN_indexes.end());
 
 			auto difference_indexes = ms::set_difference(vnode_share_cell_index_set, temp);
-			dynamic_require(difference_indexes.size() == 1, "difference indexes should be unique");
+			dynamic_require(difference_indexes.size() == 1, "difference indexes should be unique");			
 
 			ANN_indexes[location2[j]] = difference_indexes.front();
 		}
@@ -841,6 +878,7 @@ std::vector<std::array<uint, 9>> Grid<space_dimension>::ANN_indexes(void) const 
 	}
 
 	return set_of_ANN_indexes;
+	//only work RQ mesh
 }
 
 

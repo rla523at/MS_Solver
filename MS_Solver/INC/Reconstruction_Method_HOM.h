@@ -410,7 +410,7 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
                     const auto P1_projected_criterion_value = P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
                     const auto P1_mode_criterion_value = P1_projected_criterion_value - P0_criterion_value;
     
-                    limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max));
+                    limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::limiter_function(P1_mode_criterion_value, P0_criterion_value, allowable_min, allowable_max));
                 }
     
                 solution_coefficient *= this->limiting_matrix(limiting_value);
@@ -747,7 +747,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     const auto simplex_P1_projected_criterion_value = simplex_P1_projected_solution_vnodes.at(This_::criterion_variable_index_, j);
                     const auto simplex_P1_mode_criterion_value = simplex_P1_projected_criterion_value - simplex_P0_criterion_value;
 
-                    limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::calculate_limiting_value(simplex_P1_mode_criterion_value, simplex_P0_criterion_value, allowable_min, allowable_max));
+                    limiting_value = (std::min)(limiting_value, MLP_u1_Limiting_Strategy::limiter_function(simplex_P1_mode_criterion_value, simplex_P0_criterion_value, allowable_min, allowable_max));
                }
 
                 solution_coefficient *= this->limiting_matrix(limiting_value);

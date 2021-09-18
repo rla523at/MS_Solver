@@ -18,6 +18,8 @@
 #define __MODIFIED_SOD__				36
 #define __SHU_OSHER__					37
 #define __EXPLOSION_PROBLEM__			38
+#define __DOUBLE_RAREFACTION_WAVE__		39
+#define __HARTEN_LAX_PROBLEM__			300
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41

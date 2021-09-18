@@ -786,6 +786,13 @@ GTEST_TEST(IrrationalFunction, operator_call_2) {
 }
 
 
+TEST(ms, is_natural_number_1) {
+	EXPECT_FALSE(ms::is_natural_number(3.1));
+}
+TEST(ms, is_natural_number_2) {
+	EXPECT_FALSE(ms::is_natural_number(-1));
+}
+
 //GTEST_TEST(Polynomial, OPERATOR_MULTIPLICATION_10) {
 //	auto p1 = X + 1;
 //	const auto p2 = p1^(0.5);

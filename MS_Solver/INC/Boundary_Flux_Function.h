@@ -2,6 +2,37 @@
 #include "Numerical_Flux_Function.h"
 #include "Element.h"
 
+
+template <ushort num_equation>
+class Supersonic_Inlet1_Neighbor_Solution
+{
+private:
+	Supersonic_Inlet1_Neighbor_Solution(void) = delete;
+
+private:
+	inline static Euclidean_Vector<num_equation> inflow_;
+
+public:
+	static void initialize(const Euclidean_Vector<num_equation>& inflow) { inflow_ = inflow; };
+	static Euclidean_Vector<num_equation> calculate(void) { return inflow_; };
+};
+
+
+template <ushort num_equation>
+class Supersonic_Inlet2_Neighbor_Solution
+{
+private:
+	Supersonic_Inlet2_Neighbor_Solution(void) = delete;
+
+private:
+	inline static Euclidean_Vector<num_equation> inflow_;
+
+public:
+	static void initialize(const Euclidean_Vector<num_equation>& inflow) { inflow_ = inflow; };
+	static Euclidean_Vector<num_equation> calculate(void) { return inflow_; };
+};
+
+
 template <typename Numerical_Flux_Function>
 class Boundary_Flux_Function
 {
@@ -28,18 +59,12 @@ private:
 	using Space_Vector_ = This_::Space_Vector_;
 	using Solution_		= This_::Solution_;
 
-private:
-	inline static This_::Solution_ inflow_;
-
-public:
-	static void initialize(const Solution_& inflow) { This_::inflow_ = inflow; };
-	static This_::Solution_ inflow(void) { return This_::inflow_; };
-
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
-		return Numerical_Flux_Function::calculate(solution, This_::inflow_, normal);
+		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet1_Neighbor_Solution<This_::num_equation_>::calculate(), normal);
 	}
 };
+
 
 template <typename Numerical_Flux_Function>
 class Supersonic_Inlet2 : public Boundary_Flux_Function<Numerical_Flux_Function>
@@ -49,16 +74,9 @@ private:
 	using Space_Vector_ = This_::Space_Vector_;
 	using Solution_		= This_::Solution_;
 
-private:
-	inline static This_::Solution_ inflow_;
-
-public:
-	static void initialize(const Solution_& inflow) { This_::inflow_ = inflow; };
-	static This_::Solution_ inflow(void) { return This_::inflow_; };
-
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
-		return Numerical_Flux_Function::calculate(solution, This_::inflow_, normal);
+		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet2_Neighbor_Solution<This_::num_equation_>::calculate(), normal);
 	}
 };
 

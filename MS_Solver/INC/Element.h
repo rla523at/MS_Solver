@@ -261,13 +261,26 @@ namespace ms {
 		return normalized_functions;
 	}
 
-	template <typename T, typename Index>
-	std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<Index>& indexes) {
-		const auto num_extracted_value = indexes.size();
-		std::vector<T> extracted_values(num_extracted_value);
+	//template <typename T, typename Index>
+	//std::vector<T> extract_by_index(const std::vector<T>& set, const std::vector<Index>& indexes) {
+	//	const auto num_extracted_value = indexes.size();
+	//	std::vector<T> extracted_values(num_extracted_value);
 
-		for (ushort i = 0; i < num_extracted_value; ++i)
-			extracted_values[i] = set[indexes[i]];
+	//	for (ushort i = 0; i < num_extracted_value; ++i)
+	//		extracted_values[i] = set[indexes[i]];
+
+	//	return extracted_values;
+	//}
+
+	template <typename T, typename Container>
+	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) {
+		const auto num_extracted_value = indexes.size();
+		
+		std::vector<T> extracted_values;
+		extracted_values.reserve(num_extracted_value);
+
+		for (const auto& index : indexes) 
+			extracted_values.push_back(set[index]);
 
 		return extracted_values;
 	}

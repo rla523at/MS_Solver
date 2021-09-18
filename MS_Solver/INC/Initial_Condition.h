@@ -174,6 +174,50 @@ public:
     static constexpr ushort space_dimension(void);
 };
 
+template <ushort space_dimension_>
+class Double_Rarefaction_Wave : public IC
+{
+private:
+    Double_Rarefaction_Wave(void) = delete;
+
+private:
+    static constexpr ushort num_eqation_ = 2 + space_dimension_;
+
+    using This_ = Double_Rarefaction_Wave<space_dimension_>;
+    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
+
+public:
+    static std::string name(void);
+    static constexpr ushort space_dimension(void);
+};
+
+template <ushort space_dimension_>
+class Harten_Lax_Problem : public IC
+{
+private:
+    Harten_Lax_Problem(void) = delete;
+
+private:
+    static constexpr ushort num_eqation_ = 2 + space_dimension_;
+
+    using This_ = Harten_Lax_Problem<space_dimension_>;
+    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
+    using Solution_ = Euclidean_Vector<num_eqation_>;
+
+public:
+    static Solution_ calculate_solution(const Space_Vector_& space_vector);
+    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
+
+public:
+    static std::string name(void);
+    static constexpr ushort space_dimension(void);
+};
+
 
 template <ushort space_dimension_>
 class Shu_Osher : public IC 
@@ -584,6 +628,188 @@ std::string Modified_SOD<space_dimension_>::name(void) {
 
 template <ushort space_dimension_>
 constexpr ushort Modified_SOD<space_dimension_>::space_dimension(void) {
+    return space_dimension_;
+}
+
+template <ushort space_dimension_>
+Double_Rarefaction_Wave<space_dimension_>::Solution_ Double_Rarefaction_Wave<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
+    constexpr auto gamma = 1.4;
+    constexpr auto c = 1.0 / (gamma - 1.0);
+    constexpr auto discontinuity_location = 0.5;
+
+    const auto x_coordinate = space_vector.at(0);
+
+    if constexpr (space_dimension_ == 2) {
+        if (x_coordinate <= discontinuity_location) {
+            constexpr auto rho = 1.0;
+            constexpr auto u = -2.0;
+            constexpr auto v = 0.0;
+            constexpr auto p = 0.4;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+            return { rho, rhou, rhov, rhoE };
+        }
+        else {
+            constexpr auto rho = 1.0;
+            constexpr auto u = 2.0;
+            constexpr auto v = 0.0;
+            constexpr auto p = 0.4;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+            return { rho, rhou, rhov, rhoE };
+        }
+    }
+    else if constexpr (space_dimension_ == 3) {
+        if (x_coordinate <= discontinuity_location) {
+            constexpr auto rho = 1.0;
+            constexpr auto u = -2.0;
+            constexpr auto v = 0.0;
+            constexpr auto w = 0.0;
+            constexpr auto p = 0.4;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhow = rho * w;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
+
+            return { rho, rhou, rhov, rhow, rhoE };
+        }
+        else {
+            constexpr auto rho = 1.0;
+            constexpr auto u = 2.0;
+            constexpr auto v = 0.0;
+            constexpr auto w = 0.0;
+            constexpr auto p = 0.4;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhow = rho * w;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
+
+            return { rho, rhou, rhov, rhow, rhoE };
+        }
+    }
+    else {
+        throw std::runtime_error("not supported space dimension");
+        return {};
+    }
+}
+
+template <ushort space_dimension_>
+std::vector<typename Double_Rarefaction_Wave<space_dimension_>::Solution_> Double_Rarefaction_Wave<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+    const auto num_cell = cell_centers.size();
+
+    std::vector<Solution_> solutions(num_cell);
+    for (size_t i = 0; i < num_cell; ++i)
+        solutions[i] = This_::calculate_solution(cell_centers[i]);
+
+    return solutions;
+}
+
+template <ushort space_dimension_>
+std::string Double_Rarefaction_Wave<space_dimension_>::name(void) {
+    return "Double_Rarefaction_Wave";
+};
+
+template <ushort space_dimension_>
+constexpr ushort Double_Rarefaction_Wave<space_dimension_>::space_dimension(void) {
+    return space_dimension_;
+}
+
+template <ushort space_dimension_>
+Harten_Lax_Problem<space_dimension_>::Solution_ Harten_Lax_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
+    constexpr auto gamma = 1.4;
+    constexpr auto c = 1.0 / (gamma - 1.0);
+    constexpr auto discontinuity_location = 0.5;
+
+    const auto x_coordinate = space_vector.at(0);
+
+    if constexpr (space_dimension_ == 2) {
+        if (x_coordinate <= discontinuity_location) {
+            constexpr auto rho = 0.445;
+            constexpr auto u = 0.698;
+            constexpr auto v = 0.0;
+            constexpr auto p = 3.528;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+            return { rho, rhou, rhov, rhoE };
+        }
+        else {
+            constexpr auto rho = 0.5;
+            constexpr auto u = 0.0;
+            constexpr auto v = 0.0;
+            constexpr auto p = 0.571;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
+
+            return { rho, rhou, rhov, rhoE };
+        }
+    }
+    else if constexpr (space_dimension_ == 3) {
+        if (x_coordinate <= discontinuity_location) {
+            constexpr auto rho = 0.445;
+            constexpr auto u = 0.698;
+            constexpr auto v = 0.0;
+            constexpr auto w = 0.0;
+            constexpr auto p = 3.528;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhow = rho * w;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
+
+            return { rho, rhou, rhov, rhow, rhoE };
+        }
+        else {
+            constexpr auto rho = 0.5;
+            constexpr auto u = 0.0;
+            constexpr auto v = 0.0;
+            constexpr auto w = 0.0;
+            constexpr auto p = 0.571;
+
+            constexpr auto rhou = rho * u;
+            constexpr auto rhov = rho * v;
+            constexpr auto rhow = rho * w;
+            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
+
+            return { rho, rhou, rhov, rhow, rhoE };
+        }
+    }
+    else {
+        throw std::runtime_error("not supported space dimension");
+        return {};
+    }
+}
+
+template <ushort space_dimension_>
+std::vector<typename Harten_Lax_Problem<space_dimension_>::Solution_> Harten_Lax_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
+    const auto num_cell = cell_centers.size();
+
+    std::vector<Solution_> solutions(num_cell);
+    for (size_t i = 0; i < num_cell; ++i)
+        solutions[i] = This_::calculate_solution(cell_centers[i]);
+
+    return solutions;
+}
+
+template <ushort space_dimension_>
+std::string Harten_Lax_Problem<space_dimension_>::name(void) {
+    return "Harten_Lax_Problem";
+};
+
+template <ushort space_dimension_>
+constexpr ushort Harten_Lax_Problem<space_dimension_>::space_dimension(void) {
     return space_dimension_;
 }
 

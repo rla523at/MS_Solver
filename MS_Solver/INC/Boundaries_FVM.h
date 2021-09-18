@@ -101,7 +101,7 @@ Boundaries_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::Boundarie
     : Boundaries_FVM_Base<Numerical_Flux_Function>(grid), reconstruction_method_(reconstruction_method) {
     SET_TIME_POINT;
 
-    this->oc_to_boundary_vectors_ = grid.owner_cell_center_to_boundary_center_vectors(this->oc_indexes_);
+    this->oc_to_boundary_vectors_ = grid.boundary_owner_cell_to_faces(this->oc_indexes_);
 
     Log::content_ << std::left << std::setw(50) << "@ Boundaries FVM linear precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();

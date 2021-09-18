@@ -8,7 +8,7 @@ GTEST_TEST(Linear_Advection, calculate_physical_fluxes_1) {
 	constexpr ushort space_dimension = 2;
 
 	Linear_Advection<space_dimension>::initialize({ 1.0,0.5 });
-	
+
 	constexpr size_t num = 5;
 	
 	std::vector<Euclidean_Vector<1>> solutions(num);

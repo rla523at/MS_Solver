@@ -8,7 +8,7 @@ Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator-=(const Dynamic_Euc
 }
 
 Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator*=(const double constant) {
-	cblas_dscal(this->dimension(), constant, this->values_.data(), 1);
+	cblas_dscal(static_cast<MKL_INT>(this->dimension()), constant, this->values_.data(), 1);
 	return *this;
 }
 

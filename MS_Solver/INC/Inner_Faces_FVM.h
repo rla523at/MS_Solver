@@ -1,7 +1,7 @@
 #pragma once
 #include "Grid.h"
 #include "Reconstruction_Method_FVM.h"
-
+//#include "Log.h"
 
 //FVM이면 공통으로 사용하는 variable
 template <ushort space_dimension>
@@ -135,9 +135,9 @@ void Inner_Faces_FVM_Linear<Reconstruction_Method, Numerical_Flux_Function>::cal
             RHS[oc_index] -= delta_RHS;
             RHS[nc_index] += delta_RHS;
 
-            std::cout << except.what() << "\n";
-            std::cout << "oc_index " << oc_index << "\n";
-            std::cout << "nc_index " << nc_index << "\n";
+            Log::content_ << except.what() << "\n";
+            Log::content_ << "oc_index " << oc_index << "\n";
+            Log::content_ << "nc_index " << nc_index << "\n";
         }
     }
 }

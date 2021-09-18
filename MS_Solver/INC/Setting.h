@@ -5,52 +5,52 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
-
+#define __DEFAULT_PATH__						"E:/CodeData/Result/DFM/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						shocktube_L5_v2
+#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
 #define __GOVERNING_EQUATION__					__EULER__
 #define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__FVM__
-#define __RECONSTRUCTION_METHOD__				__ANN_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
+#define __NUMERICAL_FLUX__						__LLF__
+#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
+#define __TIME_STEP_METHOD__					__CFL__
+#define __TIME_STEP_CONSTANT__					0.9
+#define __SOLVE_END_CONDITION__					__BY_TIME__
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2				
+#define __SOLVE_POST_CONDITION__				__BY_ITER__
+#define __SOLVE_POST_CONDITION_CONSTANT__		10
+#define __POST_ORDER__							1
+#define __POST_FILE_FORMAT__					__BINARY__
 
-#if		__RECONSTRUCTION_METHOD__	!=	__CONSTANT_RECONSTRUCTION__
-#if		__SPATIAL_DISCRETE_METHOD__ ==	__FVM__ 
-#define __GRADIENT_METHOD__						__FACE_LEAST_SQUARE__
-#endif
+// CONDITIONAL OPTIONS
+#if  __RECONSTRUCTION_METHOD__ == __ANN_RECONSTRUCTION__
+#define __ANN_MODEL__							model5_1
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
 #define __SOLUTION_ORDER__						3
 #endif 
 
-#define __NUMERICAL_FLUX__						__LLF__
-#define __TIME_INTEGRAL_METHOD__				__SSPRK33__
-#define __TIME_STEP_METHOD__					__CFL__
-#define __TIME_STEP_CONSTANT__					0.9
-#define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2
-#define __SOLVE_POST_CONDITION__				__BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		1
-#define __POST_ORDER__							1
-#define __POST_FILE_FORMAT__					__BINARY__
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
 // __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __CONSTANT1__,
-//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__
+//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __SHU_OSHER__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
-// __GRADIENT_METHOD__				__VERTEX_LEAST_SQUARE__, __FACE_LEAST_SQUARE__ 
 // __NUMERICAL_FLUX__				__LLF__
 // __TIME_INTEGRAL_METHOD__			__SSPRK33__, __SSPRK54__
 // __TIME_STEP_METHOD__				__CFL__, __CONSTANT_DT__
 // __SOLVE_END_CONDITION__			__END_BY_TIME__, __END_BY_ITER__
 // __SOLVE_POST_CONDITION__			__POST_BY_TIME__, __POST_BY_ITER__
 // __POST_MODE__					__ASCII__, __BINARY__
+
+// Reference Constant
+// END TIME : Modified SOD(0.2), Double Rarefaction Wave(0.15), Harten Lax(0.15), Shu_Osher(1.8)
 
 // ######################################### OPTION END ################################################################
 
@@ -84,11 +84,6 @@
 
 
 // ########################################## MACRO SETTING ##################################################################
-
-//#define INFLOW_RHO	 0.0
-//#define INFLOW_RHOU	 0.0
-//#define INFLOW_RHOV	 0.0
-//#define INFLOW_RHOE	 0.0
 
 
 #if		__GRID_FILE_TYPE__ == __GMSH__
@@ -134,8 +129,13 @@
 #endif
 #if		__INITIAL_CONDITION__ == __EXPLOSION_PROBLEM__
 #define INITIAL_CONDITION	Explosion_Problem<__DIMENSION__>
+#endif 
+#if		__INITIAL_CONDITION__ == __DOUBLE_RAREFACTION_WAVE__
+#define INITIAL_CONDITION	Double_Rarefaction_Wave<__DIMENSION__>
+#endif 
+#if		__INITIAL_CONDITION__ == __HARTEN_LAX_PROBLEM__
+#define INITIAL_CONDITION	Harten_Lax_Problem<__DIMENSION__>
 #endif
-
 
 #if		__SPATIAL_DISCRETE_METHOD__ == __FVM__
 #define SPATIAL_DISCRETE_METHOD	FVM
@@ -146,12 +146,15 @@
 
 #if		__SPATIAL_DISCRETE_METHOD__ == __FVM__
 #if		__RECONSTRUCTION_METHOD__ != __CONSTANT_RECONSTRUCTION__
-#if		__GRADIENT_METHOD__ == __VERTEX_LEAST_SQUARE__ 
-#define GRADIENT_METHOD		Vertex_Least_Square<GOVERNING_EQUATION::num_equation(), __DIMENSION__>
-#endif
-#if		__GRADIENT_METHOD__ == __FACE_LEAST_SQUARE__ 
+
 #define GRADIENT_METHOD		Face_Least_Square<GOVERNING_EQUATION::num_equation(), __DIMENSION__>
-#endif
+
+//#if		__GRADIENT_METHOD__ == __VERTEX_LEAST_SQUARE__ 
+//#define GRADIENT_METHOD		Vertex_Least_Square<GOVERNING_EQUATION::num_equation(), __DIMENSION__>
+//#endif
+//#if		__GRADIENT_METHOD__ == __FACE_LEAST_SQUARE__ 
+//#define GRADIENT_METHOD		Face_Least_Square<GOVERNING_EQUATION::num_equation(), __DIMENSION__>
+//#endif
 #endif
 #endif
 
@@ -222,13 +225,17 @@
 
 namespace ms {
 	inline void apply_user_defined_setting(void) {
+#if		__RECONSTRUCTION_METHOD__	== __ANN_RECONSTRUCTION__
+		ANN_limiter<GRADIENT_METHOD>::set_model(TO_STRING(__ANN_MODEL__));
+#endif
+
 		if constexpr (__DIMENSION__ == 2) {
 			Linear_Advection<2>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
 			Sine_Wave<2>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
 
 #if __GOVERNING_EQUATION__ == __EULER__			
-			Supersonic_Inlet1<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO1,INFLOW_RHOU1,INFLOW_RHOV1,INFLOW_RHOE1 });
-			Supersonic_Inlet2<NUMERICAL_FLUX_FUNCTION>::initialize({ INFLOW_RHO2,INFLOW_RHOU2,INFLOW_RHOV2,INFLOW_RHOE2 });
+			Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO1,INFLOW_RHOU1,INFLOW_RHOV1,INFLOW_RHOE1 });
+			Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO2,INFLOW_RHOU2,INFLOW_RHOV2,INFLOW_RHOE2 });
 #endif
 		}
 		else if constexpr (__DIMENSION__ == 3) {

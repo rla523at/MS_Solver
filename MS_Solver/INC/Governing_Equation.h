@@ -117,11 +117,9 @@ namespace ms {
 //Template Definition Part
 template <ushort space_dimension>
 auto Linear_Advection<space_dimension>::physical_flux(const Solution_& solution) {
-    const auto sol = solution.at(0);	//scalar
-
     std::array<double, space_dimension> flux_values;
-    for (ushort i = 0; i < space_dimension; ++i) 
-        flux_values[i] = sol * This_::advection_speeds_[i];
+    for (ushort i = 0; i < space_dimension; ++i)
+        flux_values[i] = This_::advection_speeds_[i] * solution;
     
     return Matrix<1, space_dimension>(flux_values);
 }
@@ -155,8 +153,8 @@ double Linear_Advection<space_dimension>::inner_face_maximum_lambda(const Soluti
 
 template <ushort space_dimension>
 auto Burgers<space_dimension>::physical_flux(const Solution_& solution) {
-    const auto sol = solution.at(0); //scalar
-    const auto flux_value = 0.5 * sol * sol;
+    //const auto sol = solution.at(0); //scalar
+    const double flux_value = 0.5 * std::pow(solution,2.0);
 
     std::array<double, space_dimension> flux_values;
     flux_values.fill(flux_value);
@@ -181,7 +179,7 @@ std::vector<std::array<double, space_dimension>> Burgers<space_dimension>::calcu
 
     std::vector<std::array<double, space_dimension>> projected_maximum_lambdas(num_solution);
     for (size_t i = 0; i < num_solution; ++i) {
-        const auto maximum_lambdas = std::abs(solutions[i].at(0));	//scalar
+        const auto maximum_lambdas = std::abs(solutions[i]);
         projected_maximum_lambdas[i].fill(maximum_lambdas);
     }
 
@@ -194,7 +192,7 @@ double Burgers<space_dimension>::inner_face_maximum_lambda(const Solution_& solu
     for (ushort i = 0; i < space_dimension; ++i)
         normal_component_sum += normal_vector[i];
             
-    return (std::max)(std::abs(solution_o.at(0) * normal_component_sum), std::abs(solution_n.at(0) * normal_component_sum));
+    return (std::max)(std::abs(solution_o * normal_component_sum), std::abs(solution_n * normal_component_sum));
 }
 
 
@@ -217,7 +215,7 @@ auto Euler<space_dimension_>::physical_flux(const Solution_& conservative_variab
         const auto a = primitivie_variable.at(3);
         const auto rhouv = rhou * v;
 
-        dynamic_require(rho > 0 && p > 0, "density and pressure shold be positive");
+        dynamic_require(rho >= 0 && p >= 0, "density and pressure shold be positive");
 
         return Matrix<num_equation_,space_dimension_>({
             rhou,				rhov,
@@ -242,7 +240,7 @@ auto Euler<space_dimension_>::physical_flux(const Solution_& conservative_variab
         const auto rhouw = rhou * w;
         const auto rhovw = rhov * w;
 
-        dynamic_require(rho > 0 && p > 0, "density and pressure shold be positive");
+        dynamic_require(rho >= 0 && p >= 0, "density and pressure shold be positive");
 
         return Matrix<num_equation_, space_dimension_>({
             rhou,				rhov,               rhow,

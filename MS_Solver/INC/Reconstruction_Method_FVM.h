@@ -49,7 +49,7 @@ private:
     MLP_u1_Limiting_Strategy(void) = delete;
 
 public:
-    static double calculate_limiting_value(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
+    static double limiter_function(const double P1_mode_solution, const double P0_solution, const double allowable_min, const double allowable_max) {
         if (P1_mode_solution == 0)
             return 1.0;
 
@@ -76,7 +76,7 @@ public:
 
 private:
     Gradient_Method gradient_method_;
-    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_indexes_;
+    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_index_set_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::vector<Dynamic_Matrix> center_to_vertex_matrixes_;
     std::vector<Solution_Gradient_> solution_gradients_;
@@ -133,12 +133,13 @@ private:
     using Solution_             = Euclidean_Vector<num_equation_>;
     using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
 
-private:
+    inline static std::string model_name_;
+
+private:    
     Gradient_Method gradient_method_;    
     std::vector<Solution_Gradient_> solution_gradients_;
-
     std::vector<double> chracteristic_length_;
-    std::vector<std::array<uint, 9>> set_of_indexes_;//temporary
+    std::vector<std::vector<uint>> set_of_indexes_;
 
 public:
     ANN_limiter(const Grid<space_dimension_>& grid);
@@ -152,7 +153,8 @@ private:
     ANN_Model read_model(void) const;
 
 public:
-    static std::string name(void) { return "ANN_Reconstruction_" + Gradient_Method::name(); };
+    static void set_model(const std::string_view model_name) { model_name_ = model_name; };
+    static std::string name(void) { return "ANN_Reconstruction_" + model_name_; };
 };
 
 namespace ms {
@@ -179,31 +181,14 @@ void Linear_Reconstruction<Gradient_Method>::reconstruct(const std::vector<Solut
 }
 
 template <typename Gradient_Method>
-MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_method_(grid), vnode_index_to_share_cell_indexes_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
+MLP_u1<Gradient_Method>::MLP_u1(const Grid<space_dimension_>& grid) : gradient_method_(grid), vnode_index_to_share_cell_index_set_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry()) {
     SET_TIME_POINT;
 
     this->set_of_vnode_indexes_ = grid.cell_set_of_vnode_indexes();
+    this->center_to_vertex_matrixes_ = grid.cell_center_to_vertex_matrixes();
 
     const auto num_cell = set_of_vnode_indexes_.size();
     this->solution_gradients_.resize(num_cell);
-    this->center_to_vertex_matrixes_.reserve(num_cell);
-
-    const auto cell_center_nodes = grid.cell_center_nodes();
-    const auto cell_set_of_vdnoes = grid.cell_set_of_vnodes();
-
-    for (size_t i = 0; i < num_cell; ++i) {
-        const auto center_node = cell_center_nodes[i];
-        const auto& vnodes = cell_set_of_vdnoes[i];
-        const auto num_vertex = vnodes.size();
-
-        Dynamic_Matrix center_to_vertex_matrix(space_dimension_, num_vertex);
-        for (size_t i = 0; i < num_vertex; ++i) {
-            const auto center_to_vertex = vnodes[i] - center_node;
-            center_to_vertex_matrix.change_column(i, center_to_vertex);
-        }
-
-        this->center_to_vertex_matrixes_.push_back(std::move(center_to_vertex_matrix));
-    }
 
     Log::content_ << std::left << std::setw(50) << "@ MLP u1 precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -214,9 +199,8 @@ template <typename Gradient_Method>
 void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solutions) {
     const auto solution_gradients = this->gradient_method_.calculate_solution_gradients(solutions);
     const auto vnode_index_to_min_max_solution = this->calculate_vertex_node_index_to_min_max_solution(solutions);
-    const auto num_cell = solutions.size();
 
-    for (uint i = 0; i < num_cell; ++i) {
+    for (uint i = 0; i < solutions.size(); ++i) {
         const auto& gradient = solution_gradients[i];
         const auto P1_mode_solution_vnodes = gradient * this->center_to_vertex_matrixes_[i];
 
@@ -227,12 +211,11 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
         const auto num_vertex = vnode_indexes.size();
 
         for (ushort j = 0; j < num_vertex; ++j) {
-            const auto vnode_index = vnode_indexes[j];
-            const auto& [min_solution, max_solution] = vnode_index_to_min_max_solution.at(vnode_index);
+            const auto& [min_solution, max_solution] = vnode_index_to_min_max_solution.at(vnode_indexes[j]);
 
             for (ushort e = 0; e < num_equation_; ++e) {
-                const auto limiting_value = MLP_u1_Limiting_Strategy::calculate_limiting_value(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
-                limiting_values[e] = min(limiting_values[e], limiting_value);
+                const auto limiting_value = MLP_u1_Limiting_Strategy::limiter_function(P1_mode_solution_vnodes.at(e, j), solutions[i].at(e), min_solution.at(e), max_solution.at(e));
+                limiting_values[e] = (std::min)(limiting_values[e], limiting_value);
             }
         }
                 
@@ -244,34 +227,17 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
 
 template <typename Gradient_Method>
 auto MLP_u1<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(const std::vector<Solution_>& solutions) const {
-    const auto num_vnode = this->vnode_index_to_share_cell_indexes_.size();
+    const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 
     std::unordered_map<uint, std::pair<Solution_, Solution_>> vnode_index_to_min_max_solution;
     vnode_index_to_min_max_solution.reserve(num_vnode);
 
-    for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_indexes_) {
-        const auto num_share_cell = share_cell_indexes.size();
-        std::array<std::vector<double>, num_equation_> equation_wise_solutions;
+    for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_index_set_) {
+        const auto vnode_share_cell_solutions = ms::extract_by_index(solutions, share_cell_indexes);
+        const auto gathered_min_sol = ms::min_value_gathering_vector(vnode_share_cell_solutions);
+        const auto gathered_max_sol = ms::max_value_gathering_vector(vnode_share_cell_solutions);
 
-        for (ushort i = 0; i < num_equation_; ++i)
-            equation_wise_solutions[i].reserve(num_share_cell);
-
-        for (const auto cell_index : share_cell_indexes) {
-            for (ushort i = 0; i < num_equation_; ++i)
-                equation_wise_solutions[i].push_back(solutions[cell_index].at(i));
-        }
-
-        std::array<double, num_equation_> min_solution;
-        std::array<double, num_equation_> max_solution;
-        for (ushort i = 0; i < num_equation_; ++i) {
-            min_solution[i] = *std::min_element(equation_wise_solutions[i].begin(), equation_wise_solutions[i].end());
-            max_solution[i] = *std::max_element(equation_wise_solutions[i].begin(), equation_wise_solutions[i].end());
-        }
-
-        Solution_ min_sol = min_solution;
-        Solution_ max_sol = max_solution;
-
-        vnode_index_to_min_max_solution.emplace(vnode_index, std::make_pair(min_sol, max_sol));
+        vnode_index_to_min_max_solution.emplace(vnode_index, std::make_pair(gathered_min_sol, gathered_max_sol));
     }
 
     return vnode_index_to_min_max_solution;
@@ -300,6 +266,11 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
     std::vector<double> post_limiter_value(num_cell);//post
 
     for (size_t i = 0; i < num_cell; ++i) {
+        if (this->set_of_indexes_[i].empty()) {
+            this->solution_gradients_[i] *= 0.0;
+            continue;
+        }
+
         const auto ordered_indexes = this->set_of_indexes_[i];
         const auto num_ordered_index = ordered_indexes.size();
 
@@ -364,8 +335,8 @@ double ANN_limiter<Gradient_Method>::limit(Dynamic_Euclidean_Vector& feature) co
 }
 
 template <typename Gradient_Method>
-ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {
-    std::ifstream file("RSC/test_square.bin", std::ios::binary); 
+ANN_Model ANN_limiter<Gradient_Method>::read_model(void) const {    
+    std::ifstream file("RSC/" + model_name_ + ".bin", std::ios::binary);
     dynamic_require(file.is_open(), "Model file should be open");
 
     int num_layer;

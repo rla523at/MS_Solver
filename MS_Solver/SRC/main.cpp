@@ -53,10 +53,10 @@ int main(void) {
 
 		try { Discrete_Equation_::solve<TIME_STEP_METHOD>(semi_discrete_equation, solutions); }
 		catch (const std::exception& exception) {
-			std::cout << "\n================================================================================\n";
-			std::cout << "\t\t\t Abnormal Termination\n";
-			std::cout << "================================================================================\n";
-			std::cout << "Essential requirement is not satisfied => " << exception.what() << "\n";
+			Log::content_ << "\n================================================================================\n";
+			Log::content_ << "\t\t\t Abnormal Termination\n";
+			Log::content_ << "================================================================================\n";
+			Log::content_ << "Essential requirement is not satisfied => " << exception.what() << "\n";
 			Tecplot::post_solution(solutions, "abnormal_termination");
 			std::exit(523);
 		}
