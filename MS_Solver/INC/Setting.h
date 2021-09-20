@@ -8,17 +8,17 @@
 #define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Quad40
-#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
-#define __INITIAL_CONDITION__					__SQUARE_WAVE__
+#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
+#define __GOVERNING_EQUATION__					__EULER__
+#define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
-#define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
+#define __RECONSTRUCTION_METHOD__				__hMLP_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		1.0
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		10
 #define __POST_ORDER__							4
@@ -30,7 +30,7 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						4
+#define __SOLUTION_ORDER__						2
 #endif 
 
 
@@ -56,6 +56,10 @@
 
 // #################################### USER DEFINED SETTING ############################################################
 
+// MODE
+// comment out if you do not want to use
+#define __USE_SCAILING_METHOD__
+
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
 #define Y_ADVECTION_SPEED				2.0
@@ -77,8 +81,11 @@
 #define INFLOW_RHOV2					0.0
 #define INFLOW_RHOE2					2.5
 
+// Reference Constants
 // Modified SOD (1, 0.75, 0.0, 2.78125), 
 // Shu Osher	(3.857143, 10.1418522328, 0.0, 39.1666684317), (0.9735296499804454, 0.0, 0.0, 2.5)
+
+
 
 // ################################# USER DEFINED SETTING END #########################################################
 
@@ -219,6 +226,12 @@
 #endif
 #if		__POST_FILE_FORMAT__ == __BINARY__
 #define POST_FILE_FORMAT  Post_File_Format::binary
+#endif
+
+#ifdef __USE_SCAILING_METHOD__
+#define SCAILING_METHOD_FLAG true
+#else
+#define SCAILING_METHOD_FLAG false
 #endif
 
 // ########################################## MACRO SETTING END ##################################################################

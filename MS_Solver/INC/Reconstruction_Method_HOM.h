@@ -144,7 +144,7 @@ private:
     using This_ = hMLP_BD_Reconstruction<space_dimension_, solution_order_>;
 
 private:
-    const std::unordered_map<uint, std::set<uint>>& pbdry_vnode_index_to_matched_node_index_set_;
+    std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_vnode_index_set_;
 
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
@@ -455,8 +455,10 @@ auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_vertex_no
 
 template <ushort space_dimension_, ushort solution_order_>
 hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstruction(const Grid<space_dimension_>& grid) 
-    : hMLP_Base<space_dimension_, solution_order_>(grid), pbdry_vnode_index_to_matched_node_index_set_(grid.get_pbdry_vnode_index_to_matched_node_index_set()) {
+    : hMLP_Base<space_dimension_, solution_order_>(grid) {
     SET_TIME_POINT;
+
+    this->pbdry_vnode_index_to_matched_vnode_index_set_ = grid.pbdry_vnode_index_to_matched_pbdry_vnode_index_set();
 
     const auto set_of_vnodes = grid.cell_set_of_vnodes();
     const auto simplex_flags = grid.cell_simplex_flags();
@@ -776,7 +778,7 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
     //consider pbdry
     std::unordered_set<uint> considered_pbdry_node_index_set;
 
-    for (const auto& [vnode_index, matched_vnode_index_set] : this->pbdry_vnode_index_to_matched_node_index_set_) {
+    for (const auto& [vnode_index, matched_vnode_index_set] : this->pbdry_vnode_index_to_matched_vnode_index_set_) {
         if (considered_pbdry_node_index_set.contains(vnode_index))
             continue;
         

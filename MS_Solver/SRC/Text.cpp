@@ -105,6 +105,35 @@ Binary_Writer& Binary_Writer::operator<<(const std::string& str) {
 }
 
 namespace ms {
+	void be_replaced(std::string& str, const char target, const char replacement) {
+		while (true) {
+			const auto pos = str.find(target);
+
+			if (pos == std::string::npos)
+				break;
+
+			str[pos] = replacement;
+		}
+	}
+
+	void be_replaced(std::string& str, const std::string_view target, const std::string_view replacement) {
+		if (target.empty())
+			return;
+
+		while (true) {
+			const auto pos = str.find(target.data());
+
+			if (pos == std::string::npos)
+				break;
+
+			str.replace(pos, target.size(), replacement.data());
+		}
+	}
+
+	void be_removed(std::string& str, const std::string_view target) {
+		ms::be_replaced(str, target, "");
+	}
+
 	std::vector<std::string> parse(const std::string& str, const char delimiter) {
 		if (str.empty())
 			return std::vector<std::string>();
@@ -133,55 +162,21 @@ namespace ms {
 		
 		auto temp_str = str;
 		for (size_t i = 1; i < num_delimiter; ++i)
-			ms::replace_all(temp_str, delimiters[i], reference_delimiter);
+			ms::be_replaced(temp_str, delimiters[i], reference_delimiter);
 
 		return ms::parse(temp_str, reference_delimiter);
 	}
 
-	void replace_all(std::string& str, const char target, const char replacement) {
-		while (true) {
-			const auto pos = str.find(target);
-
-			if (pos == std::string::npos)
-				break;
-
-			str[pos] = replacement;
-		}
-	}
-
-	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement) {
-		if (target.empty())
-			return;
-		
-		while (true) {
-			const auto pos = str.find(target.data());
-
-			if (pos == std::string::npos)
-				break;
-
-			str.replace(pos, target.size(), replacement.data());
-		}
-	}
-
-	std::string replace_all(const std::string& str, const std::string_view target, const std::string_view replacement) {
+	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement) {
 		auto result = str;
-		ms::replace_all(result, target, replacement);
+		ms::be_replaced(result, target, replacement);
 		return result;
 	}
 
-
-	std::string remove(const std::string& str, const std::string& target) {
-		const auto target_size = target.size();
-
+	std::string remove(const std::string& str, const std::string_view target) {
 		auto result = str;
-		while (true) {
-			const auto position = result.find(target);
-
-			if (position == std::string::npos)
-				return result;
-
-			result.erase(position, target_size);
-		}
+		ms::be_removed(result, target);
+		return result;
 	}
 
 	size_t find_icase(const std::string& str, const std::string& target) {

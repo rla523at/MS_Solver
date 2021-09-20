@@ -1,9 +1,8 @@
-
 #include "../INC/Setting.h"
 
 using Grid_Element_Builder_		= Grid_Element_Builder<GRID_FILE_TYPE, __DIMENSION__>;
 using Grid_						= Grid<__DIMENSION__>;
-using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, RECONSTRUCTION_METHOD, NUMERICAL_FLUX_FUNCTION>;
+using Semi_Discrete_Equation_	= Semi_Discrete_Equation<GOVERNING_EQUATION, SPATIAL_DISCRETE_METHOD, RECONSTRUCTION_METHOD, NUMERICAL_FLUX_FUNCTION, SCAILING_METHOD_FLAG>;
 using Discrete_Equation_		= Discrete_Equation<TIME_INTEGRAL_METHOD>;
 
 int main(void) {
@@ -15,7 +14,7 @@ int main(void) {
 	
 
 	for (auto& grid_file_name : grid_file_names) {
-		ms::remove(grid_file_name, " ");
+		ms::be_removed(grid_file_name, " ");
 
 		Tecplot::initialize<GOVERNING_EQUATION>(__POST_ORDER__, POST_FILE_FORMAT); //post
 		Solve_Controller::initialize(SOLVE_END_CONDITION, SOLVE_POST_CONDITION);
@@ -30,7 +29,12 @@ int main(void) {
 		Log::content_ << std::left << std::setw(35) << "Governing Equation" << GOVERNING_EQUATION::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Initial Condtion" << INITIAL_CONDITION::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Spatial Discrete Method" << SPATIAL_DISCRETE_METHOD::name() << "\n";
-		Log::content_ << std::left << std::setw(35) << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << "\n";
+
+		if constexpr (SCAILING_METHOD_FLAG)
+			Log::content_ << std::left << std::setw(35) << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << " with scailing method\n";
+		else
+			Log::content_ << std::left << std::setw(35) << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << "\n";
+
 		Log::content_ << std::left << std::setw(35) << "Numeraical Flux Function" << NUMERICAL_FLUX_FUNCTION::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Integral Method" << TIME_INTEGRAL_METHOD::name() << "\n";
 		Log::content_ << std::left << std::setw(35) << "Time Step Method" << TIME_STEP_METHOD::name() << "\n";
@@ -57,6 +61,8 @@ int main(void) {
 			Log::content_ << "\t\t\t Abnormal Termination\n";
 			Log::content_ << "================================================================================\n";
 			Log::content_ << "Essential requirement is not satisfied => " << exception.what() << "\n";
+			Log::print();
+			Log::write();
 			Tecplot::post_solution(solutions, "abnormal_termination");
 			std::exit(523);
 		}

@@ -25,28 +25,28 @@ GTEST_TEST(Text, write) {
 
 GTEST_TEST(ms, replace_all_1) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::replace_all(str, ",", "_");
+	ms::be_replaced(str, ",", "_");
 
 	std::string ref = "abc_qwer_wer____";
 	EXPECT_EQ(str, ref);
 }
 GTEST_TEST(ms, replace_all_2) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::replace_all(str, "", "_");
+	ms::be_replaced(str, "", "_");
 
 	std::string ref = "abc_qwer,wer__,,";
 	EXPECT_EQ(str, ref);
 }
 GTEST_TEST(ms, replace_all_3) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::replace_all(str, "wer", "");
+	ms::be_replaced(str, "wer", "");
 
 	std::string ref = "abc_q,__,,";
 	EXPECT_EQ(str, ref);
 }
 GTEST_TEST(ms, replace_all_4) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::replace_all(str, ',', '_');
+	ms::be_replaced(str, ',', '_');
 
 	std::string ref = "abc_qwer_wer____";
 	EXPECT_EQ(str, ref);
@@ -181,6 +181,22 @@ GTEST_TEST(ms, rfind_nth_6) {
 
 	const auto ref = std::string::npos;
 	EXPECT_EQ(result, ref);
+}
+
+TEST(ms, be_removed_1) {
+	std::string str = " target";
+	ms::be_removed(str, " ");
+
+	std::string ref = "target";
+	EXPECT_EQ(str, ref);
+}
+
+TEST(ms, be_replaced_1) {
+	std::string str = " target";
+	ms::be_replaced(str, " ", "");
+
+	std::string ref = "target";
+	EXPECT_EQ(str, ref);
 }
 
 //TEST(ms, rename) {

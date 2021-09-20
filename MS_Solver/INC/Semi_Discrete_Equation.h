@@ -8,7 +8,7 @@
 #include "Tecplot.h"
 
 
-template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function>
+template <typename Governing_Equation, typename Spatial_Discrete_Method, typename Reconstruction_Method, typename Numerical_Flux_Function, bool scailing_method_flag>
 class Semi_Discrete_Equation
 {
 private:
@@ -102,7 +102,7 @@ public:
             this->reconstruction_method_.reconstruct(solutions);
 
         //이거 어떻게 못하나..
-        if constexpr (ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
+        if constexpr (scailing_method_flag && ms::can_use_scaliling_method<Governing_Equation, Spatial_Discrete_Method>)
             Solution_Scaler<space_dimension_>::inspect_and_scale(solutions);
     }
 

@@ -11,7 +11,7 @@ TEST(Constant1, calculate_solution_1) {
 	Euclidean_Vector space_vector = { 1,1 };
 	const auto result = Constant1<space_dimension>::calculate_solution(space_vector);
 
-	const auto ref = 1.0;
+	const Euclidean_Vector ref = 1.0;
 	EXPECT_EQ(result, ref);
 }
 TEST(Constant1, calculate_solution_2) {
@@ -20,7 +20,7 @@ TEST(Constant1, calculate_solution_2) {
 	Euclidean_Vector space_vector = { 1,1,1 };
 	const auto result = Constant1<space_dimension>::calculate_solution(space_vector);
 
-	const auto ref = 1.0;
+	const Euclidean_Vector ref = 1.0;
 	EXPECT_EQ(result, ref);
 }
 
@@ -38,7 +38,7 @@ TEST(Sine_Wave, calculate_solution_1) {
 		Euclidean_Vector space_vector = { dis1(gen),dis1(gen) };
 		const auto result = Sine_Wave<space_dimension>::calculate_solution(space_vector);
 
-		const auto ref = std::sin(2 * std::numbers::pi * space_vector[0]) * std::sin(2 * std::numbers::pi * space_vector[1]);
+		const Euclidean_Vector ref = std::sin(2 * std::numbers::pi * space_vector[0]) * std::sin(2 * std::numbers::pi * space_vector[1]);
 		EXPECT_EQ(result, ref);
 	}
 }
@@ -57,7 +57,7 @@ TEST(Sine_Wave, calculate_solution_2) {
 	Euclidean_Vector space_vector = { dis1(gen),dis1(gen),dis1(gen) };
 	const auto result = Sine_Wave<space_dimension>::calculate_solution(space_vector);
 
-	const auto ref = std::sin(2 * std::numbers::pi * space_vector[0]) * std::sin(2 * std::numbers::pi * space_vector[1]) * std::sin(2 * std::numbers::pi * space_vector[2]);
+	const Euclidean_Vector ref = std::sin(2 * std::numbers::pi * space_vector[0]) * std::sin(2 * std::numbers::pi * space_vector[1]) * std::sin(2 * std::numbers::pi * space_vector[2]);
 	EXPECT_EQ(result, ref);
 	}
 }
@@ -74,7 +74,7 @@ TEST(Square_Wave, calculate_solution_1) {
 		Euclidean_Vector space_vector = { dis1(gen),dis1(gen) };
 		const auto result = Square_Wave<space_dimension>::calculate_solution(space_vector);
 
-		double ref = 0.0;
+		Euclidean_Vector ref = 0.0;
 		if (0.25 <= space_vector[0] && space_vector[0] <= 0.75 && 0.25 <= space_vector[1] && space_vector[1] <= 0.75)
 			ref = 1.0;
 
@@ -94,7 +94,7 @@ TEST(Square_Wave, calculate_solution_2) {
 		Euclidean_Vector space_vector = { dis1(gen),dis1(gen),dis1(gen) };
 		const auto result = Square_Wave<space_dimension>::calculate_solution(space_vector);
 
-		double ref = 0.0;
+		Euclidean_Vector ref = 0.0;
 		if (0.25 <= space_vector[0] && space_vector[0] <= 0.75 && 0.25 <= space_vector[1] && space_vector[1] <= 0.75 && 0.25 <= space_vector[2] && space_vector[2] <= 0.75)
 			ref = 1.0;
 
@@ -114,7 +114,7 @@ TEST(Circle_Wave, calculate_solution_1) {
 		Euclidean_Vector space_vector = { dis1(gen),dis1(gen) };
 		const auto result = Circle_Wave<space_dimension>::calculate_solution(space_vector);
 
-		double ref = 0.0;
+		Euclidean_Vector ref = 0.0;
 		if ((space_vector[0] - 0.5) * (space_vector[0] - 0.5) + (space_vector[1] - 0.5) * (space_vector[1] - 0.5) <= 0.25 * 0.25)
 			ref = 1.0;
 
@@ -134,7 +134,7 @@ TEST(Circle_Wave, calculate_solution_2) {
 		Euclidean_Vector space_vector = { dis1(gen),dis1(gen),dis1(gen) };
 		const auto result = Circle_Wave<space_dimension>::calculate_solution(space_vector);
 
-		double ref = 0.0;
+		Euclidean_Vector ref = 0.0;
 		if ((space_vector[0] - 0.5) * (space_vector[0] - 0.5) + (space_vector[1] - 0.5) * (space_vector[1] - 0.5) + (space_vector[2] - 0.5) * (space_vector[2] - 0.5) <= 0.25 * 0.25)
 			ref = 1.0;
 		
@@ -157,7 +157,7 @@ TEST(Gaussian_Wave, calculate_solution_1) {
 		const auto temp = (space_vector[0] - 0.5) * (space_vector[0] - 0.5) + (space_vector[1] - 0.5) * (space_vector[1] - 0.5);
 		constexpr auto beta = 20.0;
 				
-		double ref = std::exp(-beta * temp);
+		Euclidean_Vector ref = std::exp(-beta * temp);
 		EXPECT_EQ(result, ref);
 	}
 }
@@ -176,7 +176,7 @@ TEST(Gaussian_Wave, calculate_solution_2) {
 
 		const auto temp = (space_vector[0] - 0.5) * (space_vector[0] - 0.5) + (space_vector[1] - 0.5) * (space_vector[1] - 0.5) + (space_vector[2] - 0.5) * (space_vector[2] - 0.5);
 		constexpr auto beta = 20.0;
-		double ref = std::exp(-beta * temp);
+		Euclidean_Vector ref = std::exp(-beta * temp);
 
 		EXPECT_EQ(result, ref);
 	}

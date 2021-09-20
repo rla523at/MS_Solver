@@ -23,7 +23,7 @@ TEST(Grid, vnode_index_to_matched_vnode_index_set_1) {
 
 	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
 	const auto grid = Grid<space_dimension>(std::move(grid_elements));
-	const auto result = grid.get_pbdry_vnode_index_to_matched_node_index_set().at(0);
+	const auto result = grid.pbdry_vnode_index_to_matched_pbdry_vnode_index_set().at(0);
 
 	const std::set<uint> ref = { 3,12,15 };
 	EXPECT_EQ(ref, result);

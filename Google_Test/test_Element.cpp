@@ -1300,6 +1300,77 @@ TEST(Element, check_face_type_2) {
 
 	EXPECT_EQ(result, ref);
 }
+TEST(Element, check_face_type_3) {
+	constexpr size_t space_dimension = 3;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1,2 };
+	const Euclidean_Vector n2 = { 2,3,3 };
+	const Euclidean_Vector n3 = { 2,2,1 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes = { n1,n2,n3 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 0,1,2 };
+
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::tetrahedral;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n4 = { 2,3,1 };
+	std::vector<Euclidean_Vector<space_dimension>> cell_nodes = { n1,n2,n3,n4 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 0,1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.check_face_type(cell_element);
+	const auto ref = FaceType::inward_face;
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, check_face_type_4) {
+	constexpr size_t space_dimension = 3;
+
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1,2 };
+	const Euclidean_Vector n2 = { 2,3,3 };
+	const Euclidean_Vector n3 = { 2,2,1 };
+	std::vector<Euclidean_Vector<space_dimension>> nodes = { n2,n1,n3 };
+
+	const auto element_type = ElementType::inner_face;
+	Geometry face_geometry(ref_geometry, std::move(nodes));
+	std::vector<uint> face_node_indexes = { 1,0,2 };
+
+	Element face_element(element_type, std::move(face_geometry), std::move(face_node_indexes));
+
+	const Figure cell_fig = Figure::tetrahedral;
+	const ReferenceGeometry<space_dimension> cell_ref_geometry(cell_fig, fig_order);
+
+	const Euclidean_Vector n4 = { 2,3,1 };
+	std::vector<Euclidean_Vector<space_dimension>> cell_nodes = { n1,n2,n3,n4 };
+
+	const auto cell_element_type = ElementType::cell;
+	Geometry cell_geometry(cell_ref_geometry, std::move(cell_nodes));
+	std::vector<uint> cell_node_indexes = { 0,1,2,3 };
+
+	Element cell_element(cell_element_type, std::move(cell_geometry), std::move(cell_node_indexes));
+
+	const auto result = face_element.check_face_type(cell_element);
+	const auto ref = FaceType::outward_face;
+
+	EXPECT_EQ(result, ref);
+}
+
 
 TEST(Element, normalized_normal_vector_1) {
 	constexpr size_t space_dimension = 2;

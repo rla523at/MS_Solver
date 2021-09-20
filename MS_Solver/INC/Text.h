@@ -61,12 +61,14 @@ public:
 
 
 namespace ms {
+	void be_replaced(std::string& str, const char target, const char replacement);
+	void be_replaced(std::string& str, const std::string_view target, const std::string_view replacement);
+	void be_removed(std::string& str, const std::string_view target);
+
 	std::vector<std::string> parse(const std::string& str, const char delimiter);
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
-	void replace_all(std::string& str, const char target, const char replacement);
-	void replace_all(std::string& str, const std::string_view target, const std::string_view replacement);
-	std::string replace_all(const std::string& str, const std::string_view target, const std::string_view replacement);
-	std::string remove(const std::string& str, const std::string& target);
+	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement);
+	std::string remove(const std::string& str, const std::string_view target);
 	std::string upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
@@ -122,7 +124,7 @@ namespace ms {
 	};
 
 	template <typename... Args>
-	bool contains_icase(const std::string& str, const char* target, const Args... args) {		
+	bool contains_icase(const std::string& str, const Args... args) {		
 		static_require((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};
