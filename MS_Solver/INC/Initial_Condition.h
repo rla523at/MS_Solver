@@ -817,7 +817,8 @@ template <ushort space_dimension_>
 Shu_Osher<space_dimension_>::Solution_ Shu_Osher<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
     constexpr auto gamma = 1.4;
     constexpr auto c = 1 / (gamma - 1);
-    constexpr auto discontinuity_location = -4.0;
+    constexpr auto pi = std::numbers::pi;
+    constexpr auto discontinuity_location = 0.125;
 
     const auto x_coordinate = space_vector.at(0);
 
@@ -835,7 +836,7 @@ Shu_Osher<space_dimension_>::Solution_ Shu_Osher<space_dimension_>::calculate_so
             return { rho, rhou, rhov, rhoE };
         }
         else {
-            const auto rho = 1 + 0.2 * std::sin(5 * x_coordinate);            
+            const auto rho = 1 + 0.2 * std::sin(16 * pi * x_coordinate);
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
             constexpr auto p = 1.0;
@@ -863,7 +864,7 @@ Shu_Osher<space_dimension_>::Solution_ Shu_Osher<space_dimension_>::calculate_so
             return { rho, rhou, rhov, rhow, rhoE };
         }
         else {
-            const auto rho = 1 + 0.2 * std::sin(5 * x_coordinate);
+            const auto rho = 1 + 0.2 * std::sin(16 * pi * x_coordinate);
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
             constexpr auto w = 0.0;

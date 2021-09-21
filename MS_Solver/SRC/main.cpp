@@ -1,4 +1,12 @@
+#include "../INC/Initial_Condition.h"
+#include "../INC/Discrete_Equation.h"
+
 #include "../INC/Setting.h"
+
+namespace ms {
+	inline void apply_user_defined_setting(void);
+}
+
 
 using Grid_Element_Builder_		= Grid_Element_Builder<GRID_FILE_TYPE, __DIMENSION__>;
 using Grid_						= Grid<__DIMENSION__>;
@@ -43,8 +51,11 @@ int main(void) {
 		Log::content_ << "================================================================================\n\n";
 		Log::print();
 
-		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
-		Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/"); //post
+		//Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/");
+		//Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "/"); //post
+		Log::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "_" + ms::to_string(__hMLP_BD_TYPE__) + "/");
+		Tecplot::set_path(__DEFAULT_PATH__ + grid_file_name + "_" + date_str + "_" + ms::to_string(__hMLP_BD_TYPE__) + "/"); //post
+
 
 		auto grid_element = Grid_Element_Builder_::build_from_grid_file(grid_file_name);
 		Grid_ grid(std::move(grid_element));
@@ -73,3 +84,27 @@ int main(void) {
 	}
 }
 
+
+namespace ms {
+	inline void apply_user_defined_setting(void) {
+#if		__RECONSTRUCTION_METHOD__	== __ANN_RECONSTRUCTION__
+		ANN_limiter<GRADIENT_METHOD>::set_model(TO_STRING(__ANN_MODEL__));
+#endif
+
+		if constexpr (__DIMENSION__ == 2) {
+			Linear_Advection<2>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
+			Sine_Wave<2>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
+
+#if __GOVERNING_EQUATION__ == __EULER__			
+			Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO1,INFLOW_RHOU1,INFLOW_RHOV1,INFLOW_RHOE1 });
+			Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO2,INFLOW_RHOU2,INFLOW_RHOV2,INFLOW_RHOE2 });
+#endif
+		}
+		else if constexpr (__DIMENSION__ == 3) {
+			Linear_Advection<3>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED, Z_ADVECTION_SPEED });
+			Sine_Wave<3>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH, Z_WAVE_LENGTH });
+		}
+		else
+			throw std::runtime_error("not supported dimension");
+	}
+}

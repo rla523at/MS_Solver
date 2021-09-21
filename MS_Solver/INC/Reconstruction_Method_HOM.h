@@ -2,6 +2,7 @@
 #include "Debugger.h" //debug
 #include "Reconstruction_Method_FVM.h"
 #include "Polynomial.h"
+#include "Setting.h"
 
 class HOM_Reconstruction : public RM {};
 
@@ -18,7 +19,7 @@ public:
     static constexpr ushort num_basis(void) { return num_basis_; };
     static constexpr ushort solution_order(void) { return solution_order_; };
     static constexpr ushort space_dimension(void) { return space_dimension_; };
-    static std::string name(void) { return "Polynomial_Reconstruction_D" + std::to_string(solution_order_); };
+    static std::string name(void) { return "Polynomial_Reconstruction_P" + std::to_string(solution_order_); };
 
 protected:
     std::vector<Vector_Function<Polynomial<space_dimension_>, num_basis_>> basis_vector_functions_;
@@ -106,7 +107,6 @@ protected:
     auto limiting_matrix(const double limiting_value) const;
 };
 
-
 template <ushort space_dimension_, ushort solution_order_>
 class hMLP_Reconstruction : public hMLP_Base<space_dimension_, solution_order_>
 {
@@ -132,6 +132,11 @@ private:
     template <ushort num_equation>
     auto calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;        
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<double>& P0_criterion_values) const;
+};
+
+
+enum class BD_Type {
+    standard, noBD, typeI_1, typeI_4, no_typeI, no_typeII
 };
 
 
@@ -201,6 +206,21 @@ namespace ms {
             return vec1;
         else 
             return ms::merge(vec1, std::move(args)...);
+    }
+
+    inline std::string to_string(const BD_Type bd_type) {
+        switch (bd_type)
+        {
+        case BD_Type::noBD: return "noBD";
+        case BD_Type::no_typeI: return "no_typeI";
+        case BD_Type::no_typeII: return "no_typeII";
+        case BD_Type::standard: return "standard";
+        case BD_Type::typeI_1: return "typeI_1";
+        case BD_Type::typeI_4: return "typeI_4";
+        default:
+            throw std::runtime_error("wrong bd_type");
+            return "";
+        }
     }
 }
 
@@ -556,7 +576,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     const auto num_cell = solution_coefficients.size();
 
     ////test
-    //const auto before_limiting = solution_coefficients;
+    const auto before_limiting = solution_coefficients;
     //std::vector<ushort> type_I_flag(num_cell);
     //std::vector<ushort> type_II_flag(num_cell);    
     ////test
@@ -591,94 +611,103 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                 const auto simplex_higher_mode_criterion_value = criterion_value - simplex_P1_projected_criterion_value;
                 const auto simplex_P1_mode_criterion_value = simplex_P1_projected_criterion_value - simplex_P0_criterion_value;
  
-                ////////NoBD
-
-                //if (!Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume) &&
-                //    !P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) &&
-                //    !MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
-                //    is_normal_cell = false;
-                //    break;
-                //}
-
-                ////////NoBD
-
-                //BD                
-
-                ////default
-                 
-                //if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
-                //    continue;
-                //if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                //    if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
-                //        temporal_solution_order = 1;
-                //        is_normal_cell = false;
-                //        break;
-                //    }
-                //    continue;
-                //}
-
-                //if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
-                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
-                //    is_normal_cell = false;
-                //    break;
-                //}
-                 
-                ////default
-
-
-
-                //////super TypeI
-
-                //if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
-                //    continue;
-                //if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                //    if (num_troubled_boundary == 1) {
-                //        temporal_solution_order = 1;
-                //        is_normal_cell = false;
-                //        break;
-                //    }
-                //    continue;
-                //}
-
-                //if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
-                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
-                //    is_normal_cell = false;
-                //    break;
-                //}
-
-                //////super TypeI              
-
-
-                ////off typeII    
-                             
-                if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
-                    continue;
-
-                if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                    if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
-                        temporal_solution_order = 1;
+                if constexpr (__hMLP_BD_TYPE__ == BD_Type::noBD) {
+                    if (!Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume) &&
+                        !P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) &&
+                        !MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
                         is_normal_cell = false;
                         break;
                     }
-                    continue;
                 }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::standard) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
 
-                if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
-                    is_normal_cell = false;
-                    break;
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                        this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        is_normal_cell = false;
+                        break;
+                    }
                 }
-                 
-                ////off typeII
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::no_typeI) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
 
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max))
+                        continue;
+                    
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                        this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::no_typeII) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
 
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
 
-                ////post
-                //if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) &&
-                //    this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
-                //    type_II_flag[i] = 1;
-                //    Tecplot::post_condition_ = true;
-                //}                    
-                ////post
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::typeI_1) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (num_troubled_boundary >= 1) {
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                        this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::typeI_4) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (num_troubled_boundary >= 4) {
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                        this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else
+                    throw std::runtime_error("wrong bd type");
             }
 
             if (is_normal_cell)
@@ -720,14 +749,14 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     //Tecplot::record_cell_indexes();
     //Tecplot::post_solution(solution_coefficients, "after");
     
-    //if (Tecplot::post_condition_ == true) {
-    //    Tecplot::record_cell_indexes();
-    //    Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
-    //    Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
-    //    Tecplot::post_solution(before_limiting, "before");
-    //    Tecplot::record_cell_indexes();
-    //    Tecplot::post_solution(solution_coefficients, "after");
-    //}
+    if (Tecplot::post_condition_ == true) {
+        Tecplot::record_cell_indexes();
+        Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
+        //Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
+        Tecplot::post_solution(before_limiting, "before");
+        //Tecplot::record_cell_indexes();
+        //Tecplot::post_solution(solution_coefficients, "after");
+    }
     //post
 }
 

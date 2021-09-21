@@ -23,7 +23,8 @@ public:
         Log::content_ << "================================================================================\n";
                 
 
-        Tecplot::post_solution(solutions, "initial");//post
+        //Tecplot::post_solution(solutions, "initial");//post
+        Tecplot::post_condition_ = true;
         semi_discrete_equation.reconstruct(solutions);
       
         SET_TIME_POINT;
@@ -34,7 +35,8 @@ public:
             }                      
 
             if (Solve_Controller::is_time_to_post(current_time))
-                Tecplot::post_solution(solutions);//post
+                //Tecplot::post_solution(solutions);//post
+                Tecplot::post_condition_ = true;
 
             SET_TIME_POINT;
             auto time_step = semi_discrete_equation.calculate_time_step<Time_Step_Method>(solutions);
