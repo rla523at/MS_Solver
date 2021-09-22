@@ -54,8 +54,10 @@ public:
 	Euclidean_Vector& operator*=(const double scalar);
 
 public:
+	template <size_t temp = dimension_, std::enable_if_t<temp != 1, bool> = true>
 	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
 	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
+	template <size_t temp = dimension_, std::enable_if_t<temp != 1, bool> = true>
 	Euclidean_Vector operator*(const double scalar) const;
 	bool operator==(const Euclidean_Vector& y) const;
 	double operator[](const size_t position) const;
@@ -85,7 +87,7 @@ Euclidean_Vector(Args... args)->Euclidean_Vector<sizeof...(Args)>;
 template <size_t dimension_> 
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector<dimension_>& x);
 
-template <size_t dimension_>
+template <size_t dimension_, std::enable_if_t<dimension_ != 1, bool> = true>
 Euclidean_Vector<dimension_> operator*(const double constant, const Euclidean_Vector<dimension_>& x);
 
 
@@ -230,6 +232,7 @@ Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::operator*=(const dou
 }
 
 template <size_t dimension_> 
+template <size_t temp, std::enable_if_t<temp != 1, bool>>
 Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator+(const Euclidean_Vector& y) const {
 	auto result = *this;
 	return result += y;
@@ -240,7 +243,9 @@ template <size_t dimension_> Euclidean_Vector<dimension_> Euclidean_Vector<dimen
 	return result -= y;
 }
 
-template <size_t dimension_> Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator*(const double scalar) const {
+template <size_t dimension_> 
+template <size_t temp, std::enable_if_t<temp != 1, bool>>
+Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator*(const double scalar) const {
 	auto result = *this;
 	return result *= scalar;
 }
@@ -354,7 +359,7 @@ template <size_t dimension_> std::ostream& operator<<(std::ostream& os, const Eu
 	return os << x.to_string();
 };
 
-template <size_t dimension_>
+template <size_t dimension_, std::enable_if_t<dimension_ != 1, bool>>
 Euclidean_Vector<dimension_> operator*(const double constant, const Euclidean_Vector<dimension_>& x) {
 	return x * constant;
 }
