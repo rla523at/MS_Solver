@@ -114,6 +114,8 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
             numerical_flux_quadrature.change_column(q, Numerical_Flux_Function::calculate(oc_side_solution, nc_side_solution, normals[q]));
         }               
 
+
+
         Residual_ owner_side_delta_rhs, neighbor_side_delta_rhs;
         const auto& [oc_side_basis_weight, nc_side_basis_weight] = this->oc_nc_side_qweights_basis_pairs_[i];
         ms::gemm(numerical_flux_quadrature, oc_side_basis_weight, owner_side_delta_rhs);

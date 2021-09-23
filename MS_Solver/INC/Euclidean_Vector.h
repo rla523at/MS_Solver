@@ -56,9 +56,12 @@ public:
 public:
 	template <size_t temp = dimension_, std::enable_if_t<temp != 1, bool> = true>
 	Euclidean_Vector operator+(const Euclidean_Vector& y) const;	
+
 	Euclidean_Vector operator-(const Euclidean_Vector& y) const;
+
 	template <size_t temp = dimension_, std::enable_if_t<temp != 1, bool> = true>
 	Euclidean_Vector operator*(const double scalar) const;
+
 	bool operator==(const Euclidean_Vector& y) const;
 	double operator[](const size_t position) const;
 

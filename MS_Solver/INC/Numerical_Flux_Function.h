@@ -34,8 +34,8 @@ public:
     static constexpr ushort num_equation(void) { return This_::num_equation_; };
 
 public:
-    static auto calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal);
-    static auto calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
+    static Numerical_Flux_ calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal);
+    static std::vector<Numerical_Flux_> calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs);
 };
 
 
@@ -47,7 +47,7 @@ namespace ms {
 
 //template definition part
 template <typename Governing_Equation>
-auto LLF<Governing_Equation>::calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal) {
+LLF<Governing_Equation>::Numerical_Flux_ LLF<Governing_Equation>::calculate(const Solution_& oc_side_solution, const Solution_& nc_side_solution, const Space_Vector_& normal) {
     if constexpr (ms::is_SCL<Governing_Equation>) {
         const auto oc_physical_flux = Governing_Equation::physical_flux(oc_side_solution);
         const auto nc_physical_flux = Governing_Equation::physical_flux(nc_side_solution);
@@ -72,7 +72,7 @@ auto LLF<Governing_Equation>::calculate(const Solution_& oc_side_solution, const
 }
 
 template <typename Governing_Equation>
-auto LLF<Governing_Equation>::calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) {
+std::vector<typename LLF<Governing_Equation>::Numerical_Flux_> LLF<Governing_Equation>::calculate(const std::vector<Solution_>& solutions, const std::vector<Space_Vector_>& normals, const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) {
       const auto num_inner_face = normals.size();
     std::vector<Numerical_Flux_> inner_face_numerical_fluxes(num_inner_face);
 
