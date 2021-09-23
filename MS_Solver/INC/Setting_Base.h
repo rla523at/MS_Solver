@@ -20,6 +20,15 @@
 #define __EXPLOSION_PROBLEM__			308
 #define __DOUBLE_RAREFACTION_WAVE__		309
 #define __HARTEN_LAX_PROBLEM__			310
+
+#define __SUPERSONIC_EXPANSION__		311		
+#define __BLAST_WAVE_PROBLEM__			312
+#define __DOUBLE_STRONG_SHOCK_PROBLEM__	313
+#define __SLOWLY_MOVING_CONTACT__		314
+
+
+
+
 // SPATIAL DISCRETE METHOD
 #define __FVM__							40
 #define __HOM__							41
