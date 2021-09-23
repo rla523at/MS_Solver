@@ -30,8 +30,9 @@ public:
 public:
     auto calculate_set_of_transposed_gradient_basis(void) const;
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
-    Dynamic_Matrix basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;
+    Dynamic_Matrix basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;    
     double calculate_P0_basis_value(const uint cell_index) const;
+    std::vector<double> calculate_P0_basis_values(void) const;
 
 public:
     template<ushort num_equation>
@@ -97,6 +98,7 @@ protected:
     std::array<ushort, solution_order_ + 1> num_Pn_projection_basis_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
     std::vector<double> volumes_;
+    std::vector<double> P0_basis_values_;
 
 protected:
     hMLP_Base(const Grid<space_dimension_>& grid);
@@ -118,8 +120,7 @@ public:
 
 protected:
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
-    std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;
-    std::vector<double> P0_basis_values_;    
+    std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;     
     
 public:
     hMLP_Reconstruction(const Grid<space_dimension_>& grid);
@@ -128,7 +129,7 @@ public:
     template <ushort num_equation>
     void reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
 
-private:
+protected:
     template <ushort num_equation>
     auto calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;        
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<double>& P0_criterion_values) const;
@@ -150,6 +151,7 @@ private:
 
 private:
     std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_vnode_index_set_;
+    std::vector<std::vector<uint>> set_of_face_share_cell_indexes_;
 
     std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
     std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
@@ -177,7 +179,13 @@ private:
     template <ushort projection_order>
     auto calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const Geometry<space_dimension_>& sub_simplex_geometry) const;
     bool is_typeI_subcell_oscillation(const ushort num_trouble_boundaries) const;
-    bool is_typeII_subcell_oscillation(const ushort num_trouble_boundary) const;
+    bool is_typeII_subcell_oscillation(const ushort num_trouble_boundary) const;   
+    
+    template <ushort num_equation>
+    std::vector<Euclidean_Vector<num_equation>> calculate_P0_solutions(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+
+    template <ushort num_equation>
+    std::vector<bool> is_shock(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
 
 public:
     static std::string name(void) { return "hMLP_BD_Reconstruction_P" + std::to_string(solution_order_); };
@@ -282,6 +290,17 @@ double Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P
 }
 
 template <ushort space_dimension_, ushort solution_order_>
+std::vector<double> Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_P0_basis_values(void) const {
+    const auto num_cell = this->basis_vector_functions_.size();
+
+    std::vector<double> P0_basis_values(num_cell);
+    for (uint i = 0; i < num_cell; ++i)
+        P0_basis_values[i] = this->calculate_P0_basis_value(i);
+
+    return P0_basis_values;
+} 
+
+template <ushort space_dimension_, ushort solution_order_>
 template<ushort num_equation>
 auto Polynomial_Reconstruction<space_dimension_, solution_order_>::solution_function(const uint cell_index, const Matrix<num_equation, num_basis_>& coefficient) const {
     dynamic_require(cell_index < basis_vector_functions_.size(), "cell index should be less than number of cell");
@@ -298,6 +317,7 @@ hMLP_Base<space_dimension_, solution_order_>::hMLP_Base(const Grid<space_dimensi
 
     this->set_of_vnode_indexes_ = grid.cell_set_of_vnode_indexes();
     this->volumes_ = grid.cell_volumes();
+    this->P0_basis_values_ = this->calculate_P0_basis_values();
 
     Log::content_ << std::left << std::setw(50) << "@ hMLP Base precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n";
     Log::print();
@@ -481,6 +501,7 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
     SET_TIME_POINT;
 
     this->pbdry_vnode_index_to_matched_vnode_index_set_ = grid.pbdry_vnode_index_to_matched_pbdry_vnode_index_set();
+    this->set_of_face_share_cell_indexes_ = grid.set_of_face_share_cell_indexes_consider_pbdry();
 
     const auto set_of_vnodes = grid.cell_set_of_vnodes();
     const auto simplex_flags = grid.cell_simplex_flags();
@@ -574,6 +595,11 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     const auto set_of_vnode_index_to_simplex_P0_criterion_value = this->calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(solution_coefficients);
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(set_of_vnode_index_to_simplex_P0_criterion_value);
     const auto set_of_num_troubled_boundary = this->calculate_set_of_num_troubled_boundary(solution_coefficients);     
+
+    //temporary
+    const auto P0_solutions = this->calculate_P0_solutions(solution_coefficients);
+    const auto is_shocks = this->is_shock(P0_solutions);
+    //temporary
 
     const auto num_cell = solution_coefficients.size();
 
@@ -713,7 +739,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (num_troubled_boundary >= 1) {
+                        //if (num_troubled_boundary >= 1 && is_shock[i]) {
+                        if (num_troubled_boundary >= 1 && is_shocks[i]) {//temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -731,7 +758,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (num_troubled_boundary >= 4) {
+                        //if (num_troubled_boundary >= 4 ) {
+                        if (num_troubled_boundary >= 4 && is_shocks[i]) {//temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -947,4 +975,42 @@ template <ushort space_dimension_, ushort solution_order_>
 bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeII_subcell_oscillation(const ushort num_troubled_boundary) const {
     constexpr ushort typeI_threshold_value = 1;
     return typeI_threshold_value <= num_troubled_boundary;
+}
+
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+std::vector<Euclidean_Vector<num_equation>> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_P0_solutions(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+    const auto num_cell = solution_coefficients.size();    
+    std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i)
+        P0_solutions[i] = solution_coefficients[i].column(0) * this->P0_basis_values_[i];
+
+    return P0_solutions;
+}
+
+
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_shock(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {    
+    const auto pressures = Euler<space_dimension_>::pressures(P0_solutions); //temporary code
+
+    const auto num_cell = P0_solutions.size();
+    std::vector<bool> is_shock(num_cell, false);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_[i];
+
+        const auto my_pressure = pressures[i];
+        for (const auto face_share_cell_index : face_share_cell_indexes) {
+            const auto other_pressure = pressures[face_share_cell_index];
+
+            if (std::abs(my_pressure - other_pressure) >= 0.1 * my_pressure) {
+                is_shock[i] = true;
+                break;
+            }
+        }
+    }
+
+    return is_shock;
 }

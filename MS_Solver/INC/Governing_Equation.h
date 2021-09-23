@@ -2,8 +2,9 @@
 #include "Matrix.h"
 #include "Debugger.h"
 
-class GE {}; // Governing Equation
+using uint = unsigned int;
 
+class GE {}; // Governing Equation
 
 template <ushort space_dimension_>
 class SCL : public GE    //Scalar Conservation Law 
@@ -95,6 +96,7 @@ public:
     static double inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& nomal_vector);
     
 public:
+    static std::vector<double> pressures(const std::vector<Solution_>& cvariables);
     static Solution_ conservative_to_primitive(const Solution_& conservative_variable);
     static constexpr ushort space_dimension(void) { return space_dimension_; };
     static constexpr ushort num_equation(void) { return num_equation_; };
@@ -339,6 +341,46 @@ double Euler<space_dimension_>::inner_face_maximum_lambda(const Solution_& oc_pr
     return (std::max)(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
 }
 
+
+template <ushort space_dimension_>
+std::vector<double> Euler<space_dimension_>::pressures(const std::vector<Solution_>& cvariables) {
+    constexpr auto gamma = 1.4;
+
+    const auto num_cell = cvariables.size();
+    std::vector<double> pressures(num_cell);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        double p = 0.0;
+
+        const auto rho = cvariables[i][0];
+        const auto one_over_rho = 1.0 / rho;
+
+        if constexpr (space_dimension_ == 2) {
+            const auto rhou = cvariables[i][1];
+            const auto rhov = cvariables[i][2];
+            const auto rhoE = cvariables[i][3];
+
+            const auto u = rhou * one_over_rho;
+            const auto v = rhov * one_over_rho;
+            p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
+        }
+        else {
+            const auto rhou = cvariables[i][1];
+            const auto rhov = cvariables[i][2];
+            const auto rhow = cvariables[i][3];
+            const auto rhoE = cvariables[i][4];
+
+            const auto u = rhou * one_over_rho;
+            const auto v = rhov * one_over_rho;
+            const auto w = rhow * one_over_rho;
+            p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (gamma - 1);
+        }
+
+        pressures[i] = p;
+    }
+
+    return pressures;
+}
 
 template <ushort space_dimension_>
 Euler<space_dimension_>::Solution_ Euler<space_dimension_>::conservative_to_primitive(const Solution_& conservative_variable) {

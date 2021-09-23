@@ -86,7 +86,7 @@ public:
 	std::vector<Ghost_Cell<space_dimension>> make_ghost_cells(void) const;
 	std::vector<std::vector<uint>> ANN_indexes(void) const; //temporary	
 	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_ignore_pbdry(void) const;
-	std::vector<std::vector<size_t>> set_of_face_share_cell_indexes_consider_pbdry(void) const;
+	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_consider_pbdry(void) const;
 	std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes_consider_pbdry(void) const;
 	std::vector<std::vector<uint>> set_of_face_share_ghost_cell_indexes(const std::vector<Ghost_Cell<space_dimension>>& ghost_cells) const;
 
@@ -987,33 +987,28 @@ std::vector<std::vector<uint>> Grid<space_dimension>::set_of_face_share_cell_ind
 }
 
 template <ushort space_dimension>
-std::vector<std::vector<size_t>> Grid<space_dimension>::set_of_face_share_cell_indexes_consider_pbdry(void) const {
+std::vector<std::vector<uint>> Grid<space_dimension>::set_of_face_share_cell_indexes_consider_pbdry(void) const {
 	const auto& cell_elements = this->elements.cell_elements;
 	const auto num_cell = cell_elements.size();
 
-	std::vector<std::vector<size_t>> set_of_face_share_cell_indexes;
+	std::vector<std::vector<uint>> set_of_face_share_cell_indexes;
 	set_of_face_share_cell_indexes.reserve(num_cell);
 
-	for (size_t i = 0; i < num_cell; ++i) {
+	for (uint i = 0; i < num_cell; ++i) {
 		const auto& element = cell_elements[i];
 		const auto& geometry = element.geometry_;
 
 		const auto face_vnode_indexes_set = element.set_of_face_vertex_node_indexes();
 		const auto num_face = face_vnode_indexes_set.size();
 
-		std::vector<size_t> face_share_cell_indexes;
+		std::vector<uint> face_share_cell_indexes;
 		face_share_cell_indexes.reserve(num_face);
 
 		for (const auto& face_vnode_indexes : face_vnode_indexes_set) {			
-			auto this_face_share_cell_indexes = this->find_cell_indexes_have_these_vnodes_consider_pbdry(face_vnode_indexes);
+			const auto face_share_cell_index_opt = this->find_face_share_cell_index_consider_pbdry(i, face_vnode_indexes);
 
-			const auto my_index_pos_iter = std::find(this_face_share_cell_indexes.begin(), this_face_share_cell_indexes.end(), i);
-			dynamic_require(my_index_pos_iter != this_face_share_cell_indexes.end(), "my index should be included in this face share cell indexes");
-
-			this_face_share_cell_indexes.erase(my_index_pos_iter);
-			dynamic_require(this_face_share_cell_indexes.size() <= 1, "face share cell should be unique or absent");
-
-			face_share_cell_indexes.push_back(this_face_share_cell_indexes.front());//need to fix
+			if (face_share_cell_index_opt.has_value())
+				face_share_cell_indexes.push_back(face_share_cell_index_opt.value());//need to fix
 		}
 
 		set_of_face_share_cell_indexes.push_back(std::move(face_share_cell_indexes));

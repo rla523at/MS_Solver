@@ -7,9 +7,9 @@
 #define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
+#define __GRID_FILE_NAMES__						Box_Quad100
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__MODIFIED_SOD__
+#define __INITIAL_CONDITION__					__EXPLOSION_PROBLEM__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
@@ -17,7 +17,7 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2
+#define __SOLVE_END_CONDITION_CONSTANT__		0.25
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		10
 #define __POST_ORDER__							4
@@ -33,13 +33,13 @@
 #endif 
 
 //temp
-#define __hMLP_BD_TYPE__				BD_Type::typeI_1_without_typeII
+#define __hMLP_BD_TYPE__				BD_Type::typeI_4_without_typeII
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
 // __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __CONSTANT1__,
-//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __SHU_OSHER__
+//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __SHU_OSHER__, __HARTEN_LAX_PROBLEM__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
@@ -51,7 +51,7 @@
 // __POST_MODE__					__ASCII__, __BINARY__
 
 // Reference Constant
-// END TIME : Modified SOD(0.2), Double Rarefaction Wave & Harten Lax(0.15), Shu_Osher(0.178)
+// END TIME : Modified SOD(0.2), Double Rarefaction Wave & Harten Lax(0.15), Shu_Osher(0.178), Explosion Problem(0.25)
 
 // ######################################### OPTION END ################################################################
 
