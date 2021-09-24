@@ -78,7 +78,7 @@ int main(void) {
 			std::exit(523);
 		}
 
-		semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
+		//semi_discrete_equation.estimate_error<INITIAL_CONDITION>(solutions, __SOLVE_END_CONDITION_CONSTANT__);
 
 		Log::write();
 	}
