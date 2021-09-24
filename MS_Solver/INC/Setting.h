@@ -7,9 +7,9 @@
 #define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Box_Quad100
+#define __GRID_FILE_NAMES__						Shocktube_Quad_100x4
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__EXPLOSION_PROBLEM__
+#define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
@@ -17,9 +17,9 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.25
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
-#define __SOLVE_POST_CONDITION_CONSTANT__		10
+#define __SOLVE_POST_CONDITION_CONSTANT__		50
 #define __POST_ORDER__							4
 #define __POST_FILE_FORMAT__					__BINARY__
 
@@ -33,13 +33,13 @@
 #endif 
 
 //temp
-#define __hMLP_BD_TYPE__				BD_Type::typeI_4_without_typeII
+#define __hMLP_BD_TYPE__				BD_Type::standard
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
 // __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __CONSTANT1__,
-//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __SHU_OSHER__, __HARTEN_LAX_PROBLEM__
+//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __HARTEN_LAX_PROBLEM__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
@@ -59,7 +59,7 @@
 
 // MODE
 // comment out if you do not want to use
-#define __USE_SCAILING_METHOD__
+//#define __USE_SCAILING_METHOD__
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
@@ -72,19 +72,21 @@
 #define Z_WAVE_LENGTH					1.0
 
 // Supersonic Inlet inflow value
-#define INFLOW_RHO1						3.857143
-#define INFLOW_RHOU1					10.1418522328
+#define INFLOW_RHO1						1.0
+#define INFLOW_RHOU1					0.75
 #define INFLOW_RHOV1					0.0
-#define INFLOW_RHOE1					39.1666684317
+#define INFLOW_RHOE1					2.78125
 
-#define INFLOW_RHO2						1.0
+#define INFLOW_RHO2						0.125
 #define INFLOW_RHOU2					0.0
 #define INFLOW_RHOV2					0.0
-#define INFLOW_RHOE2					2.5
+#define INFLOW_RHOE2					0.25
 
 // Reference Constants
-// Modified SOD (1, 0.75, 0.0, 2.78125), 
-// Shu Osher	(3.857143, 10.1418522328, 0.0, 39.1666684317), (1.0, 0.0, 0.0, 2.5)
+// Modified SOD				(1.0, 0.75, 0.0, 2.78125), (0.125, 0, 0, 0.25)
+// Double Rarefaction Wave	(1.0, -2.0, 0.0, 3.0), (1.0, 2.0, 0.0, 3.0)
+// Harten Lax				(0.445, 0.31061, 0.0, 8.92840289), (0.5, 0.0, 0.0, 1.4275)
+// Shu Osher				(3.857143, 10.1418522328, 0.0, 39.1666684317), (1.0, 0.0, 0.0, 2.5)
 
 
 // ################################# USER DEFINED SETTING END #########################################################

@@ -651,7 +651,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
                         continue;
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                        //if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary) && is_shocks[i]) { // temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -683,7 +684,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary)) {
+                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary) && is_shocks[i]) { //temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -701,7 +702,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (num_troubled_boundary >= 1) {
+                        //if (num_troubled_boundary >= 1) {
+                        if (num_troubled_boundary >= 1 && is_shocks[i]) { //temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -720,7 +722,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        if (num_troubled_boundary >= 4) {
+                        //if (num_troubled_boundary >= 4) {
+                        if (num_troubled_boundary >= 4 && is_shocks[i]) { //temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -739,7 +742,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        //if (num_troubled_boundary >= 1 && is_shock[i]) {
+                        //if (num_troubled_boundary >= 1) {
                         if (num_troubled_boundary >= 1 && is_shocks[i]) {//temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
