@@ -9,24 +9,21 @@
 #define __BURGERS__						21
 #define __EULER__						22
 // INITIAL CONDITION
-#define __SINE_WAVE__					300
-#define __SQUARE_WAVE__					301
-#define __CIRCLE_WAVE__					302
-#define __GAUSSIAN_WAVE__				303
-#define __CONSTANT1__					304
+#define __CONSTANT1__					300
+#define __SINE_WAVE__					301
+#define __SQUARE_WAVE__					302
+#define __CIRCLE_WAVE__					303
+#define __GAUSSIAN_WAVE__				304
 #define __SOD__							305
 #define __MODIFIED_SOD__				306
-#define __SHU_OSHER__					307
-#define __EXPLOSION_PROBLEM__			308
-#define __DOUBLE_RAREFACTION_WAVE__		309
-#define __HARTEN_LAX_PROBLEM__			310
-
-#define __SUPERSONIC_EXPANSION__		311		
-#define __BLAST_WAVE_PROBLEM__			312
-#define __DOUBLE_STRONG_SHOCK_PROBLEM__	313
-#define __SLOWLY_MOVING_CONTACT__		314
-
-
+#define __SUPERSONIC_EXPANSION__		307		
+#define __BLAST_WAVE_PROBLEM__			308
+#define __DOUBLE_STRONG_SHOCK_PROBLEM__	309
+#define __SLOWLY_MOVING_CONTACT__		310
+#define __HARTEN_LAX_PROBLEM__			311
+#define __SHU_OSHER__					312
+#define __BLAST_WAVE_INTERACTION__		313
+#define __EXPLOSION_PROBLEM__			314
 
 
 // SPATIAL DISCRETE METHOD

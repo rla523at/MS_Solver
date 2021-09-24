@@ -46,11 +46,10 @@ public:
 				while (true) {
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
 					const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
-					const auto rho = cvariable[0];
-					const auto pressure = pvariable[2];
+					const auto a = pvariable[num_equation - 1];
 
-					if (rho <= 0.0 || pressure <= 0.0) {
-						dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
+					if (!std::isfinite(a)) {
+						dynamic_require(fix_count < 10, "More then 10 attemps to fix is meaningless");
 						fix_count++;						
 						solution_coefficients[i] *= This_::calculate_fix_matrix<num_basis>();
 
@@ -77,11 +76,10 @@ public:
 				while (true) {
 					const auto cvariable = solution_qnodes.column<num_equation>(j);
 					const auto pvariable = Euler<space_dimension>::conservative_to_primitive(cvariable);
-					const auto rho = cvariable[0];
-					const auto pressure = pvariable[2];
+					const auto a = pvariable[num_equation - 1];
 
-					if (rho <= 0.0 || pressure <= 0.0) {
-						dynamic_require(fix_count < 10, "More then 10 attemps to fix pressure is meaningless");
+					if (!std::isfinite(a)) {
+						dynamic_require(fix_count < 10, "More then 10 attemps to fix is meaningless");
 						fix_count++;
 						solution_coefficients[cell_index] *= This_::calculate_fix_matrix<num_basis>();
 

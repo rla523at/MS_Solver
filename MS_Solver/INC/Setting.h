@@ -4,38 +4,23 @@
 
 // ########################################## OPTION ##################################################################
 
-#define __DEFAULT_PATH__						"D:/Code/Result/_Shocktube_test/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
+#define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-<<<<<<< HEAD
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x4
+#define __GRID_FILE_NAMES__						Shocktube_Quad_400x4
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__MODIFIED_SOD__
+#define __INITIAL_CONDITION__					__BLAST_WAVE_INTERACTION__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
-=======
-#define __GRID_FILE_NAMES__						Shocktube_Quad_100x10
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SLOWLY_MOVING_CONTACT__
-#define __SPATIAL_DISCRETE_METHOD__				__FVM__
-#define __RECONSTRUCTION_METHOD__				__MLP_u1_RECONSTRUCTION__
->>>>>>> origin/dev/DFM
 #define __NUMERICAL_FLUX__						__LLF__
 #define __TIME_INTEGRAL_METHOD__				__SSPRK54__
 #define __TIME_STEP_METHOD__					__CFL__
-#define __TIME_STEP_CONSTANT__					0.6
+#define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-<<<<<<< HEAD
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2
+#define __SOLVE_END_CONDITION_CONSTANT__		0.038
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		50
 #define __POST_ORDER__							4
-=======
-#define __SOLVE_END_CONDITION_CONSTANT__		0.012
-#define __SOLVE_POST_CONDITION__				__BY_TIME__
-#define __SOLVE_POST_CONDITION_CONSTANT__		0.001
-#define __POST_ORDER__							0
->>>>>>> origin/dev/DFM
 #define __POST_FILE_FORMAT__					__BINARY__
 
 // CONDITIONAL OPTIONS
@@ -54,30 +39,24 @@
 // __GRID_FILE_TYPE__				__GMSH__
 // __GOVERNING_EQUATION__			__LINEAR_ADVECTION__, __BURGERS__, __EULER__
 // __INITIAL_CONDITION__			__SINE_WAVE__, __SQUARE_WAVE__, __CIRCLE_WAVE__, __GAUSSIAN_WAVE__, __CONSTANT1__,
-<<<<<<< HEAD
-//									__SOD__, __MODIFIED_SOD__, __SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __HARTEN_LAX_PROBLEM__
-=======
 //									__SOD__, __MODIFIED_SOD__, __SUPERSONIC_EXPANSION__, __BLAST_WAVE_PROBLEM__, __DOUBLE_STRONG_SHOCK_PROBLEM__, __SLOWLY_MOVING_CONTACT__
-//									__SHU_OSHER__, __EXPLOSION_PROBLEM__, __DOUBLE_RAREFACTION_WAVE__, __SHU_OSHER__, __HARTEN_LAX_PROBLEM__
->>>>>>> origin/dev/DFM
+//									__SHU_OSHER__, __HARTEN_LAX_PROBLEM__, __BLAST_WAVE_INTERACTION__, __EXPLOSION_PROBLEM__
 // __SPATIAL_DISCRETE_METHOD__		__FVM__, __HOM__
 // __RECONSTRUCTION_METHOD__		__CONSTANT_RECONSTRUCTION__, __LINEAR_RECONSTRUCTION__,  __MLP_u1_RECONSTRUCTION__, __ANN_RECONSTRUCTION__
 //									__POLYNOMIAL_RECONSTRUCTION__, __hMLP_RECONSTRUCTION__, __hMLP_BD_RECONSTRUCTION__
 // __NUMERICAL_FLUX__				__LLF__
 // __TIME_INTEGRAL_METHOD__			__SSPRK33__, __SSPRK54__
-// __TIME_STEP_METHOD__				__CFL__, __CONSTANT_DT__
+// __TIME_STEP_METHOD__				__CFL__, __CONSTANT_DT__ 
 // __SOLVE_END_CONDITION__			__END_BY_TIME__, __END_BY_ITER__
 // __SOLVE_POST_CONDITION__			__POST_BY_TIME__, __POST_BY_ITER__
 // __POST_MODE__					__ASCII__, __BINARY__
 
 // Reference Constant
-<<<<<<< HEAD
-// END TIME : Modified SOD(0.2), Double Rarefaction Wave & Harten Lax(0.15), Shu_Osher(0.178), Explosion Problem(0.25)
-=======
 // CFL		: Modified SOD(0.9), Supersonic Expansion(0.5), Blast wave problem(0.6), Double strong shock problem(0.8), Slowly-moving contact(0.6)
+//			   Harten Lax(0.5), Shu_Osher(0.5), Blast Wave Interaction(0.5)	
 // END TIME : Modified SOD(0.2), Supersonic Expansion(0.15), Blast wave problem(0.012), Double strong shock problem(0.035), Slowly-moving contact(0.012)
-//			  Double Rarefaction Wave & Harten Lax(0.15), Shu_Osher(0.178), 
->>>>>>> origin/dev/DFM
+//			  Harten Lax(0.15), Shu_Osher(0.178), Explosion(0.25), Blast Wave Interaction(0.038)
+
 
 // ######################################### OPTION END ################################################################
 
@@ -85,7 +64,7 @@
 
 // MODE
 // comment out if you do not want to use
-//#define __USE_SCAILING_METHOD__
+#define __USE_SCAILING_METHOD__
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
@@ -98,21 +77,26 @@
 #define Z_WAVE_LENGTH					1.0
 
 // Supersonic Inlet inflow value
-#define INFLOW_RHO1						1.0
-#define INFLOW_RHOU1					0.75
-#define INFLOW_RHOV1					0.0
-#define INFLOW_RHOE1					2.78125
-
-#define INFLOW_RHO2						0.125
-#define INFLOW_RHOU2					0.0
-#define INFLOW_RHOV2					0.0
-#define INFLOW_RHOE2					0.25
+#define INFLOW1_VALUES					1.0, 0.0, 0.0, 2500
+#define INFLOW2_VALUES					1.0, 0.0, 0.0, 250
 
 // Reference Constants
-// Modified SOD				(1.0, 0.75, 0.0, 2.78125), (0.125, 0, 0, 0.25)
-// Double Rarefaction Wave	(1.0, -2.0, 0.0, 3.0), (1.0, 2.0, 0.0, 3.0)
-// Harten Lax				(0.445, 0.31061, 0.0, 8.92840289), (0.5, 0.0, 0.0, 1.4275)
-// Shu Osher				(3.857143, 10.1418522328, 0.0, 39.1666684317), (1.0, 0.0, 0.0, 2.5)
+// Modified SOD				1.0, 0.75, 0.0, 2.78125 
+//							0.125, 0.0, 0.0, 0.25
+// Supersonic Expansion		1.0, -2.0, 0.0, 3.0
+//							1.0, 2.0, 0.0, 3.0
+// Blast Wave				1.0, 0.0, 0.0, 2500
+//							1.0, 0.0, 0.0, 0.025
+// Double strong shock		5.99924, 117.5701059, 0.0, 2304.275075187625134
+//							5.99242, -37.1310118186, 0.0, 230.2755012309728784
+// Slowly moving contact	1.0, -19.59745, 0.0, 2692.03002325125
+//							1.0, -19.59745, 0.0, 192.05502325125
+// Harten Lax				0.445, 0.31061, 0.0, 8.92840289
+//							0.5, 0.0, 0.0, 1.4275
+// Shu Osher				3.857143, 10.1418522328, 0.0, 39.1666684317
+//							1.0, 0.0, 0.0, 2.5
+// Blast wave interaction	1.0, 0.0, 0.0, 2500
+//							1.0, 0.0, 0.0, 250
 
 
 // ################################# USER DEFINED SETTING END #########################################################
@@ -183,7 +167,9 @@
 #if		__INITIAL_CONDITION__ == __SLOWLY_MOVING_CONTACT__
 #define INITIAL_CONDITION	Slowly_Moving_Contact_Problem<__DIMENSION__>
 #endif
-
+#if		__INITIAL_CONDITION__ == __BLAST_WAVE_INTERACTION__
+#define INITIAL_CONDITION	Blast_Wave_Interaction<__DIMENSION__>
+#endif
 
 
 #if		__SPATIAL_DISCRETE_METHOD__ == __FVM__

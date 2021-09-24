@@ -137,7 +137,7 @@ protected:
 
 
 enum class BD_Type {
-    standard, noBD, typeI_1, typeI_4, no_typeI, no_typeII, typeI_1_without_typeII, typeI_4_without_typeII
+    standard, noBD, typeI_1, typeI_4, no_typeI, no_typeII, typeI_1_without_typeII, typeI_4_without_typeII, typeI_1_cc
 };
 
 
@@ -187,6 +187,9 @@ private:
     template <ushort num_equation>
     std::vector<bool> is_shock(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
 
+    template <ushort num_equation>
+    std::vector<bool> is_contact(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
+
 public:
     static std::string name(void) { return "hMLP_BD_Reconstruction_P" + std::to_string(solution_order_); };
 };
@@ -227,6 +230,7 @@ namespace ms {
         case BD_Type::typeI_4: return "typeI_4";
         case BD_Type::typeI_1_without_typeII: return "typeI_1_without_typeII";
         case BD_Type::typeI_4_without_typeII: return "typeI_4_without_typeII";
+        case BD_Type::typeI_1_cc: return "typeI_1_cc";
         default:
             throw std::runtime_error("wrong bd_type");
             return "";
@@ -599,6 +603,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     //temporary
     const auto P0_solutions = this->calculate_P0_solutions(solution_coefficients);
     const auto is_shocks = this->is_shock(P0_solutions);
+    const auto is_contacts = this->is_contact(P0_solutions);
     //temporary
 
     const auto num_cell = solution_coefficients.size();
@@ -771,6 +776,30 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     }
 
                     if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::typeI_1_cc) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (num_troubled_boundary >= 1 && is_shocks[i]) {//temporary
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
+                        if (is_contacts[i]) {
+                            is_normal_cell = false;
+                            break;
+                        }
+                    }
+                    else {
                         is_normal_cell = false;
                         break;
                     }
@@ -1008,7 +1037,7 @@ std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_
         for (const auto face_share_cell_index : face_share_cell_indexes) {
             const auto other_pressure = pressures[face_share_cell_index];
 
-            if (std::abs(my_pressure - other_pressure) >= 0.1 * my_pressure) {
+            if (std::abs(my_pressure - other_pressure) >= 0.1 * (std::min)(my_pressure,other_pressure)) {
                 is_shock[i] = true;
                 break;
             }
@@ -1016,4 +1045,29 @@ std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_
     }
 
     return is_shock;
+}
+
+
+template <ushort space_dimension_, ushort solution_order_>
+template <ushort num_equation>
+std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_contact(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {
+
+    const auto num_cell = P0_solutions.size();
+    std::vector<bool> is_contact(num_cell, false);
+
+    for (uint i = 0; i < num_cell; ++i) {
+        const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_[i];
+
+        const auto my_density = P0_solutions[i][0];
+        for (const auto face_share_cell_index : face_share_cell_indexes) {
+            const auto other_density = P0_solutions[face_share_cell_index][0];
+
+            if (std::abs(my_density - other_density) >= 0.1 * (std::min)(my_density, other_density)) {
+                is_contact[i] = true;
+                break;
+            }
+        }
+    }
+
+    return is_contact;
 }
