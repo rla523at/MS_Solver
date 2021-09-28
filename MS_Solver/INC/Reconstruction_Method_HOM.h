@@ -138,7 +138,7 @@ protected:
 
 enum class BD_Type {
     standard, noBD, 
-    no_typeI, typeI_1, typeI_3, typeI_4,
+    no_typeI, typeI_1, typeI_2, typeI_3, typeI_4,
     no_typeII, typeI_1_without_typeII, typeI_4_without_typeII, typeI_1_cc, typeI_1_dc,
     noBD_dc
 };
@@ -230,6 +230,7 @@ namespace ms {
         case BD_Type::no_typeII: return "no_typeII";
         case BD_Type::standard: return "standard";
         case BD_Type::typeI_1: return "typeI_1";
+        case BD_Type::typeI_2: return "typeI_2";
         case BD_Type::typeI_3: return "typeI_3";
         case BD_Type::typeI_4: return "typeI_4";
         case BD_Type::typeI_1_without_typeII: return "typeI_1_without_typeII";
@@ -726,8 +727,26 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
-                        //if (num_troubled_boundary >= 1) {
                         if (num_troubled_boundary >= 1 && shock_flags[i]) { //temporary
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
+                        this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::typeI_2) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (num_troubled_boundary >= 2 && shock_flags[i]) { //temporary
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
