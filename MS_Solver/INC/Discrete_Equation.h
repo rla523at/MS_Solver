@@ -21,7 +21,7 @@ public:
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
-                
+                        
 
         //Tecplot::post_solution(solutions, "initial");//post
         Tecplot::post_condition_ = true;

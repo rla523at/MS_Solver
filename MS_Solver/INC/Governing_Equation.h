@@ -89,7 +89,11 @@ private:
     using Physical_Flux_        = Matrix<num_equation_, space_dimension_>;
 
 public:
-    static auto physical_flux(const Solution_& conservative_variable);
+    //static auto physical_flux(const Solution_& conservative_variable);
+    static auto physical_flux(const Solution_& cvariable) {
+        const auto pvariable = conservative_to_primitive(cvariable);
+        return physical_flux(cvariable, pvariable);
+    }
     static auto physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable);
     static auto physical_fluxes(const std::vector<Solution_>& conservative_variables, const std::vector<Solution_>& primitive_variables);
     static std::vector<std::array<double, space_dimension_>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables);
@@ -198,11 +202,11 @@ double Burgers<space_dimension>::inner_face_maximum_lambda(const Solution_& solu
 }
 
 
-template <ushort space_dimension_>
-auto Euler<space_dimension_>::physical_flux(const Solution_& cvariable) {
-    const auto pvariable = conservative_to_primitive(cvariable);
-    return physical_flux(cvariable, pvariable);
-}
+//template <ushort space_dimension_>
+//auto Euler<space_dimension_>::physical_flux(const Solution_& cvariable) {
+//    const auto pvariable = conservative_to_primitive(cvariable);
+//    return physical_flux(cvariable, pvariable);
+//}
 
 template <ushort space_dimension_>
 auto Euler<space_dimension_>::physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable) {

@@ -91,17 +91,14 @@ namespace ms {
 		ANN_limiter<GRADIENT_METHOD>::set_model(TO_STRING(__ANN_MODEL__));
 #endif
 
+#if __GOVERNING_EQUATION__ == __EULER__			
+		Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW1_VALUES });
+		Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW2_VALUES });
+#endif
+
 		if constexpr (__DIMENSION__ == 2) {
 			Linear_Advection<2>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED });
 			Sine_Wave<2>::initialize({ X_WAVE_LENGTH, Y_WAVE_LENGTH });
-
-#if __GOVERNING_EQUATION__ == __EULER__			
-			Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW1_VALUES });
-			Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW2_VALUES });
-
-			//Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO1,INFLOW_RHOU1,INFLOW_RHOV1,INFLOW_RHOE1 });
-			//Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW_RHO2,INFLOW_RHOU2,INFLOW_RHOV2,INFLOW_RHOE2 });
-#endif
 		}
 		else if constexpr (__DIMENSION__ == 3) {
 			Linear_Advection<3>::initialize({ X_ADVECTION_SPEED, Y_ADVECTION_SPEED, Z_ADVECTION_SPEED });

@@ -1420,7 +1420,7 @@ Blast_Wave_Interaction<space_dimension_>::Solution_ Blast_Wave_Interaction<space
             constexpr auto rho = 1.0;
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
-            constexpr auto p = 0.001;
+            constexpr auto p = 0.01;
 
             constexpr auto rhou = rho * u;
             constexpr auto rhov = rho * v;
@@ -1429,7 +1429,7 @@ Blast_Wave_Interaction<space_dimension_>::Solution_ Blast_Wave_Interaction<space
             return { rho, rhou, rhov, rhoE };
         }
         else {
-            constexpr auto rho = 1;
+            constexpr auto rho = 1.0;
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
             constexpr auto p = 100.0;
@@ -1461,7 +1461,7 @@ Blast_Wave_Interaction<space_dimension_>::Solution_ Blast_Wave_Interaction<space
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
             constexpr auto w = 0.0;
-            constexpr auto p = 0.001;
+            constexpr auto p = 0.01;
 
             constexpr auto rhou = rho * u;
             constexpr auto rhov = rho * v;

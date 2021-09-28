@@ -33,6 +33,22 @@ public:
 };
 
 
+template <ushort num_equation>
+class Slip_Wall_Neighbor_Solution
+{
+private:
+	Slip_Wall_Neighbor_Solution(void) = delete;
+
+public:
+	static Euclidean_Vector<num_equation> calculate(const Euclidean_Vector<num_equation>& solution) {
+		std::array<double, num_equation> values = -1 * solution;
+		values.front() *= -1;
+		values.back() *= -1;
+		return values;
+	};
+};
+
+
 template <typename Numerical_Flux_Function>
 class Boundary_Flux_Function
 {
@@ -127,6 +143,39 @@ public:
 	}
 };
 
+
+template <typename Numerical_Flux_Function>
+class Reflective_Wall : public Boundary_Flux_Function<Numerical_Flux_Function>
+{
+private:
+	using This_ = Reflective_Wall<Numerical_Flux_Function>;
+	using Space_Vector_ = This_::Space_Vector_;
+	using Solution_ = This_::Solution_;
+
+public:
+	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
+		static_require(This_::space_dimension_ <= 3, "dimension can not exceed 3");
+
+		Solution_ boundary_solution = oc_cvariable;
+
+		if constexpr (ms::is_Euler<Numerical_Flux_Function::Governing_Equation_>) {
+			const auto pvariable = Euler<This_::space_dimension_>::conservative_to_primitive(oc_cvariable);
+
+			if constexpr (This_::space_dimension_ == 2) {
+				const auto p = pvariable[2];
+				return { 0.0, p * normal[0], p * normal[1], 0.0 };
+			}
+			else {
+				const auto p = pvariable[3];
+				return { 0.0, p * normal[0], p * normal[1], p * normal[2], 0.0 };
+			}
+		}
+		else {
+			throw std::runtime_error("Governing equation should be Euler");
+			return {};
+		}
+	}
+};
 
 
 template <typename Numerical_Flux_Function>
