@@ -137,7 +137,7 @@ protected:
 
 
 enum class BD_Type {
-    standard, noBD, 
+    standard, noBD, improved,
     no_typeI, typeI_1, typeI_2, typeI_3, typeI_4,
     no_typeII, typeI_1_without_typeII, typeI_4_without_typeII, typeI_1_cc, typeI_1_dc,
     noBD_dc
@@ -191,7 +191,7 @@ private:
     std::vector<bool> is_shock(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
 
     template <ushort num_equation>
-    std::vector<bool> is_contact(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
+    std::vector<bool> is_discontinuity(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
 
 public:
     static std::string name(void) { return "hMLP_BD_Reconstruction_P" + std::to_string(solution_order_); };
@@ -229,6 +229,7 @@ namespace ms {
         case BD_Type::no_typeI: return "no_typeI";
         case BD_Type::no_typeII: return "no_typeII";
         case BD_Type::standard: return "standard";
+        case BD_Type::improved: return "improved";
         case BD_Type::typeI_1: return "typeI_1";
         case BD_Type::typeI_2: return "typeI_2";
         case BD_Type::typeI_3: return "typeI_3";
@@ -610,7 +611,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     //temporary
     const auto P0_solutions = this->calculate_P0_solutions(solution_coefficients);
     const auto shock_flags = this->is_shock(P0_solutions);
-    const auto discontinuity_flags = this->is_contact(P0_solutions);
+    const auto discontinuity_flags = this->is_discontinuity(P0_solutions);
     //temporary
 
     const auto num_cell = solution_coefficients.size();
@@ -624,8 +625,8 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
     //for (auto& P1_projection_coefficient : P1_projection_coefficients)
     //    P1_projection_coefficient *= P1_projection_matrix;
 
-    //std::vector<ushort> type_I_flag(num_cell);
-    //std::vector<ushort> type_II_flag(num_cell);    
+    //std::vector<ushort> typeI_flags(num_cell);
+    std::vector<ushort> type_II_flag(num_cell);    
     ////post
 
     for (uint i = 0; i < num_cell; ++i) {
@@ -667,6 +668,17 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     }
                 }
                 else if constexpr (__hMLP_BD_TYPE__ == BD_Type::standard) {
+                    ////debug
+                    //if (Debugger::conditions_[0] && i == 76) {
+                    //    std::cout << std::boolalpha;
+                    //    std::cout << "vertex_index " << j << "\n";
+                    //    std::cout << "is_Constant " << Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume) << "\n";
+                    //    std::cout << "P1_MLP_cond " << P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max) << "\n";
+                    //    std::cout << "smooth_extrema " << MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) << "\n";
+                    //    std::cout << "num_troubled_bdry " << num_troubled_boundary << "\n";
+                    //}
+                    ////debug
+
                     if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
                         continue;
 
@@ -680,8 +692,39 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                         continue;
                     }
 
+
                     if (!MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) ||
                         this->is_typeII_subcell_oscillation(num_troubled_boundary)) {
+                        //post
+                        if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max) &&
+                            this->is_typeII_subcell_oscillation(num_troubled_boundary))
+                            type_II_flag[i] = 1;
+                        //post
+
+                        is_normal_cell = false;
+                        break;
+                    }
+                }
+                else if constexpr (__hMLP_BD_TYPE__ == BD_Type::improved) {
+                    if (Constant_Region_Detector::is_constant(criterion_value, simplex_P0_criterion_value, volume))
+                        continue;
+
+                    if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
+                        if (this->is_typeI_subcell_oscillation(num_troubled_boundary) && shock_flags[i]) {
+                            temporal_solution_order = 1;
+                            is_normal_cell = false;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    if (MLP_Smooth_Extrema_Detector::is_smooth_extrema(criterion_value, simplex_higher_mode_criterion_value, simplex_P1_mode_criterion_value, allowable_min, allowable_max)) {
+                        if (this->is_typeII_subcell_oscillation(num_troubled_boundary) && discontinuity_flags[i]) {
+                            is_normal_cell = false;
+                            break;
+                        }
+                    }
+                    else {
                         is_normal_cell = false;
                         break;
                     }
@@ -747,6 +790,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
                         if (num_troubled_boundary >= 2 && shock_flags[i]) { //temporary
+                            //typeI_flags[i] = 1; //post
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -766,6 +810,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
                         if (num_troubled_boundary >= 3 && shock_flags[i]) { //temporary
+                            //typeI_flags[i] = 1; //post
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;
@@ -907,6 +952,13 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
                     throw std::runtime_error("wrong bd type");
             }
 
+            ////debug
+            //if (Debugger::conditions_[0] && i == 76) {
+            //    std::cout << std::boolalpha;
+            //    std::cout << "is_normal_cell " << is_normal_cell << "\n";
+            //}
+            ////debug
+
             if (is_normal_cell)
                 break;
 
@@ -937,18 +989,26 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
         }
     }
 
+    //debug
+    //if (Debugger::conditions_[0])
+    //    std::exit(523);
+    //debug
+
     //post
     
+    //auto limited_P1_projection_coefficients = solution_coefficients;
+    //for (auto& P1_projection_coefficient : limited_P1_projection_coefficients)
+    //    P1_projection_coefficient *= P1_projection_matrix;
+
     if (Tecplot::post_condition_ == true) {
         Tecplot::record_cell_indexes();
-        Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
-        //Tecplot::record_cell_variables("TypeI_flag", type_I_flag);
-        //Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
+        //Tecplot::record_cell_variables("num_troubled_boundary", set_of_num_troubled_boundary);
+        //Tecplot::record_cell_variables("TypeI_flag", typeI_flags);
+        Tecplot::record_cell_variables("TypeII_flag", type_II_flag);
         Tecplot::post_solution(before_limiting, "before");
         //Tecplot::post_solution(P1_projection_coefficients, "P1_projection");
         //Tecplot::post_solution(solution_coefficients, "after");
-        //Tecplot::record_cell_indexes();
-        //Tecplot::post_solution(solution_coefficients, "after");
+        //Tecplot::post_solution(limited_P1_projection_coefficients, "Limited_P1_projection");
     }
 
     //post
@@ -1146,10 +1206,10 @@ std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_contact(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {
+std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_discontinuity(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const {
 
     const auto num_cell = P0_solutions.size();
-    std::vector<bool> is_contact(num_cell, false);
+    std::vector<bool> is_discontinuity(num_cell, false);
 
     for (uint i = 0; i < num_cell; ++i) {
         const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_[i];
@@ -1159,11 +1219,11 @@ std::vector<bool> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_
             const auto other_density = P0_solutions[face_share_cell_index][0];
 
             if (std::abs(my_density - other_density) >= 0.1 * (std::min)(my_density, other_density)) {
-                is_contact[i] = true;
+                is_discontinuity[i] = true;
                 break;
             }
         }
     }
 
-    return is_contact;
+    return is_discontinuity;
 }

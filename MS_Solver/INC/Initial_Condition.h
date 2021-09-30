@@ -1306,11 +1306,11 @@ Explosion_Problem<space_dimension_>::Solution_ Explosion_Problem<space_dimension
     constexpr auto c = 1 / (gamma - 1);
     constexpr auto discontinuity_radius = 0.4;
 
-    const auto x_coordinate = space_vector.at(0);
-    const auto y_coordinate = space_vector.at(1);
-    const auto radius = std::sqrt(x_coordinate * x_coordinate + y_coordinate * y_coordinate);
-
     if constexpr (space_dimension_ == 2) {
+        const auto x_coordinate = space_vector.at(0);
+        const auto y_coordinate = space_vector.at(1);
+        const auto radius = std::sqrt(x_coordinate * x_coordinate + y_coordinate * y_coordinate);
+
         if (radius < discontinuity_radius) {
             constexpr auto rho = 1.0;
             constexpr auto u = 0.0;
@@ -1337,7 +1337,15 @@ Explosion_Problem<space_dimension_>::Solution_ Explosion_Problem<space_dimension
         }
     }
     else if constexpr (space_dimension_ == 3) {
-        if (radius < discontinuity_radius) {
+        const auto x_coordinate = space_vector.at(0);
+        const auto y_coordinate = space_vector.at(1);
+        const auto z_coordinate = space_vector.at(2);
+
+        const auto radius = std::sqrt(x_coordinate * x_coordinate + y_coordinate * y_coordinate + z_coordinate * z_coordinate);
+
+
+        //if (radius < discontinuity_radius) {
+        if (radius < 0.1) { // for test minibox
             constexpr auto rho = 1.0;
             constexpr auto u = 0.0;
             constexpr auto v = 0.0;
