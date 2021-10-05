@@ -7,9 +7,9 @@
 #define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Shocktube_OrthoTri_100x4
+#define __GRID_FILE_NAMES__						Box_IM100
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__MODIFIED_SOD__
+#define __INITIAL_CONDITION__					__EXPLOSION_PROBLEM__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
@@ -17,7 +17,7 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.2
+#define __SOLVE_END_CONDITION_CONSTANT__		0.25
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		100
 #define __POST_ORDER__							4
