@@ -46,7 +46,19 @@ public:
 
 
 namespace ms {
-	inline ElementType string_to_element_type(const std::string& str);
+	inline ElementType string_to_element_type(const std::string& str) {
+		if (ms::contains_icase(str, "Unspecified"))						return ElementType::cell;
+		else if (ms::contains_icase(str, "slip", "wall"))				return ElementType::slip_wall;
+		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))	return ElementType::supersonic_inlet1;
+		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))	return ElementType::supersonic_inlet2;
+		else if (ms::contains_icase(str, "SuperSonic", "outlet"))		return ElementType::supersonic_outlet;
+		else if (ms::contains_icase(str, "periodic"))					return ElementType::periodic;
+		else if (ms::contains_icase(str, "initial", "constant"))		return ElementType::initial_constant_BC;
+		else {
+			throw std::runtime_error("wrong element_type");
+			return ElementType::not_in_list;
+		}
+	};
 }
 
 
@@ -280,24 +292,24 @@ Text Grid_Element_Builder<Gmsh, space_dimension>::read_about(std::ifstream& grid
 }
 
 
-//inline function definition
-namespace ms {
-	inline ElementType string_to_element_type(const std::string& str) {
-		if (ms::contains_icase(str, "Unspecified"))
-			return ElementType::cell;
-		else if (ms::contains_icase(str, "slip", "wall"))
-			return ElementType::slip_wall;
-		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))
-			return ElementType::supersonic_inlet1;
-		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))
-			return ElementType::supersonic_inlet2;
-		else if (ms::contains_icase(str, "SuperSonic", "outlet"))
-			return ElementType::supersonic_outlet;
-		else if (ms::contains_icase(str, "periodic"))
-			return ElementType::periodic;
-		else {
-			throw std::runtime_error("wrong element_type");
-			return ElementType::not_in_list;
-		}
-	}
-}
+////inline function definition
+//namespace ms {
+//	inline ElementType string_to_element_type(const std::string& str) {
+//		if (ms::contains_icase(str, "Unspecified"))
+//			return ElementType::cell;
+//		else if (ms::contains_icase(str, "slip", "wall"))
+//			return ElementType::slip_wall;
+//		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))
+//			return ElementType::supersonic_inlet1;
+//		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))
+//			return ElementType::supersonic_inlet2;
+//		else if (ms::contains_icase(str, "SuperSonic", "outlet"))
+//			return ElementType::supersonic_outlet;
+//		else if (ms::contains_icase(str, "periodic"))
+//			return ElementType::periodic;
+//		else {
+//			throw std::runtime_error("wrong element_type");
+//			return ElementType::not_in_list;
+//		}
+//	}
+//}

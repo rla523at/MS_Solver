@@ -92,8 +92,8 @@ namespace ms {
 #endif
 
 #if __GOVERNING_EQUATION__ == __EULER__			
-		Supersonic_Inlet1_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW1_VALUES });
-		Supersonic_Inlet2_Neighbor_Solution<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW2_VALUES });
+		Supersonic_Inlet1_Neighbor_Solution_Calculator<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW1_VALUES });
+		Supersonic_Inlet2_Neighbor_Solution_Calculator<GOVERNING_EQUATION::num_equation()>::initialize({ INFLOW2_VALUES });
 #endif
 
 		if constexpr (__DIMENSION__ == 2) {

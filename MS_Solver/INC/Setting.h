@@ -9,7 +9,7 @@
 #define __GRID_FILE_TYPE__						__GMSH__
 #define __GRID_FILE_NAMES__						Shocktube_OrthoTri_100x4
 #define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__SLOWLY_MOVING_CONTACT__
+#define __INITIAL_CONDITION__					__MODIFIED_SOD__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
@@ -17,7 +17,7 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.012
+#define __SOLVE_END_CONDITION_CONSTANT__		0.2
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		100
 #define __POST_ORDER__							4
@@ -33,7 +33,7 @@
 #endif 
 
 //temp
-#define __hMLP_BD_TYPE__				BD_Type::no_typeII
+#define __hMLP_BD_TYPE__				BD_Type::typeI_2
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -76,7 +76,7 @@
 #define Y_WAVE_LENGTH					1.0
 #define Z_WAVE_LENGTH					1.0
 
-// Supersonic Inlet inflow value
+//// Supersonic Inlet inflow value
 #define INFLOW1_VALUES					1.0, -19.59745, 0.0, 2692.03002325125
 #define INFLOW2_VALUES					1.0, -19.59745, 0.0, 192.05502325125
 

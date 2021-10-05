@@ -790,7 +790,6 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
                     if (P1_Projected_MLP_Condition::is_satisfy(simplex_P1_projected_criterion_value, allowable_min, allowable_max)) {
                         if (num_troubled_boundary >= 2 && shock_flags[i]) { //temporary
-                            //typeI_flags[i] = 1; //post
                             temporal_solution_order = 1;
                             is_normal_cell = false;
                             break;

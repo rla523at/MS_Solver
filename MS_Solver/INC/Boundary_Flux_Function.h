@@ -2,12 +2,11 @@
 #include "Numerical_Flux_Function.h"
 #include "Element.h"
 
-
 template <ushort num_equation>
-class Supersonic_Inlet1_Neighbor_Solution
+class Supersonic_Inlet1_Neighbor_Solution_Calculator
 {
 private:
-	Supersonic_Inlet1_Neighbor_Solution(void) = delete;
+	Supersonic_Inlet1_Neighbor_Solution_Calculator(void) = delete;
 
 private:
 	inline static Euclidean_Vector<num_equation> inflow_;
@@ -19,10 +18,10 @@ public:
 
 
 template <ushort num_equation>
-class Supersonic_Inlet2_Neighbor_Solution
+class Supersonic_Inlet2_Neighbor_Solution_Calculator
 {
 private:
-	Supersonic_Inlet2_Neighbor_Solution(void) = delete;
+	Supersonic_Inlet2_Neighbor_Solution_Calculator(void) = delete;
 
 private:
 	inline static Euclidean_Vector<num_equation> inflow_;
@@ -34,10 +33,10 @@ public:
 
 
 template <ushort num_equation>
-class Slip_Wall_Neighbor_Solution
+class Slip_Wall_Neighbor_Solution_Calculator
 {
 private:
-	Slip_Wall_Neighbor_Solution(void) = delete;
+	Slip_Wall_Neighbor_Solution_Calculator(void) = delete;
 
 public:
 	static Euclidean_Vector<num_equation> calculate(const Euclidean_Vector<num_equation>& solution) {
@@ -45,6 +44,25 @@ public:
 		values.front() *= -1;
 		values.back() *= -1;
 		return values;
+	};
+};
+
+
+template <ushort num_equation>
+class Initial_Constant_BC_Neighbor_Solution_Calculator
+{
+private:
+	bool is_first_ = true;
+	Euclidean_Vector<num_equation> initial_constant_;
+
+public:
+	Euclidean_Vector<num_equation> calculate(const Euclidean_Vector<num_equation>& solution) {
+		if (this->is_first_) {
+			this->initial_constant_ = solution;
+			this->is_first_ = false;
+		}
+
+		return this->initial_constant_;
 	};
 };
 
@@ -77,7 +95,7 @@ private:
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
-		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet1_Neighbor_Solution<This_::num_equation_>::calculate(), normal);
+		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet1_Neighbor_Solution_Calculator<This_::num_equation_>::calculate(), normal);
 	}
 };
 
@@ -92,7 +110,7 @@ private:
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& solution, const Space_Vector_& normal) const override {
-		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet2_Neighbor_Solution<This_::num_equation_>::calculate(), normal);
+		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet2_Neighbor_Solution_Calculator<This_::num_equation_>::calculate(), normal);
 	}
 };
 
@@ -116,9 +134,9 @@ template <typename Numerical_Flux_Function>
 class Slip_Wall : public Boundary_Flux_Function<Numerical_Flux_Function>
 {
 private:
-	using This_ = Slip_Wall<Numerical_Flux_Function>;
+	using This_			= Slip_Wall<Numerical_Flux_Function>;
 	using Space_Vector_ = This_::Space_Vector_;
-	using Solution_ = This_::Solution_;
+	using Solution_		= This_::Solution_;
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
@@ -143,37 +161,26 @@ public:
 	}
 };
 
-
 template <typename Numerical_Flux_Function>
-class Reflective_Wall : public Boundary_Flux_Function<Numerical_Flux_Function>
+class Initial_Constant_BC : public Boundary_Flux_Function<Numerical_Flux_Function>
 {
 private:
-	using This_ = Reflective_Wall<Numerical_Flux_Function>;
+	using This_ = Initial_Constant_BC<Numerical_Flux_Function>;
 	using Space_Vector_ = This_::Space_Vector_;
 	using Solution_ = This_::Solution_;
+
+	static constexpr ushort space_dimension_	= Numerical_Flux_Function::space_dimension();
+	static constexpr ushort num_equation_		= Numerical_Flux_Function::num_equation();
+
+private:
+	mutable Initial_Constant_BC_Neighbor_Solution_Calculator<num_equation_> neighbor_solution_calculator_;
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
 		static_require(This_::space_dimension_ <= 3, "dimension can not exceed 3");
 
-		Solution_ boundary_solution = oc_cvariable;
-
-		if constexpr (ms::is_Euler<Numerical_Flux_Function::Governing_Equation_>) {
-			const auto pvariable = Euler<This_::space_dimension_>::conservative_to_primitive(oc_cvariable);
-
-			if constexpr (This_::space_dimension_ == 2) {
-				const auto p = pvariable[2];
-				return { 0.0, p * normal[0], p * normal[1], 0.0 };
-			}
-			else {
-				const auto p = pvariable[3];
-				return { 0.0, p * normal[0], p * normal[1], p * normal[2], 0.0 };
-			}
-		}
-		else {
-			throw std::runtime_error("Governing equation should be Euler");
-			return {};
-		}
+		const auto nc_cvariable = this->neighbor_solution_calculator_.calculate(oc_cvariable);
+		return Numerical_Flux_Function::calculate(oc_cvariable, nc_cvariable, normal);
 	}
 };
 
@@ -182,24 +189,18 @@ template <typename Numerical_Flux_Function>
 class Boundary_Flux_Function_Factory
 {
 public:
-	static std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> make(const ElementType boundary_type);
+	static std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> make(const ElementType boundary_type) {
+		switch (boundary_type)	{
+			case ElementType::supersonic_inlet1:		return std::make_unique<Supersonic_Inlet1<Numerical_Flux_Function>>();
+			case ElementType::supersonic_inlet2:		return std::make_unique<Supersonic_Inlet2<Numerical_Flux_Function>>();
+			case ElementType::supersonic_outlet:		return std::make_unique<Supersonic_Outlet<Numerical_Flux_Function>>();
+			case ElementType::slip_wall:				return std::make_unique<Slip_Wall<Numerical_Flux_Function>>();
+			case ElementType::initial_constant_BC:		return std::make_unique<Initial_Constant_BC<Numerical_Flux_Function>>();
+			default:
+				throw std::runtime_error("wrong element type");
+				break;
+		}
+	};
 };
 
 
-template <typename Numerical_Flux_Function>
-std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> Boundary_Flux_Function_Factory<Numerical_Flux_Function>::make(const ElementType boundary_type) {
-	switch (boundary_type)
-	{
-	case ElementType::supersonic_inlet1:
-		return std::make_unique<Supersonic_Inlet1<Numerical_Flux_Function>>();
-	case ElementType::supersonic_inlet2:
-		return std::make_unique<Supersonic_Inlet2<Numerical_Flux_Function>>();
-	case ElementType::supersonic_outlet:
-		return std::make_unique<Supersonic_Outlet<Numerical_Flux_Function>>();
-	case ElementType::slip_wall:
-		return std::make_unique<Slip_Wall<Numerical_Flux_Function>>();
-	default:
-		throw std::runtime_error("wrong element type");
-		break;
-	}	
-}
