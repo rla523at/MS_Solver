@@ -159,7 +159,6 @@ double Linear_Advection<space_dimension>::inner_face_maximum_lambda(const Soluti
 
 template <ushort space_dimension>
 auto Burgers<space_dimension>::physical_flux(const Solution_& solution) {
-    //const auto sol = solution.at(0); //scalar
     const double flux_value = 0.5 * std::pow(solution,2.0);
 
     std::array<double, space_dimension> flux_values;
