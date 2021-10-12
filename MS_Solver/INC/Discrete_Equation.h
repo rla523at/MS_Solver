@@ -22,8 +22,6 @@ public:
         Log::content_ << "\t\t\t\t Solving\n";
         Log::content_ << "================================================================================\n";
                         
-        //Debugger::conditions_.resize(1, false);
-        //Tecplot::post_solution(solutions, "initial");//post
         Tecplot::post_condition_ = true;
         semi_discrete_equation.reconstruct(solutions);
       
@@ -36,7 +34,6 @@ public:
 
             
             if (Solve_Controller::is_time_to_post(current_time)) 
-                //Debugger::conditions_[0] = true; // debug                
                 //Tecplot::post_solution(solutions);//post
                 Tecplot::post_condition_ = true;
 

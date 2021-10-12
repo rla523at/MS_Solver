@@ -7,9 +7,9 @@
 #define __DEFAULT_PATH__						"E:/CodeData/Result/MS_Solver/_Temp/" + GOVERNING_EQUATION::name() + "/" + INITIAL_CONDITION::name() + "/" + SPATIAL_DISCRETE_METHOD::name() + "_" + RECONSTRUCTION_METHOD::name() + "/"
 #define __DIMENSION__							2
 #define __GRID_FILE_TYPE__						__GMSH__
-#define __GRID_FILE_NAMES__						Box_IM100
-#define __GOVERNING_EQUATION__					__EULER__
-#define __INITIAL_CONDITION__					__EXPLOSION_PROBLEM__
+#define __GRID_FILE_NAMES__						Mix40,Mix60,Mix80,Mix100,Mix120
+#define __GOVERNING_EQUATION__					__LINEAR_ADVECTION__
+#define __INITIAL_CONDITION__					__SINE_WAVE__
 #define __SPATIAL_DISCRETE_METHOD__				__HOM__
 #define __RECONSTRUCTION_METHOD__				__hMLP_BD_RECONSTRUCTION__
 #define __NUMERICAL_FLUX__						__LLF__
@@ -17,10 +17,10 @@
 #define __TIME_STEP_METHOD__					__CFL__
 #define __TIME_STEP_CONSTANT__					0.9
 #define __SOLVE_END_CONDITION__					__BY_TIME__
-#define __SOLVE_END_CONDITION_CONSTANT__		0.25
+#define __SOLVE_END_CONDITION_CONSTANT__		1.0
 #define __SOLVE_POST_CONDITION__				__BY_ITER__
 #define __SOLVE_POST_CONDITION_CONSTANT__		100
-#define __POST_ORDER__							4
+#define __POST_ORDER__							2
 #define __POST_FILE_FORMAT__					__BINARY__
 
 // CONDITIONAL OPTIONS
@@ -29,11 +29,11 @@
 #endif
 
 #if		__SPATIAL_DISCRETE_METHOD__ ==	__HOM__
-#define __SOLUTION_ORDER__						4
+#define __SOLUTION_ORDER__						2
 #endif 
 
 //temp
-#define __hMLP_BD_TYPE__				BD_Type::typeI_2
+#define __hMLP_BD_TYPE__				BD_Type::standard
 
 // AVAILABLE OPTIONS
 // __GRID_FILE_TYPE__				__GMSH__
@@ -64,11 +64,11 @@
 
 // MODE
 // comment out if you do not want to use
-#define __USE_SCAILING_METHOD__
+//#define __USE_SCAILING_METHOD__
 
 // Linear Advection
 #define X_ADVECTION_SPEED				1.0
-#define Y_ADVECTION_SPEED				1.0
+#define Y_ADVECTION_SPEED				2.0
 #define Z_ADVECTION_SPEED				1.0
 
 // Sine Wave

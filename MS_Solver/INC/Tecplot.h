@@ -299,7 +299,7 @@ std::vector<std::vector<double>> Tecplot::convert_to_binary_data(const std::vect
 				convert_to_binary_data[j].push_back(cvariable[j]);
 
 			for (size_t j = 0; j < num_equation - 1; ++j)
-				convert_to_binary_data[j + 4].push_back(pvariable[j]);
+				convert_to_binary_data[num_equation + j].push_back(pvariable[j]);
 		}
 	}
 
