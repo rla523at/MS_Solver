@@ -170,5 +170,8 @@
     <ClInclude Include="INC\Debugger.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Discretized_Solution.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

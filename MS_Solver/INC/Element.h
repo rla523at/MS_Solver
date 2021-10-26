@@ -5,6 +5,8 @@
 #include <set>
 #include <unordered_set>
 
+//상속을 고려해보자!
+
 
 using uint = unsigned int;
 

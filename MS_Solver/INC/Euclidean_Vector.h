@@ -152,7 +152,6 @@ namespace ms {
 
 		return d1 - ULP_precision * lower_ULP <= d2 && d2 <= d1 + ULP_precision * upper_ULP;
 	}
-
 	template <size_t dimension>
 	Euclidean_Vector<dimension> arithmetic_mean(const std::vector<Euclidean_Vector<dimension>>& euclidean_vectors) {
 		Euclidean_Vector<dimension> arithmetic_mean;
@@ -165,9 +164,8 @@ namespace ms {
 
 		return arithmetic_mean;
 	}
-
 	template <size_t dimension>
-	Euclidean_Vector<dimension> min_value_gathering_vector(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
+	Euclidean_Vector<dimension> gather_min_value(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
 		dynamic_require(!euclideean_vectors.empty(), "min value can not collected from empty");
 		
 		const auto num_vector = euclideean_vectors.size();
@@ -180,9 +178,8 @@ namespace ms {
 
 		return result;
 	}
-
 	template <size_t dimension>
-	Euclidean_Vector<dimension> max_value_gathering_vector(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
+	Euclidean_Vector<dimension> gather_max_value(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
 		dynamic_require(!euclideean_vectors.empty(), "min value can not collected from empty");
 
 		const auto num_vector = euclideean_vectors.size();
@@ -195,6 +192,21 @@ namespace ms {
 
 		return result;
 	}
+	template <size_t dimension>
+	std::vector<std::vector<double>> gather_by_element_order(const std::vector<Euclidean_Vector<dimension>>& euclideean_vectors) {
+		dynamic_require(!euclideean_vectors.empty(), "can not gather from empty");
+
+		std::vector<std::vector<double>> gathered_vector(dimension);
+
+		const auto num_vector = euclideean_vectors.size();
+
+		for (size_t j = 0; j < dimension; ++j)
+			for (size_t i = 0; i < num_vector; ++i) 
+				gathered_vector[j][i] = euclideean_vectors[i][j];		
+
+		return result;
+	}
+
 
 }
 

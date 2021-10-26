@@ -16,7 +16,7 @@ public:
     template<typename Time_Step_Method, typename Semi_Discrete_Equation, typename Solution>
     static void solve(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions) {
         double current_time = 0.0;
-        Tecplot::syncronize_time(current_time);
+        Tecplot::syncronize_solution_time(current_time);
 
         Log::content_ << "================================================================================\n";
         Log::content_ << "\t\t\t\t Solving\n";

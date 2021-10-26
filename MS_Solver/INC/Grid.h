@@ -456,9 +456,9 @@ std::vector<std::vector<int>> Grid<space_dimension>::cell_set_of_connectivities(
 	size_t connectivity_start_index = 0;
 
 	for (uint i = 0; i < num_cell; ++i) {
-		const auto& post_nodes = set_of_post_nodes[i];
 		const auto post_connectivities = cell_elements[i].geometry_.reference_geometry_.post_connectivities(post_order, connectivity_start_index);
 
+		//vector type cast
 		for (const auto& connectivity : post_connectivities) {
 			const auto num_point = connectivity.size();
 			std::vector<int> temp(num_point);
@@ -469,6 +469,7 @@ std::vector<std::vector<int>> Grid<space_dimension>::cell_set_of_connectivities(
 			set_of_connectivities.push_back(std::move(temp));
 		}
 
+		const auto& post_nodes = set_of_post_nodes[i];
 		const auto num_post_node = post_nodes.size();
 		connectivity_start_index += num_post_node;
 	}

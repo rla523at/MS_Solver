@@ -234,8 +234,8 @@ auto MLP_u1<Gradient_Method>::calculate_vertex_node_index_to_min_max_solution(co
 
     for (const auto& [vnode_index, share_cell_indexes] : this->vnode_index_to_share_cell_index_set_) {
         const auto vnode_share_cell_solutions = ms::extract_by_index(solutions, share_cell_indexes);
-        const auto gathered_min_sol = ms::min_value_gathering_vector(vnode_share_cell_solutions);
-        const auto gathered_max_sol = ms::max_value_gathering_vector(vnode_share_cell_solutions);
+        const auto gathered_min_sol = ms::gather_min_value(vnode_share_cell_solutions);
+        const auto gathered_max_sol = ms::gather_max_value(vnode_share_cell_solutions);
 
         vnode_index_to_min_max_solution.emplace(vnode_index, std::make_pair(gathered_min_sol, gathered_max_sol));
     }

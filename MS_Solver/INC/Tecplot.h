@@ -1,8 +1,34 @@
 #pragma once
+#include "Discretized_Solution.h"
 #include "Governing_Equation.h"
 #include "Grid.h"
 
-namespace ms {
+#define LOCATION ms::location_str(__FILE__,__FUNCTION__,__LINE__)
+#define REQUIRE(requirement, message) ms::require(requirement, message, LOCATION)
+#define ERROR(message) ms::require(false, message, LOCATION)
+
+namespace ms
+{
+	inline std::string location_str(const std::string& file_name, const std::string& function_name, const int num_line) {
+		std::string location_str = file_name;
+
+		location_str.erase(location_str.begin(), location_str.begin() + location_str.rfind("\\") + 1);
+
+		location_str = "File\t\t: " + location_str + "\n";
+		location_str += "Function\t: " + function_name + "\n";
+		location_str += "Line\t\t: " + std::to_string(num_line) + "\n";
+
+		return location_str;
+	}
+	inline void require(const bool requirement, const std::string_view message, const std::string& location_str) {
+		if (!requirement) {
+			std::string exception_str = "\n\n============================EXCEPTION============================\n";
+			exception_str += location_str;
+			exception_str = exception_str + "Message\t\t: " + message.data();
+			exception_str += "\n============================EXCEPTION============================\n\n";
+			throw std::runtime_error(exception_str);
+		}
+	}
 	template <typename T, typename... Args>
 	std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args) {
 		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
@@ -15,33 +41,169 @@ namespace ms {
 		else
 			return ms::merge(vec1, std::move(args)...);
 	}
+	template <typename T>
+	size_t size_of_vvec(const std::vector<std::vector<T>>& vvec) {
+		size_t size = 0;
+		for (const auto& vec : vvec)
+			size += vec.size();
+		return size;
+	};
 }
+
+enum class Post_Variable_Location {
+	node,
+	cell_center
+};
 
 enum class Zone_Type {
 	FETriangle = 2,
 	FETetrahedron = 4
 };
 
-enum class Tecplot_Header_Writer_Mode {
-	grid,
-	solution
+class Post_Variable_Converter
+{
+public:
+	virtual std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const abstract;
+	virtual std::string solution_variable_location_str(const size_t num_solution_variable) const abstract;
+
+protected:
+	size_t num_elements_;
+	size_t num_post_nodes_;
+	size_t num_post_elements_;
+};
+
+class Post_Cell_Center_Variable_Converter : public Post_Variable_Converter
+{
+public:
+	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override {
+		const auto num_values = values.size();
+
+		if (this->num_post_elements_ == num_values)
+			return values;
+		else {
+			REQUIRE(values.size() == this->num_elements_, "number of values should be same with number of elements");
+
+			std::vector<double> post_variable_values(this->num_post_elements_);
+
+			size_t index = 0;
+			for (size_t i = 0; i < this->num_elements_; ++i) {
+				const auto num_post_elements = this->num_post_elements_per_element[i];
+				for (size_t j = 0; j < num_post_elements; ++j)
+					post_variable_values[index++] = values[i];
+			}
+
+			return post_variable_values;
+		}
+	}
+	std::string solution_variable_location_str(const size_t num_solution_variable) const override {
+		if (num_solution_variable == 1)
+			return "([1]=CELLCENTERED)";
+		else
+			return "([1-" + std::to_string(num_solution_variable) + "]=CELLCENTERED)";
+	}
+
+private:
+	std::vector<size_t> num_post_elements_per_element;
+};
+
+class Post_Node_Variable_Converter : public Post_Variable_Converter
+{
+public:
+	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override {	
+		const auto num_values = values.size();
+		
+		if (this->num_post_nodes_ == num_values)
+			return values;
+		else {
+			REQUIRE(num_values == this->num_elements_, "number of values should be same with number of elements");
+
+			std::vector<double> post_variable_values(this->num_post_nodes_);
+
+			size_t index = 0;
+			for (size_t i = 0; i < this->num_elements_; ++i) {
+				const auto num_post_elements = this->num_post_nodes_per_element[i];
+				for (size_t j = 0; j < num_post_elements; ++j)
+					post_variable_values[index++] = values[i];
+			}
+
+			return post_variable_values;
+		}
+	}
+	std::string solution_variable_location_str(const size_t num_solution_variable) const override {
+		return "()";
+	}
+
+private:
+	std::vector<size_t> num_post_nodes_per_element;
 };
 
 class Post_Variables
 {
 public:
-	void record_grid(const Grid<2>& grid) const;
-	void record_variable(const std::string_view name, const std::vector<double>& values);
+	void syncronize_solution_time(const double& solution_time) {
+		this->solution_time_ptr_ = &solution_time;
+	}
+	void record_grid(const Grid<2>& grid) {
+		const auto set_of_post_nodes =  grid.cell_set_of_post_nodes(this->post_order_);
+		this->num_post_nodes_ = ms::size_of_vvec(set_of_post_nodes);
 
-	Zone_Type zone_type(void) const;
-	size_t num_post_node(void) const;
-	size_t num_element(void) const;
-	ushort num_grid_variable(void) const;
-	ushort num_solution_variable(void) const;
+		const auto set_of_connectivities = grid.cell_set_of_connectivities(post_order_, set_of_post_nodes);
+		this->num_post_element_ = set_of_connectivities.size();
 
-	std::string grid_variable_str(void) const;
+		for (const auto& connecitivities : set_of_connectivities)
+			this->connectivities_.insert(this->connectivities_.end(), connecitivities.begin(), connecitivities.end());
+
+		this->post_nodes_by_axis_ = grid.cell_post_coordinate_blocks(set_of_post_nodes);
+		this->num_grid_variables_ = this->post_nodes_by_axis_.size();
+		REQUIRE(this->num_grid_variables_ <= 3, "num grid variable can not exceed 3");
+		
+		if (num_grid_variables_ == 2)
+			this->zone_type_ = Zone_Type::FETriangle;
+		else
+			this->zone_type_ = Zone_Type::FETetrahedron;
+	}
+	void record_variable(const std::string_view name, const std::vector<double>& values) {
+		REQUIRE(!name.empty(), "post variable should have name");
+		REQUIRE(!this->solution_variable_name_to_value_.contains(name.data()), "post variable does not allow duplicate record");
+
+		auto post_variable_values = this->post_variable_convertor_->convert_to_post_variable_values(values);
+		this->solution_variable_name_to_value_.emplace(name.data(), std::move(post_variable_values));
+	};
+
+	Zone_Type zone_type(void) const {
+		return this->zone_type_;
+	}
+	size_t num_post_node(void) const {
+		return this->num_post_nodes_;
+	}
+	size_t num_post_element(void) const {
+		return this->num_post_element_;
+	}
+	ushort num_grid_variable(void) const {
+		return num_grid_variables_;
+	}
+	ushort num_solution_variable(void) const {
+		return this->solution_variable_name_to_value_.size();
+	}
+	double solution_time(void) const {
+		REQUIRE(this->solution_time_ptr_ != nullptr, "solution time should be syncronized");
+		return *solution_time_ptr_;
+	}
+
+	std::string grid_variable_str(void) const {
+		if (this->num_grid_variables_ == 1)
+			return "x";
+		else if (this->num_grid_variables_ == 2)
+			return "x,y";
+		else if (this->num_grid_variables_ == 3)
+			return "x,y,z";
+		else
+			ERROR("current num grid variable is not supproted");
+	}
 	std::string solution_variable_str(void) const;
-	std::string variable_location_str(void) const;
+	std::string solution_variable_location_str(void) const {
+		return post_variable_convertor_->solution_variable_location_str(this->solution_variable_name_to_value_.size());
+	}
 
 	std::vector<std::vector<double>> calculate_set_of_grid_datas(void) const;
 	std::vector<std::vector<double>> calculate_set_of_ASCII_grid_datas(void) const {
@@ -55,68 +217,77 @@ public:
 		//}
 	};
 	std::vector<std::vector<double>> calculate_set_of_solution_datas(void) const;
+
+private:
+	std::unique_ptr<Post_Variable_Converter> post_variable_convertor_;
+	size_t post_order_ = 0;
+
+	const double* solution_time_ptr_ = nullptr;
+
+	Zone_Type zone_type_;
+	size_t num_post_nodes_ = 0;
+	size_t num_post_element_ = 0;
+	ushort num_grid_variables_ = 0;
+
+	std::vector<int> connectivities_;
+	std::vector<std::vector<double>> post_nodes_by_axis_;
+	std::map<std::string, std::vector<double>> solution_variable_name_to_value_;
 };
 
-class TecPlot_Header_Writer_Base
+class TecPlot_Header_Writer
 {
 public:
-	void syncronize_time(const double& solution_time) {
-		this->solution_time_ptr_ = &solution_time;
-	}
 	void write_grid_header(const Post_Variables& post_variables, const std::string_view post_file_path) {
-		this->grid_mode(post_variables);
+		this->set_grid_mode(post_variables);
 		this->write_header(post_file_path);
 	}
 	void write_solution_header(const Post_Variables& post_variables, const std::string_view post_file_path) {
-		this->solution_mode(post_variables);
+		this->set_solution_mode(post_variables);
 		this->write_header(post_file_path);
 	}
 
 protected:
-	virtual void grid_mode(const Post_Variables& post_variables) abstract;
-	virtual void solution_mode(const Post_Variables& post_variables) abstract;
-	virtual void write_header(const std::string_view post_file_path) const abstract;
+	void set_common_setting(const Post_Variables& post_variables) {
+		this->zone_type_ = post_variables.zone_type();
+		this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
+		this->num_elements_ = static_cast<int>(post_variables.num_post_element());
+		this->solution_time_ = post_variables.solution_time();
+	}
+	virtual void set_grid_mode(const Post_Variables& post_variables) abstract;
+	virtual void set_solution_mode(const Post_Variables& post_variables) abstract;
+	virtual void write_header(const std::string_view post_file_path) abstract;
 
 protected:
-	const double* solution_time_ptr_ = nullptr;
-	Tecplot_Header_Writer_Mode mode_;
 	Zone_Type zone_type_;
 	int num_post_nodes_ = 0;
 	int num_elements_ = 0;
+	double solution_time_ = 0.0;
+
+	size_t strand_id_ = 0;
 };
 
-class Tecplot_ASCII_Header_Writer : public TecPlot_Header_Writer_Base
+class Tecplot_ASCII_Header_Writer : public TecPlot_Header_Writer
 {
 private:
-	void grid_mode(const Post_Variables& post_variables) override {
-		this->zone_type_ = post_variables.zone_type();
-		this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
-		this->num_elements_ = static_cast<int>(post_variables.num_element());
+	void set_grid_mode(const Post_Variables& post_variables) override {
+		this->set_common_setting(post_variables);
+		
 		this->title_ = "Grid";
 		this->file_type_str_ = "Grid";
 		this->variable_names_ = post_variables.grid_variable_str();
 		this->zone_title_ = "Grid";
 		this->variable_location_str_ = "()";
-
-		this->mode_ = Tecplot_Header_Writer_Mode::grid;
 	}
-	void solution_mode(const Post_Variables& post_variables) override {
-		this->zone_type_ = post_variables.zone_type();
-		this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
-		this->num_elements_ = static_cast<int>(post_variables.num_element());
-		this->title_ = "Solution_at_" + ms::double_to_string(*this->solution_time_ptr_);
+	void set_solution_mode(const Post_Variables& post_variables) override {
+		this->set_common_setting(post_variables);
+
+		this->title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
 		this->file_type_str_ = "Solution";
 		this->variable_names_ = post_variables.solution_variable_str();
-		this->zone_title_ = "Solution_at_" + ms::double_to_string(*this->solution_time_ptr_);
-		this->variable_location_str_ = post_variables.variable_location_str();
-
-		this->mode_ = Tecplot_Header_Writer_Mode::solution;
+		this->zone_title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
+		this->variable_location_str_ = post_variables.solution_variable_location_str();
 	}
-	void write_header(const std::string_view post_file_path) const override {
-		//nullptr 예외 발생 코드
-		
-		static size_t strand_id = 0;
-
+	void write_header(const std::string_view post_file_path) override {		
 		Text header;
 		header.reserve(11);
 		header << "Title = " + this->title_;
@@ -127,9 +298,9 @@ private:
 		header << "Nodes = " + std::to_string(this->num_post_nodes_);
 		header << "Elements = " + std::to_string(this->num_elements_);
 		header << "DataPacking = Block";
-		header << "StrandID = " + std::to_string(strand_id);		
-		header << "SolutionTime = " + std::to_string(*this->solution_time_ptr_);
-		header << "VarLocation = " + variable_location_str_;
+		header << "StrandID = " + std::to_string(this->strand_id_++);		
+		header << "SolutionTime = " + std::to_string(this->solution_time_);
+		header << "VarLocation = " + this->variable_location_str_;
 
 		header.write(post_file_path);
 	}
@@ -142,42 +313,34 @@ protected:
 	std::string variable_location_str_;
 };
 
-class Tecplot_Binary_Header_Writer : public TecPlot_Header_Writer_Base
+class Tecplot_Binary_Header_Writer : public TecPlot_Header_Writer
 {
 public:
-	void grid_mode(const Post_Variables& post_variables) override {
-		this->zone_type_ = post_variables.zone_type();
-		this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
-		this->num_elements_ = static_cast<int>(post_variables.num_element());
+	void set_grid_mode(const Post_Variables& post_variables) override {
+		this->set_common_setting(post_variables);
+
 		this->file_type_ = 1;
 		this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
 		this->num_variable_ = static_cast<int>(post_variables.num_grid_variable());
 		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.grid_variable_str(), ','));
 		this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
 		this->specify_variable_location_ = 0;
-
-		this->mode_ = Tecplot_Header_Writer_Mode::grid;
 	}
-	void solution_mode(const Post_Variables& post_variables) override {
-		this->zone_type_ = post_variables.zone_type();
-		this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
-		this->num_elements_ = static_cast<int>(post_variables.num_element());
+	void set_solution_mode(const Post_Variables& post_variables) override {
+		this->set_common_setting(post_variables);
+
 		this->file_type_ = 2;
-		this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(*this->solution_time_ptr_));
+		this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
 		this->num_variable_ = static_cast<int>(post_variables.num_solution_variable());
 		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.solution_variable_str(), ','));
-		this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(*this->solution_time_ptr_));
+		this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
 
-		if (post_variables.variable_location_str() == "()")
+		if (post_variables.solution_variable_location_str() == "()")
 			this->specify_variable_location_ = 0;
 		else
 			this->specify_variable_location_ = 1;
-
-		this->mode_ = Tecplot_Header_Writer_Mode::solution;
 	}
-	void write_header(const std::string_view post_file_path) const override {
-		static int strand_id = 0;
-
+	void write_header(const std::string_view post_file_path) override {
 		Binary_Writer writer(post_file_path);
 
 		//I. HEADER SECTION
@@ -199,8 +362,8 @@ public:
 		writer << 299.0f;													//zone marker
 		writer << this->zone_name_tecplot_binary_format_;					//zone name
 		writer << -1;														//parent zone - default
-		writer << strand_id;												//strand id
-		writer << *this->solution_time_ptr_;								//solution_time
+		writer << static_cast<int>(this->strand_id_++);						//strand id
+		writer << this->solution_time_;										//solution_time
 		writer << -1;														//not used - default
 		writer << static_cast<int>(this->zone_type_);						//zone type
 		if (this->specify_variable_location_ == 0)							//specify var location
@@ -243,13 +406,20 @@ protected:
 	int specify_variable_location_;
 };
 
-class Tecplot_ASCII_Data_Writer
+class Tecplot_Data_Writer
+{
+public: 
+	virtual void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
+	virtual void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
+};
+
+class Tecplot_ASCII_Data_Writer : public Tecplot_Data_Writer
 {
 public:
-	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
+	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override {
 		this->write_data(post_variables.calculate_set_of_ASCII_grid_datas(), post_file_path);
 	}
-	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
+	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override {
 		this->write_data(post_variables.calculate_set_of_solution_datas(), post_file_path);
 	}
 
@@ -276,21 +446,18 @@ private:
 	};
 };
 
-class Tecplot_Binary_Data_Writer
+class Tecplot_Binary_Data_Writer : public Tecplot_Data_Writer
 {
 public:
-	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
+	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override {
 		this->write_data(post_variables.calculate_set_of_grid_datas(), post_variables.num_grid_variable(), post_file_path);
 	}
-	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
+	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override {
 		this->write_data(post_variables.calculate_set_of_solution_datas(), post_variables.num_solution_variable(), post_file_path);
 	}
 
 private:
 	void write_data(const std::vector<std::vector<double>>& set_of_post_datas, const size_t num_post_variable, const std::string_view post_file_path) const {
-		//const auto set_of_post_datas = post_data_builder_->calculate_set_of_post_datas(post_variables);	//data = post variable + connectivity
-		//const auto num_post_variable = post_data_builder_->calculate_num_variable(post_variables);
-
 		//II. DATA SECTION		
 		Binary_Writer binary_data_file(post_file_path, std::ios::app);
 
@@ -313,72 +480,48 @@ private:
 	};
 };
 
-class Tecplot_File_Writer abstract
+class Tecplot_File_Writer
 {
 public:
-	virtual void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) abstract;
-	virtual void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) abstract;
-};
-
-class Tecplot_ASCII_File_Writer : public Tecplot_File_Writer
-{
-public:
-	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) override {
-		tecplot_header_writer_.write_grid_header(post_variables, post_file_path);
-		tecplot_data_writer_.write_grid_data(post_variables, post_file_path);
+	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
+		this->header_writer_->write_grid_header(post_variables, post_file_path);
+		this->data_writer_->write_grid_data(post_variables, post_file_path);
 	}
-	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) override {
-		tecplot_header_writer_.write_solution_header(post_variables, post_file_path);
-		tecplot_data_writer_.write_solution_data(post_variables, post_file_path);
+	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
+		this->header_writer_->write_solution_header(post_variables, post_file_path);
+		this->data_writer_->write_solution_data(post_variables, post_file_path);
 	}
 
 private:
-	Tecplot_ASCII_Header_Writer tecplot_header_writer_;
-	Tecplot_ASCII_Data_Writer tecplot_data_writer_;
-};
-
-class Tecplot_Binary_File_Writer : public Tecplot_File_Writer
-{
-public:
-	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) override {
-		tecplot_header_writer_.write_grid_header(post_variables, post_file_path);
-		tecplot_data_writer_.write_grid_data(post_variables, post_file_path);
-	}
-	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) override {
-		tecplot_header_writer_.write_solution_header(post_variables, post_file_path);
-		tecplot_data_writer_.write_solution_data(post_variables, post_file_path);
-	}
-
-private:
-	Tecplot_Binary_Header_Writer tecplot_header_writer_;
-	Tecplot_Binary_Data_Writer tecplot_data_writer_;
+	std::unique_ptr<TecPlot_Header_Writer> header_writer_;
+	std::unique_ptr<Tecplot_Data_Writer> data_writer_;
 };
 
 
-class Discretized_Solution 
-{
-public:
-	std::vector<std::vector<double>> calculate_post_point_solutions_by_variables(void) const;
-	
-	const std::vector<std::string_view>& get_solution_names(void) const;
-};
 
 
 //static class
 class Tecplot
 {	
 public:
+	static void syncronize_solution_time(const double& solution_time) {
+		This_::post_variables_.syncronize_solution_time(solution_time);
+	}
 	static void post_grid(const Grid<2>& grid) {
 		This_::post_variables_.record_grid(grid);
-		This_::file_writer_->write_grid_file(This_::post_variables_, This_::post_file_path_);
+		This_::file_writer_.write_grid_file(This_::post_variables_, This_::post_file_path_);
 	}
 	static void post_solution(const Discretized_Solution& discretized_solution) {
-		const auto& solution_names = discretized_solution.get_solution_names();
-		const auto post_point_solutions_by_variable = discretized_solution.calculate_post_point_solutions_by_variables();
-		const auto num_solution_variable = solution_names.size();
+		const auto& variable_names = discretized_solution.get_variable_names();
+		//const auto post_point_solutions = discretized_solution.calculate_post_point_solutions();
+		//const auto post_point_solutions_by_variable = ms::gather_by_element_order(post_point_solutions);
+		const auto post_point_solutions_by_variable = discretized_solution.calculate_post_point_solutions_by_variable();
+		const auto num_solution_variable = variable_names.size();
 		
 		for (ushort i = 0; i < num_solution_variable; ++i) 
-			This_::post_variables_.record_variable(solution_names[i], post_point_solutions_by_variable[i]);		
+			This_::post_variables_.record_variable(variable_names[i], post_point_solutions_by_variable[i]);	
+
+		This_::file_writer_.write_solution_file(This_::post_variables_, post_file_path_);
 	}
 	static void record_variables(const std::string_view name, const std::vector<double>& values) {
 		This_::post_variables_.record_variable(name, values);
@@ -393,7 +536,7 @@ private:
 
 	static inline std::string post_file_path_;
 	static inline Post_Variables post_variables_;
-	static inline std::unique_ptr<Tecplot_File_Writer> file_writer_;
+	static inline Tecplot_File_Writer file_writer_;
 };
 
 
@@ -471,7 +614,7 @@ private:
 
 public:
 	static void set_path(const std::string& path) { This_::path_ = path; };
-	static void syncronize_time(const double& current_time) { This_::time_ptr_ = &current_time; };
+	static void syncronize_solution_time(const double& current_time) { This_::time_ptr_ = &current_time; };
 
 public:
 	template <typename T>

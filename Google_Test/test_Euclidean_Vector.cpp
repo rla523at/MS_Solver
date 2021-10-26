@@ -90,7 +90,7 @@ TEST(ms, min_value_gathering_vector_1) {
 
 	std::vector<Euclidean_Vector<3>> vec = { v1,v2,v3 };
 
-	const auto result = ms::min_value_gathering_vector(vec);
+	const auto result = ms::gather_min_value(vec);
 	const Euclidean_Vector ref = { 1,1,1 };
 	EXPECT_EQ(result, ref);
 }
@@ -102,7 +102,7 @@ TEST(ms, max_value_gathering_vector_1) {
 
 	std::vector<Euclidean_Vector<3>> vec = { v1,v2,v3 };
 
-	const auto result = ms::max_value_gathering_vector(vec);
+	const auto result = ms::gather_max_value(vec);
 	const Euclidean_Vector ref = { 3,3,3 };
 	EXPECT_EQ(result, ref);
 }
