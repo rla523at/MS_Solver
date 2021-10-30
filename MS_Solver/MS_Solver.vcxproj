@@ -161,6 +161,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -175,7 +176,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="INC\Discretized_Solution.h" />
+    <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exception.h" />
+    <ClInclude Include="INC\Governing_Equation.h" />
+    <ClInclude Include="INC\Grid.h" />
+    <ClInclude Include="INC\Initial_Condition.h" />
     <ClInclude Include="INC\Matrix.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
