@@ -8,7 +8,8 @@
 #include <vector>
 
 //for setting friend class
-namespace ms {
+namespace ms 
+{
 	class BLAS;
 }
 
@@ -17,8 +18,7 @@ class Matrix_Base
 {
 	friend class ms::BLAS;
 
-//Command
-public:
+public: //Command
 	void be_transpose(void) {
 		std::swap(this->num_row_, this->num_column_);
 
@@ -26,6 +26,55 @@ public:
 			this->transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
 		else
 			this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
+	}
+
+public: //Query
+	double at(const size_t row, const size_t column) const {
+		REQUIRE(this->is_in_range(row, column), "matrix indexes should not exceed given range");
+		if (this->is_transposed())
+			return this->const_data_ptr_[column * this->num_row_ + row];
+		else
+			return this->const_data_ptr_[row * this->num_column_ + column];
+	}
+	bool is_finite(void) const {
+		for (size_t i = 0; i < this->num_values(); ++i) {
+			if (!std::isfinite(this->const_data_ptr_[i]))
+				return false;
+		}
+		return true;
+	}
+	std::vector<double> row(const size_t row_index) const {
+		REQUIRE(row_index < this->num_row_, "index can not exceed given range");
+
+		std::vector<double> row_values(this->num_column_);
+
+		for (size_t i = 0; i < this->num_column_; ++i)
+			row_values[i] = this->at(row_index, i);
+
+		return row_values;
+	}
+	std::vector<double> column(const size_t column_index) const {
+		REQUIRE(column_index < this->num_column_, "index can not exceed given range");
+
+		std::vector<double> column_values(this->num_row_);
+
+		for (size_t i = 0; i < this->num_row_; ++i)
+			column_values[i] = this->at(i, column_index);
+
+		return column_values;
+	}
+	std::string to_string(void) const {
+		std::ostringstream oss;
+		oss << std::setprecision(16) << std::showpoint << std::left;
+		for (size_t i = 0; i < this->num_row_; ++i) {
+			for (size_t j = 0; j < this->num_column_; ++j)
+				oss << std::setw(25) << this->at(i, j);
+			oss << "\n";
+		}
+		return oss.str();
+	}
+	std::pair<size_t, size_t> size(void) const {
+		return { this->num_row_, this->num_column_ };
 	}
 
 protected:
@@ -42,6 +91,9 @@ protected:
 	bool is_square_matrix(void) const {
 		return this->num_row_ == this->num_column_;
 	}
+	bool is_in_range(const size_t irow, const size_t jcolumn) const {
+	return irow < this->num_row_ && jcolumn < this->num_column_;
+	}
 	size_t num_values(void) const {
 		return this->num_row_ * this->num_column_;
 	}
@@ -54,8 +106,67 @@ protected:
 };
 
 
-namespace ms {
-	class BLAS
+class Matrix : public Matrix_Base
+{
+public:
+	Matrix(const size_t matrix_order);
+	Matrix(const size_t matrix_order, const std::vector<double>& value);
+	Matrix(const size_t num_row, const size_t num_column);
+	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
+
+public: //Command 
+	Matrix& be_inverse(void);
+	template <typename V>	void change_column(const size_t column_index, const V& vec) {
+		REQUIRE(column_index < this->num_column_, "column idnex can not exceed number of column");
+
+		for (size_t i = 0; i < this->num_row_; ++i)
+			this->value_at(i, column_index) = vec.at(i);
+	}
+	template <typename V>	void change_row(const size_t start_row_index, const V& vec) {
+		REQUIRE(start_row_index <= this->num_row_, "index can not exceed given range");
+		REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
+
+		const auto jump_index = start_row_index * this->num_column_;
+		std::copy(vec.begin(), vec.end(), this->values_.begin() + jump_index);
+
+	}
+	void change_rows(const size_t start_row_index, const Matrix& A);
+	//void change_columns(const size_t start_column_index, const Static_Matrix<num_row, num_column>& A);
+
+public: //Query
+	Matrix operator*(const Matrix& other) const;
+	bool operator==(const Matrix& other) const;
+
+	Matrix transpose(void) const;
+	Matrix inverse(void) const;
+	
+private:
+	double& value_at(const size_t row, const size_t column);
+	std::vector<int> PLU_decomposition(void);
+
+private:
+	std::vector<double> values_;
+};
+
+
+class Matrix_Wrapper : public Matrix_Base
+{
+public:
+	Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr) {
+		this->num_row_ = num_row;
+		this->num_column_ = num_column;
+		this->const_data_ptr_ = ptr;
+	}
+		
+public:
+	Matrix operator*(const Matrix& m) const;
+};
+
+
+namespace ms 
+{
+	//static class
+	class BLAS 
 	{
 	private:
 		BLAS(void) = delete;
@@ -78,108 +189,29 @@ namespace ms {
 
 			cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.const_data_ptr_, lda, B.const_data_ptr_, ldb, beta, output_ptr, ldc);
 		}
-
-		//static void gemvpv(const Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2);
+		//static void gemvpv(const Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
+		//	REQUIRE(A.num_column_ == v1.dimension(), "dimension should be matched for matrix vector multiplication");
+		//	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+		//	const auto transA = A.transpose_type_;
+		//	const auto m = static_cast<MKL_INT>(A.num_row_);
+		//	const auto n = static_cast<MKL_INT>(A.num_column_);
+		//	const auto alpha = 1.0;
+		//	const auto lda = static_cast<MKL_INT>(A.leading_dimension());
+		//	const auto incx = 1;
+		//	const auto beta = 1.0;
+		//	const auto incy = 1;
+		//	cblas_dgemv(layout, transA, m, n, alpha, A.values_.data(), lda, v1.data(), incx, beta, v2.values_.data(), incy);
+		//};
 	};
 
 	//alias
-	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr) {
+	inline void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr) {
 		BLAS::gemm(A, B, output_ptr);
 	}
-
-
-	//inline constexpr ushort blas_dscal_criteria = 10;
-	//inline constexpr ushort blas_mv_criteria = 50;
 }
 
 
-class Matrix : public Matrix_Base
-{
-public:
-	Matrix(const size_t matrix_order);
-	Matrix(const size_t matrix_order, const std::vector<double>& value);
-	Matrix(const size_t num_row, const size_t num_column);
-	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
-
-//Command
-public:
-	Matrix& be_inverse(void);
-	template <typename V>
-	void change_column(const size_t column_index, const V& vec);
-	//void change_row(const size_t start_row_index, const Dynamic_Euclidean_Vector& vec);
-	void change_rows(const size_t start_row_index, const Matrix& A);
-
-//Query
-public:
-	Matrix operator*(const Matrix& other) const;
-	bool operator==(const Matrix& other) const;
-
-public:
-	//double at(const size_t row, const size_t column) const;
-	Matrix transpose(void) const;
-	std::string to_string(void) const;
-	Matrix inverse(void) const;
-	std::pair<size_t, size_t> size(void) const;
-	bool is_finite(void) const;
-
-
-
-public:
-	//template <size_t num_row>
-	//Euclidean_Vector<num_row> column(const size_t column_index) const;
-
-	std::vector<double> row(const size_t row_index) const;
-
-	//template <size_t dimension>
-	//void change_row(const size_t row_index, const Euclidean_Vector<dimension>& vec);
-
-	//template <size_t dimension>
-	//void change_column(const size_t column_index, const Euclidean_Vector<dimension>& vec);
-
-	//template <size_t num_row, size_t num_column>
-	//void change_rows(const size_t start_row_index, const Static_Matrix<num_row, num_column>& A);
-
-	//template <size_t num_row, size_t num_column>
-	//void change_columns(const size_t start_column_index, const Static_Matrix<num_row, num_column>& A);
-
-
-private:
-	bool is_in_range(const size_t irow, const size_t jcolumn) const;
-
-	double& value_at(const size_t row, const size_t column);
-	std::vector<int> PLU_decomposition(void);
-
-private:
-	std::vector<double> values_;
-};
-
-
-//
-//
-//class Matrix_Wrapper
-//{
-//public:
-//	Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr)
-//		: num_row_(num_row), num_column_(num_column), ptr_(ptr) {};
-//
-//public:
-//	Matrix operator*(const Matrix& m) const {
-//		const auto [num_row, num_column] = m.size();
-//
-//		Matrix result(this->num_row_, num_column);
-//		//ms::gemm(*this, m, result);
-//		return result;
-//	}
-//
-//private:
-//	size_t  num_row_;
-//	size_t  num_column_;
-//	const double* ptr_;
-//};
-
-
-
-
+std::ostream& operator<<(std::ostream& os, const Matrix_Base& m);
 
 
 
