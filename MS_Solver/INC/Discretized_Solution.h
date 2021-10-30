@@ -1,7 +1,4 @@
 #pragma once
-#include <vector>
-#include <string_view>
-
 #include "Governing_Equation.h"
 
 
@@ -18,9 +15,8 @@ namespace ms {
 
 class Discretized_Solution
 {
-public:	
+public:	//Quary
 	virtual std::vector<std::vector<double>> calculate_post_point_solutions_by_variable(void) const abstract;
-
 	const std::vector<std::string>& get_variable_names(void) const {
 		return this->governing_equation_->get_variable_names();
 	}
@@ -43,7 +39,8 @@ public:
 		for (ushort j = 0; j < this->num_equation_; ++j) {
 			post_point_solutions_by_variable[j].resize(num_cell);
 			for (uint i = 0; i < num_cell; ++i) {
-				post_point_solutions_by_variable[j][i] = this->discretized_solutions_[i * this->num_equation_ + j];
+				const auto index = i * this->num_equation_ + j; //i-cell j-variable index
+				post_point_solutions_by_variable[j][i] = this->discretized_solutions_[index];
 			}
 		}
 
@@ -73,6 +70,8 @@ private:
 	Matrix_Wrapper get_cell_coefficient(const uint icell) const {
 		return { this->num_equation_, this->set_of_num_basis_[icell], this->discretized_solutions_.data() + this->set_of_data_start_index_[icell] };
 	}
+
+	//std::vector<
 
 private:
 	std::vector<ushort> set_of_num_basis_;
