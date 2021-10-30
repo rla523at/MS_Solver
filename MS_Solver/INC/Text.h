@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Exception.h"
+
 #include <algorithm>
 #include <fstream>
 #include <filesystem>
@@ -8,8 +11,6 @@
 #include <sstream>
 #include <vector>
 
-#define static_require static_assert
-#define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
 
 class Text : public std::vector<std::string>
 {
@@ -125,7 +126,7 @@ namespace ms {
 
 	template <typename... Args>
 	bool contains_icase(const std::string& str, const Args... args) {		
-		static_require((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
+		static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};
 }

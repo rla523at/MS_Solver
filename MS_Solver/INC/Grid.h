@@ -58,7 +58,7 @@ public:
 	std::vector<std::vector<Euclidean_Vector<space_dimension>>> cell_set_of_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<double>> cell_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_post_nodes) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_post_nodes) const;	
-	std::vector<Dynamic_Matrix> cell_center_to_vertex_matrixes(void) const;
+	std::vector<Matrix> cell_center_to_vertex_matrixes(void) const;
 	std::vector<bool> cell_simplex_flags(void) const;
 	std::vector<std::vector<Geometry<space_dimension>>> cell_set_of_sub_simplex_geometries(const std::vector<bool>& simplex_flags) const;
 
@@ -478,11 +478,11 @@ std::vector<std::vector<int>> Grid<space_dimension>::cell_set_of_connectivities(
 }
 
 template <ushort space_dimension>
-std::vector<Dynamic_Matrix> Grid<space_dimension>::cell_center_to_vertex_matrixes(void) const {
+std::vector<Matrix> Grid<space_dimension>::cell_center_to_vertex_matrixes(void) const {
 	const auto& cell_elements = this->elements.cell_elements;
 	const auto num_cell = cell_elements.size();
 
-	std::vector<Dynamic_Matrix> center_to_vertex_matrixes;
+	std::vector<Matrix> center_to_vertex_matrixes;
 	center_to_vertex_matrixes.reserve(num_cell);
 
 	for (size_t i = 0; i < num_cell; ++i) {
@@ -492,7 +492,7 @@ std::vector<Dynamic_Matrix> Grid<space_dimension>::cell_center_to_vertex_matrixe
 		const auto vnodes = geometry.vertex_nodes();
 		const auto num_vertex = vnodes.size();
 
-		Dynamic_Matrix center_to_vertex_matrix(space_dimension, num_vertex);
+		Matrix center_to_vertex_matrix(space_dimension, num_vertex);
 		for (size_t i = 0; i < num_vertex; ++i) {
 			const auto center_to_vertex = vnodes[i] - center_node;
 			center_to_vertex_matrix.change_column(i, center_to_vertex);

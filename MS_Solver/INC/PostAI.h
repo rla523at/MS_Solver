@@ -27,10 +27,10 @@ public:
 	static void intialize(const Grid<space_dimension>& grid);
 
 	template <size_t num_equation, size_t space_dimension>
-	static void record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
+	static void record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients);
 
 	template <size_t num_equation, size_t space_dimension>
-	static void conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
+	static void conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients);
 
 	template <ushort num_equation>
 	static void record_limiting_value(const size_t index, const std::array<double,num_equation>& limiting_value);
@@ -57,7 +57,7 @@ public:
 	static auto convert_to_solution_strings(const std::vector<Euclidean_Vector<num_equation>>& solutions);
 
 	template <size_t num_equation, size_t space_dimension>
-	static std::vector<std::string> convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients);
+	static std::vector<std::string> convert_to_solution_gradient_strings(const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients);
 };
 
 
@@ -171,7 +171,7 @@ void Post_AI_Data::intialize(const Grid<space_dimension>& grid) {
 
 
 template <size_t num_equation, size_t space_dimension>
-void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
+void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients) {
 
 	dynamic_require(num_data_ == solutions.size(),			"number of solution should be same with number of data");
 	dynamic_require(num_data_ == solution_gradients.size(), "number of solution gradient should be same with number of data");
@@ -214,7 +214,7 @@ void Post_AI_Data::record_solution_datas(const std::vector<Euclidean_Vector<num_
 }
 
 template <size_t num_equation, size_t space_dimension>
-void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
+void Post_AI_Data::conditionally_record_solution_datas(const std::vector<Euclidean_Vector<num_equation>>& solutions, const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients) {
 	if (This_::is_time_to_conditionally_post_)
 		This_::record_solution_datas(solutions, solution_gradients);
 }
@@ -354,7 +354,7 @@ auto Post_AI_Data::convert_to_solution_strings(const std::vector<Euclidean_Vecto
 
 
 template <size_t num_equation, size_t space_dimension>
-std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Matrix<num_equation, space_dimension>>& solution_gradients) {
+std::vector<std::string> Post_AI_Data::convert_to_solution_gradient_strings(const std::vector<Static_Matrix<num_equation, space_dimension>>& solution_gradients) {
 	const auto num_solution = solution_gradients.size();
 	//const auto [num_equation, space_dimension] = solution_gradients.front().size();
 

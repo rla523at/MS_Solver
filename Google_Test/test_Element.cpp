@@ -168,7 +168,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_1) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
-	const Dynamic_Matrix ref(2, 2, { 0.5,-0.5,0.5,0.5 });
+	const Matrix ref(2, 2, { 0.5,-0.5,0.5,0.5 });
 	EXPECT_EQ(ref, result);
 }
 GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_2) {
@@ -179,7 +179,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_2) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
-	const Dynamic_Matrix ref(3, 3, { 0, -0.5, -0.5,0.5,  0.5,    0,0.5,    0,  0.5 });
+	const Matrix ref(3, 3, { 0, -0.5, -0.5,0.5,  0.5,    0,0.5,    0,  0.5 });
 	EXPECT_EQ(result, ref);
 }
 GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_3) {
@@ -190,7 +190,7 @@ GTEST_TEST(ReferenceGeometry, inverse_mapping_monomial_matrix_3) {
 	const ReferenceGeometry<space_dimension> ref_geometry(fig, fig_order);
 	const auto result = ref_geometry.inverse_mapping_monomial_matrix();
 
-	const Dynamic_Matrix ref(4, 4, { 0.25, -0.25,  0.25, -0.25,  0.25,  0.25, -0.25, -0.25,  0.25,  0.25,  0.25,  0.25,  0.25, -0.25, -0.25,  0.25 });
+	const Matrix ref(4, 4, { 0.25, -0.25,  0.25, -0.25,  0.25,  0.25, -0.25, -0.25,  0.25,  0.25,  0.25,  0.25,  0.25, -0.25, -0.25,  0.25 });
 	EXPECT_EQ(result, ref);
 }
 

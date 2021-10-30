@@ -127,7 +127,7 @@ public:
 
 
 template <typename Function, size_t num_row, size_t num_column>
-Vector_Function<Function, num_row> operator*(const Matrix<num_row, num_column>& matrix, const Vector_Function<Function, num_column>& vector_function) {
+Vector_Function<Function, num_row> operator*(const Static_Matrix<num_row, num_column>& matrix, const Vector_Function<Function, num_column>& vector_function) {
 	std::array<Function, num_row> functions;
 
 	for (size_t i = 0; i < num_row; ++i)
@@ -225,7 +225,7 @@ public:
 		functions_ = { Function(args)... };
 	}
 
-	Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
+	Static_Matrix<range_num_row, range_num_column> operator()(const Euclidean_Vector<domain_dimension_>& space_vector) const {
 		std::array<double, num_value_> values;
 
 		for (ushort i = 0; i < range_num_row; ++i)
@@ -274,7 +274,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix_Function<Function, range
 
 namespace ms {
 	template <typename Function>
-	void gemv(const Dynamic_Matrix& A, const Dynamic_Vector_Function<Function>& v, Function* ptr) {
+	void gemv(const Matrix& A, const Dynamic_Vector_Function<Function>& v, Function* ptr) {
 		//code for dynmaic matrix * dynmaic vector function => vector function
 		const auto [num_row, num_column] = A.size();
 		const auto range_dimension = v.range_dimension();

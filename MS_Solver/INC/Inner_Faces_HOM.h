@@ -16,14 +16,14 @@ private:
     
     using This_                 = Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
-    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
-    using Residual_             = Matrix<num_equation_, num_basis_>;
+    using Solution_Coefficient_ = Static_Matrix<num_equation_, num_basis_>;
+    using Residual_             = Static_Matrix<num_equation_, num_basis_>;
 
 protected:
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
+    std::vector<std::pair<Matrix, Matrix>> oc_nc_side_basis_qnodes_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_qweights_basis_pairs_;
+    std::vector<std::pair<Matrix, Matrix>> oc_nc_side_qweights_basis_pairs_;
 
 public:
     Inner_Faces_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -62,8 +62,8 @@ Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::Inner_Faces_HOM
         auto oc_side_basis_qnodes = reconstruction_method.basis_nodes(oc_index, qnodes);
         auto nc_side_basis_qnodes = reconstruction_method.basis_nodes(nc_index, qnodes);
 
-        Dynamic_Matrix oc_side_qweights_basis(num_qnode, This_::num_basis_);
-        Dynamic_Matrix nc_side_qweights_basis(num_qnode, This_::num_basis_);
+        Matrix oc_side_qweights_basis(num_qnode, This_::num_basis_);
+        Matrix nc_side_qweights_basis(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             oc_side_qweights_basis.change_row(q, reconstruction_method.calculate_basis_node(oc_index, qnodes[q]) * qweights[q]);
@@ -101,7 +101,7 @@ void Inner_Faces_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_
         const auto [num_equation, num_qnode] = oc_side_solution_qnodes.size();
         const auto& normals = this->set_of_normals_[i];
 
-        Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
+        Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto oc_side_cvariable = oc_side_solution_qnodes.column<This_::num_equation_>(q);
             const auto nc_side_cvariable = nc_side_solution_qnodes.column<This_::num_equation_>(q);

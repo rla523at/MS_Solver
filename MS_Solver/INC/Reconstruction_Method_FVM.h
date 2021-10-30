@@ -25,7 +25,7 @@ private:
     static constexpr size_t space_dimension_    = Gradient_Method::space_dimension();
 
     using Solution_             = Euclidean_Vector<num_equation_>;
-    using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
+    using Solution_Gradient_    = Static_Matrix<num_equation_, space_dimension_>;
 
 public:
     static std::string name(void) { return "Linear_Reconstruction_" + Gradient_Method::name(); };
@@ -69,7 +69,7 @@ private:
     static constexpr size_t space_dimension_ = Gradient_Method::space_dimension();
 
     using Solution_ = Euclidean_Vector<num_equation_>;
-    using Solution_Gradient_ = Matrix<num_equation_, space_dimension_>;
+    using Solution_Gradient_ = Static_Matrix<num_equation_, space_dimension_>;
 
 public:
     static std::string name(void) { return "MLP_u1_" + Gradient_Method::name(); };
@@ -78,7 +78,7 @@ private:
     Gradient_Method gradient_method_;
     const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_index_set_;
     std::vector<std::vector<uint>> set_of_vnode_indexes_;
-    std::vector<Dynamic_Matrix> center_to_vertex_matrixes_;
+    std::vector<Matrix> center_to_vertex_matrixes_;
     std::vector<Solution_Gradient_> solution_gradients_;
 
 public:
@@ -95,7 +95,7 @@ protected:
 
 struct ANN_Model
 {
-    std::vector<Dynamic_Matrix> weights;
+    std::vector<Matrix> weights;
     std::vector<Dynamic_Euclidean_Vector> biases;
 };
 
@@ -131,7 +131,7 @@ private:
     static constexpr ushort space_dimension_ = Gradient_Method::space_dimension();
 
     using Solution_             = Euclidean_Vector<num_equation_>;
-    using Solution_Gradient_    = Matrix<num_equation_, space_dimension_>;
+    using Solution_Gradient_    = Static_Matrix<num_equation_, space_dimension_>;
 
     inline static std::string model_name_;
 
@@ -219,7 +219,7 @@ void MLP_u1<Gradient_Method>::reconstruct(const std::vector<Solution_>& solution
             }
         }
                 
-        const Matrix limiting_value_matrix = limiting_values;
+        const Static_Matrix limiting_value_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_value_matrix * gradient;
     }
 };
@@ -303,7 +303,7 @@ void ANN_limiter<Gradient_Method>::reconstruct(const std::vector<Solution_>& sol
 
         post_limiter_value[i] = limiting_values[0];//post
 
-        const Matrix limiting_matrix = limiting_values;
+        const Static_Matrix limiting_matrix = limiting_values;
         this->solution_gradients_[i] = limiting_matrix * this->solution_gradients_[i];
     }
 }

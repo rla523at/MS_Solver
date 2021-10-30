@@ -22,7 +22,7 @@ TEST(Vector_Function, mv_1) {
 	Polynomial<domain_dimension> x("x0");
 	Polynomial<domain_dimension> y("x1");
 
-	Matrix<2, 2> m = { 1,2,3,4 };
+	Static_Matrix<2, 2> m = { 1,2,3,4 };
 	Vector_Function<Polynomial<2>, 2> vf = { x , y };
 	const auto result = m * vf;
 

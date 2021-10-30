@@ -15,13 +15,13 @@ private:
 
     using This_                 = Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
-    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
-    using Residual_             = Matrix<num_equation_, num_basis_>;
+    using Solution_Coefficient_ = Static_Matrix<num_equation_, num_basis_>;
+    using Residual_             = Static_Matrix<num_equation_, num_basis_>;
 
 protected:
     std::vector<std::pair<uint, uint>> oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_basis_qnodes_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> oc_nc_side_qweights_basis_pairs_;
+    std::vector<std::pair<Matrix, Matrix>> oc_nc_side_basis_qnodes_pairs_;
+    std::vector<std::pair<Matrix, Matrix>> oc_nc_side_qweights_basis_pairs_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
 
 public:
@@ -67,8 +67,8 @@ Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Periodi
 
         const auto num_qnode = oc_side_qnodes.size();
 
-        Dynamic_Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
-        Dynamic_Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
+        Matrix oc_side_basis_weight(num_qnode, This_::num_basis_);
+        Matrix nc_side_basis_weight(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             oc_side_basis_weight.change_row(q, reconstruction_method.calculate_basis_node(oc_index, oc_side_qnodes[q]) * oc_side_qweights[q]);
@@ -106,7 +106,7 @@ void Periodic_Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::ca
         const auto [num_equation, num_qnode] = oc_side_solution_qnodes.size();
         const auto& normals = this->set_of_normals_[i];
 
-        Dynamic_Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
+        Matrix numerical_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto oc_side_solution = oc_side_solution_qnodes.column<This_::num_equation_>(q);
             const auto nc_side_solution = nc_side_solution_qnodes.column<This_::num_equation_>(q);

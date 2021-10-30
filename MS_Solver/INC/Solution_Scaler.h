@@ -18,21 +18,21 @@ private:
 
 private:
 	inline static double fix_rate = 0.5;
-	inline static std::vector<Dynamic_Matrix> set_of_cell_basis_qnodes_;
-	inline static std::vector<std::pair<uint, Dynamic_Matrix>> cell_index_basis_qnodes_pairs;
+	inline static std::vector<Matrix> set_of_cell_basis_qnodes_;
+	inline static std::vector<std::pair<uint, Matrix>> cell_index_basis_qnodes_pairs;
 
 
 public:
-	static void record_cell_basis_qnodes(const std::vector<Dynamic_Matrix>& set_of_cell_basis_qnodes) {
+	static void record_cell_basis_qnodes(const std::vector<Matrix>& set_of_cell_basis_qnodes) {
 		This_::set_of_cell_basis_qnodes_ = set_of_cell_basis_qnodes;
 	}
 
-	static void record_face_basis_qnodes(const uint cell_index, const Dynamic_Matrix& basis_qnodes) {
+	static void record_face_basis_qnodes(const uint cell_index, const Matrix& basis_qnodes) {
 		This_::cell_index_basis_qnodes_pairs.push_back({ cell_index, basis_qnodes });
 	}
 
 	template <ushort num_equation, ushort num_basis>
-	static void inspect_and_scale(std::vector<Matrix<num_equation, num_basis>>& solution_coefficients) {
+	static void inspect_and_scale(std::vector<Static_Matrix<num_equation, num_basis>>& solution_coefficients) {
 		//check cell
 		const auto num_cell = This_::set_of_cell_basis_qnodes_.size();
 
@@ -100,7 +100,7 @@ public:
 
 private:
 	template <ushort num_basis>
-	static Matrix<num_basis, num_basis> calculate_fix_matrix(void) {
+	static Static_Matrix<num_basis, num_basis> calculate_fix_matrix(void) {
 		std::array<double, num_basis> limiting_values;
 		limiting_values.fill(fix_rate);
 		limiting_values[0] = 1.0; //preserve P0 values

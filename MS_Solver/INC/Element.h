@@ -65,7 +65,7 @@ private:
 
 	inline static std::map<std::pair<Figure, ushort>, std::vector<Space_Vector_>> key_to_mapping_nodes_;
 	inline static std::map<std::pair<Figure, ushort>, Dynamic_Vector_Function<Polynomial<space_dimension>>> key_to_mapping_monomial_vector_function_;
-	inline static std::map<std::pair<Figure, ushort>, Dynamic_Matrix> key_to_inverse_mapping_monomial_matrix_;
+	inline static std::map<std::pair<Figure, ushort>, Matrix> key_to_inverse_mapping_monomial_matrix_;
 	inline static std::map<std::pair<Figure, ushort>, Quadrature_Rule<space_dimension>> key_to_reference_quadrature_rule_;
 	inline static std::map<std::pair<Figure, ushort>, std::vector<Space_Vector_>> key_to_reference_post_nodes_;
 	inline static std::map<std::pair<Figure, ushort>, std::vector<std::vector<uint>>> key_to_reference_connectivity_;
@@ -96,7 +96,7 @@ public:
 	//private: for test
 	std::vector<Space_Vector_> mapping_nodes(void) const;
 	Dynamic_Vector_Function<Polynomial<space_dimension>> mapping_monomial_vector_function(void) const;
-	Dynamic_Matrix inverse_mapping_monomial_matrix(void) const;
+	Matrix inverse_mapping_monomial_matrix(void) const;
 	Quadrature_Rule<space_dimension> reference_quadrature_rule(const ushort integrand_order) const;
 	std::vector<Space_Vector_> reference_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<uint>> reference_connectivity(const ushort post_order) const;	
@@ -670,7 +670,7 @@ Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<
 	//	X : mapped node matrix			
 	//	C : mapping coefficient matrix	
 	//	M : mapping monomial matrix
-	Dynamic_Matrix X(space_dimension, num_mapped_node);
+	Matrix X(space_dimension, num_mapped_node);
 	for (size_t j = 0; j < num_mapped_node; ++j)
 		X.change_column(j, mapped_nodes[j]);
 
@@ -1152,13 +1152,13 @@ Dynamic_Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dim
 }
 
 template <ushort space_dimension>
-Dynamic_Matrix ReferenceGeometry<space_dimension>::inverse_mapping_monomial_matrix(void) const {
+Matrix ReferenceGeometry<space_dimension>::inverse_mapping_monomial_matrix(void) const {
 	const auto key = std::make_pair(this->figure_, this->figure_order_);
 	const auto mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
 	const auto mapping_monomial_vector_function = ReferenceGeometry::key_to_mapping_monomial_vector_function_.at(key);
 
 	const auto matrix_order = mapping_monomial_vector_function.range_dimension();
-	Dynamic_Matrix transformation_monomial_matrix(matrix_order);
+	Matrix transformation_monomial_matrix(matrix_order);
 	for (size_t i = 0; i < matrix_order; ++i)
 		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));
 

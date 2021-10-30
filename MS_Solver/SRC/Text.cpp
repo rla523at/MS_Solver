@@ -16,7 +16,7 @@ Text& Text::operator<<(std::string&& str) {
 
 void Text::read(const std::string& file_path) {	
 	std::ifstream file_stream(file_path);
-	dynamic_require(file_stream.is_open(), "Fail to open file" + file_path);
+	REQUIRE(file_stream.is_open(), "Fail to open file" + file_path);
 
 	std::string str;
 	while (std::getline(file_stream, str))
@@ -26,7 +26,7 @@ void Text::read(const std::string& file_path) {
 }
 
 void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
-	dynamic_require(file_stream.is_open(), "Fail to open file");
+	REQUIRE(file_stream.is_open(), "Fail to open file");
 
 	size_t index = 0;
 	std::string str;
@@ -45,7 +45,7 @@ Text& Text::remove_empty_line(void) {
 void Text::add_write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path, std::ios::app);
-	dynamic_require(output_file.is_open(), "output file stream should be opend before write");
+	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
 
 	const auto num_sentence = this->size();
 	for (auto i = this->begin(); i != this->end() - 1; ++i)
@@ -58,7 +58,7 @@ void Text::add_write(const std::string_view file_path) const {
 void Text::write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path);
-	dynamic_require(output_file.is_open(), "output file stream should be opend before write"); 
+	REQUIRE(output_file.is_open(), "output file stream should be opend before write"); 
 
 	const auto num_sentence = this->size();
 	for (auto i = this->begin(); i != this->end() - 1; ++i)
@@ -82,14 +82,14 @@ Binary_Writer::Binary_Writer(const std::string_view file_path) {
 	ms::make_path(file_path);
 	binary_file_stream_.open(file_path.data(), std::ios::binary);
 
-	dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
+	REQUIRE(this->binary_file_stream_.is_open(), "file should be opened");
 }
 
 Binary_Writer::Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode) {
 	ms::make_path(file_path);
 	binary_file_stream_.open(file_path.data(), std::ios::binary | mode);
 
-	dynamic_require(this->binary_file_stream_.is_open(), "file should be opened");
+	REQUIRE(this->binary_file_stream_.is_open(), "file should be opened");
 }
 
 template <>

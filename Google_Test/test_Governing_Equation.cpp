@@ -16,7 +16,7 @@ GTEST_TEST(Linear_Advection, calculate_physical_fluxes_1) {
 		solutions[i] = { i };	
 	const auto result = Linear_Advection<space_dimension>::physical_fluxes(solutions);
 
-	std::vector<Matrix<1, 2>> ref(num);
+	std::vector<Static_Matrix<1, 2>> ref(num);
 	for (size_t i = 0; i < num; ++i)
 		ref[i] = { i, 0.5 * i };
 
@@ -34,7 +34,7 @@ GTEST_TEST(Linear_Advection, calculate_physical_fluxes_2) {
 		solutions[i] = { i };
 	const auto result = Linear_Advection<space_dimension>::physical_fluxes(solutions);
 
-	std::vector<Matrix<1, space_dimension>> ref(num);
+	std::vector<Static_Matrix<1, space_dimension>> ref(num);
 	for (size_t i = 0; i < num; ++i)
 		ref[i] = { i, 0.5 * i, 2.0 * i };
 
@@ -150,7 +150,7 @@ GTEST_TEST(Burgers, calculate_physical_fluxes_1) {
 		solutions[i] = { i };
 	const auto result = Burgers<space_dimension>::physical_fluxes(solutions);
 
-	std::vector<Matrix<1, 2>> ref(num);
+	std::vector<Static_Matrix<1, 2>> ref(num);
 	for (size_t i = 0; i < num; ++i)
 		ref[i] = { 0.5 * i * i, 0.5 * i * i };
 
@@ -165,7 +165,7 @@ GTEST_TEST(Burgers, calculate_physical_fluxes_2) {
 		solutions[i] = { i };
 	const auto result = Burgers<space_dimension>::physical_fluxes(solutions);
 
-	std::vector<Matrix<1, space_dimension>> ref(num);
+	std::vector<Static_Matrix<1, space_dimension>> ref(num);
 	for (size_t i = 0; i < num; ++i)
 		ref[i] = { 0.5 * i * i, 0.5 * i * i, 0.5 * i * i };
 
@@ -297,7 +297,7 @@ TEST(Euler, physical_flux_1) {
 	Euclidean_Vector<num_equation> solution = { 1,1,1,1 };
 	const auto result = Euler<space_dimension>::physical_flux(solution);
 
-	const Matrix<num_equation,space_dimension> ref = { 1,1,1,1,1,1,1,1 };
+	const Static_Matrix<num_equation,space_dimension> ref = { 1,1,1,1,1,1,1,1 };
 	EXPECT_EQ(result, ref);
 }
 TEST(Euler, physical_flux_2) {
@@ -307,7 +307,7 @@ TEST(Euler, physical_flux_2) {
 	Euclidean_Vector<num_equation> solution = { 1,1,1,1,1.5 };
 	const auto result = Euler<space_dimension>::physical_flux(solution);
 
-	const Matrix<num_equation, space_dimension> ref = { 1,1,1,1,1,1,1,1,1,1,1,1,1.5,1.5,1.5 };
+	const Static_Matrix<num_equation, space_dimension> ref = { 1,1,1,1,1,1,1,1,1,1,1,1,1.5,1.5,1.5 };
 	EXPECT_EQ(result, ref);
 }
 

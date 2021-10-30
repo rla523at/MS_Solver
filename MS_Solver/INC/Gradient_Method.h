@@ -6,20 +6,20 @@ class Least_Square_Base
 {
 private:    
     using Solution_             = Euclidean_Vector<num_equation_>;
-    using Solution_gradinet_    = Matrix<num_equation_, space_dimension_>;
+    using Solution_gradinet_    = Static_Matrix<num_equation_, space_dimension_>;
 
 protected:
     std::vector<std::vector<uint>> set_of_near_cell_indexes_;
     std::vector<std::vector<uint>> set_of_near_ghost_cell_indexes_;
 
-    std::vector<Dynamic_Matrix> least_square_matrixes_;
+    std::vector<Matrix> least_square_matrixes_;
     std::vector<Ghost_Cell<space_dimension_>> ghost_cells_;
 
 public:
     std::vector<Solution_gradinet_> calculate_solution_gradients(const std::vector<Solution_>& solutions) const;
 
 private:
-    std::vector<Dynamic_Matrix> calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) const;
+    std::vector<Matrix> calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) const;
 
 public:
     static constexpr ushort space_dimension(void) { return space_dimension_; };
@@ -50,7 +50,7 @@ public:
 
 //template definition part
 template <ushort num_equation_, ushort space_dimension_>
-std::vector<Matrix<num_equation_, space_dimension_>> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions)  const {
+std::vector<Static_Matrix<num_equation_, space_dimension_>> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_gradients(const std::vector<Solution_>& solutions)  const {
     const auto num_solution = solutions.size();
     std::vector<Solution_gradinet_> solution_gradients(num_solution);
 
@@ -62,9 +62,9 @@ std::vector<Matrix<num_equation_, space_dimension_>> Least_Square_Base<num_equat
 }
 
 template <ushort num_equation_, ushort space_dimension_>
-std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) const {
+std::vector<Matrix> Least_Square_Base<num_equation_, space_dimension_>::calculate_solution_delta_matrixes(const std::vector<Solution_>& solutions) const {
     const auto num_cell = solutions.size();
-    std::vector<Dynamic_Matrix> solution_delta_matrixes;
+    std::vector<Matrix> solution_delta_matrixes;
     solution_delta_matrixes.reserve(num_cell);
 
     for (size_t i = 0; i < num_cell; ++i) {
@@ -75,7 +75,7 @@ std::vector<Dynamic_Matrix> Least_Square_Base<num_equation_, space_dimension_>::
         const auto num_near_ghost_cell = near_ghost_cell_indexes.size();
         const auto num_total_near_cell = num_near_cell + num_near_ghost_cell;
 
-        Dynamic_Matrix solution_delta_matrix(num_equation_, num_total_near_cell);
+        Matrix solution_delta_matrix(num_equation_, num_total_near_cell);
 
         for (size_t j = 0; j < num_near_cell; ++j) {
             const auto solution_delta = solutions[near_cell_indexes[j]] - solutions[i];
@@ -193,7 +193,7 @@ Face_Least_Square<num_equation_, space_dimension_>::Face_Least_Square(const Grid
         const auto num_near_ghost_cell = near_ghost_cell_indexes.size();
         const auto num_total_near_cell = num_near_cell + num_near_ghost_cell;
 
-        Dynamic_Matrix center_to_center_matrix(num_total_near_cell, space_dimension_);
+        Matrix center_to_center_matrix(num_total_near_cell, space_dimension_);
 
         const auto this_center = cell_center_nodes[i];
 

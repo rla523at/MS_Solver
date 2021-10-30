@@ -16,15 +16,15 @@ private:
 
     using This_                 = Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
-    using Residual_             = Matrix<num_equation_, num_basis_>;
-    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
+    using Residual_             = Static_Matrix<num_equation_, num_basis_>;
+    using Solution_Coefficient_ = Static_Matrix<num_equation_, num_basis_>;
 
 protected:
     std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions_;
     std::vector<uint> oc_indexes_;
-    std::vector<Dynamic_Matrix> set_of_oc_side_basis_qnodes_;
+    std::vector<Matrix> set_of_oc_side_basis_qnodes_;
     std::vector<std::vector<Space_Vector_>> set_of_normals_;
-    std::vector<Dynamic_Matrix> set_of_oc_side_qweights_basis_;
+    std::vector<Matrix> set_of_oc_side_qweights_basis_;
 
 public:
     Boundaries_HOM(const Grid<space_dimension_>& grid, const Reconstruction_Method& reconstruction_method);
@@ -62,7 +62,7 @@ Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::Boundaries_HOM(c
 
         auto basis_qnodes = reconstruction_method.basis_nodes(this->oc_indexes_[i], qnodes);
 
-        Dynamic_Matrix qweight_basis(num_qnode, This_::num_basis_);
+        Matrix qweight_basis(num_qnode, This_::num_basis_);
         for (ushort q = 0; q < num_qnode; ++q) 
             qweight_basis.change_row(q, reconstruction_method.calculate_basis_node(this->oc_indexes_[i], qnodes[q]) * qweights[q]);
         
@@ -92,7 +92,7 @@ void Boundaries_HOM<Reconstruction_Method, Numerical_Flux_Function>::calculate_R
         const auto& boundary_flux_function = *this->boundary_flux_functions_[i];
         const auto& normals = this->set_of_normals_[i];
 
-        Dynamic_Matrix boundary_flux_quadrature(This_::num_equation_, num_qnode);
+        Matrix boundary_flux_quadrature(This_::num_equation_, num_qnode);
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto oc_side_cvariable = oc_side_cvariables.column<This_::num_equation_>(q);
             boundary_flux_quadrature.change_column(q, boundary_flux_function.calculate(oc_side_cvariable, normals[q]));

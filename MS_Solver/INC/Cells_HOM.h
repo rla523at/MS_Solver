@@ -15,11 +15,11 @@ private:
 
     using This_                 = Cells_HOM<Governing_Equation, Reconstruction_Method>;
     using Space_Vector_         = Euclidean_Vector<space_dimension_>;
-    using Solution_Coefficient_ = Matrix<num_equation_, num_basis_>;
-    using Residual_             = Matrix<num_equation_, num_basis_>;
+    using Solution_Coefficient_ = Static_Matrix<num_equation_, num_basis_>;
+    using Residual_             = Static_Matrix<num_equation_, num_basis_>;
 
 public:
-    using Discretized_Solution_ = Matrix<num_equation_, num_basis_>;
+    using Discretized_Solution_ = Static_Matrix<num_equation_, num_basis_>;
 
 protected:    
     const Reconstruction_Method& reconstruction_method_;
@@ -27,8 +27,8 @@ protected:
     std::vector<double> volumes_;
     std::vector<std::array<double, space_dimension_>> projected_volumes_;
     std::vector<Quadrature_Rule<space_dimension_>> quadrature_rules_;
-    std::vector<Dynamic_Matrix> set_of_basis_qnodes_;
-    std::vector<Dynamic_Matrix> qweights_gradient_basis_;
+    std::vector<Matrix> set_of_basis_qnodes_;
+    std::vector<Matrix> qweights_gradient_basis_;
     std::vector<double> P0_basis_values_;
 
 public:
@@ -72,7 +72,7 @@ Cells_HOM<Governing_Equation, Reconstruction_Method>::Cells_HOM(const Grid<space
         const auto& qweights = this->quadrature_rules_[i].weights;
         const auto num_qnode = qnodes.size();
 
-        Dynamic_Matrix qweight_gradient_basis(num_qnode * this->space_dimension_, this->num_basis_);
+        Matrix qweight_gradient_basis(num_qnode * this->space_dimension_, this->num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             const auto part_of_gradient_basis_weight = transposed_gradient_basis(qnodes[q]) * qweights[q];
@@ -141,7 +141,7 @@ void Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_RHS(std::ve
         const auto solution_qnodes = solution_coefficient * basis_qnodes;
 
         const auto [num_eq, num_quadrature_node] = solution_qnodes.size();
-        Dynamic_Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
+        Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
 
         for (size_t j = 0; j < num_quadrature_node; ++j) {
             const auto physical_flux = Governing_Equation::physical_flux(solution_qnodes.column<This_::num_equation_>(j));
@@ -159,7 +159,7 @@ template <typename Governing_Equation, typename Reconstruction_Method>
 template <typename Initial_Condition>
 auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_solutions(void) const {
     const auto num_cell = this->quadrature_rules_.size();
-    std::vector<Matrix<This_::num_equation_, This_::num_basis_>> initial_solution_coefficients(num_cell);
+    std::vector<Static_Matrix<This_::num_equation_, This_::num_basis_>> initial_solution_coefficients(num_cell);
     
     for (uint i = 0; i < num_cell; ++i) {
         const auto& qnodes = this->quadrature_rules_[i].points;
@@ -167,8 +167,8 @@ auto Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_initial_sol
 
         const auto num_qnode = qnodes.size();
 
-        Dynamic_Matrix initial_solution_qnodes(This_::num_equation_, num_qnode);
-        Dynamic_Matrix basis_weight(num_qnode, This_::num_basis_);
+        Matrix initial_solution_qnodes(This_::num_equation_, num_qnode);
+        Matrix basis_weight(num_qnode, This_::num_basis_);
 
         for (ushort q = 0; q < num_qnode; ++q) {
             initial_solution_qnodes.change_column(q, Initial_Condition::calculate_solution(qnodes[q]));

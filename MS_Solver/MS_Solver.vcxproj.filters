@@ -18,25 +18,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SRC\Grid_File_Type.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Matrix.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\PostAI.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Profiler.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Text.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Tecplot.cpp">
@@ -44,133 +32,31 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="INC\Boundaries.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Boundaries_FVM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Boundary_Flux_Function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Cells.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Cells_FVM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Discrete_Equation.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Element.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Euclidean_Vector.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Governing_Equation.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Gradient_Method.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_Element_Builder.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Type.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Initial_Condition.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Inner_Faces.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Inner_Faces_FVM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Log.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Matrix.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Numerical_Flux_Function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Periodic_Boundaries.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Periodic_Boundaries_FVM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\PostAI.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Profiler.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Reconstruction_Method_FVM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Semi_Discrete_Equation.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Solve_Controller.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Spatial_Discrete_Method.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Text.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Time_Integral_Method.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Time_Step_Method.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Setting.h">
       <Filter>설정 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Polynomial.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Vector_Function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Cells_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Boundaries_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Inner_Faces_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Periodic_Boundaries_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Setting_Base.h">
       <Filter>설정 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Reconstruction_Method_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Solution_Scaler.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Tecplot.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Debugger.h">
+    <ClInclude Include="INC\Discretized_Solution.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Discretized_Solution.h">
+    <ClInclude Include="INC\Exception.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Euclidean_Vector.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Text.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Governing_Equation.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

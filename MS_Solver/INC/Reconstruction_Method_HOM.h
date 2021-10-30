@@ -30,13 +30,13 @@ public:
 public:
     auto calculate_set_of_transposed_gradient_basis(void) const;
     auto calculate_basis_node(const uint cell_index, const Space_Vector_& node) const;
-    Dynamic_Matrix basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;    
+    Matrix basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const;    
     double calculate_P0_basis_value(const uint cell_index) const;
     std::vector<double> calculate_P0_basis_values(void) const;
 
 public:
     template<ushort num_equation>
-    auto solution_function(const uint cell_index, const Matrix<num_equation, num_basis_>& coefficient) const;
+    auto solution_function(const uint cell_index, const Static_Matrix<num_equation, num_basis_>& coefficient) const;
 };
 
 
@@ -119,19 +119,19 @@ public:
     static std::string name(void) { return "hMLP_Reconstruction_P" + std::to_string(solution_order_); };
 
 protected:
-    std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
-    std::vector<Dynamic_Matrix> set_of_P1_projected_basis_vnodes_;     
+    std::vector<Matrix> set_of_basis_vnodes_;
+    std::vector<Matrix> set_of_P1_projected_basis_vnodes_;     
     
 public:
     hMLP_Reconstruction(const Grid<space_dimension_>& grid);
 
 public:
     template <ushort num_equation>
-    void reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    void reconstruct(std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
 
 protected:
     template <ushort num_equation>
-    auto calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;        
+    auto calculate_P0_criterion_values(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;        
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<double>& P0_criterion_values) const;
 };
 
@@ -156,14 +156,14 @@ private:
     std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_vnode_index_set_;
     std::vector<std::vector<uint>> set_of_face_share_cell_indexes_;
 
-    std::vector<Dynamic_Matrix> set_of_basis_vnodes_;
-    std::vector<Dynamic_Matrix> set_of_simplex_P1_projected_basis_vnodes_;
-    std::vector<Dynamic_Matrix> set_of_simplex_P0_projected_basis_vnodes_;
+    std::vector<Matrix> set_of_basis_vnodes_;
+    std::vector<Matrix> set_of_simplex_P1_projected_basis_vnodes_;
+    std::vector<Matrix> set_of_simplex_P0_projected_basis_vnodes_;
 
     std::vector<double> face_volumes_;
     std::vector<double> face_characteristic_lengths_;
     std::vector<std::pair<uint, uint>> face_oc_nc_index_pairs_;
-    std::vector<std::pair<Dynamic_Matrix, Dynamic_Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;    
+    std::vector<std::pair<Matrix, Matrix>> face_oc_nc_side_basis_jump_qnodes_pairs_;    
     std::vector<Dynamic_Euclidean_Vector> set_of_jump_qweights_;
 
 public:
@@ -171,21 +171,21 @@ public:
 
 public:
     template <ushort num_equation>
-    void reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    void reconstruct(std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
 
 private:
     template <ushort num_equation>
-    auto calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    auto calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
     auto calculate_vertex_node_index_to_allowable_min_max_criterion_value(const std::vector<std::map<uint, double>>& cell_index_to_vnode_index_to_simplex_P0_criterion_values) const;
     template <ushort num_equation>
-    std::vector<ushort> calculate_set_of_num_troubled_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    std::vector<ushort> calculate_set_of_num_troubled_boundary(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
     template <ushort projection_order>
     auto calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const Geometry<space_dimension_>& sub_simplex_geometry) const;
     bool is_typeI_subcell_oscillation(const ushort num_trouble_boundaries) const;
     bool is_typeII_subcell_oscillation(const ushort num_trouble_boundary) const;   
     
     template <ushort num_equation>
-    std::vector<Euclidean_Vector<num_equation>> calculate_P0_solutions(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
+    std::vector<Euclidean_Vector<num_equation>> calculate_P0_solutions(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const;
 
     template <ushort num_equation>
     std::vector<bool> is_shock(const std::vector<Euclidean_Vector<num_equation>>& P0_solutions) const;//temporary code
@@ -209,18 +209,18 @@ namespace ms {
     inline constexpr bool is_default_reconstruction<typename Spatial_Discrete_Method, typename Reconstruction_Method, std::enable_if_t<std::is_same_v<HOM, Spatial_Discrete_Method>>>
         = ms::is_polynomial_reconustruction<Reconstruction_Method>;
 
-    template <typename T, typename... Args>
-    std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args) {
-        static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+    //template <typename T, typename... Args>
+    //std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args) {
+    //    static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
 
-        vec1.reserve(vec1.size() + vec2.size());
-        vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
+    //    vec1.reserve(vec1.size() + vec2.size());
+    //    vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
 
-        if constexpr (sizeof...(Args) == 0) 
-            return vec1;
-        else 
-            return ms::merge(vec1, std::move(args)...);
-    }
+    //    if constexpr (sizeof...(Args) == 0) 
+    //        return vec1;
+    //    else 
+    //        return ms::merge(vec1, std::move(args)...);
+    //}
 
     inline std::string to_string(const BD_Type bd_type) {
         switch (bd_type)
@@ -281,11 +281,11 @@ auto Polynomial_Reconstruction<space_dimension_, solution_order_>::calculate_bas
 }
 
 template <ushort space_dimension_, ushort solution_order_>
-Dynamic_Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const {
+Matrix Polynomial_Reconstruction<space_dimension_, solution_order_>::basis_nodes(const uint cell_index, const std::vector<Space_Vector_>& nodes) const {
     const auto& basis_functions = this->basis_vector_functions_[cell_index];
 
     const auto num_node = nodes.size();
-    Dynamic_Matrix basis_nodes(this->num_basis_, num_node);
+    Matrix basis_nodes(this->num_basis_, num_node);
 
     for (ushort j = 0; j < num_node; ++j)
         basis_nodes.change_column(j, basis_functions(nodes[j]));
@@ -314,7 +314,7 @@ std::vector<double> Polynomial_Reconstruction<space_dimension_, solution_order_>
 
 template <ushort space_dimension_, ushort solution_order_>
 template<ushort num_equation>
-auto Polynomial_Reconstruction<space_dimension_, solution_order_>::solution_function(const uint cell_index, const Matrix<num_equation, num_basis_>& coefficient) const {
+auto Polynomial_Reconstruction<space_dimension_, solution_order_>::solution_function(const uint cell_index, const Static_Matrix<num_equation, num_basis_>& coefficient) const {
     dynamic_require(cell_index < basis_vector_functions_.size(), "cell index should be less than number of cell");
     return coefficient * this->basis_vector_functions_[cell_index];
 }
@@ -345,7 +345,7 @@ auto hMLP_Base<space_dimension_, solution_order_>::Pn_projection_matrix(const us
     for (ushort j = 0; j < num_Pn_projection_basis; ++j)
         projection_value[j] = 1.0; //preserve Pn_projection_basis
 
-    return Matrix(projection_value);
+    return Static_Matrix(projection_value);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -359,7 +359,7 @@ auto hMLP_Base<space_dimension_, solution_order_>::Pn_mode_matrix(const ushort P
     for (ushort j = num_Pnm1_projection_basis; j < num_Pn_projection_basis; ++j)
         projection_value[j] = 1.0; //preserve Pn_mode_basis
 
-    return Matrix(projection_value);
+    return Static_Matrix(projection_value);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -368,7 +368,7 @@ auto hMLP_Base<space_dimension_, solution_order_>::limiting_matrix(const double 
     limiting_values.fill(limiting_value);
     limiting_values[0] = 1.0; // keep P0 coefficient
         
-    return Matrix(limiting_values);
+    return Static_Matrix(limiting_values);
 }
 
 template <ushort space_dimension_, ushort solution_order_>
@@ -400,7 +400,7 @@ hMLP_Reconstruction<space_dimension_, solution_order_>::hMLP_Reconstruction(cons
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto P0_criterion_values = this->calculate_P0_criterion_values(solution_coefficients);
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(P0_criterion_values);
 
@@ -472,7 +472,7 @@ void hMLP_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::ve
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_P0_criterion_values(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+auto hMLP_Reconstruction<space_dimension_, solution_order_>::calculate_P0_criterion_values(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
     std::vector<double> P0_criterion_values(num_cell);
 
@@ -541,8 +541,8 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
             const auto& sub_simplex_geometries = set_of_sub_simplex_geometries[i];
 
             const auto num_vnode = vnodes.size();
-            Dynamic_Matrix simplex_P0_projected_basis_vnodes(This_::num_basis_, num_vnode);
-            Dynamic_Matrix simplex_P1_projected_basis_vnodes(This_::num_basis_, num_vnode);
+            Matrix simplex_P0_projected_basis_vnodes(This_::num_basis_, num_vnode);
+            Matrix simplex_P1_projected_basis_vnodes(This_::num_basis_, num_vnode);
 
             for (ushort j = 0; j < num_vnode; ++j) {
                 const auto simplex_P0_projection_basis_vector_function = this->calculate_simplex_Pn_projection_basis_vector_function<P0>(i, sub_simplex_geometries[j]);
@@ -603,7 +603,7 @@ hMLP_BD_Reconstruction<space_dimension_, solution_order_>::hMLP_BD_Reconstructio
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto set_of_vnode_index_to_simplex_P0_criterion_value = this->calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(solution_coefficients);
     const auto vnode_index_to_allowable_min_max_criterion_value = this->calculate_vertex_node_index_to_allowable_min_max_criterion_value(set_of_vnode_index_to_simplex_P0_criterion_value);
     const auto set_of_num_troubled_boundary = this->calculate_set_of_num_troubled_boundary(solution_coefficients);     
@@ -998,7 +998,7 @@ void hMLP_BD_Reconstruction<space_dimension_, solution_order_>::reconstruct(std:
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_vertex_node_index_to_simplex_P0_criterion_value(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
     const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 
@@ -1080,7 +1080,7 @@ auto hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_vertex
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_num_troubled_boundary(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+std::vector<ushort> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_set_of_num_troubled_boundary(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();
 
     std::vector<ushort> set_of_num_trouble_boundary(num_cell);
@@ -1149,7 +1149,7 @@ bool hMLP_BD_Reconstruction<space_dimension_, solution_order_>::is_typeII_subcel
 
 template <ushort space_dimension_, ushort solution_order_>
 template <ushort num_equation>
-std::vector<Euclidean_Vector<num_equation>> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_P0_solutions(const std::vector<Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
+std::vector<Euclidean_Vector<num_equation>> hMLP_BD_Reconstruction<space_dimension_, solution_order_>::calculate_P0_solutions(const std::vector<Static_Matrix<num_equation, This_::num_basis_>>& solution_coefficients) const {
     const auto num_cell = solution_coefficients.size();    
     std::vector<Euclidean_Vector<num_equation>> P0_solutions(num_cell);
 
