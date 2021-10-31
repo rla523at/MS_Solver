@@ -161,6 +161,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="SRC\Element.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>

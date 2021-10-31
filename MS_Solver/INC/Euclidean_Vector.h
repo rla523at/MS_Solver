@@ -3,6 +3,8 @@
 
 #include <mkl.h>
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 
 class Euclidean_Vector
@@ -15,6 +17,8 @@ public:
 
 public: //Query
 	double operator[](const size_t position) const;
+	bool operator==(const Euclidean_Vector& other) const;
+
 
 	size_t dimension(void) const;
 
@@ -29,7 +33,6 @@ public:
 
 public:
 	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
-	bool operator==(const Euclidean_Vector& other) const;
 
 public:
 	template <typename Function>

@@ -4,8 +4,25 @@ double Euclidean_Vector::operator[](const size_t position) const {
 	REQUIRE(position < this->dimension(), "position should be less then dimension");
 	return this->values_[position];
 }
+bool Euclidean_Vector::operator==(const Euclidean_Vector& other) const {
+	return this->values_ == other.values_;
+}
 size_t Euclidean_Vector::dimension(void) const {
 	return values_.size();
+}
+std::string Euclidean_Vector::to_string(void) const {
+	std::ostringstream oss;
+	oss << std::setprecision(16) << std::showpoint << std::left;
+	for (const auto value : this->values_)
+		oss << std::setw(25) << value;
+	return oss.str();
+}
+
+
+
+
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x) {
+	return os << x.to_string();
 }
 
 //
@@ -30,11 +47,7 @@ size_t Euclidean_Vector::dimension(void) const {
 //	dynamic_require(position < this->dimension(), "position should be less then dimension");
 //	return this->values_[position];
 //}
-//
-//bool Dynamic_Euclidean_Vector::operator==(const Dynamic_Euclidean_Vector& other) const {
-//	return this->values_ == other.values_;
-//}
-//
+
 //double Dynamic_Euclidean_Vector::at(const size_t position) const {
 //	dynamic_require(position < this->dimension(), "position should be less then dimension");
 //	return this->values_[position];
@@ -56,14 +69,7 @@ size_t Euclidean_Vector::dimension(void) const {
 //	return values_.size();
 //}
 //
-//std::string Dynamic_Euclidean_Vector::to_string(void) const {
-//	std::string result;
-//	for (const auto& element : this->values_)
-//		result += ms::double_to_string(element) + " ";
-//	result.pop_back();
-//	return result;
-//}
-//
+
 //double Dynamic_Euclidean_Vector::inner_product(const Dynamic_Euclidean_Vector& other) const {
 //	dynamic_require(this->dimension() == other.dimension(), "dimension should be matched");
 //
@@ -75,7 +81,4 @@ size_t Euclidean_Vector::dimension(void) const {
 //	for (auto& value : this->values_)
 //		value = std::abs(value);	
 //};
-//
-//std::ostream& operator<<(std::ostream& os, const Dynamic_Euclidean_Vector& x) {
-//	return os << x.to_string();
-//}
+

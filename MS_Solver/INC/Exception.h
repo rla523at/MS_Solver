@@ -4,7 +4,7 @@
 
 #define LOCATION ms::location_str(__FILE__,__FUNCTION__,__LINE__)
 #define REQUIRE(requirement, message) ms::require(requirement, message, LOCATION)
-#define EXCEPT(message) ms::require(false, message, LOCATION)
+#define EXCEPTION(message) ms::require(false, message, LOCATION)
 
 namespace ms
 {
