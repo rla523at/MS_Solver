@@ -9,7 +9,24 @@
 
 class Grid 
 {
+public:
+	size_t num_cells(void) const {
+		return this->grid_elements_.cell_elements.size();
+	}
+	std::vector<Euclidean_Vector> cell_center_nodes(void) const {
+		const auto& cell_elements = this->grid_elements_.cell_elements;
 
+		const auto num_cell = cell_elements.size();
+		std::vector<Euclidean_Vector> center_nodes(num_cell);
+
+		for (uint i = 0; i < num_cell; ++i)
+			center_nodes[i] = cell_elements[i].center_node();
+
+		return center_nodes;
+	}
+
+private:
+	Grid_Elements grid_elements_;
 };
 
 //
@@ -57,7 +74,7 @@ class Grid
 //	std::vector<double> cell_volumes(void) const;
 //	std::vector<std::array<double, space_dimension>> cell_projected_volumes(void) const;
 //	std::vector<Quadrature_Rule<space_dimension>> cell_quadrature_rules(const ushort polynomial_degree) const;
-//	std::vector<Euclidean_Vector<space_dimension>> cell_center_nodes(void) const;
+	//std::vector<Euclidean_Vector<space_dimension>> cell_center_nodes(void) const;
 //	std::vector<std::vector<uint>> cell_set_of_vnode_indexes(void) const;
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> cell_set_of_vnodes(void) const;
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> cell_set_of_post_nodes(const ushort post_order) const;

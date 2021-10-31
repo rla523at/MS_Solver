@@ -17,35 +17,47 @@ namespace ms {
 
 class Discretized_Solution
 {
-public: //Command
-	virtual void calculate_initial_solution(const Grid& grid, const Initial_Condition& initial_condition) const abstract;
+protected:
+	Discretized_Solution(const Grid& grid, const Initial_Condition& initial_condition) {
+		this->num_equations_ = initial_condition.num_equations();
+		this->num_cells_ = grid.num_cells();
+		this->solution_variable_names_ = initial_condition.solution_variable_names();
+	}
 
-public:	//Quary
+public:	//Query
 	virtual std::vector<std::vector<double>> calculate_post_point_solutions_by_variable(void) const abstract;
 	const std::vector<std::string>& get_variable_names(void) const {
-		return this->governing_equation_->get_variable_names();
+		return this->solution_variable_names_;
 	}
 
 protected:
-	ushort num_equation_;
-	size_t num_cell_;
+	ushort num_equations_;
+	size_t num_cells_;
+	std::vector<std::string> solution_variable_names_;
 	std::vector<double> discretized_solutions_;
-	std::unique_ptr<Governing_Equation> governing_equation_;
 };
 
 
 class Discretized_Solution_FVM : public Discretized_Solution
 {
 public:
+	Discretized_Solution_FVM(const Grid& grid, const Initial_Condition& initial_condition)
+		: Discretized_Solution(grid, initial_condition) {
+		this->discretized_solutions_.resize(num_cells_ * num_equations_);
+
+
+	}
+
+public: //Query
 	std::vector<std::vector<double>> calculate_post_point_solutions_by_variable(void) const override {
-		std::vector<std::vector<double>> post_point_solutions_by_variable(num_equation_);
+		std::vector<std::vector<double>> post_point_solutions_by_variable(num_equations_);
 		for (auto& vec : post_point_solutions_by_variable)
-			vec.reserve(this->num_cell_);
+			vec.reserve(this->num_cells_);
 				
-		for (uint icell = 0; icell < this->num_cell_; ++icell) {
+		for (uint icell = 0; icell < this->num_cells_; ++icell) {
 			const auto solution = this->calculate_solution_at_post_point(icell);
 		
-			for (ushort j = 0; j < this->num_equation_; ++j) 
+			for (ushort j = 0; j < this->num_equations_; ++j) 
 				post_point_solutions_by_variable[j].push_back(solution[j]);
 		}
 
@@ -54,8 +66,8 @@ public:
 
 private:
 	Euclidean_Vector calculate_solution_at_post_point(const uint icell) const {
-		const auto start_index = icell * this->num_equation_;
-		const auto num_variable = this->num_equation_;
+		const auto start_index = icell * this->num_equations_;
+		const auto num_variable = this->num_equations_;
 
 		const auto start_iter = this->discretized_solutions_.begin() + start_index;
 
@@ -70,7 +82,7 @@ class Discretized_Solution_HOM : public Discretized_Solution
 {
 public:
 	std::vector<std::vector<double>> calculate_post_point_solutions_by_variable(void) const override {
-		std::vector<std::vector<double>> post_point_solutions_by_variable(num_equation_);
+		std::vector<std::vector<double>> post_point_solutions_by_variable(num_equations_);
 		for (auto& vec : post_point_solutions_by_variable)
 			vec.reserve(this->num_post_points_);
 
@@ -83,7 +95,7 @@ public:
 			for (ushort q = 0; q < num_post_points; ++q) {
 				const auto& solution = solution_at_post_points[q];
 
-				for (ushort j = 0; j < this->num_equation_; ++j)
+				for (ushort j = 0; j < this->num_equations_; ++j)
 					post_point_solutions_by_variable[j].push_back(solution[j]);
 			}
 		}
@@ -93,7 +105,7 @@ public:
 
 private:
 	Matrix_Wrapper get_coefficient_matrix_wrapper(const uint icell) const {
-		return { this->num_equation_, this->set_of_num_basis_[icell], this->discretized_solutions_.data() + this->set_of_data_start_index_[icell] };
+		return { this->num_equations_, this->set_of_num_basis_[icell], this->discretized_solutions_.data() + this->set_of_data_start_index_[icell] };
 	}
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint icell) const {
 		const auto solution_post_points_m = this->get_coefficient_matrix_wrapper(icell) * this->set_of_basis_post_points_[icell];	//E x PP

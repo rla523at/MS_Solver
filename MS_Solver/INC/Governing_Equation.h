@@ -7,14 +7,19 @@ public:
 	const std::vector<std::string>& get_variable_names(void) const {
 		return variable_names_;
 	}
+	ushort num_equations(void) const {
+		return this->num_equations_;
+	}
 	
 protected:
+	ushort num_equations_;
 	std::vector<std::string> variable_names_;
 };
 
 class Euler2D : public Governing_Equation
 {
 	Euler2D(void) {		
+		this->num_equations_ = 4;
 		this->variable_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "e" };
 	}
 };

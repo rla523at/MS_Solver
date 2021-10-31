@@ -5,6 +5,16 @@
 
 class Initial_Condition
 {
+public:
+	ushort num_equations(void) const {
+		return this->governing_equation_->num_equations();
+	}
+	std::vector<std::string> solution_variable_names(void) const {
+		return this->governing_equation_->get_variable_names();
+	}
+
+private:
+	std::unique_ptr<Governing_Equation> governing_equation_;
 };
 
 

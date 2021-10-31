@@ -177,10 +177,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Discretized_Solution.h" />
+    <ClInclude Include="INC\Element.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exception.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
     <ClInclude Include="INC\Grid.h" />
+    <ClInclude Include="INC\Grid_File_Type.h" />
     <ClInclude Include="INC\Initial_Condition.h" />
     <ClInclude Include="INC\Matrix.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
