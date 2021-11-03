@@ -255,6 +255,16 @@ TEST(PolyTerm, operator_multiplication_1) {
 	const auto ref = PolyTerm(12, ref_ppt);
 	EXPECT_EQ(result, ref);
 }
+TEST(PolyTerm, operator_multiplication_2) {
+	const auto x = Simple_Poly_Term("x0");
+
+	const PolyTerm pt1 = x;
+	const PolyTerm pt2 = 2.0;
+	const auto result = pt1 * pt2;
+
+	const auto ref = 2 * pt1;
+	EXPECT_EQ(result, ref);
+}
 TEST(PolyTerm, operator_call_1) {
 	std::vector<double> coefficients = { 1 };
 	const auto spt1 = Simple_Poly_Term(coefficients, 1);
@@ -317,19 +327,17 @@ TEST(PolyTerm, domain_dimension_2) {
 	EXPECT_EQ(result, ref);
 }
 TEST(PolyTerm, differentiate_1) {
-	const auto spt1 = Simple_Poly_Term("x0");	
-	const auto spt2 = spt1 + 1;
+	const auto x = Simple_Poly_Term("x0");	
+	const auto spt2 = x + 1;
 
-	const auto pt1 = PolyTerm(spt1);
+	const auto pt1 = PolyTerm(x);
 	const auto pt2 = PolyTerm(spt2);
 	const auto pt3 = pt1 * pt2;
 
 	constexpr size_t variable_index = 0;
 	const auto result = pt3.differentiate(variable_index);
 
-	const auto x = Polynomial("x0");
 	const auto ref = 2 * x + 1;
-
 	EXPECT_EQ(result, ref);
 }
 TEST(PolyTerm, differentiate_2) {
@@ -346,6 +354,28 @@ TEST(PolyTerm, differentiate_2) {
 	const auto x = Polynomial("x0");
 	const auto ref = 2 * x + 2;
 
+	EXPECT_EQ(result, ref);
+}
+TEST(PolyTerm, differentiate_3) {
+	const auto x = Simple_Poly_Term("x0");
+	const auto y = Simple_Poly_Term("x1");
+	const auto pt1 = 2 * x * y;
+
+	constexpr size_t variable_index = 0;
+	const auto result = pt1.differentiate(variable_index);
+
+	const auto ref = 2 * y;
+	EXPECT_EQ(result, ref);
+}
+TEST(PolyTerm, differentiate_4) {
+	const auto x = Simple_Poly_Term("x0");
+	const auto pt1 = PolyTerm(2 * x);
+
+	const auto result = pt1.differentiate(1);
+
+	std::cout << result;
+
+	const auto ref = 0.0;
 	EXPECT_EQ(result, ref);
 }
 
@@ -1206,45 +1236,60 @@ TEST(Polynomial, differentiate_15) {
 	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);
 }
+TEST(Polynomial, differentiate_16) {
+	Polynomial X("x0");
+	Polynomial Y("x1");
 
-//TEST(Polynomial, gradient_1) {
-//	constexpr ushort space_dimension = 2;
-//
-//	const Polynomial x("x0");
-//	const Polynomial y("x1");
-//
-//	const auto p = x + y + 1;
-//	const auto result = p.gradient();
-//
-//	const Vector_Function<Polynomial,space_dimension> ref = { 1, 1 };
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Polynomial, gradient_2) {
-//	constexpr ushort space_dimension = 2;
-//
-//	const Polynomial x("x0");
-//	const Polynomial y("x1");
-//
-//	const auto p = (x ^ 2) + x * y + 1;
-//	const auto result = p.gradient();
-//
-//	const Vector_Function<Polynomial, space_dimension> ref = { 2 * x + y, x };
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Polynomial, gradient_3) {
-//	const auto p = (X ^ 2) + X * Y + 1;
-//	const auto result = p.gradient();
-//
-//	const Vector_Function<Polynomial, space_dimension> ref = { 2 * X + Y, X, 0 };
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Polynomial, gradient_4) {
-//	const auto p = X * Y * Z;
-//	const auto result = p.gradient();
-//
-//	const Vector_Function<Polynomial, space_dimension> ref = { Y * Z,  X * Z, X * Y };
-//	EXPECT_EQ(result, ref);
-//}
+	const auto p1 = X * Y + X;
+
+	constexpr size_t variable_index = 0;
+	const auto result = p1.differentiate(variable_index);
+
+	const auto ref = Y + 1;
+	EXPECT_EQ(result, ref);
+}
+TEST(Polynomial, gradient_1) {
+	const Polynomial x("x0");
+	const Polynomial y("x1");
+
+	const auto p = x + y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial> ref = { 1, 1 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Polynomial, gradient_2) {
+	const Polynomial x("x0");
+	const Polynomial y("x1");
+
+	const auto p = (x ^ 2) + x * y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial> ref = { 2 * x + y, x };
+	EXPECT_EQ(result, ref);
+}
+TEST(Polynomial, gradient_3) {
+	const Polynomial X("x0");
+	const Polynomial Y("x1");
+
+	const auto p = (X ^ 2) + X * Y + 1;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial> ref = { 2 * X + Y, X };
+	EXPECT_EQ(result, ref);
+}
+TEST(Polynomial, gradient_4) {
+	const Polynomial X("x0");
+	const Polynomial Y("x1");
+	const Polynomial Z("x2");
+
+	const auto p = X * Y * Z;
+	const auto result = p.gradient();
+
+	const Vector_Function<Polynomial> ref = { Y * Z,  X * Z, X * Y };
+	EXPECT_EQ(result, ref);
+}
+
 //
 //
 //

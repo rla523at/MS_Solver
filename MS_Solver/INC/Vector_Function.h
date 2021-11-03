@@ -36,12 +36,11 @@ public://Query
 	size_t range_dimension(void) const {
 		return this->functions_.size();
 	}
-
 	std::string to_string(void) const {
 		std::string result;
 
 		for (const auto& function : this->functions_)
-			result += function.to_string() + "\n";
+			result += function.to_string() + "\t";
 
 		return result;
 	}
@@ -52,7 +51,7 @@ private:
 
 
 template <typename Function>
-std::ostream& operator<<(std::ostream& os, const Dynamic_Vector_Function<Function>& vf) {
+std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) {
 	return os << vf.to_string();
 }
 

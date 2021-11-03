@@ -1,5 +1,6 @@
 #pragma once
-#include "../INC/Exception.h"
+//#include "../INC/Exception.h"
+#include "../INC/Vector_Function.h"
 
 #include <array>
 #include <algorithm>
@@ -152,6 +153,7 @@ public://Query
 private:
 	void add_term(const PoweredPolyTerm& powered_poly_term);
 	void multiply_assign_powered_poly_term(const PoweredPolyTerm& power_poly_term);
+	bool is_constant(void) const;
 	bool is_small(void) const;
 
 private:
@@ -203,11 +205,11 @@ public://Query
 	ushort degree(void) const;
 	ushort domain_dimension(void) const;
 	Polynomial differentiate(const ushort variable_index) const;
+	Vector_Function<Polynomial> gradient(void) const;
 	size_t num_term(void) const;
 	double to_constant(void) const;
 	std::string to_string(void) const;
 	//Irrational_Function<domain_dimension_> root(const double root_index) const;
-	//Vector_Function<Polynomial<domain_dimension_>, domain_dimension_> gradient(void) const;
 
 private:
 	void add_assign_poly_term(const PolyTerm& term);
@@ -222,8 +224,9 @@ private:
 };
 
 
+Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple_poly_term);
 PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term);
-PolyTerm operator*(const double constant, const PolyTerm& powered_poly_term);
+PolyTerm operator*(const double constant, const PolyTerm& poly_term);
 Polynomial operator*(const double constant, const Polynomial& polynomial);
 
 std::ostream& operator<<(std::ostream& ostream, const Simple_Poly_Term& simple_poly_term);

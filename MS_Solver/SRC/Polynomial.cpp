@@ -421,37 +421,17 @@ Polynomial PolyTerm::differentiate(const ushort variable_index) const {
 	Polynomial result = 0.0;
 
 	for (ushort i = 0; i < this->num_term_; ++i) {
-		const auto diff_term = this->term_ptr_[i].differentiate(variable_index);
+		auto derivative = this->term_ptr_[i].differentiate(variable_index) * this->constant_;
 
-		if (diff_term.is_zero())
-			continue;
+		if (derivative.is_zero())
+			continue;			
 
-		PolyTerm derivative = this->constant_;
 		for (ushort j = 0; j < this->num_term_; ++j) {
 			if (j == i)
 				continue;
 			else
 				derivative.add_term(this->term_ptr_[j]);
 		}
-		
-
-
-		//if (this->is_small()) {
-		//	ushort index = 0;
-		//	for (ushort j = 0; j < this->num_term_; ++j) {
-		//		if (j == i)
-		//			continue;
-		//		else
-		//			derivative.small_buffer_[index++] = this->term_ptr_[j];
-		//	}
-		//	derivative.num_term_ = index;
-		//}
-		//else {
-		//	derivative = *this;
-		//	derivative.multiplied_powered_poly_term_set_.erase(derivative.multiplied_powered_poly_term_set_.begin() + i);
-		//}
-
-		derivative *= diff_term;
 
 		if (derivative.is_simple())
 			result += derivative.be_simple();
@@ -526,7 +506,12 @@ std::string PolyTerm::to_string(void) const {
 	return oss.str();
 }
 
-void PolyTerm::add_term(const PoweredPolyTerm& powered_poly_term) {
+void PolyTerm::add_term(const PoweredPolyTerm& powered_poly_term) {	
+	if (this->is_constant()) {
+		*this->term_ptr_ = powered_poly_term;
+		return;
+	}
+
 	const auto new_term_pos = this->num_term_;
 	this->num_term_++;
 
@@ -551,7 +536,7 @@ void PolyTerm::multiply_assign_powered_poly_term(const PoweredPolyTerm& power_po
 	if (power_poly_term == 0.0)
 		*this = 0.0;
 
-	if (power_poly_term == 1.0)
+	if (power_poly_term.is_constant())
 		return;
 
 	for (ushort i = 0; i < this->num_term_; ++i) {
@@ -562,6 +547,10 @@ void PolyTerm::multiply_assign_powered_poly_term(const PoweredPolyTerm& power_po
 	}
 
 	this->add_term(power_poly_term);
+}
+
+bool PolyTerm::is_constant(void) const {
+	return this->num_term_ == 1 && this->term_ptr_->is_constant();
 }
 
 bool PolyTerm::is_small(void) const {
@@ -705,11 +694,11 @@ Polynomial& Polynomial::be_absolute(void) {
 	return *this;
 }
 
-//Polynomial& Polynomial::be_derivative(const ushort variable_index) {
-//	auto result = this->differentiate(variable_index);
-//	return *this = std::move(result);
-//};
-//
+Polynomial& Polynomial::be_derivative(const ushort variable_index) {
+	auto result = this->differentiate(variable_index);
+	return *this = std::move(result);
+};
+
 Polynomial Polynomial::differentiate(const ushort variable_index) const {
 	if (this->domain_dimension() <= variable_index)
 		return 0.0;
@@ -738,6 +727,16 @@ ushort Polynomial::domain_dimension(void) const {
 		domain_dimension = std::max(domain_dimension, term.domain_dimension());
 
 	return domain_dimension;
+}
+
+Vector_Function<Polynomial> Polynomial::gradient(void) const {
+	const auto domain_dimension = this->domain_dimension();
+	std::vector<Polynomial> gradient(domain_dimension);
+
+	for (ushort i = 0; i < domain_dimension; ++i)
+		gradient[i] = this->differentiate(i);
+
+	return gradient;
 }
 
 size_t Polynomial::num_term(void) const {
@@ -775,15 +774,7 @@ std::string Polynomial::to_string(void) const {
 //	return Irrational_Function<domain_dimension_>(*this, root_index);
 //}
 //
-//Vector_Function<Polynomial, domain_dimension_> Polynomial::gradient(void) const {
-//	std::array<Polynomial, domain_dimension_> gradient;
-//
-//	for (ushort i = 0; i < domain_dimension_; ++i)
-//		gradient[i] = this->differentiate(i);
-//
-//	return gradient;
-//}
-//
+
 void Polynomial::add_assign_poly_term(const PolyTerm& term) {
 	REQUIRE(this->is_operable(), "polynomials should be operable");
 
@@ -832,6 +823,9 @@ std::ostream& operator<<(std::ostream& ostream, const Polynomial& polynomial) {
 }
 
 
+Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple_poly_term) {
+	return simple_poly_term * constant;
+}
 PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term) {
 	return powered_poly_term * constant;
 }
