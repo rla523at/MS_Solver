@@ -1,5 +1,89 @@
 #include "../INC/Matrix.h"
 
+void Matrix_Base::be_transpose(void) {
+	std::swap(this->num_row_, this->num_column_);
+
+	if (this->is_transposed())
+		this->transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
+	else
+		this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
+}
+Matrix Matrix_Base::operator*(const Matrix_Base& other) const {
+	const auto [num_row, num_column] = other.size();
+
+	std::vector<double> values(this->num_row_ * num_column);
+	ms::gemm(*this, other, values.data());
+	return { this->num_row_, num_column, std::move(values) };
+}
+double Matrix_Base::at(const size_t row, const size_t column) const {
+	REQUIRE(this->is_in_range(row, column), "matrix indexes should not exceed given range");
+	if (this->is_transposed())
+		return this->const_data_ptr_[column * this->num_row_ + row];
+	else
+		return this->const_data_ptr_[row * this->num_column_ + column];
+}
+bool Matrix_Base::is_finite(void) const {
+	for (size_t i = 0; i < this->num_values(); ++i) {
+		if (!std::isfinite(this->const_data_ptr_[i]))
+			return false;
+	}
+	return true;
+}
+std::vector<double> Matrix_Base::row(const size_t row_index) const {
+	REQUIRE(row_index < this->num_row_, "index can not exceed given range");
+
+	std::vector<double> row_values(this->num_column_);
+
+	for (size_t i = 0; i < this->num_column_; ++i)
+		row_values[i] = this->at(row_index, i);
+
+	return row_values;
+}
+std::vector<double> Matrix_Base::column(const size_t column_index) const {
+	REQUIRE(column_index < this->num_column_, "index can not exceed given range");
+
+	std::vector<double> column_values(this->num_row_);
+
+	for (size_t i = 0; i < this->num_row_; ++i)
+		column_values[i] = this->at(i, column_index);
+
+	return column_values;
+}
+std::string Matrix_Base::to_string(void) const {
+	std::ostringstream oss;
+	oss << std::setprecision(16) << std::showpoint << std::left;
+	for (size_t i = 0; i < this->num_row_; ++i) {
+		for (size_t j = 0; j < this->num_column_; ++j)
+			oss << std::setw(25) << this->at(i, j);
+		oss << "\n";
+	}
+	return oss.str();
+}
+std::pair<size_t, size_t> Matrix_Base::size(void) const {
+	return { this->num_row_, this->num_column_ };
+}
+
+
+size_t Matrix_Base::leading_dimension(void) const {
+	// num column before OP()
+	if (this->is_transposed())
+		return this->num_row_;
+	else
+		return this->num_column_;
+}
+bool Matrix_Base::is_transposed(void) const {
+	return this->transpose_type_ == CBLAS_TRANSPOSE::CblasTrans;
+}
+bool Matrix_Base::is_square_matrix(void) const {
+	return this->num_row_ == this->num_column_;
+}
+bool Matrix_Base::is_in_range(const size_t irow, const size_t jcolumn) const {
+	return irow < this->num_row_&& jcolumn < this->num_column_;
+}
+size_t Matrix_Base::num_values(void) const {
+	return this->num_row_ * this->num_column_;
+}
+
 Matrix::Matrix(const size_t matrix_order) {
 	REQUIRE(matrix_order != 0, "matrix order can not be 0");
 
@@ -7,7 +91,7 @@ Matrix::Matrix(const size_t matrix_order) {
 	this->num_column_ = matrix_order;
 	this->values_.resize(this->num_values());
 	this->const_data_ptr_ = this->values_.data();
-	
+
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = 1.0;
 }
@@ -40,7 +124,20 @@ Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double
 	this->values_ = std::move(value);
 	this->const_data_ptr_ = this->values_.data();
 }
-
+Matrix::Matrix(const Matrix& other) {
+	this->transpose_type_ = other.transpose_type_;
+	this->num_row_ = other.num_row_;
+	this->num_column_ = other.num_column_;
+	this->values_ = other.values_;
+	this->const_data_ptr_ = this->values_.data();
+}
+void Matrix::operator=(const Matrix& other) {
+	this->transpose_type_ = other.transpose_type_;
+	this->num_row_ = other.num_row_;
+	this->num_column_ = other.num_column_;
+	this->values_ = other.values_;
+	this->const_data_ptr_ = this->values_.data();
+}
 Matrix& Matrix::be_inverse(void) {
 	REQUIRE(this->is_square_matrix(), "invertable matrix should be square matrix");
 
@@ -58,28 +155,27 @@ Matrix& Matrix::be_inverse(void) {
 	return *this;
 }
 void Matrix::change_rows(const size_t start_row_index, const Matrix& A) {
-	REQUIRE(this->num_column_ == A.num_column_, "dimension should be matched");
+	REQUIRE(this->num_column_ == A.num_column_, "size should be matched");
 	REQUIRE(start_row_index + A.num_row_ <= this->num_row_, "index can not exceed given range");
 	REQUIRE(!this->is_transposed() && !A.is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_column_;
 	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
 }
-
-Matrix Matrix::operator*(const Matrix& other) const {
-	REQUIRE(this->num_column_ == other.num_row_, "dimension should be matched to operate *");
-
-	Matrix result(this->num_row_, other.num_column_);
-	ms::gemm(*this, other, result.values_.data());
-	return result;
-}
+//Matrix Matrix::operator*(const Matrix& other) const {
+//	REQUIRE(this->num_column_ == other.num_row_, "size should be matched to operate *");
+//
+//	Matrix result(this->num_row_, other.num_column_);
+//	ms::gemm(*this, other, result.values_.data());
+//	return result;
+//}
 bool  Matrix::operator==(const Matrix& other) const {
 	if (this->num_row_ != other.num_row_)
 		return false;
 
 	if (this->num_column_ != other.num_column_)
 		return false;
-		
+
 	for (size_t i = 0; i < this->num_values(); ++i) {
 		if (this->const_data_ptr_[i] != other.const_data_ptr_[i])
 			return false;
@@ -93,6 +189,7 @@ Matrix Matrix::transpose(void) const {
 	result.be_transpose();
 	return result;
 }
+
 Matrix Matrix::inverse(void) const {
 	auto result = *this;
 	return result.be_inverse();
@@ -118,14 +215,17 @@ std::vector<int> Matrix::PLU_decomposition(void) {
 	return ipiv;
 }
 
-Matrix Matrix_Wrapper::operator*(const Matrix& m) const {
-	const auto [num_row, num_column] = m.size();
-
-	std::vector<double> values(this->num_row_ * num_column);
-	ms::gemm(*this, m, values.data());
-	return { this->num_row_, num_column, std::move(values) };
-}
+//Matrix Matrix_Wrapper::operator*(const Matrix& m) const {
+//	const auto [num_row, num_column] = m.size();
+//
+//	std::vector<double> values(this->num_row_ * num_column);
+//	ms::gemm(*this, m, values.data());
+//	return { this->num_row_, num_column, std::move(values) };
+//}
 
 std::ostream& operator<<(std::ostream& os, const Matrix_Base& m) {
+	return os << m.to_string();
+}
+std::ostream& operator<<(std::ostream& os, const Matrix& m) {
 	return os << m.to_string();
 }

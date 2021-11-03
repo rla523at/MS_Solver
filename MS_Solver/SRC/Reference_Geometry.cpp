@@ -1,13 +1,19 @@
-#include "../INC/Element.h"
+#include "../INC/Reference_Geometry.h"
 
 Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const {
 	const auto& mapping_nodes = this->get_mapping_nodes();
 	const auto& mapping_monomial_vector_function = this->get_mapping_monomial_vector_function();
 
+	//std::cout << mapping_monomial_vector_function; //debug
+
 	const auto matrix_order = mapping_monomial_vector_function.range_dimension();
 	Matrix transformation_monomial_matrix(matrix_order);
 	for (size_t i = 0; i < matrix_order; ++i)
 		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));
+
+	//std::cout << transformation_monomial_matrix; //debug
+	//std::cout << transformation_monomial_matrix.inverse(); //debug
+	//std::cout << transformation_monomial_matrix.be_inverse();//debug
 
 	return transformation_monomial_matrix.inverse();
 }
@@ -23,13 +29,15 @@ Reference_Line::Reference_Line(const ushort order) {
 	this->order_ = order;
 
 	if (this->set_of_mapping_nodes_.size() < this->order_) {
-		this->set_of_mapping_nodes_.resize(this->order_ + 1);
-		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
+		const auto new_size = this->order_ + 1;
+		this->set_of_mapping_nodes_.resize(new_size);
+		this->set_of_mapping_monomial_vector_function_.resize(new_size);
+		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
+	}
 
-		this->set_of_mapping_monomial_vector_function_.resize(this->order_ + 1);
+	if (this->set_of_mapping_nodes_[this->order_].empty()) {
+		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
 		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-		
-		this->set_of_inverse_mapping_monomial_matrix_.resize(this->order_ + 1);
 		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
 	}
 };
@@ -68,7 +76,6 @@ Quadrature_Rule Reference_Line::quadrature_rule(const ushort integrand_order) co
 	default:	EXCEPTION("not supported integrand order"); return{};
 	}
 };
-//Matrix inverse_mapping_monomial_matrix(void) const 
 bool Reference_Line::is_simplex(void) const {
 	return false;
 };
@@ -100,13 +107,23 @@ const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const {
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const {
-	if (this->set_of_post_nodes_.size() < post_order) 
+	if (this->set_of_post_nodes_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_post_nodes_.resize(new_size);
+	}
+
+	if (this->set_of_post_nodes_[post_order].empty())
 		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-	
+
 	return this->set_of_post_nodes_[post_order];
 }
 const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const {
-	if (this->set_of_connectivities_.size() < post_order)
+	if (this->set_of_connectivities_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_connectivities_.resize(new_size);
+	}
+
+	if (this->set_of_connectivities_[post_order].empty())
 		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
 
 	return this->set_of_connectivities_[post_order];
@@ -265,14 +282,24 @@ const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) cons
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const {
-	if (this->set_of_post_nodes_.size() < post_order)
+	if (this->set_of_post_nodes_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_post_nodes_.resize(new_size);
+	}
+
+	if (this->set_of_post_nodes_[post_order].empty())
 		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
 
 	return this->set_of_post_nodes_[post_order];
 }
 const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const {
-	if (this->set_of_connectivities_.size() < post_order)
-		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
+	if (this->set_of_connectivities_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_connectivities_.resize(new_size);
+	}
+	
+	if (this->set_of_connectivities_[post_order].empty())
+		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);	
 
 	return this->set_of_connectivities_[post_order];
 }
@@ -455,13 +482,23 @@ const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void)
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const {
-	if (this->set_of_post_nodes_.size() < post_order)
+	if (this->set_of_post_nodes_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_post_nodes_.resize(new_size);
+	}
+
+	if (this->set_of_post_nodes_[post_order].empty())
 		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
 
 	return this->set_of_post_nodes_[post_order];
 }
 const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const {
-	if (this->set_of_connectivities_.size() < post_order)
+	if (this->set_of_connectivities_.size() <= post_order) {
+		const auto new_size = post_order + 1;
+		this->set_of_connectivities_.resize(new_size);
+	}
+
+	if (this->set_of_connectivities_[post_order].empty())
 		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
 
 	return this->set_of_connectivities_[post_order];

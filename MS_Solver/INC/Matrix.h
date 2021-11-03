@@ -13,90 +13,30 @@ namespace ms
 	class BLAS;
 }
 
-
+class Matrix;
 class Matrix_Base
 {
 	friend class ms::BLAS;
 
 public: //Command
-	void be_transpose(void) {
-		std::swap(this->num_row_, this->num_column_);
-
-		if (this->is_transposed())
-			this->transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
-		else
-			this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
-	}
+	void be_transpose(void);
 
 public: //Query
-	double at(const size_t row, const size_t column) const {
-		REQUIRE(this->is_in_range(row, column), "matrix indexes should not exceed given range");
-		if (this->is_transposed())
-			return this->const_data_ptr_[column * this->num_row_ + row];
-		else
-			return this->const_data_ptr_[row * this->num_column_ + column];
-	}
-	bool is_finite(void) const {
-		for (size_t i = 0; i < this->num_values(); ++i) {
-			if (!std::isfinite(this->const_data_ptr_[i]))
-				return false;
-		}
-		return true;
-	}
-	std::vector<double> row(const size_t row_index) const {
-		REQUIRE(row_index < this->num_row_, "index can not exceed given range");
+	Matrix operator*(const Matrix_Base& other) const;
 
-		std::vector<double> row_values(this->num_column_);
-
-		for (size_t i = 0; i < this->num_column_; ++i)
-			row_values[i] = this->at(row_index, i);
-
-		return row_values;
-	}
-	std::vector<double> column(const size_t column_index) const {
-		REQUIRE(column_index < this->num_column_, "index can not exceed given range");
-
-		std::vector<double> column_values(this->num_row_);
-
-		for (size_t i = 0; i < this->num_row_; ++i)
-			column_values[i] = this->at(i, column_index);
-
-		return column_values;
-	}
-	std::string to_string(void) const {
-		std::ostringstream oss;
-		oss << std::setprecision(16) << std::showpoint << std::left;
-		for (size_t i = 0; i < this->num_row_; ++i) {
-			for (size_t j = 0; j < this->num_column_; ++j)
-				oss << std::setw(25) << this->at(i, j);
-			oss << "\n";
-		}
-		return oss.str();
-	}
-	std::pair<size_t, size_t> size(void) const {
-		return { this->num_row_, this->num_column_ };
-	}
+	double at(const size_t row, const size_t column) const;
+	std::vector<double> column(const size_t column_index) const;
+	bool is_finite(void) const;
+	std::vector<double> row(const size_t row_index) const;
+	std::pair<size_t, size_t> size(void) const;
+	std::string to_string(void) const;
 
 protected:
-	size_t leading_dimension(void) const {
-		// num column before OP()
-		if (this->is_transposed())
-			return this->num_row_;
-		else
-			return this->num_column_;
-	}
-	bool is_transposed(void) const {
-		return this->transpose_type_ == CBLAS_TRANSPOSE::CblasTrans;
-	}
-	bool is_square_matrix(void) const {
-		return this->num_row_ == this->num_column_;
-	}
-	bool is_in_range(const size_t irow, const size_t jcolumn) const {
-	return irow < this->num_row_ && jcolumn < this->num_column_;
-	}
-	size_t num_values(void) const {
-		return this->num_row_ * this->num_column_;
-	}
+	size_t leading_dimension(void) const;
+	bool is_transposed(void) const;
+	bool is_square_matrix(void) const;
+	bool is_in_range(const size_t irow, const size_t jcolumn) const;
+	size_t num_values(void) const;
 
 protected:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -105,16 +45,19 @@ protected:
 	const double* const_data_ptr_ = nullptr;
 };
 
-
 class Matrix : public Matrix_Base
 {
 public:
+	Matrix(void) = default;
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
 	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
+	Matrix(const Matrix& other);
 
-public: //Command 
+public://Command 
+	void operator=(const Matrix& other);
+
 	Matrix& be_inverse(void);
 	template <typename V>	void change_column(const size_t column_index, const V& vec) {
 		REQUIRE(column_index < this->num_column_, "column idnex can not exceed number of column");
@@ -131,10 +74,9 @@ public: //Command
 
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
-	//void change_columns(const size_t start_column_index, const Static_Matrix<num_row, num_column>& A);
+	//void change_columns(const size_t start_column_index, const Static_Matrix<num_row, num_column>& A);	
 
-public: //Query
-	Matrix operator*(const Matrix& other) const;
+public://Query
 	bool operator==(const Matrix& other) const;
 
 	Matrix transpose(void) const;
@@ -157,9 +99,6 @@ public:
 		this->num_column_ = num_column;
 		this->const_data_ptr_ = ptr;
 	}
-		
-public:
-	Matrix operator*(const Matrix& m) const;
 };
 
 
@@ -173,7 +112,7 @@ namespace ms
 
 	public:
 		static void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr) {
-			REQUIRE(A.num_column_ == B.num_row_, "dimension should be matched for matrix multiplication");
+			REQUIRE(A.num_column_ == B.num_row_, "size should be matched for matrix multiplication");
 
 			const auto layout = CBLAS_LAYOUT::CblasRowMajor;
 			const auto transA = A.transpose_type_;
@@ -212,6 +151,7 @@ namespace ms
 
 
 std::ostream& operator<<(std::ostream& os, const Matrix_Base& m);
+std::ostream& operator<<(std::ostream& os, const Matrix& m);
 
 
 

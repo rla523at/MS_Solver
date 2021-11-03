@@ -27,10 +27,10 @@
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Element.cpp">
+    <ClCompile Include="SRC\Polynomial.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Polynomial.cpp">
+    <ClCompile Include="SRC\Reference_Geometry.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -66,6 +66,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Vector_Function.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reference_Geometry.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

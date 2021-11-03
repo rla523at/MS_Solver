@@ -1,13 +1,20 @@
 #include "../INC/Euclidean_Vector.h"
 
 double Euclidean_Vector::operator[](const size_t position) const {
-	REQUIRE(position < this->dimension(), "position should be less then dimension");
+	REQUIRE(position < this->size(), "position should be less then size");
 	return this->values_[position];
 }
 bool Euclidean_Vector::operator==(const Euclidean_Vector& other) const {
 	return this->values_ == other.values_;
 }
-size_t Euclidean_Vector::dimension(void) const {
+double Euclidean_Vector::at(const size_t position) const {
+	REQUIRE(position < this->size(), "position should be less then size");
+	return this->values_[position];
+}
+const double* Euclidean_Vector::begin(void) const {
+	return this->values_.data();
+}
+size_t Euclidean_Vector::size(void) const {
 	return values_.size();
 }
 std::string Euclidean_Vector::to_string(void) const {

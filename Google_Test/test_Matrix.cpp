@@ -67,6 +67,21 @@ TEST(Matrix, row1) {
 	const std::vector<double> ref = { 1,2,3 };
 	EXPECT_EQ(result, ref);
 }
+TEST(Matrix, be_inverse_1) {
+	Matrix m(2, 2, { 2,1,1,1 });
+	m.be_inverse();
+
+	Matrix ref(2, 2, { 1,-1,-1,2 });
+	EXPECT_EQ(m, ref);
+}
+TEST(Matrix, inverse_1) {
+	Matrix m(2, 2, { 2,1,1,1 });
+
+	const auto result = m.inverse();	
+
+	Matrix ref(2, 2, { 1,-1,-1,2 });
+	EXPECT_EQ(result, ref);
+}
 //TEST(Matrix, change_columns_1) {
 //	const Static_Matrix<2, 2> m = { 1,2,3,4 };
 //

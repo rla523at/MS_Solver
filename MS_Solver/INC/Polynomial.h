@@ -1,6 +1,5 @@
 #pragma once
-//#include "../INC/Exception.h"
-#include "../INC/Vector_Function.h"
+#include "Vector_Function.h"
 
 #include <array>
 #include <algorithm>
@@ -33,7 +32,7 @@ public://Query
 	Simple_Poly_Term operator*(const double constant) const;	
 	PolyTerm operator*(const Simple_Poly_Term& other) const;
 	template <typename V> double operator()(const V& domain_vector) const {
-		REQUIRE(this->domain_dimension_ <= domain_vector.size(), "dimension of domain vector should be greater than domain dimension for clarity");
+		REQUIRE(this->domain_dimension_ <= domain_vector.size(), "size of domain vector should be greater than domain size for clarity");
 
 		auto coef_iter = this->coefficient_ptr_;
 		auto dv_iter = domain_vector.begin();

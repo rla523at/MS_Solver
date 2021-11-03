@@ -140,7 +140,7 @@ private:
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
-		static_require(This_::space_dimension_ <= 3, "dimension can not exceed 3");
+		static_require(This_::space_dimension_ <= 3, "size can not exceed 3");
 
 		if constexpr (ms::is_Euler<Numerical_Flux_Function::Governing_Equation_>) {
 			const auto pvariable = Euler<This_::space_dimension_>::conservative_to_primitive(oc_cvariable);
@@ -177,7 +177,7 @@ private:
 
 public:
 	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
-		static_require(This_::space_dimension_ <= 3, "dimension can not exceed 3");
+		static_require(This_::space_dimension_ <= 3, "size can not exceed 3");
 
 		const auto nc_cvariable = this->neighbor_solution_calculator_.calculate(oc_cvariable);
 		return Numerical_Flux_Function::calculate(oc_cvariable, nc_cvariable, normal);

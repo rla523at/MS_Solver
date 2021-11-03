@@ -23,14 +23,14 @@ public://Query
 		return result;
 	}
 	const Function& operator[](const size_t index) const {
-		REQUIRE(index < this->range_dimension(), "index can not exceed range dimension");
+		REQUIRE(index < this->range_dimension(), "index can not exceed range size");
 		return this->functions_[index];
 	}
 	bool operator==(const Vector_Function& other) const {
 		return this->functions_ == other.functions_;
 	}
 	const Function& at(const size_t index) const {
-		REQUIRE(index < this->range_dimension(), "index can not exceed range dimension");
+		REQUIRE(index < this->range_dimension(), "index can not exceed range size");
 		return this->functions_[index];
 	}
 	size_t range_dimension(void) const {

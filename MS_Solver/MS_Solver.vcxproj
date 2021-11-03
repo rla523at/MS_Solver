@@ -161,7 +161,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SRC\Element.cpp" />
+    <ClCompile Include="SRC\Reference_Geometry.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -193,6 +193,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Polynomial.h" />
+    <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Vector_Function.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

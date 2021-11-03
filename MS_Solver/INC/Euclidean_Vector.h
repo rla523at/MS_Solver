@@ -10,7 +10,7 @@
 class Euclidean_Vector
 {
 public:
-	Euclidean_Vector(const size_t dimension) : values_(dimension) {};
+	Euclidean_Vector(const size_t size) : values_(size) {};
 	Euclidean_Vector(const std::initializer_list<double> list) : values_(list) {};
 	Euclidean_Vector(std::vector<double>&& values) : values_(std::move(values)) {};
 	Euclidean_Vector(const std::vector<double>& values) : values_(values) {};
@@ -19,37 +19,32 @@ public: //Query
 	double operator[](const size_t position) const;
 	bool operator==(const Euclidean_Vector& other) const;
 
-	size_t dimension(void) const;
-	std::string to_string(void) const;
-
-
-
-
-
-
-public:
-	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
-	Euclidean_Vector& operator*=(const double constant);
-
-
-public:
-	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
-
-public:
-	template <typename Function>
-	void apply(const Function& f);
-	void be_absolute(void);
-
-public:
 	double at(const size_t position) const;
-	std::vector<double>::const_iterator begin(void) const;
-	std::vector<double>::const_iterator end(void) const;
-	const double* data(void) const;
-	double inner_product(const Euclidean_Vector& other) const;
-	
+	const double* begin(void) const;
+	size_t size(void) const;
+	std::string to_string(void) const;
 
 private:
 	std::vector<double> values_;
+
+
+//public:
+//	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
+//	Euclidean_Vector& operator*=(const double constant);
+//
+//
+//public:
+//	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
+//
+//public:
+//	template <typename Function>
+//	void apply(const Function& f);
+//	void be_absolute(void);
+//
+//public:
+//	std::vector<double>::const_iterator end(void) const;
+//	const double* data(void) const;
+//	double inner_product(const Euclidean_Vector& other) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
