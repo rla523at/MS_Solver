@@ -1,6 +1,5 @@
 #pragma once
-#include "../INC/Exception.h"
-//#include "Matrix.h"
+#include "Exception.h"
 
 #include <initializer_list>
 #include <vector>
@@ -9,6 +8,7 @@ template <typename Function>
 class Vector_Function
 {
 public:
+	Vector_Function(void) = default;
 	Vector_Function(std::vector<Function>&& functions) : functions_(std::move(functions)) {};
 	Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
 
@@ -54,6 +54,7 @@ template <typename Function>
 std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) {
 	return os << vf.to_string();
 }
+
 
 
 //template<typename Function, ushort range_dimension_>
@@ -178,16 +179,7 @@ std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) 
 //};
 //
 //
-//template <typename Function, size_t num_row, size_t num_column>
-//Vector_Function<Function, num_row> operator*(const Static_Matrix<num_row, num_column>& matrix, const Vector_Function<Function, num_column>& vector_function) {
-//	std::array<Function, num_row> functions;
-//
-//	for (size_t i = 0; i < num_row; ++i)
-//		for (size_t j = 0; j < num_column; ++j)
-//			functions[i] += matrix.at(i, j) * vector_function[j];
-//
-//	return functions;
-//}
+
 //
 //
 //template <typename Function, size_t range_dimension>
