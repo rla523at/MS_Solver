@@ -30,16 +30,13 @@
     <ClCompile Include="SRC\Element.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Polynomial.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Matrix.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Setting.h">
-      <Filter>설정 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Setting_Base.h">
-      <Filter>설정 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Exception.h">
       <Filter>헤더 파일</Filter>
@@ -63,6 +60,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid_File_Type.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Polynomial.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

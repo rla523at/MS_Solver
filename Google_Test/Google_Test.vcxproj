@@ -54,8 +54,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_Element.cpp" />
     <ClCompile Include="test_Matrix.cpp" />
+    <ClCompile Include="test_Polynomial.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
