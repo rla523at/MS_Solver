@@ -19,8 +19,9 @@ public: //Query
 	double operator[](const size_t position) const;
 	bool operator==(const Euclidean_Vector& other) const;
 
-
 	size_t dimension(void) const;
+	std::string to_string(void) const;
+
 
 
 
@@ -45,7 +46,7 @@ public:
 	std::vector<double>::const_iterator end(void) const;
 	const double* data(void) const;
 	double inner_product(const Euclidean_Vector& other) const;
-	std::string to_string(void) const;
+	
 
 private:
 	std::vector<double> values_;

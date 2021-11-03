@@ -3,42 +3,10 @@
 
 #include <array>
 #include <algorithm>
-#include <string>
 #include <vector>
 #include <sstream>
-#include <stdexcept>
 #include <iomanip>
 #include <iostream>
-
-//
-//
-//#define LOCATION ms::location_str(__FILE__,__FUNCTION__,__LINE__)
-//#define REQUIRE(requirement, message) ms::dynamic_require(requirement, message, LOCATION)
-//
-//namespace ms
-//{
-//	inline std::string location_str(const std::string& file_name, const std::string& function_name, const int num_line) {
-//		std::string location_str = file_name;
-//		
-//		location_str.erase(location_str.begin(), location_str.begin() + location_str.rfind("\\") + 1);
-//
-//		location_str = "File\t\t: " + location_str + "\n";
-//		location_str += "Function\t: " + function_name + "\n";
-//		location_str += "Line\t\t: " + std::to_string(num_line) + "\n";
-//
-//		return location_str;
-//	}
-//	inline void dynamic_require(const bool requirement, const std::string_view message, const std::string& location_str) {
-//		if (!requirement) {
-//			std::string exception_str = "\n\n============================EXCEPTION============================\n";
-//			exception_str += location_str;
-//			exception_str = exception_str + "Message\t\t: " + message.data();
-//			exception_str += "\n============================EXCEPTION============================\n\n";
-//			throw std::runtime_error(exception_str);
-//		}
-//	}
-//}
-
 
 using ushort = unsigned short;
 
@@ -92,14 +60,12 @@ private:
 	bool is_small(void) const;
 
 private:
-	inline static ushort small_criterion_ = 3;
+	static constexpr ushort small_criterion_ = 3;
 
 	ushort domain_dimension_ = 0;
-
 	double constant_ = 0.0;
-	double* coefficient_ptr_ = this->small_buffer_.data();
-	
-	std::array<double, 3> small_buffer_ = { 0 };
+	double* coefficient_ptr_ = this->small_buffer_.data();	
+	std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> coefficients_;
 };
 
