@@ -48,7 +48,13 @@ Euclidean_Vector Reference_Line::center_node(void) const {
 ushort Reference_Line::num_vertex(void) const {
 	return 2;
 }
-
+ushort Reference_Line::num_post_nodes(const ushort post_order) const {
+	return post_order + 2;
+}
+ushort Reference_Line::num_post_elements(const ushort post_order) const {
+	const auto n = post_order;
+	return n + 1;
+}
 Quadrature_Rule Reference_Line::quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {
 	case 0:
@@ -201,6 +207,14 @@ Euclidean_Vector Reference_Triangle::center_node(void) const {
 };
 ushort Reference_Triangle::num_vertex(void) const {
 	return 3;
+}
+ushort Reference_Triangle::num_post_nodes(const ushort post_order) const {
+	const auto n = post_order;
+	return static_cast<ushort>((n + 2) * (n + 3) * 0.5);
+}
+ushort Reference_Triangle::num_post_elements(const ushort post_order) const {
+	const auto n = post_order;
+	return (n + 1) * (n + 1);
 }
 Quadrature_Rule Reference_Triangle::quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {
@@ -399,6 +413,14 @@ Euclidean_Vector Reference_Quadrilateral::center_node(void) const {
 };
 ushort Reference_Quadrilateral::num_vertex(void) const {
 	return 4;
+}
+ushort Reference_Quadrilateral::num_post_nodes(const ushort post_order) const {
+	const auto n = post_order;
+	return (n + 2) * (n + 2);
+}
+ushort Reference_Quadrilateral::num_post_elements(const ushort post_order) const {
+	const auto n = post_order;
+	return 2 * (n + 1) * (n + 1);
 }
 Quadrature_Rule Reference_Quadrilateral::quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {

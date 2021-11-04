@@ -32,6 +32,8 @@ class Reference_Geometry
 public://Query
 	virtual Euclidean_Vector center_node(void) const abstract;
 	virtual ushort num_vertex(void) const abstract;
+	virtual ushort num_post_nodes(const ushort post_order) const abstract;
+	virtual ushort num_post_elements(const ushort post_order) const abstract;
 	virtual Quadrature_Rule quadrature_rule(const ushort integrand_order) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
@@ -74,6 +76,8 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	ushort num_vertex(void) const override;
+	ushort num_post_nodes(const ushort post_order) const override;
+	ushort num_post_elements(const ushort post_order) const override;
 	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
@@ -108,6 +112,8 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	ushort num_vertex(void) const override;
+	ushort num_post_nodes(const ushort post_order) const override;
+	ushort num_post_elements(const ushort post_order) const override;
 	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
@@ -142,6 +148,8 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	ushort num_vertex(void) const override;
+	ushort num_post_nodes(const ushort post_order) const override;
+	ushort num_post_elements(const ushort post_order) const override;
 	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;

@@ -1,7 +1,17 @@
 #pragma once
-#include "Discretized_Solution.h"
 #include "Text.h"
 #include "Post_Variables.h"
+
+class Tecplot_File_Writer
+{
+public:
+	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
+	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path);
+
+private:
+	std::unique_ptr<TecPlot_Header_Writer> header_writer_;
+	std::unique_ptr<Tecplot_Data_Writer> data_writer_;
+};
 
 class TecPlot_Header_Writer
 {
@@ -18,7 +28,7 @@ protected:
 protected:
 	Zone_Type zone_type_;
 	int num_post_nodes_ = 0;
-	int num_elements_ = 0;
+	int num_cells_ = 0;
 	double solution_time_ = 0.0;
 	size_t strand_id_ = 0;
 };
@@ -129,40 +139,9 @@ private:
 	}
 };
 
-class Tecplot_File_Writer
-{
-public:
-	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-		this->header_writer_->write_grid_header(post_variables, post_file_path);
-		this->data_writer_->write_grid_data(post_variables, post_file_path);
-	}
-	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-		this->header_writer_->write_solution_header(post_variables, post_file_path);
-		this->data_writer_->write_solution_data(post_variables, post_file_path);
-	}
-
-private:
-	std::unique_ptr<TecPlot_Header_Writer> header_writer_;
-	std::unique_ptr<Tecplot_Data_Writer> data_writer_;
-};
-
-
-
-
-
-
 namespace ms
 {
-	std::string to_string(const Zone_Type get_zone_type) {
-		switch (get_zone_type)
-		{
-		case Zone_Type::FETriangle:		return "FETriangle";
-		case Zone_Type::FETetrahedron:	return "FETetrahedron";
-		default:
-			EXCEPTION("Wrong zone type");
-			return "";
-		}
-	}
+	std::string to_string(const Zone_Type get_zone_type);
 }
 
 

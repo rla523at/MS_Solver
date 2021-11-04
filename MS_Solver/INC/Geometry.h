@@ -8,6 +8,8 @@ public:
 
 public:
 	Euclidean_Vector center_node(void) const;
+	ushort num_post_nodes(const ushort post_order) const;
+	ushort num_post_elements(const ushort post_order) const;
 	std::vector<Euclidean_Vector> post_nodes(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 

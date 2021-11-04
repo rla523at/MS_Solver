@@ -9,6 +9,12 @@ Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidea
 Euclidean_Vector Geometry::center_node(void) const {
 	return this->mapping_function_(this->reference_geometry_->center_node());
 }
+ushort Geometry::num_post_nodes(const ushort post_order) const {
+	return this->reference_geometry_->num_post_nodes(post_order);
+}
+ushort Geometry::num_post_elements(const ushort post_order) const {
+	return this->reference_geometry_->num_post_elements(post_order);
+}
 std::vector<Euclidean_Vector> Geometry::post_nodes(const ushort post_order) const {
 	const auto& ref_post_nodes = this->reference_geometry_->get_post_nodes(post_order);
 	const auto num_post_nodes = ref_post_nodes.size();

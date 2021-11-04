@@ -22,6 +22,12 @@
     <Filter Include="소스 파일\Post">
       <UniqueIdentifier>{cada62cd-d160-48ec-9832-94c366fe4f9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Grid">
+      <UniqueIdentifier>{74e48833-375a-4c55-87a5-f711843ed161}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Grid">
+      <UniqueIdentifier>{27bad5ed-0f7f-47f6-b822-dc80fce37003}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRC\main.cpp">
@@ -36,15 +42,6 @@
     <ClCompile Include="SRC\Polynomial.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Reference_Geometry.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Grid.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Geometry.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Text.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -53,6 +50,18 @@
     </ClCompile>
     <ClCompile Include="SRC\Post_Variables.cpp">
       <Filter>소스 파일\Post</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Post.cpp">
+      <Filter>소스 파일\Post</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Geometry.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Grid.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Reference_Geometry.cpp">
+      <Filter>소스 파일\Grid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,12 +83,6 @@
     <ClInclude Include="INC\Initial_Condition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Grid.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Element.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Grid_File_Type.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -87,12 +90,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Vector_Function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Reference_Geometry.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Geometry.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Text.h">
@@ -109,6 +106,18 @@
     </ClInclude>
     <ClInclude Include="INC\Configuration.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Geometry.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reference_Geometry.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Element.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid.h">
+      <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

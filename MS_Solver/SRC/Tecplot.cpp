@@ -1,5 +1,13 @@
 #include "../INC/Tecplot.h"
 
+void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
+	this->header_writer_->write_grid_header(post_variables, post_file_path);
+	this->data_writer_->write_grid_data(post_variables, post_file_path);
+}
+void Tecplot_File_Writer::write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
+	this->header_writer_->write_solution_header(post_variables, post_file_path);
+	this->data_writer_->write_solution_data(post_variables, post_file_path);
+}
 
 void TecPlot_Header_Writer::write_grid_header(const Post_Variables& post_variables, const std::string_view post_file_path) {
 	this->set_grid_mode(post_variables);
@@ -10,10 +18,10 @@ void TecPlot_Header_Writer::write_solution_header(const Post_Variables& post_var
 	this->write_header(post_file_path);
 }
 void TecPlot_Header_Writer::set_common_variable(const Post_Variables& post_variables) {
-	this->zone_type_ = post_variables.get_zone_type();
-	this->num_post_nodes_ = static_cast<int>(post_variables.get_num_post_node());
-	this->num_elements_ = static_cast<int>(post_variables.get_num_post_element());
-	this->solution_time_ = post_variables.get_solution_time();
+	this->zone_type_ = post_variables.zone_type();
+	this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
+	this->num_cells_ = static_cast<int>(post_variables.num_post_element());
+	this->solution_time_ = post_variables.solution_time();
 }
 
 void Tecplot_ASCII_Header_Writer::set_grid_mode(const Post_Variables& post_variables) {
@@ -21,7 +29,7 @@ void Tecplot_ASCII_Header_Writer::set_grid_mode(const Post_Variables& post_varia
 
 	this->title_ = "Grid";
 	this->file_type_str_ = "Grid";
-	this->variable_names_ = post_variables.get_grid_variable_str();
+	this->variable_names_ = post_variables.grid_variable_str();
 	this->zone_title_ = "Grid";
 	this->variable_location_str_ = "()";
 }
@@ -43,7 +51,7 @@ void Tecplot_ASCII_Header_Writer::write_header(const std::string_view post_file_
 	header[3] << "Zone T = " + this->zone_title_;
 	header[4] << "ZoneType =  " + ms::to_string(this->zone_type_);
 	header[5] << "Nodes = " + std::to_string(this->num_post_nodes_);
-	header[6] << "Elements = " + std::to_string(this->num_elements_);
+	header[6] << "Elements = " + std::to_string(this->num_cells_);
 	header[7] << "DataPacking = Block";
 	header[8] << "StrandID = " + std::to_string(this->strand_id_++);
 	header[9] << "SolutionTime = " + std::to_string(this->solution_time_);
@@ -56,8 +64,8 @@ void Tecplot_Binary_Header_Writer::set_grid_mode(const Post_Variables& post_vari
 
 	this->file_type_ = 1;
 	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
-	this->num_variable_ = static_cast<int>(post_variables.get_num_grid_variable());
-	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.get_grid_variable_str(), ','));
+	this->num_variable_ = static_cast<int>(post_variables.num_grid_variable());
+	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.grid_variable_str(), ','));
 	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
 	this->specify_variable_location_ = 0;
 }
@@ -107,7 +115,7 @@ void Tecplot_Binary_Header_Writer::write_header(const std::string_view post_file
 	writer << 0;														//one to one face neighbor - default
 	writer << 0;														//user define face neighbor connection -default
 	writer << this->num_post_nodes_;									//num points
-	writer << this->num_elements_;										//num elements
+	writer << this->num_cells_;										//num elements
 	writer << 0 << 0 << 0;												//i,j,k cell dim - default
 	writer << 0;														//auxilarily name index pair - default
 	writer << 357.0f;													//EOH_marker
@@ -162,13 +170,18 @@ void Tecplot_Binary_Data_Writer::write_grid_data(const Post_Variables& post_vari
 //	this->write_data(post_variables.calculate_set_of_solution_datas(), post_variables.num_solution_variable(), post_file_path);
 //}
 
-void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->header_writer_->write_grid_header(post_variables, post_file_path);
-	this->data_writer_->write_grid_data(post_variables, post_file_path);
-}
-void Tecplot_File_Writer::write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->header_writer_->write_solution_header(post_variables, post_file_path);
-	this->data_writer_->write_solution_data(post_variables, post_file_path);
+namespace ms
+{
+	std::string to_string(const Zone_Type get_zone_type) {
+		switch (get_zone_type)
+		{
+		case Zone_Type::FETriangle:		return "FETriangle";
+		case Zone_Type::FETetrahedron:	return "FETetrahedron";
+		default:
+			EXCEPTION("Wrong zone type");
+			return "";
+		}
+	}
 }
 
 
