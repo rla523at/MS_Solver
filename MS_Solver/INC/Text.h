@@ -11,30 +11,86 @@
 #include <sstream>
 #include <vector>
 
-
-class Text : public std::vector<std::string>
+class Sentence
 {
 public:
 	template <typename ... Vals>
-	explicit Text(Vals&&... values) : std::vector<std::string>(std::forward<Vals>(values)...) {};
-	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
-	Text(std::ifstream& file, const size_t num_read_line);
+	Sentence(Vals&&... values) : contents_(std::forward<Vals>(values)...) {}; //explicit 없으면 = 연산자 사용가능
+	
+public://command
+	Sentence& operator<<(const std::string& str);
+	template<typename T>	Sentence& insert_with_space(const T value) {
+		this->contents_ += " " + std::to_string(value);
+		return *this;
+	}
+	template<>	Sentence& insert_with_space(const double value);
 
-public:
-	Text& operator<<(const std::string& str);
-	Text& operator<<(std::string&& str);
+public://Query
+	bool operator==(const Sentence& other) const;
+	std::string to_string(void) const;
 
-public:
-	void merge(Text&& other);
-	Text& remove_empty_line(void);
-	void read(const std::string& read_file_path);
-	void read(std::ifstream& file, const size_t num_read_line);
-
-public:
-	void add_write(const std::string_view write_file_path) const;
-	void write(const std::string_view write_file_path) const;
+private:
+	std::string contents_;
 };
 
+
+class Text
+{
+public:
+	Text(void) = default;
+	Text(std::initializer_list<std::string> list);
+
+public://command
+	Sentence& operator[](const size_t index);
+	Text& operator<<(const std::string& str);
+	Text& operator<<(std::string&& str);	
+
+	void add_empty_lines(const size_t num_line);
+	void merge(Text&& other);
+	void remove_empty_line(void);
+	void read(const std::string_view read_file_path);
+	void read(std::ifstream& file, const size_t num_read_line);
+
+
+
+public://Query
+	bool operator==(const Text& other) const;	
+	void add_write(const std::string_view write_file_path) const;
+	void write(const std::string_view write_file_path) const;
+	std::string to_string(void) const;
+	size_t size(void) const;
+
+private:
+	std::vector<Sentence> senteces_;
+};
+
+
+//class Text : public std::vector<std::string>
+//{
+//public:
+//	template <typename ... Vals>
+//	explicit Text(Vals&&... values) : std::vector<std::string>(std::forward<Vals>(values)...) {};
+//	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
+//	Text(std::ifstream& file, const size_t num_read_line);
+//
+//public:
+//	Text& operator<<(const std::string& str);
+//	Text& operator<<(std::string&& str);
+//
+//public://command
+//	void merge(Text&& other);
+//	void remove_empty_line(void);
+//	void read(const std::string& read_file_path);
+//	void read(std::ifstream& file, const size_t num_read_line);
+//	void insert_with_space(const size_t line_index, const int value);
+//	void insert_with_space(const size_t line_index, const double value);
+//
+//public://Query
+//	void add_write(const std::string_view write_file_path) const;
+//	void write(const std::string_view write_file_path) const;
+//};
+
+std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece);
 std::ostream& operator<<(std::ostream& ostream, const Text& text);
 
 
@@ -74,6 +130,7 @@ namespace ms {
 	size_t find_icase(const std::string& str, const std::string& target);
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
 	bool contains_icase(const std::string& str, const char* target);
+	std::string double_to_string(const double val);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	std::vector<std::string> file_paths_in_path(const std::string& path);
 	void make_path(std::string_view file_path);

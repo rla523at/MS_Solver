@@ -9,8 +9,8 @@ using uint = unsigned int;
 
 namespace ms {
 	template <typename T>
-	void insert(std::vector<T>& vec, const std::vector<T>& other_vec) {
-		vec.insert(vec.end(), other_vec.begin(), other_vec.end());
+	void insert_with_space(std::vector<T>& vec, const std::vector<T>& other_vec) {
+		vec.insert_with_space(vec.end(), other_vec.begin(), other_vec.end());
 	}
 }
 

@@ -34,8 +34,10 @@ std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_or
 		const auto num_index = ref_connecitivity.size();
 		connectivity.resize(num_index);
 
-		for (ushort j = 0; j < num_index; ++j)
-			connectivity[j] = ref_connecitivity[j] + connectivity_start_index;
+		for (ushort j = 0; j < num_index; ++j) {
+			const auto new_index = static_cast<int>(ref_connecitivity[j] + connectivity_start_index);
+			connectivity[j] = new_index;
+		}
 	}
 
 	return connectivities;

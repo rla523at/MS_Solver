@@ -1,26 +1,54 @@
 #include "../INC/Text.h"
 
-Text::Text(std::ifstream& file, const size_t num_read_line) {
-	this->read(file, num_read_line);
+Sentence& Sentence::operator<<(const std::string& str) {
+	this->contents_ += str;
+	return *this;
+}
+template<>
+Sentence& Sentence::insert_with_space(const double value) {
+	this->contents_ += " " + ms::double_to_string(value);
+	return *this;
+}
+bool Sentence::operator==(const Sentence& other) const {
+	return this->contents_ == other.contents_;
+}
+std::string Sentence::to_string(void) const {
+	return this->contents_;
 }
 
+Text::Text(std::initializer_list<std::string> list) {
+	this->senteces_.reserve(list.size());
+
+	for (auto& str : list)
+		this->senteces_.push_back(std::move(str));
+
+	//this->senteces_.insert(this->senteces_.end(), list);
+}
+Sentence& Text::operator[](const size_t index) {
+	REQUIRE(index < this->size(), "index can not exceed given range");
+	return this->senteces_[index];
+}
 Text& Text::operator<<(const std::string& str) {
-	this->push_back(str);
+	this->senteces_.push_back(str);
 	return *this;
 }
-
 Text& Text::operator<<(std::string&& str) {
-	this->push_back(std::move(str));
+	this->senteces_.push_back(std::move(str));
 	return *this;
 }
-
-void Text::read(const std::string& file_path) {	
+void Text::add_empty_lines(const size_t num_line) {
+	this->senteces_.resize(num_line);
+}
+void Text::merge(Text&& other) {
+	this->senteces_.insert(this->senteces_.end(), std::make_move_iterator(other.senteces_.begin()), std::make_move_iterator(other.senteces_.end()));
+}
+void Text::read(const std::string_view file_path) {
 	std::ifstream file_stream(file_path);
-	REQUIRE(file_stream.is_open(), "Fail to open file" + file_path);
+	REQUIRE(file_stream.is_open(), "Fail to open file");
 
 	std::string str;
 	while (std::getline(file_stream, str))
-		this->push_back(std::move(str));
+		this->senteces_.push_back(std::move(str));
 
 	file_stream.close();
 }
@@ -31,26 +59,25 @@ void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
 	size_t index = 0;
 	std::string str;
 	while (std::getline(file_stream, str)) {
-		this->push_back(std::move(str));
+		this->senteces_.push_back(std::move(str));
 		if (++index == num_read_line)
 			break;
 	}
 }
-
-Text& Text::remove_empty_line(void) {
-	this->erase(std::remove(this->begin(), this->end(), ""), this->end());
-	return *this;
+void Text::remove_empty_line(void) {
+	this->senteces_.erase(std::remove(this->senteces_.begin(), this->senteces_.end(), ""), this->senteces_.end());
 }
-
+bool Text::operator==(const Text& other) const {
+	return this->senteces_ == other.senteces_;
+}
 void Text::add_write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path, std::ios::app);
 	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
 
-	const auto num_sentence = this->size();
-	for (auto i = this->begin(); i != this->end() - 1; ++i)
+	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
 		output_file << *i << "\n";
-	output_file << this->back();
+	output_file << this->senteces_.back();
 
 	output_file.close();
 }
@@ -58,24 +85,24 @@ void Text::add_write(const std::string_view file_path) const {
 void Text::write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path);
-	REQUIRE(output_file.is_open(), "output file stream should be opend before write"); 
+	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
 
-	const auto num_sentence = this->size();
-	for (auto i = this->begin(); i != this->end() - 1; ++i)
+	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
 		output_file << *i << "\n";
-	output_file << this->back();
+	output_file << this->senteces_.back();
 
 	output_file.close();
 }
+std::string Text::to_string(void) const {
+	std::string str;
+	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
+		str += i->to_string() + "\n";
+	str += this->senteces_.back().to_string();
 
-void Text::merge(Text&& other) {
-	this->insert(this->end(), std::make_move_iterator(other.begin()), std::make_move_iterator(other.end()));
+	return str;
 }
-
-std::ostream& operator<<(std::ostream& ostream, const Text& text) {
-	for (const auto& line : text)
-		ostream << line << "\n";
-	return ostream;
+size_t Text::size(void) const {
+	return this->senteces_.size();
 }
 
 Binary_Writer::Binary_Writer(const std::string_view file_path) {
@@ -159,7 +186,7 @@ namespace ms {
 		const auto num_delimiter = delimiters.size();
 
 		const auto reference_delimiter = delimiters[0];
-		
+
 		auto temp_str = str;
 		for (size_t i = 1; i < num_delimiter; ++i)
 			ms::be_replaced(temp_str, delimiters[i], reference_delimiter);
@@ -197,7 +224,7 @@ namespace ms {
 
 			pos = object_str.rfind(target_str, pos - 1); //rfind next pos
 		}
-		
+
 		return pos;
 	}
 
@@ -211,7 +238,12 @@ namespace ms {
 	bool contains_icase(const std::string& str, const char* target) {
 		return ms::find_icase(str, target) != std::string::npos;
 	}
-
+	std::string double_to_string(const double val) {
+		constexpr size_t precision = 16;
+		std::stringstream stream;
+		stream << std::setprecision(precision) << std::noshowpoint << val;
+		return stream.str();
+	}
 	std::string double_to_str_sp(const double value) {
 		std::ostringstream os;
 		os << std::setprecision(16) << std::showpoint << value;
@@ -257,3 +289,11 @@ namespace ms {
 }
 
 
+
+std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece) {
+	return ostream << sentece.to_string();
+}
+
+std::ostream& operator<<(std::ostream& ostream, const Text& text) {
+	return ostream << text.to_string();
+}

@@ -165,6 +165,7 @@
     <ClCompile Include="SRC\Grid.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="SRC\Post_Variables.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\main.cpp">
@@ -183,8 +184,10 @@
     <ClCompile Include="SRC\Tecplot.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="SRC\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="INC\Configuration.h" />
     <ClInclude Include="INC\Discretized_Solution.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -209,10 +212,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Polynomial.h" />
+    <ClInclude Include="INC\Post.h" />
+    <ClInclude Include="INC\Post_Variables.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Tecplot.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="INC\Text.h" />
     <ClInclude Include="INC\Vector_Function.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

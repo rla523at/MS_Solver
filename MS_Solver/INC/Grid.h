@@ -14,23 +14,27 @@ public:
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
-	std::vector<std::vector<double>> cell_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const {
-		std::vector<std::vector<double>> coordinates(this->space_dimension_);
-
-		for (const auto& post_nodes : set_of_post_nodes) {
-			for (const auto& node : post_nodes) {
-				for (ushort j = 0; j < this->space_dimension_; ++j)
-					coordinates[j].push_back(node[j]);
-			}
-		}
-
-		return coordinates;
-	}
 
 private:
 	ushort space_dimension_;
 	Grid_Elements grid_elements_;
 };
+
+
+namespace ms {
+	template <typename T, typename... Args>
+	std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args) {
+		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+
+		vec1.reserve(vec1.size() + vec2.size());
+		vec1.insert_with_space(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
+
+		if constexpr (sizeof...(Args) == 0)
+			return vec1;
+		else
+			return ms::merge(vec1, std::move(args)...);
+	}
+}
 
 //
 //template <ushort space_dimension>
