@@ -324,26 +324,7 @@
 //	EXPECT_EQ(result, ref);
 //}
 //
-//TEST(Geometry, center_1) {
-///
-//	const Figure fig = Figure::quadrilateral;
-//	const ushort fig_order = 1;
-//	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
-//
-//	const Euclidean_Vector n1 = { 1,1 };
-//	const Euclidean_Vector n2 = { 2,1 };
-//	const Euclidean_Vector n3 = { 4,2 };
-//	const Euclidean_Vector n4 = { 1,2 };
-//	std::vector<Euclidean_Vector<2>> nodes = { n1,n2,n3,n4 };
-//
-//
-//	Geometry geometry(ref_geometry, std::move(nodes));
-//	const auto result = geometry.center_node();
-//
-//	const Euclidean_Vector ref = { 2,1.5 };
-//	EXPECT_EQ(result, ref);
-//}
-//
+
 //TEST(Geometry, normalized_normal_vector_1) {
 ///
 //	const Figure fig = Figure::line;

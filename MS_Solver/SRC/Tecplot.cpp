@@ -1,4 +1,70 @@
 #include "../INC/Tecplot.h"
+
+std::vector<double> Post_Cell_Center_Variable_Converter::convert_to_post_variable_values(const std::vector<double>& values) const {
+	const auto num_values = values.size();
+
+	if (this->num_post_elements_ == num_values)
+		return values;
+	else {
+		REQUIRE(values.size() == this->num_elements_, "number of values should be same with number of elements");
+
+		std::vector<double> post_variable_values(this->num_post_elements_);
+
+		size_t index = 0;
+		for (size_t i = 0; i < this->num_elements_; ++i) {
+			const auto num_post_elements = this->num_post_elements_per_element[i];
+			for (size_t j = 0; j < num_post_elements; ++j)
+				post_variable_values[index++] = values[i];
+		}
+
+		return post_variable_values;
+	}
+}
+std::string Post_Cell_Center_Variable_Converter::solution_variable_location_str(const size_t num_solution_variable) const {
+	if (num_solution_variable == 1)
+		return "([1]=CELLCENTERED)";
+	else
+		return "([1-" + std::to_string(num_solution_variable) + "]=CELLCENTERED)";
+}
+
+std::vector<double> Post_Node_Variable_Converter::convert_to_post_variable_values(const std::vector<double>& values) const {
+	const auto num_values = values.size();
+
+	if (this->num_post_nodes_ == num_values)
+		return values;
+	else {
+		REQUIRE(num_values == this->num_elements_, "number of values should be same with number of elements");
+
+		std::vector<double> post_variable_values(this->num_post_nodes_);
+
+		size_t index = 0;
+		for (size_t i = 0; i < this->num_elements_; ++i) {
+			const auto num_post_elements = this->num_post_nodes_per_element[i];
+			for (size_t j = 0; j < num_post_elements; ++j)
+				post_variable_values[index++] = values[i];
+		}
+
+		return post_variable_values;
+	}
+}
+std::string Post_Node_Variable_Converter::solution_variable_location_str(const size_t num_solution_variable) const {
+	return "()";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //void Tecplot::record_cell_indexes(void) {
 //	const auto num_cell = This_::num_post_points_.size();

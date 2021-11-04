@@ -581,29 +581,3 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vecto
 	}
 	return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
 }
-
-Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_nodes) {
-	this->reference_geometry_ = Reference_Geometry_Factory::make(figure, order);
-	this->nodes_ = std::move(consisting_nodes);
-	this->mapping_function_ = this->make_mapping_function();
-}
-
-Vector_Function<Polynomial> Geometry::make_mapping_function(void) const {
-	//	X = CM
-	//	X : mapped node matrix			
-	//	C : mapping coefficient matrix	
-	//	M : mapping monomial matrix
-
-	const auto num_nodes = this->nodes_.size();
-	Matrix X(this->space_dimension_, num_nodes);
-	for (size_t j = 0; j < num_nodes; ++j)
-		X.change_column(j, this->nodes_[j]);
-
-	const auto& inv_M = this->reference_geometry_->get_inverse_mapping_monomial_matrix();
-
-	const auto C = X * inv_M;
-
-	const auto& monomial_vector_function = this->reference_geometry_->get_mapping_monomial_vector_function();
-
-	return C * monomial_vector_function;
-}

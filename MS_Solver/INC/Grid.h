@@ -10,22 +10,25 @@
 class Grid 
 {
 public:
-	size_t num_cells(void) const {
-		return this->grid_elements_.cell_elements.size();
-	}
-	std::vector<Euclidean_Vector> cell_center_nodes(void) const {
-		const auto& cell_elements = this->grid_elements_.cell_elements;
+	size_t num_cells(void) const;
+	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
+	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_nodes(const ushort post_order) const;
+	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
+	std::vector<std::vector<double>> cell_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const {
+		std::vector<std::vector<double>> coordinates(this->space_dimension_);
 
-		const auto num_cell = cell_elements.size();
-		std::vector<Euclidean_Vector> center_nodes(num_cell);
+		for (const auto& post_nodes : set_of_post_nodes) {
+			for (const auto& node : post_nodes) {
+				for (ushort j = 0; j < this->space_dimension_; ++j)
+					coordinates[j].push_back(node[j]);
+			}
+		}
 
-		for (uint i = 0; i < num_cell; ++i)
-			center_nodes[i] = cell_elements[i].center_node();
-
-		return center_nodes;
+		return coordinates;
 	}
 
 private:
+	ushort space_dimension_;
 	Grid_Elements grid_elements_;
 };
 
@@ -171,10 +174,10 @@ private:
 //	SET_TIME_POINT;
 //	
 //	//calculate vnode_index_to_share_cell_index_set_ignore_pbdry_
-//	const auto num_cell = this->elements.cell_elements.size();
+//	const auto num_cell = this->grid_elements_.cell_elements.size();
 //
 //	for (uint i = 0; i < num_cell; ++i) {
-//		const auto vnode_indexes = this->elements.cell_elements[i].vertex_node_indexes();
+//		const auto vnode_indexes = this->grid_elements_.cell_elements[i].vertex_node_indexes();
 //		for (const auto vnode_index : vnode_indexes) {
 //			if (!this->vnode_index_to_share_cell_index_set_ignore_pbdry_.contains(vnode_index))
 //				this->vnode_index_to_share_cell_index_set_ignore_pbdry_.emplace(vnode_index, std::set<uint>());
@@ -204,7 +207,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<uint> Grid<space_dimension>::boundary_owner_cell_indexes(void) const {			
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<uint> oc_indexes(num_boundary);
@@ -224,7 +227,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<double> Grid<space_dimension>::boundary_volumes(void) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<double> volumes(num_boundary);
@@ -239,7 +242,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<ElementType> Grid<space_dimension>::boundary_types(void) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<ElementType> types(num_boundary);
@@ -254,8 +257,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::boundary_normals_at_centers(const std::vector<uint>& oc_indexes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<Euclidean_Vector<space_dimension>> normals(num_boundary);
@@ -273,8 +276,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension>::boundary_set_of_normals(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_nodes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> boundary_set_of_normals(num_boundary);
@@ -292,7 +295,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::boundary_center_nodes(void) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<Euclidean_Vector<space_dimension>> center_nodes(num_boundary);
@@ -307,8 +310,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::boundary_owner_cell_to_faces(const std::vector<uint>& oc_indexes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<Euclidean_Vector<space_dimension>> center_to_center_vectors(num_boundary);
@@ -328,7 +331,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Quadrature_Rule<space_dimension>> Grid<space_dimension>::boundary_quadrature_rules(const ushort polynomial_degree) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //	
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<Quadrature_Rule<space_dimension>> quadrature_rules(num_boundary);
@@ -346,7 +349,7 @@ private:
 //template <ushort space_dimension>
 //template <typename Numerical_Flux_Function>
 //auto Grid<space_dimension>::boundary_flux_functions(void) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_boundary = boundary_elements.size();
 //	std::vector<std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>>> boundary_flux_functions;
@@ -363,7 +366,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<double> Grid<space_dimension>::cell_volumes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<double> volumes(num_cell);
@@ -376,7 +379,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::array<double, space_dimension>> Grid<space_dimension>::cell_projected_volumes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<std::array<double, space_dimension>> projected_volumes(num_cell);
@@ -389,7 +392,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Quadrature_Rule<space_dimension>> Grid<space_dimension>::cell_quadrature_rules(const ushort polynomial_degree) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<Quadrature_Rule<space_dimension>> quadrature_rules(num_cell);
@@ -403,7 +406,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::cell_center_nodes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<Euclidean_Vector<space_dimension>> center_nodes(num_cell);
@@ -416,7 +419,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::cell_set_of_vnode_indexes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<std::vector<uint>> set_of_vnode_indexes(num_cell);
@@ -429,7 +432,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension>::cell_set_of_vnodes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> set_of_vnodes(num_cell);
@@ -442,7 +445,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension>::cell_set_of_post_nodes(const ushort post_order) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> set_of_post_nodes(num_cell);
@@ -470,7 +473,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<int>> Grid<space_dimension>::cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_post_nodes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	std::vector<std::vector<int>> set_of_connectivities;
@@ -501,7 +504,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Matrix> Grid<space_dimension>::cell_center_to_vertex_matrixes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<Matrix> center_to_vertex_matrixes;
@@ -529,7 +532,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<bool> Grid<space_dimension>::cell_simplex_flags(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<bool> simplex_flags(num_cell, false);
@@ -543,7 +546,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Geometry<space_dimension>>> Grid<space_dimension>::cell_set_of_sub_simplex_geometries(const std::vector<bool>& simplex_flags) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<std::vector<Geometry<space_dimension>>> set_of_sub_simplex_geometries(num_cell);
@@ -560,7 +563,7 @@ private:
 //template <ushort space_dimension>
 //template <ushort polynomial_degree>
 //auto  Grid<space_dimension>::cell_basis_vector_functions(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //
 //	const auto num_cell = cell_elements.size();
 //	constexpr auto num_basis_ = ms::combination_with_repetition(1 + space_dimension, polynomial_degree);
@@ -577,7 +580,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::pair<uint, uint>> Grid<space_dimension>::inner_face_oc_nc_index_pairs(void) const {
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<std::pair<uint, uint>> inner_face_oc_nc_index_pairs(num_inner_face);
@@ -599,7 +602,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<double> Grid<space_dimension>::inner_face_volumes(void) const {
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<double> volumes(num_inner_face);
@@ -614,8 +617,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::inner_face_normals_at_center(const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<Euclidean_Vector<space_dimension>> normals(num_inner_face);
@@ -635,8 +638,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension>::inner_face_set_of_normals(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_nodes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> inner_face_set_of_normals(num_inner_face);
@@ -654,7 +657,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::pair<Euclidean_Vector<space_dimension>, Euclidean_Vector<space_dimension>>> Grid<space_dimension>::inner_face_oc_nc_to_face_pairs(const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) const {
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<std::pair<Euclidean_Vector<space_dimension>, Euclidean_Vector<space_dimension>>> oc_nc_to_face_pairs(num_inner_face);
@@ -679,7 +682,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Quadrature_Rule<space_dimension>> Grid<space_dimension>::inner_face_quadrature_rules(const ushort polynomial_degree) const {
-//	const auto& inner_face_elements = this->elements.inner_face_elements;
+//	const auto& inner_face_elements = this->grid_elements_.inner_face_elements;
 //
 //	const auto num_inner_face = inner_face_elements.size();
 //	std::vector<Quadrature_Rule<space_dimension>> quadrature_rules(num_inner_face);
@@ -696,7 +699,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::pair<uint, uint>> Grid<space_dimension>::periodic_boundary_oc_nc_index_pairs(void) const {
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<std::pair<uint, uint>> pbdry_oc_nc_index_pairs(num_pbdry_pair);
@@ -719,7 +722,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<double> Grid<space_dimension>::periodic_boundary_volumes(void) const {
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<double> volumes(num_pbdry_pair);
@@ -734,8 +737,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> Grid<space_dimension>::periodic_boundary_normals_at_center(const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<Euclidean_Vector<space_dimension>> normals(num_pbdry_pair);
@@ -755,8 +758,8 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<Euclidean_Vector<space_dimension>>> Grid<space_dimension>::periodic_boundary_set_of_normals(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector<space_dimension>>>& set_of_oc_side_nodes) const {
-//	const auto& cell_elements = this->elements.cell_elements;
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<std::vector<Euclidean_Vector<space_dimension>>> pbdry_set_of_normals(num_pbdry_pair);
@@ -773,7 +776,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::pair<Euclidean_Vector<space_dimension>, Euclidean_Vector<space_dimension>>> Grid<space_dimension>::periodic_boundary_oc_nc_to_oc_nc_side_face_pairs(const std::vector<std::pair<uint, uint>>& oc_nc_index_pairs) const {
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<std::pair<Euclidean_Vector<space_dimension>, Euclidean_Vector<space_dimension>>> oc_nc_to_face_pairs(num_pbdry_pair);
@@ -801,7 +804,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::pair<Quadrature_Rule<space_dimension>, Quadrature_Rule<space_dimension>>> Grid<space_dimension>::periodic_boundary_quadrature_rule_pairs(const ushort polynomial_degree) const {
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry_pair = pbdry_element_pairs.size();
 //	std::vector<std::pair<Quadrature_Rule<space_dimension>, Quadrature_Rule<space_dimension>>> quadrature_rule_pairs(num_pbdry_pair);
@@ -821,7 +824,7 @@ private:
 //std::unordered_map<uint, std::set<uint>> Grid<space_dimension>::pbdry_vnode_index_to_matched_pbdry_vnode_index_set(void) const {
 //	std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_vnode_index_set;
 //
-//	for (const auto& [oc_side_element, nc_side_element] : this->elements.periodic_boundary_element_pairs) {
+//	for (const auto& [oc_side_element, nc_side_element] : this->grid_elements_.periodic_boundary_element_pairs) {
 //		const auto oc_side_vnode_indexes = oc_side_element.vertex_node_indexes();
 //		const auto nc_side_vnode_indexes = nc_side_element.vertex_node_indexes();
 //
@@ -883,7 +886,7 @@ private:
 //	const auto oc_to_boundary = this->boundary_owner_cell_to_faces(bdry_owner_cell_indexes);
 //
 //	for (uint i = 0; i < num_boundary; ++i) {
-//		const auto& bdry_element = this->elements.boundary_elements[i];
+//		const auto& bdry_element = this->grid_elements_.boundary_elements[i];
 //		const auto oc_index = bdry_owner_cell_indexes[i];
 //
 //		const auto ghost_cell_center = cell_center_nodes[oc_index] + 2 * oc_to_boundary[i];
@@ -895,7 +898,7 @@ private:
 //	}
 //
 //	for (uint i = 0; i < num_pbdry_pair; ++i) {
-//		const auto& [oc_side_element, nc_side_element] = this->elements.periodic_boundary_element_pairs[i];
+//		const auto& [oc_side_element, nc_side_element] = this->grid_elements_.periodic_boundary_element_pairs[i];
 //		const auto [oc_index, nc_index] = pbdry_oc_nc_index_pairs[i];
 //
 //		const auto oc_center_node = cell_center_nodes[oc_index];
@@ -927,7 +930,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::ANN_indexes(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	
 //	const auto bdry_oc_indexes = this->boundary_owner_cell_indexes();
 //
@@ -981,7 +984,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::set_of_face_share_cell_indexes_ignore_pbdry(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<std::vector<uint>> set_of_face_share_cell_indexes;
@@ -1012,7 +1015,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::set_of_face_share_cell_indexes_consider_pbdry(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<std::vector<uint>> set_of_face_share_cell_indexes;
@@ -1044,7 +1047,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<size_t>> Grid<space_dimension>::set_of_vertex_share_cell_indexes_consider_pbdry(void) const {
-//	const auto& cell_elements = this->elements.cell_elements;
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
 //	const auto num_cell = cell_elements.size();
 //
 //	std::vector<std::vector<size_t>> set_of_vertex_share_cell_indexes;
@@ -1070,7 +1073,7 @@ private:
 //
 //template <ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::set_of_face_share_ghost_cell_indexes(const std::vector<Ghost_Cell<space_dimension>>& ghost_cells) const {
-//	std::vector<std::vector<uint>> set_of_face_share_ghost_cell_indexes(this->elements.cell_elements.size());
+//	std::vector<std::vector<uint>> set_of_face_share_ghost_cell_indexes(this->grid_elements_.cell_elements.size());
 //
 //	const auto num_ghost_cell = ghost_cells.size();
 //
@@ -1164,7 +1167,7 @@ private:
 //
 //template<ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::set_of_boundary_vnode_indexes(void) const {
-//	const auto& boundary_elements = this->elements.boundary_elements;
+//	const auto& boundary_elements = this->grid_elements_.boundary_elements;
 //
 //	const auto num_bdry = boundary_elements.size();
 //	std::vector<std::vector<uint>> set_of_vnode_indexes;
@@ -1178,7 +1181,7 @@ private:
 //
 //template<ushort space_dimension>
 //std::vector<std::vector<uint>> Grid<space_dimension>::set_of_periodic_boundary_vnode_indexes(void) const {
-//	const auto& pbdry_element_pairs = this->elements.periodic_boundary_element_pairs;
+//	const auto& pbdry_element_pairs = this->grid_elements_.periodic_boundary_element_pairs;
 //
 //	const auto num_pbdry = pbdry_element_pairs.size() * 2;
 //	std::vector<std::vector<uint>> set_of_vnode_indexes;

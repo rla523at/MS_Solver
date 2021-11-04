@@ -1,7 +1,6 @@
 #pragma once
 #include "Discretized_Solution.h"
 #include "Text.h"
-//#include "Grid.h"
 
 #include <map>
 #include <string>
@@ -38,7 +37,7 @@ namespace ms
 		case Zone_Type::FETriangle:		return "FETriangle";
 		case Zone_Type::FETetrahedron:	return "FETetrahedron";
 		default:
-			EXCEPT("Wrong zone type");
+			EXCEPTION("Wrong zone type");
 			return "";
 		}
 	}
@@ -75,32 +74,8 @@ protected:
 class Post_Cell_Center_Variable_Converter : public Post_Variable_Converter
 {
 public:
-	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override {
-		const auto num_values = values.size();
-
-		if (this->num_post_elements_ == num_values)
-			return values;
-		else {
-			REQUIRE(values.size() == this->num_elements_, "number of values should be same with number of elements");
-
-			std::vector<double> post_variable_values(this->num_post_elements_);
-
-			size_t index = 0;
-			for (size_t i = 0; i < this->num_elements_; ++i) {
-				const auto num_post_elements = this->num_post_elements_per_element[i];
-				for (size_t j = 0; j < num_post_elements; ++j)
-					post_variable_values[index++] = values[i];
-			}
-
-			return post_variable_values;
-		}
-	}
-	std::string solution_variable_location_str(const size_t num_solution_variable) const override {
-		if (num_solution_variable == 1)
-			return "([1]=CELLCENTERED)";
-		else
-			return "([1-" + std::to_string(num_solution_variable) + "]=CELLCENTERED)";
-	}
+	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override;
+	std::string solution_variable_location_str(const size_t num_solution_variable) const override;
 
 private:
 	std::vector<size_t> num_post_elements_per_element;
@@ -109,29 +84,8 @@ private:
 class Post_Node_Variable_Converter : public Post_Variable_Converter
 {
 public:
-	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override {	
-		const auto num_values = values.size();
-		
-		if (this->num_post_nodes_ == num_values)
-			return values;
-		else {
-			REQUIRE(num_values == this->num_elements_, "number of values should be same with number of elements");
-
-			std::vector<double> post_variable_values(this->num_post_nodes_);
-
-			size_t index = 0;
-			for (size_t i = 0; i < this->num_elements_; ++i) {
-				const auto num_post_elements = this->num_post_nodes_per_element[i];
-				for (size_t j = 0; j < num_post_elements; ++j)
-					post_variable_values[index++] = values[i];
-			}
-
-			return post_variable_values;
-		}
-	}
-	std::string solution_variable_location_str(const size_t num_solution_variable) const override {
-		return "()";
-	}
+	std::vector<double> convert_to_post_variable_values(const std::vector<double>& values) const override;
+	std::string solution_variable_location_str(const size_t num_solution_variable) const override;
 
 private:
 	std::vector<size_t> num_post_nodes_per_element;
@@ -143,7 +97,7 @@ public:
 	void syncronize_solution_time(const double& solution_time) {
 		this->solution_time_ptr_ = &solution_time;
 	}
-	void record_grid(const Grid<2>& grid) {
+	void record_grid(const Grid& grid) {
 		const auto set_of_post_nodes =  grid.cell_set_of_post_nodes(this->post_order_);
 		this->num_post_nodes_ = ms::size_of_vvec(set_of_post_nodes);
 
@@ -198,7 +152,7 @@ public:
 		else if (this->num_grid_variables_ == 3)
 			return "x,y,z";
 		else
-			EXCEPT("current num grid variable is not supproted");
+			EXCEPTION("current num grid variable is not supproted");
 	}
 	std::string solution_variable_str(void) const;
 	std::string solution_variable_location_str(void) const {
