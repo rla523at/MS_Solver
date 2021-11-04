@@ -9,11 +9,39 @@ Sentence& Sentence::insert_with_space(const double value) {
 	this->contents_ += " " + ms::double_to_string(value);
 	return *this;
 }
+void Sentence::remove_after(const std::string_view target) {
+	const auto pos = this->contents_.find(target.data());
+	this->contents_.erase(pos + 1);
+}
+void Sentence::remove_all_from_here(const size_t position) {
+	REQUIRE(position < this->contents_.size(), "position can not exceed given range");
+	this->contents_.erase(position);
+}
+void Sentence::remove_all(const std::vector<char> targets) {
+
+}
 bool Sentence::operator==(const Sentence& other) const {
 	return this->contents_ == other.contents_;
 }
+size_t Sentence::find_position(const std::string_view target) const {
+	return this->contents_.find(target.data());
+}
+std::vector<Sentence> Sentence::parse(const char delimiter) const {
+	auto parsed_strs =ms::parse(this->contents_, delimiter);
+	
+	std::vector<Sentence> parsed_senteces;
+	parsed_senteces.reserve(parsed_strs.size());
+
+	for (auto& str : parsed_strs)
+		parsed_senteces.push_back(std::move(str));
+
+	return parsed_senteces;
+}
 std::string Sentence::to_string(void) const {
 	return this->contents_;
+}
+Sentence Sentence::upper_case(void) const {
+	return ms::upper_case(this->contents_);
 }
 
 Text::Text(std::initializer_list<std::string> list) {
@@ -38,6 +66,12 @@ Text& Text::operator<<(std::string&& str) {
 }
 void Text::add_empty_lines(const size_t num_line) {
 	this->senteces_.resize(num_line);
+}
+std::vector<Sentence>::iterator Text::begin(void) {
+	return this->senteces_.begin();
+}
+std::vector<Sentence>::iterator Text::end(void) {
+	return this->senteces_.end();
 }
 void Text::merge(Text&& other) {
 	this->senteces_.insert(this->senteces_.end(), std::make_move_iterator(other.senteces_.begin()), std::make_move_iterator(other.senteces_.end()));
@@ -81,7 +115,12 @@ void Text::add_write(const std::string_view file_path) const {
 
 	output_file.close();
 }
-
+std::vector<Sentence>::const_iterator Text::begin(void) const {
+	return this->senteces_.begin();
+}
+std::vector<Sentence>::const_iterator Text::end(void) const {
+	return this->senteces_.end();
+}
 void Text::write(const std::string_view file_path) const {
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path);
@@ -104,6 +143,7 @@ std::string Text::to_string(void) const {
 size_t Text::size(void) const {
 	return this->senteces_.size();
 }
+
 
 Binary_Writer::Binary_Writer(const std::string_view file_path) {
 	ms::make_path(file_path);

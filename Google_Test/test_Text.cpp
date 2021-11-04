@@ -8,6 +8,28 @@ TEST(Sentence, constructor_2) {
 	std::string str = "abc";
 	Sentence s = str;
 }
+TEST(Sentence, remove_after_1) {
+	Sentence s = "abcdef";
+	s.remove_after("d");
+
+	Sentence ref = "abcd";
+	EXPECT_EQ(s, ref);
+}
+TEST(Sentence, find_1) {
+	Sentence s = "abcdef";
+	const auto result = s.find_position("d");
+
+	const auto ref = 3;
+	EXPECT_EQ(result, ref);
+}
+TEST(Sentence, remove_all_from_here_1) {
+	Sentence s = "abcdef";
+	const auto pos = s.find_position("d");
+	s.remove_all_from_here(pos);
+
+	const Sentence ref = "abc";
+	EXPECT_EQ(s, ref);
+}
 
 TEST(Text, constructor_1) {
 	Text txt = { "abc", "def", "ghi" };
@@ -61,7 +83,6 @@ TEST(ms, replace_all_4) {
 	std::string ref = "abc_qwer_wer____";
 	EXPECT_EQ(str, ref);
 }
-
 TEST(ms, parse_1) {
 	std::string str = "abc_qwer,wer__,,";
 	const auto result = ms::parse(str, { ',', '_' });
@@ -69,7 +90,6 @@ TEST(ms, parse_1) {
 	std::vector<std::string> ref = { "abc","qwer","wer" };
 	EXPECT_EQ(result, ref);
 }
-
 TEST(ms, upper_case_1) {
 	std::string str = "abc";
 	const auto result = ms::upper_case(str);
@@ -91,6 +111,11 @@ TEST(ms, upper_case_3) {
 	std::string ref = "ABC_123Q";
 	EXPECT_EQ(result, ref);
 }
+TEST(ms, upper_case_4) {
+	const auto result = ms::upper_case("abc");
+	std::string_view ref = "ABC";
+	EXPECT_EQ(result, ref);
+}
 
 TEST(ms, find_icase_1) {
 	std::string str = "abc_123q";
@@ -106,7 +131,6 @@ TEST(ms, find_icase_2) {
 	const auto ref = 2;
 	EXPECT_EQ(result, ref);
 }
-
 TEST(ms, is_there_icase_1) {
 	std::string str = "abc_123q";
 	const auto result = ms::contains_icase(str, "C_12");
@@ -142,8 +166,6 @@ TEST(ms, is_there_icase_5) {
 	const auto ref = false;
 	EXPECT_EQ(result, ref);
 }
-
-
 TEST(ms, rfind_nth_1) {
 	std::string str = "abcaba";
 	std::string target_str = "a";
@@ -192,7 +214,6 @@ TEST(ms, rfind_nth_6) {
 	const auto ref = std::string::npos;
 	EXPECT_EQ(result, ref);
 }
-
 TEST(ms, be_removed_1) {
 	std::string str = " target";
 	ms::be_removed(str, " ");
@@ -200,7 +221,6 @@ TEST(ms, be_removed_1) {
 	std::string ref = "target";
 	EXPECT_EQ(str, ref);
 }
-
 TEST(ms, be_replaced_1) {
 	std::string str = " target";
 	ms::be_replaced(str, " ", "");

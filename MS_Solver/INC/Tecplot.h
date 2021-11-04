@@ -3,14 +3,6 @@
 #include "Text.h"
 #include "Post_Variables.h"
 
-//#include <map>
-//#include <string>
-//#include <vector>
-//#include <utility>
-//#include <map>
-//#include <sstream>
-//#include <iomanip>
-
 class TecPlot_Header_Writer
 {
 public:

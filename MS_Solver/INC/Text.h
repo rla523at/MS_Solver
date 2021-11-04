@@ -24,10 +24,17 @@ public://command
 		return *this;
 	}
 	template<>	Sentence& insert_with_space(const double value);
+	void remove_after(const std::string_view target);
+	void remove_all_from_here(const size_t position);
+	void remove_all(const std::vector<char> targets);
 
 public://Query
 	bool operator==(const Sentence& other) const;
+	size_t find_position(const std::string_view target) const;
+	std::vector<Sentence> parse(const char delimiter) const;
 	std::string to_string(void) const;
+	Sentence upper_case(void) const;
+
 
 private:
 	std::string contents_;
@@ -46,16 +53,18 @@ public://command
 	Text& operator<<(std::string&& str);	
 
 	void add_empty_lines(const size_t num_line);
+	std::vector<Sentence>::iterator begin(void);
+	std::vector<Sentence>::iterator end(void);
 	void merge(Text&& other);
 	void remove_empty_line(void);
 	void read(const std::string_view read_file_path);
 	void read(std::ifstream& file, const size_t num_read_line);
 
-
-
 public://Query
 	bool operator==(const Text& other) const;	
 	void add_write(const std::string_view write_file_path) const;
+	std::vector<Sentence>::const_iterator begin(void) const;
+	std::vector<Sentence>::const_iterator end(void) const;
 	void write(const std::string_view write_file_path) const;
 	std::string to_string(void) const;
 	size_t size(void) const;
