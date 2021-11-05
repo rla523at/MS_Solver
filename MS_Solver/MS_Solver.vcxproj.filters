@@ -86,9 +86,6 @@
     <ClInclude Include="INC\Initial_Condition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Grid_File_Type.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Polynomial.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -120,6 +117,9 @@
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Type.h">
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
   </ItemGroup>

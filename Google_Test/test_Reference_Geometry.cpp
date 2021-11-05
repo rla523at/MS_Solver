@@ -324,3 +324,23 @@ TEST(ReferenceGeometry, get_connectivities4) {
 	const std::vector<std::vector<uint>> ref = { {0,1,3},{1,4,3},{1,2,4},{2,5,4},{3,4,6},{4,7,6},{4,5,7},{5,8,7} };
 	EXPECT_EQ(result, ref);
 }
+//TEST(ReferenceGeometry, scale_function_1) {
+//
+//	const Figure fig = Figure::quadrilateral;
+//	const ushort fig_order = 1;
+//	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+//
+//	Euclidean_Vector p1 = { 1,2 };
+//	Euclidean_Vector p2 = { 3,1 };
+//	Euclidean_Vector p3 = { 4,1 };
+//	Euclidean_Vector p4 = { 1,3 };
+//	std::vector<Euclidean_Vector> pv = { p1,p2,p3,p4 };
+//
+//	const auto mapping_function = ref_geometry->mapping_function(pv);
+//	const auto result = ref_geometry.scale_function(mapping_function);
+//
+//	const auto x = Polynomial("x0");
+//	const auto y = Polynomial("x1");
+//	Irrational_Function ref = (0.25 * y + 1.25) * (-0.25 * x + 0.25) - (0.25 * x + 0.25) * (-0.25 * y - 0.75);
+//	EXPECT_EQ(result, ref);
+//}

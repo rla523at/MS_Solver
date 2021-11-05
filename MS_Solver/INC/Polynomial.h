@@ -49,7 +49,7 @@ public://Query
 	//bool operator>(const Simple_Poly_Term& other) const;
 	
 	double to_constant(void) const;
-	double differentiate(const ushort variable_index) const;
+	double get_differentiate(const ushort variable_index) const;
 	ushort degree(void) const;
 	ushort domain_dimension(void) const;
 	bool is_constant(void) const;
@@ -90,11 +90,9 @@ public://Query
 	bool operator<(const PoweredPolyTerm& other) const;
 	//bool operator>(const PoweredPolyTerm& other) const;
 	
-	PolyTerm differentiate(const ushort variable_index) const;
+	PolyTerm get_differentiate(const ushort variable_index) const;
 	ushort degree(void) const;
-	ushort domain_dimension(void) const {
-		return this->base_.domain_dimension();
-	}
+	ushort domain_dimension(void) const;
 	double to_constant(void) const;
 	Simple_Poly_Term be_simple(void) const;
 	bool has_same_base(const PoweredPolyTerm& other) const;
@@ -142,7 +140,7 @@ public://Query
 	Simple_Poly_Term be_simple(void) const;
 	ushort degree(void) const;
 	ushort domain_dimension(void) const;
-	Polynomial differentiate(const ushort variable_index) const;
+	Polynomial get_differentiate(const ushort variable_index) const;
 	double to_constant(void) const;
 	bool has_same_form(const PolyTerm& other) const;
 	bool is_simple(void) const;
@@ -181,7 +179,7 @@ public://Command
 	Polynomial& operator*=(const double constant);
 
 	Polynomial& be_absolute(void);
-	Polynomial& be_derivative(const ushort variable_index);
+	Polynomial& differentiate(const ushort variable_index);
 
 public://Query
 	Polynomial operator+(const Polynomial& other) const;
@@ -203,7 +201,7 @@ public://Query
 
 	ushort degree(void) const;
 	ushort domain_dimension(void) const;
-	Polynomial differentiate(const ushort variable_index) const;
+	Polynomial get_differentiate(const ushort variable_index) const;
 	Vector_Function<Polynomial> gradient(void) const;
 	size_t num_term(void) const;
 	double to_constant(void) const;

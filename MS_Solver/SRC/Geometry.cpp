@@ -5,16 +5,21 @@ Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidea
 	this->nodes_ = std::move(consisting_nodes);
 	this->space_dimension_ = this->check_space_dimension();
 	this->mapping_function_ = this->make_mapping_function();
+	this->scale_function_ = this->reference_geometry_->scale_function(mapping_function_);
 }
+
 Euclidean_Vector Geometry::center_node(void) const {
 	return this->mapping_function_(this->reference_geometry_->center_node());
 }
+
 ushort Geometry::num_post_nodes(const ushort post_order) const {
 	return this->reference_geometry_->num_post_nodes(post_order);
 }
+
 ushort Geometry::num_post_elements(const ushort post_order) const {
 	return this->reference_geometry_->num_post_elements(post_order);
 }
+
 std::vector<Euclidean_Vector> Geometry::post_nodes(const ushort post_order) const {
 	const auto& ref_post_nodes = this->reference_geometry_->get_post_nodes(post_order);
 	const auto num_post_nodes = ref_post_nodes.size();
@@ -50,18 +55,28 @@ std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_or
 	return connectivities;
 }
 
+Vector_Function<Polynomial> Geometry::orthonormal_basis_vector_function(const ushort solution_order) const {
+	const auto initial_basis_vector_function = this->initial_basis_vector_function(solution_order);
+	return ms::Gram_Schmidt_process(initial_basis_vector_function, *this);
+}
+
+
+double Geometry::volume(void) const {
+	const auto& quadrature_rule = this->get_quadrature_rule(0);
+
+	auto volume = 0.0;
+	for (const auto weight : quadrature_rule.weights)
+		volume += weight;
+
+	return volume;
+}
+
 const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_order) const {
 	if (this->integrand_order_to_quadrature_rule_.find(integrand_order) == this->integrand_order_to_quadrature_rule_.end())
 		this->integrand_order_to_quadrature_rule_.emplace(integrand_order, this->make_quadrature_rule(integrand_order));
 
 	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
 }
-
-Vector_Function<Polynomial> Geometry::orthonormal_basis_vector_function(const ushort solution_order) const {
-	const auto initial_basis_set = this->initial_basis_vector_function(solution_order);
-	return ms::Gram_Schmidt_process(initial_basis_set, *this);
-}
-
 
 Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort solution_order) const {
 	const auto num_basis = ms::combination_with_repetition(1 + this->space_dimension_, solution_order);
@@ -136,75 +151,26 @@ Vector_Function<Polynomial> Geometry::make_mapping_function(void) const {
 }
 
 Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) const {
-	const auto scale_function = this->scale_function(mapping_function);
-	const auto reference_integrand_order = integrand_order + this->scale_function_order();
-
+	const auto reference_integrand_order = integrand_order + this->reference_geometry_->scale_function_order();
 	const auto& ref_quadrature_rule = this->reference_geometry_->get_quadrature_rule(reference_integrand_order);
 	
-	const auto transformed_QP = mapping_function(ref_quadrature_rule.nodes);
+	const auto num_QP = ref_quadrature_rule.nodes.size();
+	std::vector<Euclidean_Vector> transformed_QP;
+	transformed_QP.reserve(num_QP);
 
-	const auto num_QP = transformed_QP.size();
+	for (const auto& ref_node : ref_quadrature_rule.nodes)
+		transformed_QP.push_back(this->mapping_function_(ref_node));
+
 	std::vector<double> transformed_QW(num_QP);
 
 	for (size_t i = 0; i < num_QP; ++i) {
 		const auto& point = ref_quadrature_rule.nodes[i];
 		const auto& weight = ref_quadrature_rule.weights[i];
 
-		transformed_QW[i] = scale_function(point) * weight;
+		transformed_QW[i] = this->scale_function_(point) * weight;
 	}
 
 	return { transformed_QP, transformed_QW };
-}
-
-Irrational_Function Geometry::make_scale_function(const Vector_Function<Polynomial>& mapping_function) const {
-	if constexpr (space_dimension == 2) {
-		switch (this->figure_) {
-		case Figure::line: {
-			constexpr ushort r = 0;
-			const auto mf_r = mapping_function.differentiate(r);
-			return mf_r.L2_norm();
-		}
-		case Figure::triangle:
-		case Figure::quadrilateral: {
-			constexpr ushort r = 0;
-			constexpr ushort s = 1;
-			const auto mf_r = mapping_function.differentiate(r);
-			const auto mf_s = mapping_function.differentiate(s);
-			const auto cross_product = mf_r.cross_product(mf_s);
-			return cross_product.L2_norm();
-		}
-		default:
-			throw std::runtime_error("not supported figure");
-			return Irrational_Function();
-		}
-	}
-	else if constexpr (space_dimension == 3) {
-		switch (this->figure_) {
-		case Figure::triangle:
-		case Figure::quadrilateral: {
-			constexpr ushort r = 0;
-			constexpr ushort s = 1;
-			const auto mf_r = mapping_function.differentiate(r);
-			const auto mf_s = mapping_function.differentiate(s);
-			const auto cross_product = mf_r.cross_product(mf_s);
-			return cross_product.L2_norm();
-		}
-		case Figure::tetrahedral:
-		case Figure::hexahedral: {
-			constexpr ushort r = 0;
-			constexpr ushort s = 1;
-			constexpr ushort t = 2;
-			const auto mf_r = mapping_function.differentiate(r);
-			const auto mf_s = mapping_function.differentiate(s);
-			const auto mf_t = mapping_function.differentiate(t);
-
-			return ms::scalar_triple_product(mf_r, mf_s, mf_t).be_absolute();
-		}
-		default:
-			throw std::runtime_error("not supported figure");
-			return Irrational_Function();
-		}
-	}
 }
 
 namespace ms
@@ -229,7 +195,7 @@ namespace ms
 		const auto integrand_degree = f1.degree() + f2.degree();
 
 		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_degree);
-		const auto& QP_set = quadrature_rule.points;
+		const auto& QP_set = quadrature_rule.nodes;
 		const auto& QW_set = quadrature_rule.weights;
 
 		double result = 0.0;

@@ -76,7 +76,7 @@ TEST(Simple_Poly_Term, differentiate_1) {
 	const auto spt = Simple_Poly_Term(coefficients1, -4);
 
 	constexpr ushort variable_index = 0;
-	const auto result = spt.differentiate(variable_index);
+	const auto result = spt.get_differentiate(variable_index);
 
 	const auto ref = 1;
 	EXPECT_EQ(result, ref);
@@ -86,7 +86,7 @@ TEST(Simple_Poly_Term, differentiate_2) {
 	const auto spt = Simple_Poly_Term(coefficients1, -4);
 
 	constexpr ushort variable_index = 2;
-	const auto result = spt.differentiate(variable_index);
+	const auto result = spt.get_differentiate(variable_index);
 
 	const auto ref = 3;
 	EXPECT_EQ(result, ref);
@@ -96,7 +96,7 @@ TEST(Simple_Poly_Term, differentiate_3) {
 	const auto spt = Simple_Poly_Term(coefficients1, -4);
 
 	constexpr ushort variable_index = 5;
-	const auto result = spt.differentiate(variable_index);
+	const auto result = spt.get_differentiate(variable_index);
 
 	const auto ref = 0;
 	EXPECT_EQ(result, ref);
@@ -211,7 +211,7 @@ TEST(PoweredPolyTerm, differentiate_1) {
 	const auto ppt = PoweredPolyTerm(spt, 3);
 
 	constexpr ushort variable_index = 0;
-	const auto result = ppt.differentiate(variable_index);
+	const auto result = ppt.get_differentiate(variable_index);
 	
 	const auto ppt2 = PoweredPolyTerm(spt, 2);
 	const auto ref = PolyTerm(3, ppt2);
@@ -223,7 +223,7 @@ TEST(PoweredPolyTerm, differentiate_2) {
 	const auto ppt = PoweredPolyTerm(spt, 3);
 
 	constexpr ushort variable_index = 2;
-	const auto result = ppt.differentiate(variable_index);
+	const auto result = ppt.get_differentiate(variable_index);
 
 	const auto ppt2 = PoweredPolyTerm(spt, 2);
 	const auto ref = PolyTerm(9, ppt2);
@@ -236,7 +236,7 @@ TEST(PoweredPolyTerm, differentiate_3) {
 	const auto ppt1 = PoweredPolyTerm(spt2, 2);
 
 	constexpr auto variable_index = 0;
-	const auto result = ppt1.differentiate(variable_index);
+	const auto result = ppt1.get_differentiate(variable_index);
 
 	const auto ref = PolyTerm(2, spt2);
 	EXPECT_EQ(result, ref);
@@ -326,7 +326,7 @@ TEST(PolyTerm, domain_dimension_2) {
 	const auto ref = 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(PolyTerm, differentiate_1) {
+TEST(PolyTerm, get_differentiate_1) {
 	const auto x = Simple_Poly_Term("x0");	
 	const auto spt2 = x + 1;
 
@@ -335,12 +335,12 @@ TEST(PolyTerm, differentiate_1) {
 	const auto pt3 = pt1 * pt2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = pt3.differentiate(variable_index);
+	const auto result = pt3.get_differentiate(variable_index);
 
 	const auto ref = 2 * x + 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(PolyTerm, differentiate_2) {
+TEST(PolyTerm, get_differentiate_2) {
 	const auto spt1 = Simple_Poly_Term("x0");
 	const auto spt2 = spt1 + 1;
 
@@ -349,29 +349,29 @@ TEST(PolyTerm, differentiate_2) {
 	const auto pt2 = pt1 * pt1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = pt2.differentiate(variable_index);
+	const auto result = pt2.get_differentiate(variable_index);
 
 	const auto x = Polynomial("x0");
 	const auto ref = 2 * x + 2;
 
 	EXPECT_EQ(result, ref);
 }
-TEST(PolyTerm, differentiate_3) {
+TEST(PolyTerm, get_differentiate_3) {
 	const auto x = Simple_Poly_Term("x0");
 	const auto y = Simple_Poly_Term("x1");
 	const auto pt1 = 2 * x * y;
 
 	constexpr size_t variable_index = 0;
-	const auto result = pt1.differentiate(variable_index);
+	const auto result = pt1.get_differentiate(variable_index);
 
 	const auto ref = 2 * y;
 	EXPECT_EQ(result, ref);
 }
-TEST(PolyTerm, differentiate_4) {
+TEST(PolyTerm, get_differentiate_4) {
 	const auto x = Simple_Poly_Term("x0");
 	const auto pt1 = PolyTerm(2 * x);
 
-	const auto result = pt1.differentiate(1);
+	const auto result = pt1.get_differentiate(1);
 
 	std::cout << result;
 
@@ -1067,183 +1067,183 @@ TEST(Polynomial, order_3) {
 	constexpr size_t ref = 4;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_1) {
+TEST(Polynomial, get_differentiate_1) {
 	Polynomial X("x0");
 
 	const auto p = (X + 1) * (X - 1) + 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 2 * X;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_2) {
+TEST(Polynomial, get_differentiate_2) {
 	Polynomial X("x0");
 
 	const auto p = (X - 1) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 2 * X - 2;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_3) {
+TEST(Polynomial, get_differentiate_3) {
 	Polynomial X("x0");
 
 	const auto p = (X - 1) ^ 2;
 
 	constexpr size_t variable_index = 1;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 0;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_4) {
+TEST(Polynomial, get_differentiate_4) {
 	Polynomial X("x0");
 
 	const auto p1 = (X + 1) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = 2 * X + 2;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_5) {
+TEST(Polynomial, get_differentiate_5) {
 	Polynomial X("x0");
 	Polynomial Y("x1");
 
 	const auto p1 = (X + Y + 2) * (X + 1);
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = 2 * X + Y + 3;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_6) {
+TEST(Polynomial, get_differentiate_6) {
 	Polynomial X("x0");
 	Polynomial Y("x1");
 
 	const auto p1 = (X + Y + 2) * (X + 1);
 
 	constexpr size_t variable_index = 1;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = X + 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_7) {
+TEST(Polynomial, get_differentiate_7) {
 	Polynomial X("x0");
 	Polynomial Y("x1");
 
 	const auto p1 = (X + 1) * (Y + 1) + X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = Y + 2;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_8) {
+TEST(Polynomial, get_differentiate_8) {
 	Polynomial X("x0");
 
 	const auto p1 = ((X + 1) ^ 2) * (X + 2);
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = 3 * (X ^ 2) + 8 * X + 5;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_9) {
+TEST(Polynomial, get_differentiate_9) {
 	Polynomial X("x0");
 
 	const auto p = (2 * X + 3) ^ 2;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 8 * X + 12;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_10) {
+TEST(Polynomial, get_differentiate_10) {
 	Polynomial X("x0");
 
 	const auto p = ((2 * X + 3) ^ 2) * X;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 12 * (X ^ 2) + 24 * X + 9;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_11) {
+TEST(Polynomial, get_differentiate_11) {
 	Polynomial X("x0");
 
 	const auto  p = X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	Polynomial ref = 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_12) {
+TEST(Polynomial, get_differentiate_12) {
 	Polynomial X("x0");
 
 	const auto p = (X ^ 2) - 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p.differentiate(variable_index);
+	const auto result = p.get_differentiate(variable_index);
 
 	const auto ref = 2 * X;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_13) {
+TEST(Polynomial, get_differentiate_13) {
 	Polynomial X("x0");
 
 	const auto p1 = (X ^ 2) + X + 1;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = 2 * X + 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_14) {
+TEST(Polynomial, get_differentiate_14) {
 	Polynomial X("x0");
 
 	const auto p1 = (X ^ 2) + X + 1;
 
 	constexpr size_t variable_index = 1;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = 0; 
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_15) {
+TEST(Polynomial, get_differentiate_15) {
 	Polynomial X("x0");
 	Polynomial Y("x1");
 
 	const auto p1 = X * Y + X;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, differentiate_16) {
+TEST(Polynomial, get_differentiate_16) {
 	Polynomial X("x0");
 	Polynomial Y("x1");
 
 	const auto p1 = X * Y + X;
 
 	constexpr size_t variable_index = 0;
-	const auto result = p1.differentiate(variable_index);
+	const auto result = p1.get_differentiate(variable_index);
 
 	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);

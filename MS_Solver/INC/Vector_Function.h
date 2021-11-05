@@ -4,6 +4,8 @@
 #include <initializer_list>
 #include <vector>
 
+using ushort = unsigned short;
+
 template <typename Function>
 class Vector_Function
 {
@@ -29,9 +31,45 @@ public://Query
 	bool operator==(const Vector_Function& other) const {
 		return this->functions_ == other.functions_;
 	}
+
 	const Function& at(const size_t index) const {
 		REQUIRE(index < this->range_dimension(), "index can not exceed range size");
 		return this->functions_[index];
+	}
+	Vector_Function<Function> cross_product(const Vector_Function& other) const {
+		constexpr auto result_range_dimension = 3;
+		std::vector<Function> result(result_range_dimension);
+
+		if (this->range_dimension() == 2)
+		{
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		}
+		else if (this->range_dimension() == 3)
+		{
+			result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
+			result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		}
+		else
+			EXCEPTION("cross product only valid for R^3 dimension");
+
+		return result;
+	};
+	auto L2_norm(void) const {
+		Function result = 0.0;
+
+		for (const auto& function : this->functions_)
+			result += (function ^ 2);
+
+		return result.root(0.5);
+	}
+	Vector_Function<Function> get_differentiate(const ushort variable_index) const {
+		auto differentiate_functions = this->functions_;
+		
+		for (auto& differentiate_function : differentiate_functions)
+			differentiate_function.differentiate(variable_index);
+
+		return differentiate_functions;
 	}
 	size_t range_dimension(void) const {
 		return this->functions_.size();
@@ -112,39 +150,39 @@ std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) 
 //		return this->functions_[index];
 //	}
 //
-//	template <ushort temp = range_dimension_, std::enable_if_t<temp == 2, bool> = true >
-//	Vector_Function<Function, range_dimension_ + 1> cross_product(const Vector_Function& other) const {
-//		std::array<Function, range_dimension_ + 1> result;
-//		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
-//
-//		return result;
-//	}
-//
-//	template <ushort temp = range_dimension_, std::enable_if_t<temp == 3, bool> = true >
-//	Vector_Function<Function, range_dimension_> cross_product(const Vector_Function& other) const {
-//		static_require(range_dimension_ == 3, "cross product only valid for R^3 dimension");
-//
-//		std::array<Function, range_dimension_> result;
-//		result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
-//		result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
-//		result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
-//
-//		return result;
-//	}
+	//template <ushort temp = range_dimension_, std::enable_if_t<temp == 2, bool> = true >
+	//Vector_Function<Function, range_dimension_ + 1> cross_product(const Vector_Function& other) const {
+	//	std::array<Function, range_dimension_ + 1> result;
+	//	result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+
+	//	return result;
+	//}
+
+	//template <ushort temp = range_dimension_, std::enable_if_t<temp == 3, bool> = true >
+	//Vector_Function<Function, range_dimension_> cross_product(const Vector_Function& other) const {
+	//	static_require(range_dimension_ == 3, "cross product only valid for R^3 dimension");
+
+	//	std::array<Function, range_dimension_> result;
+	//	result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
+	//	result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
+	//	result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+
+	//	return result;
+	//}
 //
 //	Function* data(void) {
 //		return this->functions_.data();
 //	}
 //
-//	Vector_Function<Function, range_dimension_> differentiate(const ushort variable_index) const {
-//		dynamic_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");
-//
-//		std::array<Function, range_dimension_> result;
-//		for (size_t i = 0; i < range_dimension_; ++i)
-//			result[i] = this->functions_[i].differentiate(variable_index);
-//
-//		return result;
-//	}
+	//Vector_Function<Function, range_dimension_> differentiate(const ushort variable_index) const {
+	//	dynamic_require(variable_index < domain_dimension_, "variable index can not exceed domain dimension");
+
+	//	std::array<Function, range_dimension_> result;
+	//	for (size_t i = 0; i < range_dimension_; ++i)
+	//		result[i] = this->functions_[i].differentiate(variable_index);
+
+	//	return result;
+	//}
 //
 //	Function inner_product(const Vector_Function& other) const {
 //		Function result;
@@ -155,14 +193,7 @@ std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) 
 //		return result;
 //	}
 //
-//	auto L2_norm(void) const {
-//		Function result(0);
-//
-//		for (const auto& function : this->functions_)
-//			result += (function ^ 2);
-//
-//		return result.root(0.5);
-//	}
+
 //
 //	std::string to_string(void) const {
 //		std::string result;

@@ -107,6 +107,17 @@ std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequence
 	return { face0_node_index,face1_node_index };
 };
 
+Irrational_Function Reference_Line::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+	constexpr ushort r = 0;
+	const auto mf_r = mapping_function.get_differentiate(r);
+	return mf_r.L2_norm();
+}
+
+ushort Reference_Line::scale_function_order(void) const {
+	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
+	return 0;
+}
+
 const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];
 }
@@ -265,12 +276,15 @@ Quadrature_Rule Reference_Triangle::make_quadrature_rule(const ushort integrand_
 bool Reference_Triangle::is_simplex(void) const {
 	return true;
 };
+
 bool Reference_Triangle::is_line(void) const {
 	return false;
-}
+};
+
 std::vector<ushort> Reference_Triangle::vertex_node_index_sequneces(void) const {
 	return { 0,1,2 };
 };
+
 std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_index_sequences(void) const {
 	//      2
 	//  2  / \  1
@@ -282,6 +296,7 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_ind
 	const std::vector<ushort> face2_node_index = { 2,0 };
 	return { face0_node_index,face1_node_index, face2_node_index };
 };
+
 std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequences(void) const {
 	//      2
 	//  2  / \  1
@@ -305,6 +320,20 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequ
 
 	return set_of_face_node_index_orders;
 };
+
+Irrational_Function Reference_Triangle::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+	constexpr ushort r = 0;
+	constexpr ushort s = 1;
+	const auto mf_r = mapping_function.get_differentiate(r);
+	const auto mf_s = mapping_function.get_differentiate(s);
+	const auto cross_product = mf_r.cross_product(mf_s);
+	return cross_product.L2_norm();
+};
+
+ushort Reference_Triangle::scale_function_order(void) const {
+	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
+	return 0;
+}
 
 const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];
@@ -529,6 +558,20 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index
 
 	return set_of_face_node_index_orders;
 };
+
+Irrational_Function Reference_Quadrilateral::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+	constexpr ushort r = 0;
+	constexpr ushort s = 1;
+	const auto mf_r = mapping_function.get_differentiate(r);
+	const auto mf_s = mapping_function.get_differentiate(s);
+	const auto cross_product = mf_r.cross_product(mf_s);
+	return cross_product.L2_norm();
+};
+
+ushort Reference_Quadrilateral::scale_function_order(void) const {
+	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
+	return 1;
+}
 
 const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];

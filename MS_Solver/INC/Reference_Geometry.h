@@ -31,6 +31,22 @@ struct Quadrature_Rule
 	}
 };
 
+//template <ushort space_dimension>
+//ushort ReferenceGeometry<space_dimension>::scale_function_order(void) const {
+//	dynamic_require(this->figure_order_ == 1, "high order mesh is not supported yet");
+//
+//	switch (this->figure_) {
+//	case Figure::line:
+//	case Figure::triangle:
+//	case Figure::tetrahedral:	return 0;
+//	case Figure::quadrilateral: return 1;
+//	case Figure::hexahedral:	return 2;
+//	default:
+//		throw std::runtime_error("not supported figure");
+//		return NULL;
+//	}
+//}
+
 class Reference_Geometry
 {
 public://Query
@@ -43,6 +59,8 @@ public://Query
 	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
+	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
+	virtual ushort scale_function_order(void) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const abstract;
 	virtual const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const abstract;
@@ -88,6 +106,8 @@ public://Query
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	ushort scale_function_order(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
@@ -126,6 +146,8 @@ public://Query
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	ushort scale_function_order(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
@@ -164,6 +186,8 @@ public://Query
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	ushort scale_function_order(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;

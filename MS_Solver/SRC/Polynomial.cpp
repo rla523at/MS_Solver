@@ -132,7 +132,7 @@ double Simple_Poly_Term::to_constant(void) const {
 	return this->constant_;
 }
 
-double Simple_Poly_Term::differentiate(const ushort variable_index) const {
+double Simple_Poly_Term::get_differentiate(const ushort variable_index) const {
 	if (this->domain_dimension_ <= variable_index)
 		return 0;
 	else
@@ -250,8 +250,8 @@ Simple_Poly_Term PoweredPolyTerm::be_simple(void) const {
 	return this->base_;
 }
 
-PolyTerm PoweredPolyTerm::differentiate(const ushort variable_index) const {
-	const auto base_derivative = this->base_.differentiate(variable_index);
+PolyTerm PoweredPolyTerm::get_differentiate(const ushort variable_index) const {
+	const auto base_derivative = this->base_.get_differentiate(variable_index);
 
 	if (base_derivative == 0.0)
 		return 0.0;
@@ -264,6 +264,10 @@ PolyTerm PoweredPolyTerm::differentiate(const ushort variable_index) const {
 
 bool PoweredPolyTerm::has_same_base(const PoweredPolyTerm& other) const {
 	return this->base_ == other.base_;
+}
+
+ushort PoweredPolyTerm::domain_dimension(void) const {
+	return this->base_.domain_dimension();
 }
 
 bool PoweredPolyTerm::is_constant(void) const {
@@ -417,11 +421,11 @@ Simple_Poly_Term PolyTerm::be_simple(void) const {
 	return this->term_ptr_[0].be_simple() * this->constant_;
 }
 
-Polynomial PolyTerm::differentiate(const ushort variable_index) const {
+Polynomial PolyTerm::get_differentiate(const ushort variable_index) const {
 	Polynomial result = 0.0;
 
 	for (ushort i = 0; i < this->num_term_; ++i) {
-		auto derivative = this->term_ptr_[i].differentiate(variable_index) * this->constant_;
+		auto derivative = this->term_ptr_[i].get_differentiate(variable_index) * this->constant_;
 
 		if (derivative.is_zero())
 			continue;			
@@ -694,21 +698,21 @@ Polynomial& Polynomial::be_absolute(void) {
 	return *this;
 }
 
-Polynomial& Polynomial::be_derivative(const ushort variable_index) {
-	auto result = this->differentiate(variable_index);
+Polynomial& Polynomial::differentiate(const ushort variable_index) {
+	auto result = this->get_differentiate(variable_index);
 	return *this = std::move(result);
 };
 
-Polynomial Polynomial::differentiate(const ushort variable_index) const {
+Polynomial Polynomial::get_differentiate(const ushort variable_index) const {
 	if (this->domain_dimension() <= variable_index)
 		return 0.0;
 
 	REQUIRE(this->is_operable(), "polynomials should be operable");
 
 	Polynomial result = 0.0;
-	result.simple_poly_term_ = this->simple_poly_term_.differentiate(variable_index);
+	result.simple_poly_term_ = this->simple_poly_term_.get_differentiate(variable_index);
 	for (const auto& poly_term : this->poly_terms_)
-		result += poly_term.differentiate(variable_index);
+		result += poly_term.get_differentiate(variable_index);
 
 	return result;
 }
@@ -734,7 +738,7 @@ Vector_Function<Polynomial> Polynomial::gradient(void) const {
 	std::vector<Polynomial> gradient(domain_dimension);
 
 	for (ushort i = 0; i < domain_dimension; ++i)
-		gradient[i] = this->differentiate(i);
+		gradient[i] = this->get_differentiate(i);
 
 	return gradient;
 }
