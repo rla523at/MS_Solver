@@ -60,7 +60,6 @@ Vector_Function<Polynomial> Geometry::orthonormal_basis_vector_function(const us
 	return ms::Gram_Schmidt_process(initial_basis_vector_function, *this);
 }
 
-
 double Geometry::volume(void) const {
 	const auto& quadrature_rule = this->get_quadrature_rule(0);
 

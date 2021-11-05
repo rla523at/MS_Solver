@@ -190,7 +190,6 @@ TEST(Geometry, volume_8) {
 		EXPECT_NEAR(result, ref, 1.0E-15);
 	}
 }
-
 TEST(Geometry, orthonormal_basis_1) {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
@@ -221,7 +220,6 @@ TEST(Geometry, orthonormal_basis_1) {
 	constexpr double allowable_error = 2.0E-9;
 	EXPECT_LE(max_error, allowable_error);
 }
-
 TEST(Geometry, orthonormal_basis_2) {
 
 	const Figure fig = Figure::quadrilateral;

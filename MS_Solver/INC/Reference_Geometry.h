@@ -31,21 +31,6 @@ struct Quadrature_Rule
 	}
 };
 
-//template <ushort space_dimension>
-//ushort ReferenceGeometry<space_dimension>::scale_function_order(void) const {
-//	dynamic_require(this->figure_order_ == 1, "high order mesh is not supported yet");
-//
-//	switch (this->figure_) {
-//	case Figure::line:
-//	case Figure::triangle:
-//	case Figure::tetrahedral:	return 0;
-//	case Figure::quadrilateral: return 1;
-//	case Figure::hexahedral:	return 2;
-//	default:
-//		throw std::runtime_error("not supported figure");
-//		return NULL;
-//	}
-//}
 
 class Reference_Geometry
 {
@@ -85,10 +70,8 @@ protected:
 
 	//virtual std::vector<ReferenceGeometry> face_reference_geometries(void) const abstract;
 	//Vector_Function<Polynomial<space_dimension>, space_dimension> normal_vector_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
-	//virtual Irrational_Function<space_dimension> scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const abstract;
 	//virtual std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const abstract;
 	//virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const abstract;
-	//virtual ushort scale_function_order(void) const abstract;
 };
 
 class Reference_Line : public Reference_Geometry

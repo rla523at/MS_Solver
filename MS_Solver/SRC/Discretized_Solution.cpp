@@ -54,6 +54,7 @@ void Discretized_Solution_HOM::set_initial_condition(const Grid& grid, const Ini
 	this->num_cells_ = grid.num_cells();
 
 }
+
 std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_HOM::calculate_set_of_post_point_solutions(void) const {
 	std::vector<std::vector<Euclidean_Vector>> set_of_post_point_solutions(this->num_cells_);
 
@@ -62,7 +63,6 @@ std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_HOM::calculate_s
 
 	return set_of_post_point_solutions;
 }
-
 
 Matrix_Wrapper Discretized_Solution_HOM::get_coefficient_matrix_wrapper(const uint icell) const {
 	return { this->num_equations_, this->set_of_num_basis_[icell], this->discretized_solutions_.data() + this->set_of_data_start_index_[icell] };

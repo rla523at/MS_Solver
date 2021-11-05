@@ -2,9 +2,21 @@
 #include <string>
 #include <stdexcept>
 
+#define DEVELOPE
+
+#ifdef DEVELOPE
 #define LOCATION ms::location_str(__FILE__,__FUNCTION__,__LINE__)
 #define REQUIRE(requirement, message) ms::require(requirement, message, LOCATION)
 #define EXCEPTION(message) ms::require(false, message, LOCATION)
+#else
+#define LOCATION 
+#define REQUIRE(requirement, message)
+#define EXCEPTION(message)
+#endif // DEVELOPE
+
+
+
+
 
 namespace ms
 {
