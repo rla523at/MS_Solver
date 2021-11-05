@@ -769,11 +769,11 @@ std::string Polynomial::to_string(void) const {
 
 	return str;
 }
-//
-//Irrational_Function<domain_dimension_> Polynomial::root(const double root_index) const {
-//	return Irrational_Function<domain_dimension_>(*this, root_index);
-//}
-//
+
+Irrational_Function Polynomial::root(const double root_index) const {
+	return Irrational_Function(*this, root_index);
+}
+
 
 void Polynomial::add_assign_poly_term(const PolyTerm& term) {
 	REQUIRE(this->is_operable(), "polynomials should be operable");
@@ -815,11 +815,17 @@ bool Polynomial::is_operable(void) const {
 std::ostream& operator<<(std::ostream& ostream, const Simple_Poly_Term& simple_poly_term) {
 	return ostream << simple_poly_term.to_string();
 }
+
 std::ostream& operator<<(std::ostream& ostream, const PolyTerm& poly_term) {
 	return ostream << poly_term.to_string();
 }
+
 std::ostream& operator<<(std::ostream& ostream, const Polynomial& polynomial) {
 	return ostream << polynomial.to_string();
+}
+
+std::ostream& operator<<(std::ostream& ostream, const Irrational_Function& irrational_function) {
+	return ostream << irrational_function.to_string();
 }
 
 

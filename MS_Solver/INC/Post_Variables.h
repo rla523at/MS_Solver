@@ -66,7 +66,7 @@ public://Query
 	virtual std::string solution_variable_location_str(const size_t get_num_solution_variable) const abstract;
 
 protected:
-	size_t num_post_elements_;
+	size_t num_cells_;
 	size_t num_post_nodes_;
 };
 

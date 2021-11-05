@@ -96,15 +96,11 @@ std::vector<std::vector<double>> Post_Variables::make_post_coordinate_blocks(con
 
 
 void Cell_Center_Format_Convertor::set_grid_data(const Grid& grid, const ushort post_order) {
-	this->num_post_elements_ = grid.num_cells();
-
-	const auto set_of_num_post_nodes = grid.cell_set_of_num_post_nodes(post_order);
-	for (const auto num_post_nodes : set_of_num_post_nodes)
-		this->num_post_nodes_ += num_post_nodes;
+	this->num_cells_ = grid.num_cells();
 }
 
 std::vector<double> Cell_Center_Format_Convertor::convert_to_post_variable_format(const std::vector<double>& values) const {
-	REQUIRE(values.size() == this->num_post_elements_, "number of values should be same with number of cells");
+	REQUIRE(values.size() == this->num_cells_, "number of values should be same with number of cells");
 	return values;
 }
 
@@ -116,7 +112,7 @@ std::string Cell_Center_Format_Convertor::solution_variable_location_str(const s
 }
 
 void Node_Format_Convertor::set_grid_data(const Grid& grid, const ushort post_order) {
-	this->num_post_elements_ = grid.num_cells();
+	this->num_cells_ = grid.num_cells();
 	this->cell_set_of_num_post_nodes_ = grid.cell_set_of_num_post_nodes(post_order);
 
 	for (const auto num_post_nodes : this->cell_set_of_num_post_nodes_)
@@ -129,12 +125,12 @@ std::vector<double> Node_Format_Convertor::convert_to_post_variable_format(const
 	if (this->num_post_nodes_ == num_values)
 		return values;
 	else {
-		REQUIRE(num_values == this->num_post_elements_, "number of values should be same with number of elements");
+		REQUIRE(num_values == this->num_cells_, "number of values should be same with number of elements");
 
 		std::vector<double> post_variable_values(this->num_post_nodes_);
 
 		size_t index = 0;
-		for (size_t i = 0; i < this->num_post_elements_; ++i) {
+		for (size_t i = 0; i < this->num_cells_; ++i) {
 			const auto num_post_elements = this->cell_set_of_num_post_nodes_[i];
 			for (size_t j = 0; j < num_post_elements; ++j)
 				post_variable_values[index++] = values[i];

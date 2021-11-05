@@ -4,6 +4,7 @@
 size_t Grid::num_cells(void) const {
 	return this->grid_elements_.cell_elements.size();
 }
+
 std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 
@@ -15,6 +16,7 @@ std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const {
 
 	return center_nodes;
 }
+
 std::vector<ushort> Grid::cell_set_of_num_post_nodes(const ushort post_order) const {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 
@@ -26,6 +28,7 @@ std::vector<ushort> Grid::cell_set_of_num_post_nodes(const ushort post_order) co
 
 	return cell_set_of_num_post_nodes;
 }
+
 std::vector<ushort> Grid::cell_set_of_num_post_elements(const ushort post_order) const{
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 
@@ -37,6 +40,7 @@ std::vector<ushort> Grid::cell_set_of_num_post_elements(const ushort post_order)
 
 	return cell_set_of_num_post_elements;
 }
+
 std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_nodes(const ushort post_order) const {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 
@@ -48,6 +52,7 @@ std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_nodes(const us
 
 	return set_of_post_nodes;
 }
+
 std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 

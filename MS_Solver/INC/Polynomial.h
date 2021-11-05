@@ -165,7 +165,7 @@ private:
 	std::vector<PoweredPolyTerm> terms;
 };
 
-
+class Irrational_Function;
 class Polynomial
 {
 public:
@@ -208,7 +208,7 @@ public://Query
 	size_t num_term(void) const;
 	double to_constant(void) const;
 	std::string to_string(void) const;
-	//Irrational_Function<domain_dimension_> root(const double root_index) const;
+	Irrational_Function root(const double root_index) const;
 
 private:
 	void add_assign_poly_term(const PolyTerm& term);
@@ -222,6 +222,34 @@ private:
 	bool is_absolute_ = false;
 };
 
+class Irrational_Function
+{
+private:
+	Polynomial base_ = 0.0;
+	double exponent_ = 1.0;
+
+public:
+	Irrational_Function(void) = default;
+	Irrational_Function(const Polynomial& polynomial, const double root_index = 1.0) 
+		:base_(polynomial),
+		 exponent_(root_index) {};
+
+public://Query
+	template <typename V> double operator()(const V& domain_vector) const {
+		return std::pow(this->base_(domain_vector), this->exponent_);
+	}
+	bool operator==(const Irrational_Function& other) const {
+		return this->base_ == other.base_ && this->exponent_ == other.exponent_;
+	}
+	std::string to_string(void) const {
+		if (this->exponent_ != 1.0)
+			return "[" + this->base_.to_string() + "]^" + std::to_string(this->exponent_);
+		else
+			return this->base_.to_string();
+	}
+};
+
+
 
 Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple_poly_term);
 PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term);
@@ -231,6 +259,7 @@ Polynomial operator*(const double constant, const Polynomial& polynomial);
 std::ostream& operator<<(std::ostream& ostream, const Simple_Poly_Term& simple_poly_term);
 std::ostream& operator<<(std::ostream& ostream, const PolyTerm& poly_term);
 std::ostream& operator<<(std::ostream& ostream, const Polynomial& polynomial);
+std::ostream& operator<<(std::ostream& ostream, const Irrational_Function& irrational_function);
 
 
 
@@ -1226,7 +1255,7 @@ std::ostream& operator<<(std::ostream& ostream, const Polynomial& polynomial);
 namespace ms {
 
 
-	constexpr ushort combination(const ushort n, const ushort k) {
+	inline ushort combination(const ushort n, const ushort k) {
 		//calculate nCk
 		//the combination of n things taken k at a time without repetition.
 		if (n == k || k == 0)
@@ -1235,7 +1264,7 @@ namespace ms {
 			return combination(n - 1, k - 1) + combination(n - 1, k);
 	}
 
-	constexpr ushort combination_with_repetition(const ushort n, const ushort k) {
+	inline ushort combination_with_repetition(const ushort n, const ushort k) {
 		//calculate nHk
 		//the combination of n things taken k at a time with repetition.
 		return combination(n + k - 1, k);

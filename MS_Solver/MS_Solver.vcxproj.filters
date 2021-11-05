@@ -63,6 +63,9 @@
     <ClCompile Include="SRC\Reference_Geometry.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Discretized_Solution.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Matrix.h">

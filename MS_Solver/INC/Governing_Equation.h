@@ -1,5 +1,9 @@
 #pragma once
-#include "Matrix.h"
+//#include "Matrix.h"
+#include <vector>
+#include <string>
+
+using ushort = unsigned short;
 
 class Governing_Equation
 {
@@ -24,6 +28,23 @@ class Euler2D : public Governing_Equation
 	}
 };
 
+//static class
+class Governing_Equation_Factory
+{
+public:
+	static std::unique_ptr<Governing_Equation> make(const Configuration& config) {
+		const auto governing_equation = config.get("Governing_Equation");
+		const auto space_dimension = config.get<ushort>("space_dimension");
+		
+		if (ms::contains_icase(governing_equation, "Euler")) {
+			if (space_dimension == 2)
+				return std::make_unique<Euler2D>();
+		}
+	}
+
+private:
+	Governing_Equation_Factory(void) = delete;
+};
 
 //
 //using uint = unsigned int;

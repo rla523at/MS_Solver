@@ -229,23 +229,23 @@ class Element : public Geometry
 //		return normalized_function;
 //	}
 //
-//	template <ushort space_dimension>
-//	Dynamic_Vector_Function<Polynomial<space_dimension>> Gram_Schmidt_process(const Dynamic_Vector_Function<Polynomial<space_dimension>>& functions, const Geometry<space_dimension>& geometry) {
-//		const auto range_dimension = functions.range_dimension();
-//
-//		std::vector<Polynomial<space_dimension>> normalized_functions(range_dimension);
-//
-//		for (ushort i = 0; i < range_dimension; ++i) {
-//			normalized_functions[i] = functions[i];
-//
-//			for (ushort j = 0; j < i; ++j)
-//				normalized_functions[i] -= ms::inner_product(normalized_functions[i], normalized_functions[j], geometry) * normalized_functions[j];
-//
-//			normalized_functions[i] *= 1.0 / ms::L2_Norm(normalized_functions[i], geometry);
-//		}
-//
-//		return normalized_functions;
-//	}
+	//template <ushort space_dimension>
+	//Dynamic_Vector_Function<Polynomial<space_dimension>> Gram_Schmidt_process(const Dynamic_Vector_Function<Polynomial<space_dimension>>& functions, const Geometry<space_dimension>& geometry) {
+	//	const auto range_dimension = functions.range_dimension();
+
+	//	std::vector<Polynomial<space_dimension>> normalized_functions(range_dimension);
+
+	//	for (ushort i = 0; i < range_dimension; ++i) {
+	//		normalized_functions[i] = functions[i];
+
+	//		for (ushort j = 0; j < i; ++j)
+	//			normalized_functions[i] -= ms::inner_product(normalized_functions[i], normalized_functions[j], geometry) * normalized_functions[j];
+
+	//		normalized_functions[i] *= 1.0 / ms::L2_Norm(normalized_functions[i], geometry);
+	//	}
+
+	//	return normalized_functions;
+	//}
 //
 //	template <typename T, typename Container>
 //	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) {
@@ -713,30 +713,30 @@ class Element : public Geometry
 //
 //template <ushort space_dimension>
 //Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const {
-//	const auto scale_function = this->scale_function(mapping_function);
-//
-//	//constexpr ushort heuristic_additional_order = 2;
-//	//const ushort reference_integrand_order = physical_integrand_order + heuristic_additional_order;
-//	const auto reference_integrand_order = physical_integrand_order + this->scale_function_order();
-//	const auto key = std::make_pair(this->figure_, reference_integrand_order);
-//	if (ReferenceGeometry::key_to_reference_quadrature_rule_.find(key) == ReferenceGeometry::key_to_reference_quadrature_rule_.end())
-//		ReferenceGeometry::key_to_reference_quadrature_rule_.emplace(key, this->reference_quadrature_rule(reference_integrand_order));
-//
-//	const auto& reference_quadrature_rule = ReferenceGeometry::key_to_reference_quadrature_rule_.at(key);
-//
-//	const auto transformed_QP = mapping_function(reference_quadrature_rule.points);
-//
-//	const auto num_QP = transformed_QP.size();
-//	std::vector<double> transformed_QW(num_QP);
-//
-//	for (size_t i = 0; i < num_QP; ++i) {
-//		const auto& point = reference_quadrature_rule.points[i];
-//		const auto& weight = reference_quadrature_rule.weights[i];
-//
-//		transformed_QW[i] = scale_function(point) * weight;
-//	}
-//
-//	return { transformed_QP, transformed_QW };
+	//const auto scale_function = this->scale_function(mapping_function);
+
+	////constexpr ushort heuristic_additional_order = 2;
+	////const ushort reference_integrand_order = physical_integrand_order + heuristic_additional_order;
+	//const auto reference_integrand_order = physical_integrand_order + this->scale_function_order();
+	//const auto key = std::make_pair(this->figure_, reference_integrand_order);
+	//if (ReferenceGeometry::key_to_reference_quadrature_rule_.find(key) == ReferenceGeometry::key_to_reference_quadrature_rule_.end())
+	//	ReferenceGeometry::key_to_reference_quadrature_rule_.emplace(key, this->reference_quadrature_rule(reference_integrand_order));
+
+	//const auto& reference_quadrature_rule = ReferenceGeometry::key_to_reference_quadrature_rule_.at(key);
+
+	//const auto transformed_QP = mapping_function(reference_quadrature_rule.points);
+
+	//const auto num_QP = transformed_QP.size();
+	//std::vector<double> transformed_QW(num_QP);
+
+	//for (size_t i = 0; i < num_QP; ++i) {
+	//	const auto& point = reference_quadrature_rule.points[i];
+	//	const auto& weight = reference_quadrature_rule.weights[i];
+
+	//	transformed_QW[i] = scale_function(point) * weight;
+	//}
+
+	//return { transformed_QP, transformed_QW };
 //}
 //
 //
@@ -1874,51 +1874,51 @@ class Element : public Geometry
 //template <ushort space_dimension>
 //template <ushort polynomial_degree>
 //auto Geometry<space_dimension>::orthonormal_basis_vector_function(void) const {
-//	const auto initial_basis_set = this->initial_basis_function<polynomial_degree>();
-//	return ms::Gram_Schmidt_process(initial_basis_set, *this);
+	//const auto initial_basis_set = this->initial_basis_function<polynomial_degree>();
+	//return ms::Gram_Schmidt_process(initial_basis_set, *this);
 //}
 //
 ////template <ushort space_dimension>
 ////auto Geometry<space_dimension>::initial_basis_function(const ushort polynomial_order) const {
-////	constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, polynomial_order);
-////
-////	std::array<Polynomial<space_dimension>, num_basis> initial_basis_set = { 0 };
-////	
-////	ushort index = 0;
-////	if (space_dimension == 2) {
-////		Polynomial<space_dimension> x("x0");
-////		Polynomial<space_dimension> y("x1");
-////
-////		const auto center_node = this->center_node();
-////		const auto x_c = center_node.at(0);
-////		const auto y_c = center_node.at(1);
-////
-////		//1 (x - x_c) (y - y_c)  ...
-////		for (ushort a = 0; a <= polynomial_order; ++a)
-////			for (ushort b = 0; b <= a; ++b)
-////				initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
-////	}
-////	else if (space_dimension == 3) {
-////		Polynomial<space_dimension> x("x0");
-////		Polynomial<space_dimension> y("x1");
-////		Polynomial<space_dimension> z("x2");
-////
-////		const auto center_node = this->center_node();
-////		const auto x_c = center_node.at(0);
-////		const auto y_c = center_node.at(1);
-////		const auto z_c = center_node.at(2);
-////
-////		//1 (x - x_c) (y - y_c) (z - z_c) ...
-////		for (ushort a = 0; a <= polynomial_order; ++a)
-////			for (ushort b = 0; b <= a; ++b)
-////				for (ushort c = 0; c <= b; ++c)
-////					initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ (b - c)) * ((z - z_c) ^ c);
-////	}
-////	else
-////		throw std::runtime_error("not supported space dimension");
-////
-////	Vector_Function<Polynomial<space_dimension>, num_basis> initial_basis_function = initial_basis_set;
-////	return initial_basis_function;
+	//constexpr auto num_basis = ms::combination_with_repetition(1 + space_dimension, polynomial_order);
+
+	//std::array<Polynomial<space_dimension>, num_basis> initial_basis_set = { 0 };
+	//
+	//ushort index = 0;
+	//if (space_dimension == 2) {
+	//	Polynomial<space_dimension> x("x0");
+	//	Polynomial<space_dimension> y("x1");
+
+	//	const auto center_node = this->center_node();
+	//	const auto x_c = center_node.at(0);
+	//	const auto y_c = center_node.at(1);
+
+	//	//1 (x - x_c) (y - y_c)  ...
+	//	for (ushort a = 0; a <= polynomial_order; ++a)
+	//		for (ushort b = 0; b <= a; ++b)
+	//			initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
+	//}
+	//else if (space_dimension == 3) {
+	//	Polynomial<space_dimension> x("x0");
+	//	Polynomial<space_dimension> y("x1");
+	//	Polynomial<space_dimension> z("x2");
+
+	//	const auto center_node = this->center_node();
+	//	const auto x_c = center_node.at(0);
+	//	const auto y_c = center_node.at(1);
+	//	const auto z_c = center_node.at(2);
+
+	//	//1 (x - x_c) (y - y_c) (z - z_c) ...
+	//	for (ushort a = 0; a <= polynomial_order; ++a)
+	//		for (ushort b = 0; b <= a; ++b)
+	//			for (ushort c = 0; c <= b; ++c)
+	//				initial_basis_set[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ (b - c)) * ((z - z_c) ^ c);
+	//}
+	//else
+	//	throw std::runtime_error("not supported space dimension");
+
+	//Vector_Function<Polynomial<space_dimension>, num_basis> initial_basis_function = initial_basis_set;
+	//return initial_basis_function;
 ////}
 ////
 ////template <ushort space_dimension>

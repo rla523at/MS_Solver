@@ -25,6 +25,10 @@ struct Quadrature_Rule
 	bool operator==(const Quadrature_Rule& other) const {
 		return this->nodes == other.nodes && this->weights == other.weights;
 	}
+
+	bool is_empty(void) const {
+		return this->nodes.empty();
+	}
 };
 
 class Reference_Geometry
@@ -34,19 +38,20 @@ public://Query
 	virtual ushort num_vertex(void) const abstract;
 	virtual ushort num_post_nodes(const ushort post_order) const abstract;
 	virtual ushort num_post_elements(const ushort post_order) const abstract;
-	virtual Quadrature_Rule quadrature_rule(const ushort integrand_order) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
 	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const abstract;
+	virtual const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const abstract;
 	virtual const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const abstract;
 	virtual const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const abstract;
 	virtual const Matrix& get_inverse_mapping_monomial_matrix(void) const abstract;
 
 protected:
+	virtual Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual std::vector<Euclidean_Vector> make_mapping_nodes(void) const abstract;
 	virtual std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const abstract;
 	virtual std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const abstract;
@@ -78,19 +83,20 @@ public://Query
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
+	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
 	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
 	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
 	const Matrix& get_inverse_mapping_monomial_matrix(void) const override;
 
 private:
+	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
@@ -98,6 +104,7 @@ private:
 
 private:
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
+	static inline std::vector<Quadrature_Rule> quadrature_rules_;
 	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
 	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;
@@ -114,13 +121,13 @@ public://Query
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
+	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
 	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
 	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
@@ -128,12 +135,14 @@ public://Query
 
 private:
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
+	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
 
 private:
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
+	static inline std::vector<Quadrature_Rule> quadrature_rules_;
 	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
 	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;
@@ -150,13 +159,13 @@ public://Query
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Quadrature_Rule quadrature_rule(const ushort integrand_order) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
+	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
 	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
 	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
 	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
@@ -164,12 +173,14 @@ public://Query
 
 private:
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
+	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
 
 private:
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
+	static inline std::vector<Quadrature_Rule> quadrature_rules_;
 	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
 	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
 	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;

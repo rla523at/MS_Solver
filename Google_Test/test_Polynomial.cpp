@@ -1290,191 +1290,43 @@ TEST(Polynomial, gradient_4) {
 	EXPECT_EQ(result, ref);
 }
 
-//
-//
-//
-////Irrational Function
-//TEST(IrrationalFunction, operator_call_1) {
-//	constexpr size_t space_dimension = 1;
-//
-//	const auto x = Polynomial("x0");
-//
-//	const auto p = x;
-//	const auto ir = p.root(0.5);
-//
-//	for (size_t i = 0; i < 10; ++i) {
-//		const double val = 0.31 * i;
-//		const std::vector<double> val_vec = { val };
-//		const double result = ir(val_vec);
-//		const double ref = std::pow(val, 0.5);
-//		EXPECT_DOUBLE_EQ(result, ref);
-//	}
-//}
-//TEST(IrrationalFunction, operator_call_2) {
-//	constexpr size_t space_dimension = 1;
-//
-//	const auto x = Polynomial("x0");
-//
-//	const auto p = (x ^ 2) + x + 1;
-//	const auto ir = p.root(0.5);
-//
-//	for (size_t i = 0; i < 10; ++i) {
-//		const double val = 0.31 * i;
-//		const std::vector<double> val_vec = { val };
-//		const double result = ir(val_vec);
-//		const double ref = std::pow(val * val + val + 1, 0.5);
-//		EXPECT_DOUBLE_EQ(result, ref);
-//	}
-//}
-//
-//
-//TEST(ms, is_natural_number_1) {
-//	EXPECT_FALSE(ms::is_natural_number(3.1));
-//}
-//TEST(ms, is_natural_number_2) {
-//	EXPECT_FALSE(ms::is_natural_number(-1));
-//}
+TEST(Irrational_Function, operator_call_1) {
+	const auto x = Polynomial("x0");
+	const auto ir = x.root(0.5);
 
+	for (size_t i = 0; i < 10; ++i) {
+		const double val = 0.31 * i;
+		const std::vector<double> val_vec = { val };
+		const double result = ir(val_vec);
+		const double ref = std::pow(val, 0.5);
+		EXPECT_DOUBLE_EQ(result, ref);
+	}
+}
+TEST(Irrational_Function, operator_call_2) {
+	const auto x = Polynomial("x0");
+	const auto p = (x ^ 2) + x + 1;
+	const auto ir = p.root(0.5);
 
+	for (size_t i = 0; i < 10; ++i) {
+		const double val = 0.31 * i;
+		const std::vector<double> val_vec = { val };
+		const double result = ir(val_vec);
+		const double ref = std::pow(val * val + val + 1, 0.5);
+		EXPECT_DOUBLE_EQ(result, ref);
+	}
+}
+TEST(Irrational_Function, operator_call_3) {
+	const auto x = Polynomial("x0");
 
+	const auto p1 = (x ^ 2) + x + 1;
+	const auto p2 = p1.root(0.7);
 
+	for (size_t i = 0; i < 10; ++i) {
+		const double val = 0.31 * i;
+		const std::vector<double> val_vec = { val };
+		const double result = p2(val_vec);
+		const double ref = (std::pow(val * val + val + 1, 0.7));
+		EXPECT_DOUBLE_EQ(result, ref);
+	}
+}
 
-
-
-
-
-//TEST(Polynomial, OPERATOR_MULTIPLICATION_10) {
-//	auto p1 = X + 1;
-//	const auto p2 = p1^(0.5);
-//	const auto result = p2 * p2;
-//
-//	auto ref = X + 1;
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Polynomial, COMPLEX_OPERATION_2) {
-//	auto p1 = (X ^ 2) + X + 1;
-//	const auto p2 = p1 ^ 0.7;
-//	const auto p3 = 5 * p2;
-//
-	//for (size_t i = 0; i < 10; ++i) {
-	//	const double val = 0.31 * i;
-	//	const MathVector val_vec = { val };
-	//	const double result = p3(val_vec);
-	//	const double ref = 5 * (std::pow(val * val + val + 1, 0.7));
-	//	EXPECT_DOUBLE_EQ(result, ref);
-//	}
-//}
-//TEST(Polynomial, COMPLEX_OPERATION_4) {
-//	auto p1 = ms::sqrt(X + 1) * X + X + 1;
-//	auto p2 = ms::sqrt(X + 2) * X;
-//	const auto result = p1 * p2;
-//
-//	for (size_t i = 0; i < 10; ++i) {
-//		const double val = 0.31 * i;
-//		const MathVector v = { val };
-//
-//		const double ref = (std::sqrt(val + 1) * val + val + 1) * (std::sqrt(val + 2) * val);
-//		EXPECT_DOUBLE_EQ(result(v), ref);
-//	}
-//}
-
-
-
-
-
-
-
-//
-//
-//TEST(VECTORFUNCTION, OPERATOR_CALL1) {
-//	auto p1 = (X ^ 2) + 3 * (X ^ 2) * Y + (Y ^ 3) + (Z ^ 2) - 6;
-//	auto p2 = X + Y + Z - 3;
-//	auto p3 = (Y ^ 2) * Z + X * Z - 2;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//	MathVector node = { 1,1,1 };
-//	const auto result = f(node);
-//
-//	MathVector ref = { 0,0,0 };
-//	EXPECT_EQ(result, ref);
-//}
-//
-//
-//TEST(VECTORFUNCTION, DIFFERENTIATE1) {
-//	auto p1 = X + 1;
-//	auto p2 = X + Y + Z - 3;
-//	auto p3 = Y + Z;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//
-//	constexpr size_t variable_index = 0;
-//	f.differentiate(variable_index);
-//
-//	VectorFunction<auto> ref = { 1,1,0 };
-//	EXPECT_EQ(f, ref);
-//}
-//TEST(VECTORFUNCTION, DIFFERENTIATE2) {
-//	auto p1 = X * Y + 1;
-//	auto p2 = X + Y * Z + Z - 3;
-//	auto p3 = Y + Z;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//
-//	constexpr size_t variable_index = 0;
-//	f.differentiate(variable_index);
-//
-//	VectorFunction<auto> ref = { Y,1,0 };
-//	EXPECT_EQ(f, ref);
-//}
-//TEST(VECTORFUNCTION, DIFFERENTIATE3) {
-//	auto p1 = X * Y + 1;
-//	auto p2 = X + Y * Z + Z - 3;
-//	auto p3 = Y + Z;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//
-//	constexpr size_t variable_index = 1;
-//	f.differentiate(variable_index);
-//
-//	VectorFunction<auto> ref = { X,Z,1 };
-//	EXPECT_EQ(f, ref);
-//}
-//TEST(VECTORFUNCTION, DIFFERENTIATE4) {
-//	auto p1 = 1.5 * X + 0.5 * Y + 3;
-//	auto p2 = Y + 3;
-//	auto p3 = 0;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//
-//	constexpr size_t variable_index = 0;
-//	f.differentiate(variable_index);
-//
-//	VectorFunction<auto> ref = { 1.5,0,0 };
-//	EXPECT_EQ(f, ref);
-//}
-//TEST(VECTORFUNCTION, DIFFERENTIATE5) {
-//	auto p1 = 1.5 * X + 0.5 * Y + 3;
-//	auto p2 = Y + 3;
-//	auto p3 = 0;
-//	VectorFunction<auto> f = { p1,p2,p3 };
-//
-//	constexpr size_t variable_index = 1;
-//	f.differentiate(variable_index);
-//
-//	VectorFunction<auto> ref = { 0.5,1,0 };
-//	EXPECT_EQ(f, ref);
-//}
-//
-//
-//TEST(VECTORFUNCTION, CROSS_PRODUCT1) {
-//	VectorFunction<auto> vf1 = { 1.5,0,0 };
-//	VectorFunction<auto> vf2 = { 0.5,1,0 };
-//	const auto result = vf1.cross_product(vf2);
-//
-//	VectorFunction<auto> ref = { 0,0,1.5 };
-//	EXPECT_EQ(result, ref);
-//}
-//
-//
-//TEST(VECTORFUNCTION, L2_NORM1) {
-//	VectorFunction<auto> vf = { 0,0,1.5 };
-//	const auto result = vf.L2_norm();
-//
-//	auto ref = 1.5;
-//	EXPECT_EQ(result, ref);
-//}

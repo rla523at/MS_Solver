@@ -1,16 +1,17 @@
 #pragma once
-#include "Boundary_Flux_Function.h"
+//#include "Boundary_Flux_Function.h"
 #include "Grid_Element_Builder.h"
 
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <optional>
+//#include <set>
+//#include <unordered_map>
+//#include <unordered_set>
+//#include <optional>
 
 class Grid 
 {
 public:
 	size_t num_cells(void) const;
+	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const ushort solution_order) const;
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
 	std::vector<ushort> cell_set_of_num_post_nodes(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;

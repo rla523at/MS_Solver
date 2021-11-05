@@ -55,7 +55,7 @@ ushort Reference_Line::num_post_elements(const ushort post_order) const {
 	const auto n = post_order;
 	return n + 1;
 }
-Quadrature_Rule Reference_Line::quadrature_rule(const ushort integrand_order) const {
+Quadrature_Rule Reference_Line::make_quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {
 	case 0:
 	case 1:		return { { { 0.000000000000000 } }, { 2.000000000000000 } };
@@ -88,30 +88,49 @@ bool Reference_Line::is_simplex(void) const {
 bool Reference_Line::is_line(void) const {
 	return true;
 }
+
 std::vector<ushort> Reference_Line::vertex_node_index_sequneces(void) const {
 	return { 0,1 };
 };
+
 std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_node_index_sequences(void) const {
 	// 0 式式式式 1
 	const std::vector<ushort> face0_node_index = { 0 };
 	const std::vector<ushort> face1_node_index = { 1 };
 	return { face0_node_index,face1_node_index };
 };
+
 std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequences(void) const {
 	// 0 式式式式 1
 	const std::vector<ushort> face0_node_index = { 0 };
 	const std::vector<ushort> face1_node_index = { 1 };
 	return { face0_node_index,face1_node_index };
 };
+
 const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];
 }
+
+const Quadrature_Rule& Reference_Line::get_quadrature_rule(const ushort integrand_order) const {
+	if (this->quadrature_rules_.size() <= integrand_order) {
+		const auto new_isze = integrand_order + 1;
+		this->quadrature_rules_.resize(new_isze);
+	}
+
+	if (this->quadrature_rules_[integrand_order].is_empty())
+		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
+
+	return this->quadrature_rules_[integrand_order];
+}
+
 const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const {
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
+
 const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const {
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
+
 const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const {
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
@@ -216,7 +235,7 @@ ushort Reference_Triangle::num_post_elements(const ushort post_order) const {
 	const auto n = post_order;
 	return (n + 1) * (n + 1);
 }
-Quadrature_Rule Reference_Triangle::quadrature_rule(const ushort integrand_order) const {
+Quadrature_Rule Reference_Triangle::make_quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {
 	case 0:		return { { { -0.5, 0 } }, { 2 } };
 	case 1:
@@ -286,15 +305,31 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequ
 
 	return set_of_face_node_index_orders;
 };
+
 const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];
 }
+
+const Quadrature_Rule& Reference_Triangle::get_quadrature_rule(const ushort integrand_order) const {
+	if (this->quadrature_rules_.size() <= integrand_order) {
+		const auto new_isze = integrand_order + 1;
+		this->quadrature_rules_.resize(new_isze);
+	}
+
+	if (this->quadrature_rules_[integrand_order].is_empty())
+		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
+
+	return this->quadrature_rules_[integrand_order];
+}
+
 const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const {
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
+
 const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const {
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
+
 const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const {
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
@@ -422,7 +457,7 @@ ushort Reference_Quadrilateral::num_post_elements(const ushort post_order) const
 	const auto n = post_order;
 	return 2 * (n + 1) * (n + 1);
 }
-Quadrature_Rule Reference_Quadrilateral::quadrature_rule(const ushort integrand_order) const {
+Quadrature_Rule Reference_Quadrilateral::make_quadrature_rule(const ushort integrand_order) const {
 	switch (integrand_order) {
 	case 0:
 	case 1:		return { { { 0, 0 } }, { 4 } };
@@ -494,15 +529,31 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index
 
 	return set_of_face_node_index_orders;
 };
+
 const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const {
 	return this->set_of_mapping_nodes_[this->order_];
 }
+
+const Quadrature_Rule& Reference_Quadrilateral::get_quadrature_rule(const ushort integrand_order) const {
+	if (this->quadrature_rules_.size() <= integrand_order) {
+		const auto new_isze = integrand_order + 1;
+		this->quadrature_rules_.resize(new_isze);
+	}
+
+	if (this->quadrature_rules_[integrand_order].is_empty())
+		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
+
+	return this->quadrature_rules_[integrand_order];
+}
+
 const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const {
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
+
 const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const {
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
+
 const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const {
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
@@ -514,6 +565,7 @@ const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(con
 
 	return this->set_of_post_nodes_[post_order];
 }
+
 const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const {
 	if (this->set_of_connectivities_.size() <= post_order) {
 		const auto new_size = post_order + 1;
