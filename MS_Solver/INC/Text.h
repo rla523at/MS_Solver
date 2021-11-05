@@ -25,15 +25,17 @@ public://command
 	}
 	template<>	Sentence& insert_with_space(const double value);
 	void remove_after(const std::string_view target);
-	void remove_all_from_here(const size_t position);
-	void remove_all(const std::vector<char> targets);
+	void remove_from_here(const size_t position);
+	void remove(const std::vector<char> targets);
+	void upper_case(void);
+
 
 public://Query
 	bool operator==(const Sentence& other) const;
 	size_t find_position(const std::string_view target) const;
 	std::vector<Sentence> parse(const char delimiter) const;
 	std::string to_string(void) const;
-	Sentence upper_case(void) const;
+	Sentence get_upper_case(void) const;
 
 
 private:
@@ -74,30 +76,7 @@ private:
 };
 
 
-//class Text : public std::vector<std::string>
-//{
-//public:
-//	template <typename ... Vals>
-//	explicit Text(Vals&&... values) : std::vector<std::string>(std::forward<Vals>(values)...) {};
-//	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
-//	Text(std::ifstream& file, const size_t num_read_line);
-//
-//public:
-//	Text& operator<<(const std::string& str);
-//	Text& operator<<(std::string&& str);
-//
-//public://command
-//	void merge(Text&& other);
-//	void remove_empty_line(void);
-//	void read(const std::string& read_file_path);
-//	void read(std::ifstream& file, const size_t num_read_line);
-//	void insert_with_space(const size_t line_index, const int value);
-//	void insert_with_space(const size_t line_index, const double value);
-//
-//public://Query
-//	void add_write(const std::string_view write_file_path) const;
-//	void write(const std::string_view write_file_path) const;
-//};
+
 
 std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece);
 std::ostream& operator<<(std::ostream& ostream, const Text& text);
@@ -127,15 +106,18 @@ public:
 
 
 namespace ms {
-	void be_replaced(std::string& str, const char target, const char replacement);
-	void be_replaced(std::string& str, const std::string_view target, const std::string_view replacement);
-	void be_removed(std::string& str, const std::string_view target);
+	void replace(std::string& str, const char target, const char replacement);
+	void replace(std::string& str, const std::string_view target, const std::string_view replacement);
+	void remove(std::string& str, const char target);
+	void remove(std::string& str, const std::string_view target);
 
 	std::vector<std::string> parse(const std::string& str, const char delimiter);
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
 	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement);
+	std::string remove(const std::string& str, const char target);
 	std::string remove(const std::string& str, const std::string_view target);
-	std::string upper_case(const std::string& str);
+	void upper_case(std::string& str);
+	std::string get_upper_case(const std::string& str);
 	size_t find_icase(const std::string& str, const std::string& target);
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
 	bool contains_icase(const std::string& str, const char* target);
@@ -196,3 +178,29 @@ namespace ms {
 		return (ms::contains_icase(str, args) && ...);
 	};
 }
+
+
+//class Text : public std::vector<std::string>
+//{
+//public:
+//	template <typename ... Vals>
+//	explicit Text(Vals&&... values) : std::vector<std::string>(std::forward<Vals>(values)...) {};
+//	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
+//	Text(std::ifstream& file, const size_t num_read_line);
+//
+//public:
+//	Text& operator<<(const std::string& str);
+//	Text& operator<<(std::string&& str);
+//
+//public://command
+//	void merge(Text&& other);
+//	void remove_empty_line(void);
+//	void read(const std::string& read_file_path);
+//	void read(std::ifstream& file, const size_t num_read_line);
+//	void insert_with_space(const size_t line_index, const int value);
+//	void insert_with_space(const size_t line_index, const double value);
+//
+//public://Query
+//	void add_write(const std::string_view write_file_path) const;
+//	void write(const std::string_view write_file_path) const;
+//};

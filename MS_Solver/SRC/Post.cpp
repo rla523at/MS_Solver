@@ -1,9 +1,11 @@
 #include "../INC/Post.h"
 
-void Post_Processing::initialize(const Configuration& configuration) {
-	This_::post_order_ = configuration.get<ushort>("post_order");
-	const auto post_variable_location = configuration.get("post_variable_location");
+void Post_Processing::initialize(const Configuration& configuration) {	
+	This_::post_file_path_ = configuration.get("Post_file_path");
 
+	This_::post_order_ = configuration.get<ushort>("post_order");
+
+	const auto post_variable_location = configuration.get("post_variable_location");	
 	This_::post_variables_.set_post_variable_format(post_variable_location);
 
 	if (ms::contains_icase(post_variable_location, "cell", "center"))
@@ -11,7 +13,7 @@ void Post_Processing::initialize(const Configuration& configuration) {
 };
 
 void Post_Processing::post_grid(const Grid& grid) {
-	This_::post_variables_.record_grid(grid, This_::post_order_);
+	This_::post_variables_.record_grid_data(grid, This_::post_order_);
 	This_::file_writer_.write_grid_file(This_::post_variables_, This_::post_file_path_);
 }
 

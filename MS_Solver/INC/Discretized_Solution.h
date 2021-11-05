@@ -20,7 +20,7 @@ class Discretized_Solution
 protected:
 	Discretized_Solution(const Grid& grid, const Initial_Condition& initial_condition) {
 		this->num_equations_ = initial_condition.num_equations();
-		this->num_cells_ = grid.num_cells();
+		this->num_post_elements_ = grid.num_cells();
 		this->solution_variable_names_ = initial_condition.solution_variable_names();
 	}
 
@@ -32,7 +32,7 @@ public:	//Query
 
 protected:
 	ushort num_equations_;
-	size_t num_cells_;
+	size_t num_post_elements_;
 	std::vector<std::string> solution_variable_names_;
 	std::vector<double> discretized_solutions_;
 };
@@ -43,7 +43,7 @@ class Discretized_Solution_FVM : public Discretized_Solution
 public:
 	Discretized_Solution_FVM(const Grid& grid, const Initial_Condition& initial_condition)
 		: Discretized_Solution(grid, initial_condition) {
-		this->discretized_solutions_.resize(num_cells_ * num_equations_);
+		this->discretized_solutions_.resize(num_post_elements_ * num_equations_);
 
 
 	}
@@ -52,9 +52,9 @@ public: //Query
 	std::vector<std::vector<double>> calculate_post_point_solutions_by_variable(void) const override {
 		std::vector<std::vector<double>> post_point_solutions_by_variable(num_equations_);
 		for (auto& vec : post_point_solutions_by_variable)
-			vec.reserve(this->num_cells_);
+			vec.reserve(this->num_post_elements_);
 				
-		for (uint icell = 0; icell < this->num_cells_; ++icell) {
+		for (uint icell = 0; icell < this->num_post_elements_; ++icell) {
 			const auto solution = this->calculate_solution_at_post_point(icell);
 		
 			for (ushort j = 0; j < this->num_equations_; ++j) 

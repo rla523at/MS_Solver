@@ -4,28 +4,40 @@ Sentence& Sentence::operator<<(const std::string& str) {
 	this->contents_ += str;
 	return *this;
 }
+
 template<>
 Sentence& Sentence::insert_with_space(const double value) {
 	this->contents_ += " " + ms::double_to_string(value);
 	return *this;
 }
+
 void Sentence::remove_after(const std::string_view target) {
 	const auto pos = this->contents_.find(target.data());
 	this->contents_.erase(pos + 1);
 }
-void Sentence::remove_all_from_here(const size_t position) {
+
+void Sentence::remove_from_here(const size_t position) {
 	REQUIRE(position < this->contents_.size(), "position can not exceed given range");
 	this->contents_.erase(position);
 }
-void Sentence::remove_all(const std::vector<char> targets) {
 
+void Sentence::remove(const std::vector<char> targets) {
+	for (const auto target : targets)
+		ms::remove(this->contents_, target);
 }
+
+void Sentence::upper_case(void) {
+	ms::upper_case(this->contents_);
+}
+
 bool Sentence::operator==(const Sentence& other) const {
 	return this->contents_ == other.contents_;
 }
+
 size_t Sentence::find_position(const std::string_view target) const {
 	return this->contents_.find(target.data());
 }
+
 std::vector<Sentence> Sentence::parse(const char delimiter) const {
 	auto parsed_strs =ms::parse(this->contents_, delimiter);
 	
@@ -37,45 +49,53 @@ std::vector<Sentence> Sentence::parse(const char delimiter) const {
 
 	return parsed_senteces;
 }
+
 std::string Sentence::to_string(void) const {
 	return this->contents_;
 }
-Sentence Sentence::upper_case(void) const {
-	return ms::upper_case(this->contents_);
+
+Sentence Sentence::get_upper_case(void) const {	
+	return ms::get_upper_case(this->contents_);
 }
 
 Text::Text(std::initializer_list<std::string> list) {
 	this->senteces_.reserve(list.size());
 
-	for (auto& str : list)
-		this->senteces_.push_back(std::move(str));
-
-	//this->senteces_.insert(this->senteces_.end(), list);
+	for (const auto& str : list)
+		this->senteces_.push_back(str);
 }
+
 Sentence& Text::operator[](const size_t index) {
 	REQUIRE(index < this->size(), "index can not exceed given range");
 	return this->senteces_[index];
 }
+
 Text& Text::operator<<(const std::string& str) {
 	this->senteces_.push_back(str);
 	return *this;
 }
+
 Text& Text::operator<<(std::string&& str) {
 	this->senteces_.push_back(std::move(str));
 	return *this;
 }
+
 void Text::add_empty_lines(const size_t num_line) {
 	this->senteces_.resize(num_line);
 }
+
 std::vector<Sentence>::iterator Text::begin(void) {
 	return this->senteces_.begin();
 }
+
 std::vector<Sentence>::iterator Text::end(void) {
 	return this->senteces_.end();
 }
+
 void Text::merge(Text&& other) {
 	this->senteces_.insert(this->senteces_.end(), std::make_move_iterator(other.senteces_.begin()), std::make_move_iterator(other.senteces_.end()));
 }
+
 void Text::read(const std::string_view file_path) {
 	std::ifstream file_stream(file_path);
 	REQUIRE(file_stream.is_open(), "Fail to open file");
@@ -172,7 +192,7 @@ Binary_Writer& Binary_Writer::operator<<(const std::string& str) {
 }
 
 namespace ms {
-	void be_replaced(std::string& str, const char target, const char replacement) {
+	void replace(std::string& str, const char target, const char replacement) {
 		while (true) {
 			const auto pos = str.find(target);
 
@@ -183,7 +203,7 @@ namespace ms {
 		}
 	}
 
-	void be_replaced(std::string& str, const std::string_view target, const std::string_view replacement) {
+	void replace(std::string& str, const std::string_view target, const std::string_view replacement) {
 		if (target.empty())
 			return;
 
@@ -197,8 +217,19 @@ namespace ms {
 		}
 	}
 
-	void be_removed(std::string& str, const std::string_view target) {
-		ms::be_replaced(str, target, "");
+	void remove(std::string& str, const char target) {
+		while (true) {
+			const auto pos = str.find(target);
+
+			if (pos == std::string::npos)
+				break;
+
+			str.erase(pos, 1);
+		}
+	}
+
+	void remove(std::string& str, const std::string_view target) {
+		ms::replace(str, target, "");
 	}
 
 	std::vector<std::string> parse(const std::string& str, const char delimiter) {
@@ -229,26 +260,33 @@ namespace ms {
 
 		auto temp_str = str;
 		for (size_t i = 1; i < num_delimiter; ++i)
-			ms::be_replaced(temp_str, delimiters[i], reference_delimiter);
+			ms::replace(temp_str, delimiters[i], reference_delimiter);
 
 		return ms::parse(temp_str, reference_delimiter);
 	}
 
 	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement) {
 		auto result = str;
-		ms::be_replaced(result, target, replacement);
+		ms::replace(result, target, replacement);
 		return result;
 	}
 
+	std::string remove(const std::string& str, const char target) {
+		auto result = str;
+		ms::remove(result, target);
+		return result;
+	}
+
+
 	std::string remove(const std::string& str, const std::string_view target) {
 		auto result = str;
-		ms::be_removed(result, target);
+		ms::remove(result, target);
 		return result;
 	}
 
 	size_t find_icase(const std::string& str, const std::string& target) {
-		auto u_str = ms::upper_case(str);
-		auto u_target = ms::upper_case(target);
+		auto u_str = ms::get_upper_case(str);
+		auto u_target = ms::get_upper_case(target);
 
 		return u_str.find(u_target);
 	}
@@ -268,9 +306,15 @@ namespace ms {
 		return pos;
 	}
 
-	std::string upper_case(const std::string& str) {
+	void upper_case(std::string& str) {
+		std::transform(str.begin(), str.end(), str.begin(), toupper);
+		//std::transform(result.begin(), result.end(), result.begin(), std::toupper); //filesystem이랑 있으면 충돌
+	}
+
+	std::string get_upper_case(const std::string& str) {
 		auto result = str;
-		std::transform(result.begin(), result.end(), result.begin(), toupper);
+		ms::upper_case(result);
+		//std::transform(result.begin(), result.end(), result.begin(), toupper);
 		//std::transform(result.begin(), result.end(), result.begin(), std::toupper); //filesystem이랑 있으면 충돌
 		return result;
 	}

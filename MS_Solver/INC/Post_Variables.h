@@ -5,7 +5,7 @@
 class Post_Variables
 {
 public://Command
-	void record_grid(const Grid& grid, const ushort post_order);
+	void record_grid_data(const Grid& grid, const ushort post_order);
 	void record_variable(const std::string_view name, const std::vector<double>& values);
 	void set_post_variable_format(const std::string& post_variable_location_str);
 	void syncronize_solution_time(const double& get_solution_time);
@@ -32,7 +32,7 @@ private:
 	std::vector<std::vector<double>> make_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 
 private:
-	std::unique_ptr<Post_Variable_Format_Converter> value_format_convertor_;
+	std::unique_ptr<Post_Value_Format_Converter> value_format_convertor_;
 
 	const double* solution_time_ptr_ = nullptr;
 
@@ -56,23 +56,21 @@ enum class Zone_Type {
 	FETetrahedron = 4
 };
 
-
-
-class Post_Variable_Format_Converter
+class Post_Value_Format_Converter
 {
-public://command
+public://Command
 	virtual void set_grid_data(const Grid& grid, const ushort post_order) abstract;
 
-public://query
+public://Query
 	virtual std::vector<double> convert_to_post_variable_format(const std::vector<double>& values) const abstract;
 	virtual std::string solution_variable_location_str(const size_t get_num_solution_variable) const abstract;
 
 protected:
-	size_t num_cells_;
+	size_t num_post_elements_;
 	size_t num_post_nodes_;
 };
 
-class Cell_Center_Format_Convertor : public Post_Variable_Format_Converter
+class Cell_Center_Format_Convertor : public Post_Value_Format_Converter
 {
 public://Command
 	void set_grid_data(const Grid& grid, const ushort post_order) override;
@@ -82,12 +80,12 @@ public://Query
 	std::string solution_variable_location_str(const size_t get_num_solution_variable) const override;
 };
 
-class Node_Format_Convertor : public Post_Variable_Format_Converter
+class Node_Format_Convertor : public Post_Value_Format_Converter
 {
 public://Command
 	void set_grid_data(const Grid& grid, const ushort post_order) override;
 
-public:
+public://Query
 	std::vector<double> convert_to_post_variable_format(const std::vector<double>& values) const override;
 	std::string solution_variable_location_str(const size_t get_num_solution_variable) const override;
 
@@ -99,7 +97,7 @@ private:
 class Post_Variable_Format_Converter_Factory
 {
 public:
-	static std::unique_ptr<Post_Variable_Format_Converter> make(const std::string_view type) {
+	static std::unique_ptr<Post_Value_Format_Converter> make(const std::string_view type) {
 		if (ms::contains_icase(type.data(), "cell", "center"))
 			return std::make_unique<Cell_Center_Format_Convertor>();
 		else if (ms::contains_icase(type.data(), "node"))
@@ -111,8 +109,6 @@ public:
 private:
 	Post_Variable_Format_Converter_Factory(void) = delete;
 };
-
-
 
 namespace ms {
 	template <typename T>

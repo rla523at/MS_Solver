@@ -22,12 +22,19 @@ TEST(Sentence, find_1) {
 	const auto ref = 3;
 	EXPECT_EQ(result, ref);
 }
-TEST(Sentence, remove_all_from_here_1) {
+TEST(Sentence, remove_from_here_1) {
 	Sentence s = "abcdef";
 	const auto pos = s.find_position("d");
-	s.remove_all_from_here(pos);
+	s.remove_from_here(pos);
 
 	const Sentence ref = "abc";
+	EXPECT_EQ(s, ref);
+}
+TEST(Sentence, remove_1) {
+	Sentence s = "a1b2c1d2e1";
+	s.remove({ '1','2' });
+
+	Sentence ref = "abcde";
 	EXPECT_EQ(s, ref);
 }
 
@@ -55,32 +62,39 @@ TEST(Text, write_1) {
 	EXPECT_EQ(result, ref);
 }
 
-TEST(ms, replace_all_1) {
+TEST(ms, replace_1) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::be_replaced(str, ",", "_");
+	ms::replace(str, ",", "_");
 
 	std::string ref = "abc_qwer_wer____";
 	EXPECT_EQ(str, ref);
 }
-TEST(ms, replace_all_2) {
+TEST(ms, replace_2) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::be_replaced(str, "", "_");
+	ms::replace(str, "", "_");
 
 	std::string ref = "abc_qwer,wer__,,";
 	EXPECT_EQ(str, ref);
 }
-TEST(ms, replace_all_3) {
+TEST(ms, replace_3) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::be_replaced(str, "wer", "");
+	ms::replace(str, "wer", "");
 
 	std::string ref = "abc_q,__,,";
 	EXPECT_EQ(str, ref);
 }
-TEST(ms, replace_all_4) {
+TEST(ms, replace_4) {
 	std::string str = "abc_qwer,wer__,,";
-	ms::be_replaced(str, ',', '_');
+	ms::replace(str, ',', '_');
 
 	std::string ref = "abc_qwer_wer____";
+	EXPECT_EQ(str, ref);
+}
+TEST(ms, replace_5) {
+	std::string str = " target";
+	ms::replace(str, " ", "");
+
+	std::string ref = "target";
 	EXPECT_EQ(str, ref);
 }
 TEST(ms, parse_1) {
@@ -90,33 +104,32 @@ TEST(ms, parse_1) {
 	std::vector<std::string> ref = { "abc","qwer","wer" };
 	EXPECT_EQ(result, ref);
 }
-TEST(ms, upper_case_1) {
+TEST(ms, get_upper_case_1) {
 	std::string str = "abc";
-	const auto result = ms::upper_case(str);
+	const auto result = ms::get_upper_case(str);
 
 	std::string ref = "ABC";
 	EXPECT_EQ(result, ref);
 }
-TEST(ms, upper_case_2) {
+TEST(ms, get_upper_case_2) {
 	std::string str = "abc123";
-	const auto result = ms::upper_case(str);
+	const auto result = ms::get_upper_case(str);
 
 	std::string ref = "ABC123";
 	EXPECT_EQ(result, ref);
 }
-TEST(ms, upper_case_3) {
+TEST(ms, get_upper_case_3) {
 	std::string str = "abc_123q";
-	const auto result = ms::upper_case(str);
+	const auto result = ms::get_upper_case(str);
 
 	std::string ref = "ABC_123Q";
 	EXPECT_EQ(result, ref);
 }
-TEST(ms, upper_case_4) {
-	const auto result = ms::upper_case("abc");
+TEST(ms, get_upper_case_4) {
+	const auto result = ms::get_upper_case("abc");
 	std::string_view ref = "ABC";
 	EXPECT_EQ(result, ref);
 }
-
 TEST(ms, find_icase_1) {
 	std::string str = "abc_123q";
 	const auto result = ms::find_icase(str, "BC_");
@@ -214,20 +227,14 @@ TEST(ms, rfind_nth_6) {
 	const auto ref = std::string::npos;
 	EXPECT_EQ(result, ref);
 }
-TEST(ms, be_removed_1) {
+TEST(ms, remove_1) {
 	std::string str = " target";
-	ms::be_removed(str, " ");
+	ms::remove(str, " ");
 
 	std::string ref = "target";
 	EXPECT_EQ(str, ref);
 }
-TEST(ms, be_replaced_1) {
-	std::string str = " target";
-	ms::be_replaced(str, " ", "");
 
-	std::string ref = "target";
-	EXPECT_EQ(str, ref);
-}
 
 //TEST(ms, rename) {
 //	const std::string path = "D:/CODE/MS_Solver/MS_Solver/RSC/Grid/3D/";
@@ -235,7 +242,7 @@ TEST(ms, be_replaced_1) {
 //
 //	for (const auto& file_path : file_paths) {
 //		const auto file_name = ms::remove(file_path, path);
-//		const auto new_name = ms::replace_all(file_name, "Quad", "Hexa");
+//		const auto new_name = ms::replace(file_name, "Quad", "Hexa");
 //		ms::rename(path, file_name, new_name);
 //	}
 //}

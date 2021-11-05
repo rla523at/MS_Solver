@@ -28,7 +28,7 @@ protected:
 protected:
 	Zone_Type zone_type_;
 	int num_post_nodes_ = 0;
-	int num_cells_ = 0;
+	int num_post_elements_ = 0;
 	double solution_time_ = 0.0;
 	size_t strand_id_ = 0;
 };
@@ -97,8 +97,9 @@ private:
 					ASCII_data_text[i] << "\n";
 					str_per_line = 0;
 				}
-				ASCII_data_text[i] << "\n\n\n";
 			}
+			str_per_line = 0;
+			ASCII_data_text[i] << "\n";
 		}
 
 		ASCII_data_text.add_write(post_file_path);
@@ -112,26 +113,24 @@ public:
 	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
 private:
-	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const size_t num_post_variable, const std::string_view post_file_path) const {
+	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const std::string_view post_file_path) const {
 		const auto num_post_variable = set_of_post_datas.size();
 
 		//II. DATA SECTION		
 		Binary_Writer binary_data_file(post_file_path, std::ios::app);
 
 		//zone
-		if (num_post_variable != 0) {
-			binary_data_file << 299.0f;								//zone marker
+		binary_data_file << 299.0f;								//zone marker
 
-			for (ushort i = 0; i < num_post_variable; ++i)
-				binary_data_file << 2;								//variable data format, double = 2
+		for (ushort i = 0; i < num_post_variable; ++i)
+			binary_data_file << 2;								//variable data format, double = 2
 
-			binary_data_file << 0 << 0 << -1;						//has passive variable, has variable sharing, zone number to share connectivity - default
+		binary_data_file << 0 << 0 << -1;						//has passive variable, has variable sharing, zone number to share connectivity - default
 
-			for (ushort i = 0; i < num_post_variable; ++i) {
-				const auto min_value = *std::min_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
-				const auto max_value = *std::max_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
-				binary_data_file << min_value << max_value;			//min,max value of each variable
-			}
+		for (ushort i = 0; i < num_post_variable; ++i) {
+			const auto min_value = *std::min_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
+			const auto max_value = *std::max_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
+			binary_data_file << min_value << max_value;			//min,max value of each variable
 		}
 
 		for (ushort i = 0; i < set_of_post_datas.size(); ++i)

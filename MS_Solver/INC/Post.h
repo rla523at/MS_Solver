@@ -18,8 +18,8 @@ private:
 private:
 	using This_ = Post_Processing;
 
-	static inline ushort post_order_ = 0;
 	static inline std::string post_file_path_;
+	static inline ushort post_order_ = 0;
 	static inline Post_Variables post_variables_;
 	static inline Tecplot_File_Writer file_writer_;
 };
