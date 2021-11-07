@@ -1,5 +1,4 @@
 #pragma once
-#include "Configuration.h"
 #include "Time_Discrete_Scheme.h"
 #include "Post.h"
 #include "Solve_Controller.h"
@@ -13,7 +12,12 @@ public://Command
     void solve(void);
 
 private:
-    std::unique_ptr<Solve_Controller> solve_controller_;
+    void controll_time_step(const double current_time, double& time_step) const;
+
+private:
+    std::unique_ptr<Solve_End_Controller> end_controller_;
+    std::unique_ptr<Solve_Post_Controller> post_controller_;
+
     std::unique_ptr<Time_Discrete_Scheme> time_discrete_scheme_;
     Semi_Discrete_Equation semi_discrete_equation_;
 };

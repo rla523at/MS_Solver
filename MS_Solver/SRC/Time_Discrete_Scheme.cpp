@@ -22,3 +22,13 @@ void SSPRK33::update(Semi_Discrete_Equation& semi_discrete_equation, const doubl
     auto stage3_solution_v = this->c1_3 * (initial_solution_v + 2 * current_solution_v + 2 * time_step * stage2_RHS);
     semi_discrete_equation.update_solution(std::move(stage3_solution_v));
 }
+
+std::unique_ptr<Time_Discrete_Scheme> Time_Discrete_Scheme_Factory::make(const Configuration& configuration)
+{
+    const auto time_discrete_scheme_name = configuration.get("time_discrete_scheme");
+
+    if (ms::contains_icase(time_discrete_scheme_name, "SSPRK", "33"))
+        return std::make_unique<SSPRK33>();
+    else
+        EXCEPTION("time discrete scheme in configuration is not supproted");
+};

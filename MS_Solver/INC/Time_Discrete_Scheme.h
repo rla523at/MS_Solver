@@ -1,4 +1,5 @@
 #pragma once
+#include "Configuration.h"
 #include "Semi_Discrete_Equation.h"
 
 class Time_Discrete_Scheme
@@ -20,38 +21,13 @@ private:
 class Time_Discrete_Scheme_Factory
 {
 public:
-    static std::unique_ptr<Time_Discrete_Scheme> make(const std::string& time_discrete_scheme_name)
-    {
-        if (ms::contains_icase(time_discrete_scheme_name, "SSPRK", "33"))
-            return std::make_unique<SSPRK33>();
-        else
-            EXCEPTION("time discrete scheme in configuration is not supproted");
-    };
+    static std::unique_ptr<Time_Discrete_Scheme> make(const Configuration& configuration);
 
 private:
     Time_Discrete_Scheme_Factory(void) = delete;
 };
 
 
-//class TIM {};
-//
-//
-//class SSPRK33 : public TIM 
-//{
-//private:
-//    static constexpr double c1_3 = 1.0 / 3.0;
-//
-//private:
-//    SSPRK33(void) = delete;
-//
-//public:
-//    template <typename Semi_Discrete_Equation, typename Solution>
-//    static void update_solutions(Semi_Discrete_Equation& semi_discrete_equation, std::vector<Solution>& solutions, const double time_step);
-//    
-//    static std::string name(void) { return "SSPRK33"; };
-//};
-//
-//
 //class SSPRK54 : public TIM 
 //{
 //private:

@@ -1,0 +1,11 @@
+
+
+
+
+solve_end_controller_type	= Time
+solve_end_time				= 0.2
+solve_end_iter				= 100
+
+solve_post_controller_type	= Time
+solve_post_time_step		= 0.02
+solve_post_iter_unit		= 10
