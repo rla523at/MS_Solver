@@ -51,6 +51,18 @@
     <ClInclude Include="INC\Cells_HOM.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Discrete_Equation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Time_Discrete_Scheme.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Solve_Controller.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Faces.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
@@ -72,6 +84,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Grid.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

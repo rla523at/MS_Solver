@@ -17,8 +17,10 @@ public:
 
 public://Command
 	Euclidean_Vector& operator*=(const double constant);
+	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
 
 public://Query
+	Euclidean_Vector operator+(const Euclidean_Vector& other) const;
 	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
 	bool operator==(const Euclidean_Vector& other) const;
@@ -51,6 +53,7 @@ private:
 //	double inner_product(const Euclidean_Vector& other) const;
 };
 
+Euclidean_Vector operator*(const double constant, const Euclidean_Vector& x);
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 
 
@@ -381,7 +384,7 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 ////		return false;
 ////	
 ////	for (size_t i = 0; i < dimension_; ++i) {
-////		if (this->values_[i] != y.values_[i])
+////		if (this->values_[i] != y.values_[i])+
 ////			return false;
 ////	}
 ////	return true;

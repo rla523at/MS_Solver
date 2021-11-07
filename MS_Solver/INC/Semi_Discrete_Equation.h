@@ -1,26 +1,23 @@
 #pragma once
 #include "Cells_HOM.h"
+#include "Faces.h"
 
-class Cells {};
-class Faces {};
-
-class Semi_Discrete_Equation abstract
+class Semi_Discrete_Equation
 {
-public:
-	virtual std::vector<double> calculate_RHS(const Discretized_Solution& discretized_solution) const abstract;
-};
+public://Command
+	void update_solution(Euclidean_Vector&& updated_soltuion);
 
-class Semi_Discrete_Equation_HOM : public Semi_Discrete_Equation
-{
-public:
-	std::vector<double> calculate_RHS(const Discretized_Solution& discretized_solution) const
-	{
-
-	}
+public://Query
+	double calculate_time_step(void) const;
+	Euclidean_Vector calculate_RHS(void) const;
+	const Euclidean_Vector& get_solution_vector(void) const;
+	
 
 private:
-	Cells_HOM cells_;
+	std::unique_ptr<Cells> cells_;
+	std::unique_ptr<Faces> faces_;
 };
+
 
 
 

@@ -6,6 +6,24 @@ Euclidean_Vector& Euclidean_Vector::operator*=(const double constant)
 	return *this;
 }
 
+Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
+{
+	const auto n = static_cast<MKL_INT>(this->size());
+	const auto a = 1.0;
+	const auto incx = 1;
+	const auto incy = 1;
+
+	cblas_daxpy(n, a, other.values_.data(), incx, this->values_.data(), incy);
+	
+	return *this;
+}
+
+Euclidean_Vector Euclidean_Vector::operator+(const Euclidean_Vector& other) const
+{
+	auto result = *this;
+	return result += other;
+}
+
 Euclidean_Vector Euclidean_Vector::operator*(const double constant) const
 {
 	auto result = *this;
@@ -50,8 +68,13 @@ std::string Euclidean_Vector::to_string(void) const
 
 
 
+Euclidean_Vector operator*(const double constant, const Euclidean_Vector& x)
+{
+	return x * constant;
+}
 
-std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x) {
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x) 
+{
 	return os << x.to_string();
 }
 
