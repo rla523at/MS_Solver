@@ -18,15 +18,21 @@ public:
 public://Command
 	Euclidean_Vector& operator*=(const double constant);
 	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
+	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
+
+	Euclidean_Vector& normalize(void);
 
 public://Query
+	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
 	Euclidean_Vector operator+(const Euclidean_Vector& other) const;
 	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
 	bool operator==(const Euclidean_Vector& other) const;
 
 	double at(const size_t position) const;
-	const double* begin(void) const;
+	const double* begin(void) const;	
+	double L2_norm(void) const;
+	double inner_product(const Euclidean_Vector& other) const;
 	size_t size(void) const;
 	std::string to_string(void) const;
 

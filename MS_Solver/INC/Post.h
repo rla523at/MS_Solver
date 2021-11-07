@@ -8,7 +8,7 @@ class Post_Processing
 public:
 	static void initialize(const Configuration& configuration);
 	static void post_grid(const Grid& grid);
-	static void post_solution(const Discretized_Solution& discretized_solution);
+	static void post_solution(const Discrete_Solution& discretized_solution);
 	static void record_variables(const std::string_view name, const std::vector<double>& values);
 	static void syncronize_solution_time(const double& get_solution_time);
 

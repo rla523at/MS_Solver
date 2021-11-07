@@ -17,7 +17,7 @@ void Post_Processing::post_grid(const Grid& grid) {
 	This_::file_writer_.write_grid_file(This_::post_variables_, This_::post_file_path_);
 }
 
-void Post_Processing::post_solution(const Discretized_Solution& discretized_solution) {
+void Post_Processing::post_solution(const Discrete_Solution& discretized_solution) {
 	const auto& variable_names = discretized_solution.get_variable_names();
 	const auto post_point_solutions_by_variable = discretized_solution.calculate_post_point_solutions_by_variable();
 	const auto get_num_solution_variable = variable_names.size();

@@ -1,21 +1,25 @@
 #pragma once
-//#include "Matrix.h"
-#include <vector>
-#include <string>
+#include "Configuration.h"
 
 using ushort = unsigned short;
 
 class Governing_Equation
 {
-public:
+public://Query
+	virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
+
 	const std::vector<std::string>& get_variable_names(void) const {
 		return variable_names_;
 	}
 	ushort num_equations(void) const {
 		return this->num_equations_;
 	}
+	ushort space_dimension(void) const {
+		return this->space_dimension_;
+	}
 	
 protected:
+	ushort space_dimension_;
 	ushort num_equations_;
 	std::vector<std::string> variable_names_;
 };
@@ -23,13 +27,13 @@ protected:
 class Euler2D : public Governing_Equation
 {
 	Euler2D(void) {		
+		this->space_dimension_ = 2;
 		this->num_equations_ = 4;
 		this->variable_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "e" };
 	}
 };
 
-//static class
-class Governing_Equation_Factory
+class Governing_Equation_Factory//static class
 {
 public:
 	static std::unique_ptr<Governing_Equation> make(const Configuration& config) {

@@ -7,15 +7,16 @@
 using ushort = unsigned short;
 using uint = unsigned int;
 
-class Discretized_Solution
+class Discrete_Solution
 {
 public:
-	Discretized_Solution(const Governing_Equation& governing_equation, const Grid& grid);
+	Discrete_Solution(const Governing_Equation& governing_equation, const Grid& grid);
 
 public://Command
 	virtual void set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) abstract;
 
 public://Query
+	virtual std::vector<Euclidean_Vector> calculate_P0_solutions(void) const abstract;
 	virtual std::vector<std::vector<Euclidean_Vector>> calculate_set_of_post_point_solutions(void) const abstract;
 	const std::vector<std::string>& get_variable_names(void) const;
 
@@ -27,7 +28,7 @@ protected:
 };
 
 
-class Discretized_Solution_FVM : public Discretized_Solution
+class Discretized_Solution_FVM : public Discrete_Solution
 {
 public:
 	Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition);
@@ -43,7 +44,7 @@ private:
 };
 
 
-class Discretized_Solution_HOM : public Discretized_Solution
+class Discretized_Solution_HOM : public Discrete_Solution
 {
 public:
 	Discretized_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order);

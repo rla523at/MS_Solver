@@ -104,3 +104,31 @@ std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const ushort solution_o
 
 	return quadrature_rules;
 }
+
+std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
+{
+	const auto& cell_elements = this->grid_elements_.cell_elements;
+	const auto num_cell = cell_elements.size();
+
+	std::vector<std::vector<double>> projected_volumes(num_cell);
+
+	for (uint i = 0; i < num_cell; ++i)
+		projected_volumes[i] = cell_elements[i].projected_volume();
+
+	return projected_volumes;
+
+}
+
+std::vector<double> Grid::cell_volumes(void) const
+{
+	const auto& cell_elements = this->grid_elements_.cell_elements;
+	const auto num_cell = cell_elements.size();
+
+	std::vector<double> volumes(num_cell);
+
+	for (uint i = 0; i < num_cell; ++i)
+		volumes[i] = cell_elements[i].volume();
+
+	return volumes;
+}
+

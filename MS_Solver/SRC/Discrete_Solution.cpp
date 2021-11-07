@@ -1,19 +1,19 @@
-#include "../INC/Discretized_Solution.h"
+#include "../INC/Discrete_Solution.h"
 
-Discretized_Solution::Discretized_Solution(const Governing_Equation& governing_equation, const Grid& grid) 
+Discrete_Solution::Discrete_Solution(const Governing_Equation& governing_equation, const Grid& grid) 
 {
 	this->num_equations_ = governing_equation.num_equations();
 	this->solution_variable_names_ = governing_equation.get_variable_names();	
 	this->num_cells_ = grid.num_cells();
 }
 
-const std::vector<std::string>& Discretized_Solution::get_variable_names(void) const 
+const std::vector<std::string>& Discrete_Solution::get_variable_names(void) const 
 {
 	return this->solution_variable_names_;
 }
 
 Discretized_Solution_FVM::Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition)
-	:Discretized_Solution(governing_equation, grid)
+	:Discrete_Solution(governing_equation, grid)
 {
 	this->set_initial_condition(grid, initial_condition);
 }
@@ -58,7 +58,7 @@ Euclidean_Vector Discretized_Solution_FVM::calculate_solution_at_center(const ui
 }
 
 Discretized_Solution_HOM::Discretized_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order)
-	:Discretized_Solution(governing_equation, grid),
+	:Discrete_Solution(governing_equation, grid),
 	solution_order_(solution_order) 
 {
 	this->set_initial_condition(grid, initial_condition);

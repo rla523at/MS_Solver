@@ -8,6 +8,8 @@ Euclidean_Vector& Euclidean_Vector::operator*=(const double constant)
 
 Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
 {
+	REQUIRE(this->size() == other.size(), "other vector should be same size");
+
 	const auto n = static_cast<MKL_INT>(this->size());
 	const auto a = 1.0;
 	const auto incx = 1;
@@ -18,10 +20,35 @@ Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
 	return *this;
 }
 
+Euclidean_Vector& Euclidean_Vector::operator-=(const Euclidean_Vector& other)
+{
+	REQUIRE(this->size() == other.size(), "other vector should be same size");
+
+	const auto n = static_cast<MKL_INT>(this->size());
+	const auto a = -1.0;
+	const auto incx = 1;
+	const auto incy = 1;
+
+	cblas_daxpy(n, a, other.values_.data(), incx, this->values_.data(), incy);
+
+	return *this;
+}
+
+Euclidean_Vector& Euclidean_Vector::normalize(void)
+{
+	return *this *= 1.0 / this->L2_norm();
+}
+
 Euclidean_Vector Euclidean_Vector::operator+(const Euclidean_Vector& other) const
 {
 	auto result = *this;
 	return result += other;
+}
+
+Euclidean_Vector Euclidean_Vector::operator-(const Euclidean_Vector& other) const
+{
+	auto result = *this;
+	return result -= other;
 }
 
 Euclidean_Vector Euclidean_Vector::operator*(const double constant) const
@@ -50,6 +77,22 @@ double Euclidean_Vector::at(const size_t position) const
 const double* Euclidean_Vector::begin(void) const 
 {
 	return this->values_.data();
+}
+
+double Euclidean_Vector::L2_norm(void) const
+{
+	return std::sqrt(this->inner_product(*this));
+}
+
+double Euclidean_Vector::inner_product(const Euclidean_Vector& other) const
+{
+	REQUIRE(this->size() == other.size(), "other vector should be same size");
+
+	const auto n = static_cast<MKL_INT>(this->values_.size());
+	const auto incx = 1;
+	const auto incy = 1;
+
+	return cblas_ddot(n, this->values_.data(), incx, other.values_.data(), incy);
 }
 
 size_t Euclidean_Vector::size(void) const 

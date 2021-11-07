@@ -9,3 +9,7 @@ solve_end_iter				= 100
 solve_post_controller_type	= Time
 solve_post_time_step		= 0.02
 solve_post_iter_unit		= 10
+
+time_step_calculator_type	= CFL
+CFL_number					= 0.9
+constant_dt					= 0.0001

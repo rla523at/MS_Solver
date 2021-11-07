@@ -36,9 +36,11 @@ class Reference_Geometry
 {
 public://Query
 	virtual Euclidean_Vector center_node(void) const abstract;
+	virtual std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const abstract;
 	virtual ushort num_vertex(void) const abstract;
 	virtual ushort num_post_nodes(const ushort post_order) const abstract;
 	virtual ushort num_post_elements(const ushort post_order) const abstract;
+	virtual Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
 	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
@@ -68,8 +70,6 @@ protected:
 protected:
 	ushort order_ = 0;
 
-	//virtual std::vector<ReferenceGeometry> face_reference_geometries(void) const abstract;
-	//Vector_Function<Polynomial<space_dimension>, space_dimension> normal_vector_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const;
 	//virtual std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const abstract;
 	//virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const abstract;
 };
@@ -81,9 +81,11 @@ public:
 
 public://Query
 	Euclidean_Vector center_node(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
+	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
@@ -121,9 +123,11 @@ public:
 
 public://Query
 	Euclidean_Vector center_node(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
+	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;
@@ -161,9 +165,11 @@ public:
 
 public://Query
 	Euclidean_Vector center_node(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
+	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<ushort> vertex_node_index_sequneces(void) const override;

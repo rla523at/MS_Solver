@@ -1,6 +1,6 @@
 #pragma once
 
-class Faces
+class Face
 {
 
 };

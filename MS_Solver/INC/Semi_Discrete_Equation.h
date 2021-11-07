@@ -1,6 +1,6 @@
 #pragma once
-#include "Cells_HOM.h"
-#include "Faces.h"
+#include "Cells.h"
+#include "Face.h"
 
 class Semi_Discrete_Equation
 {
@@ -15,7 +15,7 @@ public://Query
 
 private:
 	std::unique_ptr<Cells> cells_;
-	std::unique_ptr<Faces> faces_;
+	std::vector<std::unique_ptr<Face>> faces_;
 };
 
 

@@ -18,6 +18,8 @@ public:
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 	std::vector<Quadrature_Rule> cell_quadrature_rules(const ushort solution_order) const;
+	std::vector<std::vector<double>> cell_projected_volumes(void) const;
+	std::vector<double> cell_volumes(void) const;
 private:
 	ushort space_dimension_;
 	Grid_Elements grid_elements_;

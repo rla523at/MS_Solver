@@ -1,38 +1,4 @@
-#pragma once
-#include "Discretized_Solution.h"
 
-class Cells
-{
-public:
-	virtual void calculate_RHS(double* RHS, const Discretized_Solution& discretized_solution) abstract;
-};
-
-
-class Cells_HOM : public Cells
-{
-public:
-	void calculate_RHS(double* RHS, const Discretized_Solution& discretized_solution) override
-	{
-        for (uint i = 0; i < this->num_cells_; ++i) {
-            const auto solution_at_quadrature_nodes = discretized_solution.calculate_solution_at_quadrature_nodes(i);
-            
-            Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
-
-            for (size_t j = 0; j < num_quadrature_node; ++j) {
-                const auto physical_flux = this->governing_equation_->calculate_physical_flux(solution_at_quadrature_nodes[j]);
-                flux_quadrature_points.change_columns(j * This_::space_dimension_, physical_flux);
-            }
-
-            ms::gemm(flux_quadrature_points, This_::qweights_gradient_basis_[i], delta_rhs);
-
-            RHS[i] += delta_rhs;
-        }
-    }
-
-private:
-    size_t num_cells_;
-    std::unique_ptr<Governing_Equation> governing_equation_;
-};
 
 
 
@@ -129,44 +95,44 @@ private:
 //
 //template <typename Governing_Equation, typename Reconstruction_Method>
 //double Cells_HOM<Governing_Equation, Reconstruction_Method>::calculate_time_step(const std::vector<Solution_Coefficient_>& solution_coefficients, const double cfl) const {
-//    const auto num_cell = solution_coefficients.size();
-//
-//    std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i) {
-//        const auto P0_coefficient = solution_coefficients[i].column(0);
-//        P0_solutions[i] = P0_coefficient * this->P0_basis_values_[i];
-//    }
-//
-//    const auto coordinate_projected_maximum_lambdas = Governing_Equation::calculate_coordinate_projected_maximum_lambdas(P0_solutions);
-//    
-//    std::vector<double> local_time_step(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i) {
-//        if constexpr (This_::space_dimension_ == 2) {
-//            const auto [y_projected_volume, x_projected_volume] = this->projected_volumes_[i];
-//            const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
-//
-//            const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
-//            const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
-//
-//            local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
-//        }
-//        else if (This_::space_dimension_ == 3) {
-//            const auto [yz_projected_volume, xz_projected_volume, xy_projected_volume] = this->projected_volumes_[i];
-//            const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda, z_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
-//
-//            const auto x_radii = yz_projected_volume * x_projeced_maximum_lambda;
-//            const auto y_radii = xz_projected_volume * y_projeced_maximum_lambda;
-//            const auto z_radii = xy_projected_volume * z_projeced_maximum_lambda;
-//
-//            local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii + z_radii);
-//        }
-//        else
-//            throw std::runtime_error("not supproted order");
-//    }
-//
-//    constexpr auto solution_order = Reconstruction_Method::solution_order();
-//    constexpr auto c = static_cast<double>(1.0 / (2.0 * solution_order + 1.0));
-//    return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
+    //const auto num_cell = solution_coefficients.size();
+
+    //std::vector<Euclidean_Vector<This_::num_equation_>> P0_solutions(num_cell);
+    //for (size_t i = 0; i < num_cell; ++i) {
+    //    const auto P0_coefficient = solution_coefficients[i].column(0);
+    //    P0_solutions[i] = P0_coefficient * this->P0_basis_values_[i];
+    //}
+
+    //const auto coordinate_projected_maximum_lambdas = Governing_Equation::calculate_coordinate_projected_maximum_lambdas(P0_solutions);
+    //
+    //std::vector<double> local_time_step(num_cell);
+    //for (size_t i = 0; i < num_cell; ++i) {
+    //    if constexpr (This_::space_dimension_ == 2) {
+    //        const auto [y_projected_volume, x_projected_volume] = this->projected_volumes_[i];
+    //        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+
+    //        const auto x_radii = y_projected_volume * x_projeced_maximum_lambda;
+    //        const auto y_radii = x_projected_volume * y_projeced_maximum_lambda;
+
+    //        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii);
+    //    }
+    //    else if (This_::space_dimension_ == 3) {
+    //        const auto [yz_projected_volume, xz_projected_volume, xy_projected_volume] = this->projected_volumes_[i];
+    //        const auto [x_projeced_maximum_lambda, y_projeced_maximum_lambda, z_projeced_maximum_lambda] = coordinate_projected_maximum_lambdas[i];
+
+    //        const auto x_radii = yz_projected_volume * x_projeced_maximum_lambda;
+    //        const auto y_radii = xz_projected_volume * y_projeced_maximum_lambda;
+    //        const auto z_radii = xy_projected_volume * z_projeced_maximum_lambda;
+
+    //        local_time_step[i] = cfl * this->volumes_[i] / (x_radii + y_radii + z_radii);
+    //    }
+    //    else
+    //        throw std::runtime_error("not supproted order");
+    //}
+
+    //constexpr auto solution_order = Reconstruction_Method::solution_order();
+    //constexpr auto c = static_cast<double>(1.0 / (2.0 * solution_order + 1.0));
+    //return *std::min_element(local_time_step.begin(), local_time_step.end()) * c;
 //}
 //
 //template <typename Governing_Equation, typename Reconstruction_Method>

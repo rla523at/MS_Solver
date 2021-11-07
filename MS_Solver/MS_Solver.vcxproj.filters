@@ -39,7 +39,7 @@
     <ClInclude Include="INC\Matrix.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Discretized_Solution.h">
+    <ClInclude Include="INC\Discrete_Solution.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid.h">
@@ -60,7 +60,16 @@
     <ClInclude Include="INC\Solve_Controller.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Faces.h">
+    <ClInclude Include="INC\Face.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Time_Step_Calculator.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Governing_Equation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Element.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,7 +89,7 @@
     <ClCompile Include="SRC\Matrix.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Discretized_Solution.cpp">
+    <ClCompile Include="SRC\Discrete_Solution.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Grid.cpp">
@@ -95,5 +104,13 @@
     <ClCompile Include="SRC\Solve_Controller.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Time_Step_Calculator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RSC\configuration.dat">
+      <Filter>설정 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>

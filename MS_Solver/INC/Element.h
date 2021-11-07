@@ -247,18 +247,18 @@ class Element : public Geometry
 	//	return normalized_functions;
 	//}
 //
-//	template <typename T, typename Container>
-//	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) {
-//		const auto num_extracted_value = indexes.size();
-//		
-//		std::vector<T> extracted_values;
-//		extracted_values.reserve(num_extracted_value);
-//
-//		for (const auto& index : indexes) 
-//			extracted_values.push_back(set[index]);
-//
-//		return extracted_values;
-//	}
+	//template <typename T, typename Container>
+	//std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) {
+	//	const auto num_extracted_value = indexes.size();
+	//	
+	//	std::vector<T> extracted_values;
+	//	extracted_values.reserve(num_extracted_value);
+
+	//	for (const auto& index : indexes) 
+	//		extracted_values.push_back(set[index]);
+
+	//	return extracted_values;
+	//}
 //
 //	template <typename T>
 //	bool is_circular_permutation(const std::vector<T>& set1, const std::vector<T>& set2) {
@@ -351,32 +351,32 @@ class Element : public Geometry
 //Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<space_dimension>::normal_vector_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const {
 //	if constexpr (space_dimension == 2) {
 //		dynamic_require(this->figure_ == Figure::line, "In 2D case, normal vector must be determined only for line");
-//
-//		constexpr ushort r = 0;
-//		const auto T_r = mapping_function.differentiate(r);
-//
-//		std::array<Polynomial<space_dimension>, space_dimension> normal_vector_function = { 0 };
-//		normal_vector_function[0] = -1 * T_r.at(1);
-//		normal_vector_function[1] = T_r.at(0);
-//
-//		return normal_vector_function;
+
+		//constexpr ushort r = 0;
+		//const auto T_r = mapping_function.differentiate(r);
+
+		//std::array<Polynomial<space_dimension>, space_dimension> normal_vector_function = { 0 };
+		//normal_vector_function[0] = -1 * T_r.at(1);
+		//normal_vector_function[1] = T_r.at(0);
+
+		//return normal_vector_function;
 //	}
 //	else if constexpr (space_dimension == 3) {
 //		dynamic_require(this->figure_ == Figure::triangle || this->figure_ == Figure::quadrilateral, "In 3D case, normal vector must be determined only for triangle or quadrilateral");
 //
-//		constexpr ushort r = 0;
-//		constexpr ushort s = 1;
-//		const auto T_r = mapping_function.differentiate(r);
-//		const auto T_s = mapping_function.differentiate(s);
-//
-//		return T_r.cross_product(T_s);
+		//constexpr ushort r = 0;
+		//constexpr ushort s = 1;
+		//const auto T_r = mapping_function.differentiate(r);
+		//const auto T_s = mapping_function.differentiate(s);
+
+		//return T_r.cross_product(T_s);
 //	}
 //	else {
 //		throw std::runtime_error("not supported figure");
 //		return {};
 //	}
 //}
-//
+
 //template <ushort space_dimension>
 //ushort ReferenceGeometry<space_dimension>::num_vertex(void) const {
 //	switch (this->figure_) {
@@ -1754,21 +1754,21 @@ class Element : public Geometry
 //
 //template <ushort space_dimension>
 //std::vector<Geometry<space_dimension>> Geometry<space_dimension>::face_geometries(void) const {
-//	const auto face_reference_geometries = this->reference_geometry_.face_reference_geometries();
-//	const auto set_of_face_node_index_orders = this->reference_geometry_.set_of_face_node_index_orders();
-//	const auto num_face = set_of_face_node_index_orders.size();
-//
-//	std::vector<Geometry> face_geometries;
-//	face_geometries.reserve(num_face);
-//
-//	for (size_t i = 0; i < num_face; ++i) {
-//		const auto& reference_geometry = face_reference_geometries[i];
-//		auto face_nodes = ms::extract_by_index(this->nodes_, set_of_face_node_index_orders[i]);
-//
-//		face_geometries.push_back({ reference_geometry, std::move(face_nodes) });
-//	}
-//
-//	return face_geometries;
+	//const auto face_reference_geometries = this->reference_geometry_.face_reference_geometries();
+	//const auto set_of_face_node_index_orders = this->reference_geometry_.set_of_face_node_index_orders();
+	//const auto num_face = set_of_face_node_index_orders.size();
+
+	//std::vector<Geometry> face_geometries;
+	//face_geometries.reserve(num_face);
+
+	//for (size_t i = 0; i < num_face; ++i) {
+	//	const auto& reference_geometry = face_reference_geometries[i];
+	//	auto face_nodes = ms::extract_by_index(this->nodes_, set_of_face_node_index_orders[i]);
+
+	//	face_geometries.push_back({ reference_geometry, std::move(face_nodes) });
+	//}
+
+	//return face_geometries;
 //}
 //
 //template <ushort space_dimension>

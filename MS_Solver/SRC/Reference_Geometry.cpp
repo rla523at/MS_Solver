@@ -1,6 +1,7 @@
 #include "../INC/Reference_Geometry.h"
 
-Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const {
+Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const 
+{
 	const auto& mapping_nodes = this->get_mapping_nodes();
 	const auto& mapping_monomial_vector_function = this->get_mapping_monomial_vector_function();
 
@@ -17,7 +18,9 @@ Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const {
 
 	return transformation_monomial_matrix.inverse();
 }
-std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const {
+
+std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const 
+{
 	//   2式式式式式3
 	//   弛     弛   
 	//   0式式式式式1
@@ -42,20 +45,35 @@ Reference_Line::Reference_Line(const ushort order) {
 	}
 };
 
-Euclidean_Vector Reference_Line::center_node(void) const {
+Euclidean_Vector Reference_Line::center_node(void) const 
+{
 	return { 0.0 };
 };
-ushort Reference_Line::num_vertex(void) const {
+
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Line::face_reference_geometries(void) const
+{
+	EXCEPTION("Reference Point class is not supported yet");
+	return {};
+}
+
+ushort Reference_Line::num_vertex(void) const 
+{
 	return 2;
 }
-ushort Reference_Line::num_post_nodes(const ushort post_order) const {
+
+ushort Reference_Line::num_post_nodes(const ushort post_order) const 
+{
 	return post_order + 2;
 }
-ushort Reference_Line::num_post_elements(const ushort post_order) const {
+
+ushort Reference_Line::num_post_elements(const ushort post_order) const 
+{
 	const auto n = post_order;
 	return n + 1;
 }
-Quadrature_Rule Reference_Line::make_quadrature_rule(const ushort integrand_order) const {
+
+Quadrature_Rule Reference_Line::make_quadrature_rule(const ushort integrand_order) const 
+{
 	switch (integrand_order) {
 	case 0:
 	case 1:		return { { { 0.000000000000000 } }, { 2.000000000000000 } };
@@ -82,47 +100,71 @@ Quadrature_Rule Reference_Line::make_quadrature_rule(const ushort integrand_orde
 	default:	EXCEPTION("not supported integrand order"); return{};
 	}
 };
-bool Reference_Line::is_simplex(void) const {
+
+bool Reference_Line::is_simplex(void) const 
+{
 	return false;
 };
-bool Reference_Line::is_line(void) const {
+
+Vector_Function<Polynomial> Reference_Line::normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const
+{
+	constexpr auto r = 0;
+	const auto T_r = mapping_function.get_differentiate(r);
+
+	constexpr auto dimension = 2;
+	std::vector<Polynomial> normal_vector_function(2);
+	normal_vector_function[0] = -1 * T_r.at(1);
+	normal_vector_function[1] = T_r.at(0);
+
+	return normal_vector_function;
+}
+
+bool Reference_Line::is_line(void) const 
+{
 	return true;
 }
 
-std::vector<ushort> Reference_Line::vertex_node_index_sequneces(void) const {
+std::vector<ushort> Reference_Line::vertex_node_index_sequneces(void) const 
+{
 	return { 0,1 };
 };
 
-std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_node_index_sequences(void) const 
+{
 	// 0 式式式式 1
 	const std::vector<ushort> face0_node_index = { 0 };
 	const std::vector<ushort> face1_node_index = { 1 };
 	return { face0_node_index,face1_node_index };
 };
 
-std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequences(void) const 
+{
 	// 0 式式式式 1
 	const std::vector<ushort> face0_node_index = { 0 };
 	const std::vector<ushort> face1_node_index = { 1 };
 	return { face0_node_index,face1_node_index };
 };
 
-Irrational_Function Reference_Line::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+Irrational_Function Reference_Line::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
+{
 	constexpr ushort r = 0;
 	const auto mf_r = mapping_function.get_differentiate(r);
 	return mf_r.L2_norm();
 }
 
-ushort Reference_Line::scale_function_order(void) const {
+ushort Reference_Line::scale_function_order(void) const 
+{
 	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
 	return 0;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const {
+const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const 
+{
 	return this->set_of_mapping_nodes_[this->order_];
 }
 
-const Quadrature_Rule& Reference_Line::get_quadrature_rule(const ushort integrand_order) const {
+const Quadrature_Rule& Reference_Line::get_quadrature_rule(const ushort integrand_order) const 
+{
 	if (this->quadrature_rules_.size() <= integrand_order) {
 		const auto new_isze = integrand_order + 1;
 		this->quadrature_rules_.resize(new_isze);
@@ -134,15 +176,18 @@ const Quadrature_Rule& Reference_Line::get_quadrature_rule(const ushort integran
 	return this->quadrature_rules_[integrand_order];
 }
 
-const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const {
+const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const 
+{
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
 
-const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const {
+const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const 
+{
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 
-const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const {
+const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const 
+{
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_post_nodes_.resize(new_size);
@@ -153,7 +198,8 @@ const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort
 
 	return this->set_of_post_nodes_[post_order];
 }
-const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const {
+const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const 
+{
 	if (this->set_of_connectivities_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_connectivities_.resize(new_size);
@@ -164,7 +210,8 @@ const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const u
 
 	return this->set_of_connectivities_[post_order];
 }
-std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const {
+std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const 
+{
 	// 0 式式式式 1 		
 	switch (this->order_)
 	{
@@ -173,7 +220,8 @@ std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const {
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
-std::vector<Euclidean_Vector> Reference_Line::make_post_nodes(const ushort post_order) const {
+std::vector<Euclidean_Vector> Reference_Line::make_post_nodes(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_post_nodes = n + 2;
 
@@ -192,7 +240,8 @@ std::vector<Euclidean_Vector> Reference_Line::make_post_nodes(const ushort post_
 
 	return post_nodes;
 }
-std::vector<std::vector<uint>> Reference_Line::make_connectivities(const ushort post_order) const {
+std::vector<std::vector<uint>> Reference_Line::make_connectivities(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_connecitivity = n + 1;
 
@@ -207,7 +256,8 @@ std::vector<std::vector<uint>> Reference_Line::make_connectivities(const ushort 
 
 	return connectivities;
 }
-Vector_Function<Polynomial> Reference_Line::make_mapping_monomial_vector_function(void) const {
+Vector_Function<Polynomial> Reference_Line::make_mapping_monomial_vector_function(void) const 
+{
 	const auto num_monomial = this->order_ + 1;
 	std::vector<Polynomial> mapping_monomial_vector(num_monomial);
 
@@ -232,21 +282,43 @@ Reference_Triangle::Reference_Triangle(const ushort order) {
 		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
 	}
 };
-Euclidean_Vector Reference_Triangle::center_node(void) const {
+
+Euclidean_Vector Reference_Triangle::center_node(void) const 
+{
 	return { -1.0 / 3.0, -1.0 / 3.0 };
 };
-ushort Reference_Triangle::num_vertex(void) const {
+
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::face_reference_geometries(void) const
+{	
+	constexpr auto num_face = 3;
+	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries;
+	face_reference_geometries.reserve(num_face);
+	
+	for (ushort i = 0; i < num_face; ++i)
+		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
+
+	return face_reference_geometries;
+}
+
+ushort Reference_Triangle::num_vertex(void) const 
+{
 	return 3;
 }
-ushort Reference_Triangle::num_post_nodes(const ushort post_order) const {
+
+ushort Reference_Triangle::num_post_nodes(const ushort post_order) const 
+{
 	const auto n = post_order;
 	return static_cast<ushort>((n + 2) * (n + 3) * 0.5);
 }
-ushort Reference_Triangle::num_post_elements(const ushort post_order) const {
+
+ushort Reference_Triangle::num_post_elements(const ushort post_order) const 
+{
 	const auto n = post_order;
 	return (n + 1) * (n + 1);
 }
-Quadrature_Rule Reference_Triangle::make_quadrature_rule(const ushort integrand_order) const {
+
+Quadrature_Rule Reference_Triangle::make_quadrature_rule(const ushort integrand_order) const 
+{
 	switch (integrand_order) {
 	case 0:		return { { { -0.5, 0 } }, { 2 } };
 	case 1:
@@ -272,20 +344,34 @@ Quadrature_Rule Reference_Triangle::make_quadrature_rule(const ushort integrand_
 	default:	EXCEPTION("not supported integrand order"); return{};
 	}
 };
-//Matrix inverse_mapping_monomial_matrix(void) const 
-bool Reference_Triangle::is_simplex(void) const {
+
+bool Reference_Triangle::is_simplex(void) const 
+{
 	return true;
 };
 
-bool Reference_Triangle::is_line(void) const {
+Vector_Function<Polynomial> Reference_Triangle::normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const
+{
+	constexpr ushort r = 0;
+	constexpr ushort s = 1;
+	const auto T_r = mapping_function.get_differentiate(r);
+	const auto T_s = mapping_function.get_differentiate(s);
+
+	return T_r.cross_product(T_s);
+}
+
+bool Reference_Triangle::is_line(void) const 
+{
 	return false;
 };
 
-std::vector<ushort> Reference_Triangle::vertex_node_index_sequneces(void) const {
+std::vector<ushort> Reference_Triangle::vertex_node_index_sequneces(void) const 
+{
 	return { 0,1,2 };
 };
 
-std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_index_sequences(void) const 
+{
 	//      2
 	//  2  / \  1
 	//	  /   \
@@ -297,7 +383,8 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_ind
 	return { face0_node_index,face1_node_index, face2_node_index };
 };
 
-std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequences(void) const 
+{
 	//      2
 	//  2  / \  1
 	//	  /   \
@@ -321,7 +408,8 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequ
 	return set_of_face_node_index_orders;
 };
 
-Irrational_Function Reference_Triangle::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+Irrational_Function Reference_Triangle::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
+{
 	constexpr ushort r = 0;
 	constexpr ushort s = 1;
 	const auto mf_r = mapping_function.get_differentiate(r);
@@ -330,16 +418,19 @@ Irrational_Function Reference_Triangle::scale_function(const Vector_Function<Pol
 	return cross_product.L2_norm();
 };
 
-ushort Reference_Triangle::scale_function_order(void) const {
+ushort Reference_Triangle::scale_function_order(void) const 
+{
 	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
 	return 0;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const {
+const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const 
+{
 	return this->set_of_mapping_nodes_[this->order_];
 }
 
-const Quadrature_Rule& Reference_Triangle::get_quadrature_rule(const ushort integrand_order) const {
+const Quadrature_Rule& Reference_Triangle::get_quadrature_rule(const ushort integrand_order) const 
+{
 	if (this->quadrature_rules_.size() <= integrand_order) {
 		const auto new_isze = integrand_order + 1;
 		this->quadrature_rules_.resize(new_isze);
@@ -351,15 +442,18 @@ const Quadrature_Rule& Reference_Triangle::get_quadrature_rule(const ushort inte
 	return this->quadrature_rules_[integrand_order];
 }
 
-const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const {
+const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const 
+{
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
 
-const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const {
+const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const 
+{
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 
-const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const {
+const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const 
+{
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_post_nodes_.resize(new_size);
@@ -370,7 +464,8 @@ const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const us
 
 	return this->set_of_post_nodes_[post_order];
 }
-const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const {
+const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const 
+{
 	if (this->set_of_connectivities_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_connectivities_.resize(new_size);
@@ -381,7 +476,8 @@ const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(con
 
 	return this->set_of_connectivities_[post_order];
 }
-std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const {
+std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const 
+{
 	//	  2
 	//    弛 \ 
 	//	  弛   \
@@ -393,7 +489,8 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
-std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort post_order) const {
+std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_post_point = static_cast<ushort>((n + 2) * (n + 3) * 0.5);
 
@@ -416,7 +513,8 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort p
 
 	return post_nodes;
 }
-std::vector<std::vector<uint>> Reference_Triangle::make_connectivities(const ushort post_order) const {
+std::vector<std::vector<uint>> Reference_Triangle::make_connectivities(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_connecitivity = (n + 1) * (n + 1);
 
@@ -445,7 +543,9 @@ std::vector<std::vector<uint>> Reference_Triangle::make_connectivities(const ush
 
 	return connectivities;
 }
-Vector_Function<Polynomial> Reference_Triangle::make_mapping_monomial_vector_function(void) const {
+
+Vector_Function<Polynomial> Reference_Triangle::make_mapping_monomial_vector_function(void) const 
+{
 	const auto num_monomial = static_cast<size_t>((this->order_ + 2) * (this->order_ + 1) * 0.5);
 	std::vector<Polynomial> mapping_monomial_vector(num_monomial);
 
@@ -458,35 +558,70 @@ Vector_Function<Polynomial> Reference_Triangle::make_mapping_monomial_vector_fun
 	return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...	
 }
 
-Reference_Quadrilateral::Reference_Quadrilateral(ushort order) {
+Reference_Quadrilateral::Reference_Quadrilateral(ushort order)
+{
 	this->order_ = order;
 
 	if (this->set_of_mapping_nodes_.size() < this->order_) {
-		this->set_of_mapping_nodes_.resize(this->order_ + 1);
+		const auto new_size = this->order_ + 1;
+
+		this->set_of_mapping_nodes_.resize(new_size);
 		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
 
-		this->set_of_mapping_monomial_vector_function_.resize(this->order_ + 1);
+		this->set_of_mapping_monomial_vector_function_.resize(new_size);
 		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
 
-		this->set_of_inverse_mapping_monomial_matrix_.resize(this->order_ + 1);
+		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
 		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
 	}
 };
-Euclidean_Vector Reference_Quadrilateral::center_node(void) const {
+
+Euclidean_Vector Reference_Quadrilateral::center_node(void) const 
+{
 	return { 0.0, 0.0 };
 };
-ushort Reference_Quadrilateral::num_vertex(void) const {
+
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::face_reference_geometries(void) const
+{
+	constexpr auto num_face = 4;
+	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries;
+	face_reference_geometries.reserve(num_face);
+
+	for (ushort i = 0; i < num_face; ++i)
+		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
+
+	return face_reference_geometries;
+}
+
+ushort Reference_Quadrilateral::num_vertex(void) const 
+{
 	return 4;
 }
-ushort Reference_Quadrilateral::num_post_nodes(const ushort post_order) const {
+
+ushort Reference_Quadrilateral::num_post_nodes(const ushort post_order) const 
+{
 	const auto n = post_order;
 	return (n + 2) * (n + 2);
 }
-ushort Reference_Quadrilateral::num_post_elements(const ushort post_order) const {
+
+ushort Reference_Quadrilateral::num_post_elements(const ushort post_order) const 
+{
 	const auto n = post_order;
 	return 2 * (n + 1) * (n + 1);
 }
-Quadrature_Rule Reference_Quadrilateral::make_quadrature_rule(const ushort integrand_order) const {
+
+Vector_Function<Polynomial> Reference_Quadrilateral::normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const
+{
+	constexpr ushort r = 0;
+	constexpr ushort s = 1;
+	const auto T_r = mapping_function.get_differentiate(r);
+	const auto T_s = mapping_function.get_differentiate(s);
+
+	return T_r.cross_product(T_s);
+}
+
+Quadrature_Rule Reference_Quadrilateral::make_quadrature_rule(const ushort integrand_order) const 
+{
 	switch (integrand_order) {
 	case 0:
 	case 1:		return { { { 0, 0 } }, { 4 } };
@@ -513,16 +648,20 @@ Quadrature_Rule Reference_Quadrilateral::make_quadrature_rule(const ushort integ
 	default:	EXCEPTION("not supported order"); return {};
 	}
 }
-bool Reference_Quadrilateral::is_simplex(void) const {
+bool Reference_Quadrilateral::is_simplex(void) const 
+{
 	return false;
 };
-bool Reference_Quadrilateral::is_line(void) const {
+bool Reference_Quadrilateral::is_line(void) const 
+{
 	return false;
 }
-std::vector<ushort> Reference_Quadrilateral::vertex_node_index_sequneces(void) const {
+std::vector<ushort> Reference_Quadrilateral::vertex_node_index_sequneces(void) const 
+{
 	return { 0,1,2,3 };
 };
-std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_node_index_sequences(void) const 
+{
 	//      2
 	//   3式式式式式2
 	//3  弛     弛   1
@@ -534,7 +673,8 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_nod
 	std::vector<ushort> face3_node_index = { 3,0 };
 	return { face0_node_index,face1_node_index, face2_node_index,face3_node_index };
 };
-std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index_sequences(void) const {
+std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index_sequences(void) const 
+{
 	//      2
 	//   3式式式式式2
 	//3  弛     弛   1
@@ -559,7 +699,8 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index
 	return set_of_face_node_index_orders;
 };
 
-Irrational_Function Reference_Quadrilateral::scale_function(const Vector_Function<Polynomial>& mapping_function) const {
+Irrational_Function Reference_Quadrilateral::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
+{
 	constexpr ushort r = 0;
 	constexpr ushort s = 1;
 	const auto mf_r = mapping_function.get_differentiate(r);
@@ -568,16 +709,19 @@ Irrational_Function Reference_Quadrilateral::scale_function(const Vector_Functio
 	return cross_product.L2_norm();
 };
 
-ushort Reference_Quadrilateral::scale_function_order(void) const {
+ushort Reference_Quadrilateral::scale_function_order(void) const 
+{
 	REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
 	return 1;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const {
+const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const 
+{
 	return this->set_of_mapping_nodes_[this->order_];
 }
 
-const Quadrature_Rule& Reference_Quadrilateral::get_quadrature_rule(const ushort integrand_order) const {
+const Quadrature_Rule& Reference_Quadrilateral::get_quadrature_rule(const ushort integrand_order) const 
+{
 	if (this->quadrature_rules_.size() <= integrand_order) {
 		const auto new_isze = integrand_order + 1;
 		this->quadrature_rules_.resize(new_isze);
@@ -589,15 +733,18 @@ const Quadrature_Rule& Reference_Quadrilateral::get_quadrature_rule(const ushort
 	return this->quadrature_rules_[integrand_order];
 }
 
-const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const {
+const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const 
+{
 	return this->set_of_mapping_monomial_vector_function_[this->order_];
 }
 
-const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const {
+const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const 
+{
 	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
 }
 
-const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const {
+const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const 
+{
 	if (this->set_of_post_nodes_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_post_nodes_.resize(new_size);
@@ -609,7 +756,8 @@ const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(con
 	return this->set_of_post_nodes_[post_order];
 }
 
-const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const {
+const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const 
+{
 	if (this->set_of_connectivities_.size() <= post_order) {
 		const auto new_size = post_order + 1;
 		this->set_of_connectivities_.resize(new_size);
@@ -620,7 +768,8 @@ const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivitie
 
 	return this->set_of_connectivities_[post_order];
 }
-std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) const {
+std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) const 
+{
 	//   3式式式式式2
 	//   弛     弛   
 	//   0式式式式式1
@@ -630,7 +779,8 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) 
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
-std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ushort post_order) const {
+std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_post_nodes = (n + 2) * (n + 2);
 
@@ -653,7 +803,8 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ush
 
 	return post_nodes;
 }
-std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(const ushort post_order) const {
+std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(const ushort post_order) const 
+{
 	const auto n = post_order;
 	const auto num_connectivity = 2 * (n + 1) * (n + 1);
 
@@ -678,7 +829,8 @@ std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(cons
 
 	return connectivities;
 }
-Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vector_function(void) const {
+Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vector_function(void) const 
+{
 	Polynomial r("x0");
 	Polynomial s("x1");
 
