@@ -1,0 +1,24 @@
+#include "../INC/Time_Discrete_Scheme.h"
+
+void SSPRK33::update(Semi_Discrete_Equation& semi_discrete_equation, const double time_step) const
+{    
+    const auto& current_solution_v = semi_discrete_equation.get_solution_vector();
+    const auto initial_solution_v = semi_discrete_equation.get_solution_vector();
+    const auto initial_RHS = semi_discrete_equation.calculate_RHS();
+
+    //stage 1
+    auto stage1_solution_v = initial_solution_v + time_step * initial_RHS;
+
+    semi_discrete_equation.update_solution(std::move(stage1_solution_v));
+    const auto stage1_RHS = semi_discrete_equation.calculate_RHS();
+
+    //stage 2    
+    auto stage2_solution_v = 0.25 * (3 * initial_solution_v + current_solution_v + time_step * stage1_RHS);
+    
+    semi_discrete_equation.update_solution(std::move(stage2_solution_v));
+    const auto stage2_RHS = semi_discrete_equation.calculate_RHS();
+
+    //stage 3
+    auto stage3_solution_v = this->c1_3 * (initial_solution_v + 2 * current_solution_v + 2 * time_step * stage2_RHS);
+    semi_discrete_equation.update_solution(std::move(stage3_solution_v));
+}
