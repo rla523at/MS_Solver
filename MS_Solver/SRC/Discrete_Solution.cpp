@@ -57,14 +57,14 @@ Euclidean_Vector Discretized_Solution_FVM::calculate_solution_at_center(const ui
 	return values;
 }
 
-Discretized_Solution_HOM::Discretized_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order)
+Discrete_Solution_HOM::Discrete_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order)
 	:Discrete_Solution(governing_equation, grid),
 	solution_order_(solution_order) 
 {
 	this->set_initial_condition(grid, initial_condition);
 }
 
-void Discretized_Solution_HOM::set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) 
+void Discrete_Solution_HOM::set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) 
 {	
 	this->basis_vector_functions_ = grid.cell_basis_vector_functions(this->solution_order_);
 
@@ -100,12 +100,12 @@ void Discretized_Solution_HOM::set_initial_condition(const Grid& grid, const Ini
 	}
 }
 
-double* Discretized_Solution_HOM::coefficient_pointer(const uint icell)
+double* Discrete_Solution_HOM::coefficient_pointer(const uint icell)
 {
 	return this->discretized_solutions_.data() + this->coeffcieint_start_indexes_[icell];
 }
 
-std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_HOM::calculate_set_of_post_point_solutions(void) const 
+std::vector<std::vector<Euclidean_Vector>> Discrete_Solution_HOM::calculate_set_of_post_point_solutions(void) const 
 {
 	std::vector<std::vector<Euclidean_Vector>> set_of_post_point_solutions(this->num_cells_);
 
@@ -115,12 +115,12 @@ std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_HOM::calculate_s
 	return set_of_post_point_solutions;
 }
 
-Matrix_Wrapper Discretized_Solution_HOM::get_coefficient_matrix(const uint icell) const 
+Matrix_Wrapper Discrete_Solution_HOM::get_coefficient_matrix(const uint icell) const 
 {
 	return { this->num_equations_, this->set_of_num_basis_[icell], this->coefficient_pointer(icell) };
 }
 
-std::vector<Euclidean_Vector> Discretized_Solution_HOM::calculate_post_point_solutions(const uint icell) const 
+std::vector<Euclidean_Vector> Discrete_Solution_HOM::calculate_post_point_solutions(const uint icell) const 
 {
 	const auto solution_post_points_m = this->get_coefficient_matrix(icell) * this->set_of_basis_post_points_m_[icell];	//E x PP
 	const auto [num_equations, num_post_points] = solution_post_points_m.size();
@@ -134,17 +134,17 @@ std::vector<Euclidean_Vector> Discretized_Solution_HOM::calculate_post_point_sol
 	return solution_at_post_points;
 }
 
-Euclidean_Vector Discretized_Solution_HOM::calculate_basis_vector_value(const uint icell, const Euclidean_Vector& node) const
+Euclidean_Vector Discrete_Solution_HOM::calculate_basis_vector_value(const uint icell, const Euclidean_Vector& node) const
 {
 	return this->basis_vector_functions_[icell](node);
 }
 
-const double* Discretized_Solution_HOM::coefficient_pointer(const uint icell) const
+const double* Discrete_Solution_HOM::coefficient_pointer(const uint icell) const
 {
 	return this->discretized_solutions_.data() + this->coeffcieint_start_indexes_[icell];
 }
 
-size_t Discretized_Solution_HOM::num_total_basis(void) const
+size_t Discrete_Solution_HOM::num_total_basis(void) const
 {
 	size_t num_total_basis = 0;
 	for (const auto num_basis : this->set_of_num_basis_)

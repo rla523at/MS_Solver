@@ -44,10 +44,10 @@ private:
 };
 
 
-class Discretized_Solution_HOM : public Discrete_Solution
+class Discrete_Solution_HOM : public Discrete_Solution
 {
 public:
-	Discretized_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order);
+	Discrete_Solution_HOM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_order);
 
 public://Command
 	void set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) override;
