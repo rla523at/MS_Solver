@@ -1,23 +1,46 @@
 #include "../INC/Euclidean_Vector.h"
 
-double Euclidean_Vector::operator[](const size_t position) const {
+Euclidean_Vector& Euclidean_Vector::operator*=(const double constant)
+{
+	cblas_dscal(static_cast<MKL_INT>(this->size()), constant, this->values_.data(), 1);
+	return *this;
+}
+
+Euclidean_Vector Euclidean_Vector::operator*(const double constant) const
+{
+	auto result = *this;
+	return result *= constant;	
+}
+
+double Euclidean_Vector::operator[](const size_t position) const 
+{
 	REQUIRE(position < this->size(), "position should be less then size");
 	return this->values_[position];
 }
-bool Euclidean_Vector::operator==(const Euclidean_Vector& other) const {
+
+bool Euclidean_Vector::operator==(const Euclidean_Vector& other) const 
+{
 	return this->values_ == other.values_;
 }
-double Euclidean_Vector::at(const size_t position) const {
+
+double Euclidean_Vector::at(const size_t position) const 
+{
 	REQUIRE(position < this->size(), "position should be less then size");
 	return this->values_[position];
 }
-const double* Euclidean_Vector::begin(void) const {
+
+const double* Euclidean_Vector::begin(void) const 
+{
 	return this->values_.data();
 }
-size_t Euclidean_Vector::size(void) const {
+
+size_t Euclidean_Vector::size(void) const 
+{
 	return values_.size();
 }
-std::string Euclidean_Vector::to_string(void) const {
+
+std::string Euclidean_Vector::to_string(void) const 
+{
 	std::ostringstream oss;
 	oss << std::setprecision(16) << std::showpoint << std::left;
 	for (const auto value : this->values_)

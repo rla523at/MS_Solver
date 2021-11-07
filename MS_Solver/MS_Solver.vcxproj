@@ -19,17 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="INC\Cells_HOM.h" />
+    <ClInclude Include="INC\Discretized_Solution.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exception.h" />
     <ClInclude Include="INC\Geometry.h" />
+    <ClInclude Include="INC\Grid.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\Polynomial.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
+    <ClInclude Include="INC\Semi_Discrete_Equation.h" />
     <ClInclude Include="INC\Vector_Function.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SRC\Discretized_Solution.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\Geometry.cpp" />
+    <ClCompile Include="SRC\Grid.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
     <ClCompile Include="SRC\Polynomial.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />

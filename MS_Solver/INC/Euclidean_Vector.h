@@ -15,7 +15,11 @@ public:
 	Euclidean_Vector(std::vector<double>&& values) : values_(std::move(values)) {};
 	Euclidean_Vector(const std::vector<double>& values) : values_(values) {};
 
-public: //Query
+public://Command
+	Euclidean_Vector& operator*=(const double constant);
+
+public://Query
+	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
 	bool operator==(const Euclidean_Vector& other) const;
 
