@@ -1,38 +1,53 @@
 #pragma once
+#include "Time_Step_Calculator.h"
 #include "Discrete_Solution.h"
 
 class Cells
 {
 public:
-    virtual void calculate_RHS(double* RHS, const Discrete_Solution& discretized_solution) abstract;
-};
+    Cells(const Configuration& configuration, const Grid& grid);
 
+public://Command
+    virtual void update_solution(Euclidean_Vector&& updated_solution_v) abstract;
+
+public://Query
+    virtual double calculate_time_step(void) const abstract;
+    virtual void calculate_RHS(double* RHS) const abstract;
+    virtual const Euclidean_Vector& get_solution_vector(void) const abstract;
+    virtual size_t num_solution_values(void) const abstract;
+
+protected:
+    size_t num_cells_;
+    std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
+    std::unique_ptr<Governing_Equation> governing_equation_;
+};
 
 class Cells_HOM : public Cells
 {
 public:
-    void calculate_RHS(double* RHS, const Discrete_Solution& discretized_solution) override
-    {
-        for (uint i = 0; i < this->num_cells_; ++i) {
-            const auto solution_at_quadrature_nodes = discretized_solution.calculate_solution_at_quadrature_nodes(i);
+    Cells_HOM(const Configuration& configuration, const Grid& grid);
 
-            Matrix flux_quadrature_points(num_eq, This_::space_dimension_ * num_quadrature_node);
+public://Command
+    void update_solution(Euclidean_Vector&& updated_solution_v) override;
 
-            for (size_t j = 0; j < num_quadrature_node; ++j) {
-                const auto physical_flux = this->governing_equation_->calculate_physical_flux(solution_at_quadrature_nodes[j]);
-                flux_quadrature_points.change_columns(j * This_::space_dimension_, physical_flux);
-            }
-
-            ms::gemm(flux_quadrature_points, This_::qweights_gradient_basis_[i], delta_rhs);
-
-            RHS[i] += delta_rhs;
-        }
-    }
+public://Query
+    double calculate_time_step(void) const override;
+    void calculate_RHS(double* rhs) const override;
+    const Euclidean_Vector& get_solution_vector(void) const override;
+    size_t num_solution_values(void) const override;
 
 private:
-    size_t num_cells_;
+    void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs) const;
+
+private:
+    ushort num_equations_;
+    ushort space_dimension_;
+
     Discrete_Solution_HOM discrete_solution_;
-    std::unique_ptr<Governing_Equation> governing_equation_;
+    std::vector<Matrix> set_of_QWs_gradient_basis_m_;
+
+    std::vector<double> P0_basis_values_;
+    std::vector<Matrix> set_of_basis_QPs_m_;
 };
 
 

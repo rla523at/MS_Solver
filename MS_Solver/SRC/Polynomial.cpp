@@ -747,16 +747,15 @@ size_t Polynomial::num_term(void) const {
 	return this->poly_terms_.size();
 };
 
-//double Polynomial::to_constant(void) const {
-//	REQUIRE(this->poly_terms_.empty(), "constant polynomial should have empty poly term set");
-//
-//	if (this->is_absolute_)
-//		return std::abs(this->simple_poly_term_.to_constant());
-//	else
-//		return this->simple_poly_term_.to_constant();
-//}
-//
-//
+double Polynomial::to_constant(void) const {
+	REQUIRE(this->poly_terms_.empty(), "constant polynomial should have empty poly term set");
+
+	if (this->is_absolute_)
+		return std::abs(this->simple_poly_term_.to_constant());
+	else
+		return this->simple_poly_term_.to_constant();
+};
+
 std::string Polynomial::to_string(void) const {
 	if (this->poly_terms_.empty())
 		return this->simple_poly_term_.to_string();

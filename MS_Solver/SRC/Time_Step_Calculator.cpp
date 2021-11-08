@@ -7,11 +7,10 @@ CFL::CFL(const double cfl, const Grid& grid)
     this->cell_projected_volumes_ = grid.cell_projected_volumes();
 }
 
-double CFL::calculate(const Discrete_Solution & discrete_solution, const Governing_Equation & governing_equation) const
+double CFL::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation & governing_equation) const
 {
     const auto space_dimension = governing_equation.space_dimension();
 
-    const auto P0_solutions = discrete_solution.calculate_P0_solutions();
     const auto coordinate_projected_maximum_lambdas = governing_equation.calculate_coordinate_projected_maximum_lambda(P0_solutions);
 
     const auto num_cell = P0_solutions.size();
@@ -31,7 +30,22 @@ double CFL::calculate(const Discrete_Solution & discrete_solution, const Governi
     return *std::min_element(local_time_step.begin(), local_time_step.end());
 }
 
-double Constant_Dt::calculate(const Discrete_Solution& discrete_solution, const Governing_Equation& governing_equation) const
+double Constant_Dt::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation& governing_equation) const
 {
     return this->constant_dt_;
+}
+
+std::unique_ptr<Time_Step_Calculator> Time_Step_Calculator_Factory::make(const Configuration& configuration, const Grid& grid)
+{
+    const auto type_name = configuration.get("time_step_calculator_type");
+    if (ms::contains_icase(type_name, "CFL"))
+    {
+        const auto cfl_number = configuration.get<double>("CFL_number");
+        return std::make_unique<CFL>(cfl_number, grid);
+    }
+    else if (ms::contains_icase(type_name, "Constant", "dt"))
+    {
+        const auto constant_dt = configuration.get<double>("constant_dt");
+        return std::make_unique<Constant_Dt>(constant_dt);
+    }
 }

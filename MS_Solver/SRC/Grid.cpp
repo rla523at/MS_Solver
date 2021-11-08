@@ -6,7 +6,7 @@ size_t Grid::num_cells(void) const
 	return this->grid_elements_.cell_elements.size();
 }
 
-std::vector<Vector_Function<Polynomial>> Grid::cell_basis_vector_functions(const ushort solution_order) const 
+std::vector<Vector_Function<Polynomial>> Grid::cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const 
 {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 
@@ -14,7 +14,7 @@ std::vector<Vector_Function<Polynomial>> Grid::cell_basis_vector_functions(const
 	std::vector<Vector_Function<Polynomial>> basis_vector_functions(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
-		basis_vector_functions[i] = cell_elements[i].orthonormal_basis_vector_function(solution_order);
+		basis_vector_functions[i] = cell_elements[i].orthonormal_basis_vector_function(solution_degrees[i]);
 
 	return basis_vector_functions;
 }
@@ -91,7 +91,7 @@ std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post
 	return set_of_connectivities;
 }
 
-std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const ushort solution_order) const 
+std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const std::vector<ushort> solution_degrees) const 
 {
 	const auto& cell_elements = this->grid_elements_.cell_elements;
 	const auto num_cell = cell_elements.size();
@@ -99,8 +99,8 @@ std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const ushort solution_o
 	std::vector<Quadrature_Rule> quadrature_rules;
 	quadrature_rules.reserve(num_cell);
 
-	for (uint i = 0; i < num_cell; ++i) 
-		quadrature_rules.push_back(cell_elements[i].get_quadrature_rule(solution_order));
+	for (uint i = 0; i < num_cell; ++i)
+		quadrature_rules.push_back(cell_elements[i].get_quadrature_rule(solution_degrees[i]));
 
 	return quadrature_rules;
 }

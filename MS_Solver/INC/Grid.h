@@ -11,13 +11,13 @@ class Grid
 {
 public:
 	size_t num_cells(void) const;
-	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const ushort solution_order) const;
+	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const;
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
 	std::vector<ushort> cell_set_of_num_post_nodes(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_nodes(const ushort post_order) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
-	std::vector<Quadrature_Rule> cell_quadrature_rules(const ushort solution_order) const;
+	std::vector<Quadrature_Rule> cell_quadrature_rules(const std::vector<ushort> solution_degrees) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
 	std::vector<double> cell_volumes(void) const;
 private:

@@ -1289,6 +1289,18 @@ TEST(Polynomial, gradient_4) {
 	const Vector_Function<Polynomial> ref = { Y * Z,  X * Z, X * Y };
 	EXPECT_EQ(result, ref);
 }
+TEST(Polynomial, to_constant_1)
+{
+	Polynomial x("x0");
+
+	const auto p1 = x + 3;
+	const auto p2 = x + 1;
+	const auto p3 = p1 - p2;
+	const auto result = p3.to_constant();
+
+	const auto ref = 2;
+	EXPECT_EQ(result, ref);
+}
 
 TEST(Irrational_Function, operator_call_1) {
 	const auto x = Polynomial("x0");

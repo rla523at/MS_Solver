@@ -72,6 +72,12 @@
     <ClInclude Include="INC\Element.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Cells.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Initial_Condition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
@@ -105,6 +111,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Time_Step_Calculator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Cells.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Semi_Discrete_Equation.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Governing_Equation.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

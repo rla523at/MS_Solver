@@ -1,6 +1,7 @@
 #pragma once
 //#include <numbers>
 #include "Euclidean_Vector.h"
+#include "Configuration.h"
 
 class Initial_Condition
 {
@@ -8,6 +9,11 @@ public:
 	virtual Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const abstract;
 };
 
+class Initial_Condition_Factory//static class
+{
+public:
+	static std::unique_ptr<Initial_Condition> make(const Configuration& configuration);
+};
 
 //
 //class IC {}; //Initial Condition

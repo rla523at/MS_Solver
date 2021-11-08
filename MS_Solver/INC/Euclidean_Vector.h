@@ -6,66 +6,126 @@
 #include <iomanip>
 #include <sstream>
 
-
-class Euclidean_Vector
+class Euclidean_Vector;
+class Euclidean_Vector_Base
 {
 public:
-	Euclidean_Vector(const size_t size) : values_(size) {};
-	Euclidean_Vector(const std::initializer_list<double> list) : values_(list) {};
-	Euclidean_Vector(std::vector<double>&& values) : values_(std::move(values)) {};
-	Euclidean_Vector(const std::vector<double>& values) : values_(values) {};
-
-public://Command
-	Euclidean_Vector& operator*=(const double constant);
-	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
-	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
-
-	Euclidean_Vector& normalize(void);
-
-public://Query
-	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
-	Euclidean_Vector operator+(const Euclidean_Vector& other) const;
+	Euclidean_Vector operator-(const Euclidean_Vector_Base& other) const;
+	Euclidean_Vector operator+(const Euclidean_Vector_Base& other) const;
 	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
-	bool operator==(const Euclidean_Vector& other) const;
+	bool operator==(const Euclidean_Vector_Base& other) const;
 
 	double at(const size_t position) const;
-	const double* begin(void) const;	
+	const double* begin(void) const;
+	const double* data(void) const;
 	double L2_norm(void) const;
-	double inner_product(const Euclidean_Vector& other) const;
+	double inner_product(const Euclidean_Vector_Base& other) const;
 	size_t size(void) const;
 	std::string to_string(void) const;
 
-private:
-	std::vector<double> values_;
-
-
-//public:
-//	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
-//	Euclidean_Vector& operator*=(const double constant);
-//
-//
-//public:
-//	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
-//
-//public:
-//	template <typename Function>
-//	void apply(const Function& f);
-//	void be_absolute(void);
-//
-//public:
-//	std::vector<double>::const_iterator end(void) const;
-//	const double* data(void) const;
-//	double inner_product(const Euclidean_Vector& other) const;
+protected:
+	int num_values_ = 0;
+	const double* const_data_ptr_ = nullptr;
 };
 
-Euclidean_Vector operator*(const double constant, const Euclidean_Vector& x);
+class Euclidean_Vector : public Euclidean_Vector_Base
+{
+public:
+	Euclidean_Vector(void) = default;
+	Euclidean_Vector(const size_t size);
+	Euclidean_Vector(const std::initializer_list<double> list);
+	Euclidean_Vector(std::vector<double>&& values);
+	Euclidean_Vector(const std::vector<double>& values);
+	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) : values_(first, last) {
+		this->num_values_ = static_cast<int>(this->values_.size());
+		this->const_data_ptr_ = this->values_.data();
+	};
+	Euclidean_Vector(const Euclidean_Vector& other);
+	Euclidean_Vector(Euclidean_Vector&& other) noexcept;
+
+public://Command	
+	void operator=(const Euclidean_Vector& other);
+	void operator=(Euclidean_Vector&& other) noexcept;
+	Euclidean_Vector& operator*=(const double constant);
+
+	Euclidean_Vector& normalize(void);
+
+private:
+	std::vector<double> values_;
+};
+
+class Euclidean_Vector_Wrapper : public Euclidean_Vector_Base
+{
+public:
+	Euclidean_Vector_Wrapper(const size_t num_value, const double* ptr);
+	Euclidean_Vector_Wrapper(const std::vector<double>& values);
+};
+
+
+//class Euclidean_Vector
+//{
+//public:
+//	Euclidean_Vector(const size_t size) : values_(size) {};
+//	Euclidean_Vector(const std::initializer_list<double> list) : values_(list) {};
+//	Euclidean_Vector(std::vector<double>&& values) : values_(std::move(values)) {};
+//	Euclidean_Vector(const std::vector<double>& values) : values_(values) {};
+//	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) : values_(first, last) {};
+//
+//public://Command
+//	Euclidean_Vector& operator*=(const double constant);
+//	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
+//	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
+//
+//	Euclidean_Vector& normalize(void);
+//
+//public://Query
+//	//Euclidean_Vector operator-(const Euclidean_Vector& other) const;
+//	//Euclidean_Vector operator+(const Euclidean_Vector& other) const;
+//	//Euclidean_Vector operator*(const double constant) const;
+//	double operator[](const size_t position) const;
+//	bool operator==(const Euclidean_Vector& other) const;
+//
+//	double at(const size_t position) const;
+//	const double* begin(void) const;	
+//	double L2_norm(void) const;
+//	double inner_product(const Euclidean_Vector& other) const;
+//	size_t size(void) const;
+//	std::string to_string(void) const;
+//
+//private:
+//	std::vector<double> values_;
+//
+//
+////public:
+////	Euclidean_Vector& operator-=(const Euclidean_Vector& other);
+////	Euclidean_Vector& operator*=(const double constant);
+////
+////
+////public:
+////	Euclidean_Vector operator-(const Euclidean_Vector& other) const;
+////
+////public:
+////	template <typename Function>
+////	void apply(const Function& f);
+////	void be_absolute(void);
+////
+////public:
+////	std::vector<double>::const_iterator end(void) const;
+////	const double* data(void) const;
+////	double inner_product(const Euclidean_Vector& other) const;
+//};
+
+Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Base& x);
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 
 
 
 
+namespace ms
+{
 
+}
 
 
 

@@ -10,8 +10,7 @@ public://Command
 public://Query
 	double calculate_time_step(void) const;
 	Euclidean_Vector calculate_RHS(void) const;
-	const Euclidean_Vector& get_solution_vector(void) const;
-	
+	const Euclidean_Vector& get_solution_vector(void) const;	
 
 private:
 	std::unique_ptr<Cells> cells_;

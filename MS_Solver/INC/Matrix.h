@@ -26,8 +26,11 @@ public: //Query
 
 	double at(const size_t row, const size_t column) const;
 	std::vector<double> column(const size_t column_index) const;
+	const double* data(void) const;
 	bool is_finite(void) const;
 	std::vector<double> row(const size_t row_index) const;
+	size_t num_column(void) const;
+	size_t num_values(void) const;
 	std::pair<size_t, size_t> size(void) const;
 	std::string to_string(void) const;
 
@@ -36,7 +39,7 @@ protected:
 	bool is_transposed(void) const;
 	bool is_square_matrix(void) const;
 	bool is_in_range(const size_t irow, const size_t jcolumn) const;
-	size_t num_values(void) const;
+	
 
 protected:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
@@ -54,9 +57,11 @@ public:
 	Matrix(const size_t num_row, const size_t num_column);
 	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
 	Matrix(const Matrix& other);
+	Matrix(Matrix&& other) noexcept;
 
 public://Command 
 	void operator=(const Matrix& other);
+	void operator=(Matrix&& other) noexcept;
 
 	Matrix& be_inverse(void);
 	template <typename V>	void change_column(const size_t column_index, const V& vec) {
@@ -74,7 +79,7 @@ public://Command
 
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
-	//void change_columns(const size_t start_column_index, const Static_Matrix<num_row, num_column>& A);	
+	void change_columns(const size_t start_column_index, const Matrix& A);	
 
 public://Query
 	bool operator==(const Matrix& other) const;

@@ -1,5 +1,7 @@
 #pragma once
 #include "Configuration.h"
+#include "Euclidean_Vector.h"
+#include "Matrix.h"
 
 using ushort = unsigned short;
 
@@ -7,17 +9,12 @@ class Governing_Equation
 {
 public://Query
 	virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
+	virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
 
-	const std::vector<std::string>& get_variable_names(void) const {
-		return variable_names_;
-	}
-	ushort num_equations(void) const {
-		return this->num_equations_;
-	}
-	ushort space_dimension(void) const {
-		return this->space_dimension_;
-	}
-	
+	const std::vector<std::string>& get_variable_names(void) const;
+	ushort num_equations(void) const;
+	ushort space_dimension(void) const;
+		
 protected:
 	ushort space_dimension_;
 	ushort num_equations_;
@@ -26,11 +23,15 @@ protected:
 
 class Euler2D : public Governing_Equation
 {
-	Euler2D(void) {		
-		this->space_dimension_ = 2;
-		this->num_equations_ = 4;
-		this->variable_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "e" };
-	}
+public:
+	Euler2D(void);
+
+public://Query
+	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+
+private:
+	Euclidean_Vector calculate_velocity(const Euclidean_Vector& solution) const;
+	double calculate_pressure(const Euclidean_Vector& solution, const Euclidean_Vector& velocity) const;
 };
 
 class Governing_Equation_Factory//static class
@@ -259,24 +260,24 @@ private:
 //template <ushort space_dimension_>
 //auto Euler<space_dimension_>::physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable) {
 //    if constexpr (space_dimension_ == 2) {
-//        const auto rho = conservative_variable.at(0);
-//        const auto rhou = conservative_variable.at(1);
-//        const auto rhov = conservative_variable.at(2);
-//        const auto rhoE = conservative_variable.at(3);
-//        const auto u = primitivie_variable.at(0);
-//        const auto v = primitivie_variable.at(1);
-//        const auto p = primitivie_variable.at(2);
-//        const auto a = primitivie_variable.at(3);
-//        const auto rhouv = rhou * v;
-//
-//        dynamic_require(rho >= 0 && p >= 0, "density and pressure shold be positive");
-//
-//        return Matrix<num_equation_,space_dimension_>({
-//            rhou,				rhov,
-//            rhou * u + p,		rhouv,
-//            rhouv,				rhov * v + p,
-//            (rhoE + p) * u,		(rhoE + p) * v
-//        });
+        //const auto rho = conservative_variable.at(0);
+        //const auto rhou = conservative_variable.at(1);
+        //const auto rhov = conservative_variable.at(2);
+        //const auto rhoE = conservative_variable.at(3);
+        //const auto u = primitivie_variable.at(0);
+        //const auto v = primitivie_variable.at(1);
+        //const auto p = primitivie_variable.at(2);
+        //const auto a = primitivie_variable.at(3);
+        //const auto rhouv = rhou * v;
+
+        //dynamic_require(rho >= 0 && p >= 0, "density and pressure shold be positive");
+
+        //return Matrix<num_equation_,space_dimension_>({
+        //    rhou,				rhov,
+        //    rhou * u + p,		rhouv,
+        //    rhouv,				rhov * v + p,
+        //    (rhoE + p) * u,		(rhoE + p) * v
+        //});
 //    }
 //    else {
 //        const auto rho = conservative_variable[0];
