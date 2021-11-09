@@ -1,10 +1,12 @@
 #include "../INC/Discrete_Solution.h"
 
-Discrete_Solution::Discrete_Solution(const Grid& grid, const Governing_Equation& governing_equation)
+Discrete_Solution::Discrete_Solution(const Configuration& configuration, const Grid& grid)
 {
+	const auto governing_equation = Governing_Equation_Factory::make(configuration);
+
 	this->num_cells_ = grid.num_cells();
-	this->space_dimension_ = governing_equation.space_dimension();
-	this->num_equations_ = governing_equation.num_equations();	
+	this->space_dimension_ = governing_equation->space_dimension();
+	this->num_equations_ = governing_equation->num_equations();	
 }
 
 void Discrete_Solution::update_solution(Euclidean_Vector&& updated_solution)
@@ -22,55 +24,55 @@ size_t Discrete_Solution::num_values(void) const
 	return this->value_v_.size();
 }
 
-Discretized_Solution_FVM::Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition)
-	:Discrete_Solution(grid, governing_equation)
-{
-	this->set_initial_condition(grid, initial_condition);
-}
+//Discretized_Solution_FVM::Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition)
+//	:Discrete_Solution(grid, governing_equation)
+//{
+//	this->set_initial_condition(grid, initial_condition);
+//}
+//
+//void Discretized_Solution_FVM::set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) 
+//{
+//	//Celss¿¡ ÀÖ¾î¾ß µÉ°Å°°Àºµª¼õ
+//	std::vector<double> initial_values(this->num_cells_ * this->num_equations_);
+//	const auto cell_center_nodes = grid.cell_center_nodes();
+//
+//	for (size_t i = 0; i < this->num_cells_; ++i) {
+//		const auto initial_solution = initial_condition.calculate_solution(cell_center_nodes[i]);
+//
+//		for (ushort j = 0; j < this->num_equations_; ++j) {
+//			const auto index = i * this->num_equations_ + j;
+//			initial_values[index] = initial_solution[j];
+//		}
+//	}
+//
+//	this->value_v_ = std::move(initial_values);
+//}
+//
+//std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_FVM::calculate_set_of_post_point_solutions(void) const 
+//{
+//	std::vector<std::vector<Euclidean_Vector>> set_of_post_point_solutions(this->num_cells_);
+//
+//	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index) {
+//		auto solution = this->calculate_solution_at_center(cell_index);
+//		set_of_post_point_solutions[cell_index].push_back(std::move(solution));
+//	}
+//
+//	return set_of_post_point_solutions;
+//}
+//
+//Euclidean_Vector Discretized_Solution_FVM::calculate_solution_at_center(const uint cell_index) const 
+//{
+//	const auto start_index = cell_index * this->num_equations_;
+//	const auto num_variable = this->num_equations_;
+//
+//	const auto start_iter = this->value_v_.begin() + start_index;
+//
+//	std::vector<double> values = { start_iter, start_iter + num_variable };
+//	return values;
+//}
 
-void Discretized_Solution_FVM::set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) 
-{
-	//Celss¿¡ ÀÖ¾î¾ß µÉ°Å°°Àºµª¼õ
-	std::vector<double> initial_values(this->num_cells_ * this->num_equations_);
-	const auto cell_center_nodes = grid.cell_center_nodes();
-
-	for (size_t i = 0; i < this->num_cells_; ++i) {
-		const auto initial_solution = initial_condition.calculate_solution(cell_center_nodes[i]);
-
-		for (ushort j = 0; j < this->num_equations_; ++j) {
-			const auto index = i * this->num_equations_ + j;
-			initial_values[index] = initial_solution[j];
-		}
-	}
-
-	this->value_v_ = std::move(initial_values);
-}
-
-std::vector<std::vector<Euclidean_Vector>> Discretized_Solution_FVM::calculate_set_of_post_point_solutions(void) const 
-{
-	std::vector<std::vector<Euclidean_Vector>> set_of_post_point_solutions(this->num_cells_);
-
-	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index) {
-		auto solution = this->calculate_solution_at_center(cell_index);
-		set_of_post_point_solutions[cell_index].push_back(std::move(solution));
-	}
-
-	return set_of_post_point_solutions;
-}
-
-Euclidean_Vector Discretized_Solution_FVM::calculate_solution_at_center(const uint cell_index) const 
-{
-	const auto start_index = cell_index * this->num_equations_;
-	const auto num_variable = this->num_equations_;
-
-	const auto start_iter = this->value_v_.begin() + start_index;
-
-	std::vector<double> values = { start_iter, start_iter + num_variable };
-	return values;
-}
-
-Discrete_Solution_DG::Discrete_Solution_DG(const Configuration& configuration, const Grid& grid, const Governing_Equation& governing_equation)
-	:Discrete_Solution(grid, governing_equation)
+Discrete_Solution_DG::Discrete_Solution_DG(const Configuration& configuration, const Grid& grid)
+	:Discrete_Solution(configuration, grid)
 {
 	const auto solution_degree = configuration.get<ushort>("solution_degree");
 	this->solution_degrees_.resize(this->num_cells_, solution_degree);
@@ -88,17 +90,6 @@ Discrete_Solution_DG::Discrete_Solution_DG(const Configuration& configuration, c
 	const auto initial_condition = Initial_Condition_Factory::make(configuration);
 	this->value_v_ = this->calculate_initial_values(grid, *initial_condition);
 }
-
-
-//std::vector<double> Discrete_Solution_HOM::calculate_P0_basis_values(void) const
-//{
-//	std::vector<double> P0_basis_values(this->num_cells_);
-//
-//	for (int i = 0; i < this->num_cells_; ++i)
-//		P0_basis_values[i] = this->calculate_P0_basis_value(i);
-//
-//	return P0_basis_values;
-//}
 
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_P0_solutions(const std::vector<double>& P0_basis_values) const
 {

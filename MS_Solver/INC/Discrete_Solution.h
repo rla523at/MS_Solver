@@ -9,7 +9,7 @@ using uint = unsigned int;
 class Discrete_Solution
 {
 public:
-	Discrete_Solution(const Grid& grid, const Governing_Equation& governing_equation);
+	Discrete_Solution(const Configuration& configuration, const Grid& grid);
 
 public://Command
 	void update_solution(Euclidean_Vector&& updated_solution);
@@ -25,27 +25,10 @@ protected:
 	Euclidean_Vector value_v_;
 };
 
-
-class Discretized_Solution_FVM : public Discrete_Solution
-{
-public:
-	Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition);
-
-public://Command
-	void set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition);
-
-public: //Query
-	std::vector<std::vector<Euclidean_Vector>> calculate_set_of_post_point_solutions(void) const;
-
-private:
-	Euclidean_Vector calculate_solution_at_center(const uint cell_index) const;
-};
-
-
 class Discrete_Solution_DG : public Discrete_Solution
 {
 public:	
-	Discrete_Solution_DG(const Configuration& configuration, const Grid& grid, const Governing_Equation& governing_equation);
+	Discrete_Solution_DG(const Configuration& configuration, const Grid& grid);
 
 public://Query
 	double calculate_P0_basis_value(const uint cell_index) const;
@@ -79,6 +62,22 @@ private:
 	std::vector<ushort> set_of_num_basis_;
 	std::vector<size_t> coefficieint_start_indexes_;
 };
+
+//class Discretized_Solution_FVM : public Discrete_Solution
+//{
+//public:
+//	Discretized_Solution_FVM(const Governing_Equation& governing_equation, const Grid& grid, const Initial_Condition& initial_condition);
+//
+//public://Command
+//	void set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition);
+//
+//public: //Query
+//	std::vector<std::vector<Euclidean_Vector>> calculate_set_of_post_point_solutions(void) const;
+//
+//private:
+//	Euclidean_Vector calculate_solution_at_center(const uint cell_index) const;
+//};
+
 
 //class Discretized_Solution_Factory
 //{

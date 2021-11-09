@@ -1,10 +1,10 @@
 #pragma once
 #include "Exception.h"
 
-#include <mkl.h>
-#include <vector>
 #include <iomanip>
+#include <mkl.h>
 #include <sstream>
+#include <vector>
 
 class Euclidean_Vector;
 class Euclidean_Vector_Base
@@ -118,14 +118,6 @@ public:
 
 Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Base& x);
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
-
-
-
-
-namespace ms
-{
-
-}
 
 
 

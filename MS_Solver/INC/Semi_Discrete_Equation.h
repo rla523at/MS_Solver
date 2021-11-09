@@ -4,21 +4,108 @@
 
 class Semi_Discrete_Equation
 {
-public:
-	Semi_Discrete_Equation(const Configuration& configuration, const Grid& grid);
-
 public://Command
-	void update_solution(Euclidean_Vector&& updated_soltuion);
+	virtual void update_solution(Euclidean_Vector&& updated_soltuion) abstract;
 
 public://Query
-	double calculate_time_step(void) const;
-	Euclidean_Vector calculate_RHS(void) const;
-	const Euclidean_Vector& get_solution_vector(void) const;	
-
-private:
-	std::unique_ptr<Cells> cells_;
-	std::vector<std::unique_ptr<Face>> faces_;
+	virtual double calculate_time_step(void) const abstract;
+	virtual Euclidean_Vector calculate_RHS(void) const abstract;
+	virtual const Euclidean_Vector& get_solution_vector(void) const abstract;
 };
+
+
+class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
+{
+public:
+	Semi_Discrete_Equation_DG(const Configuration& configuration, const Grid& grid);
+
+public://Command
+	void update_solution(Euclidean_Vector&& updated_soltuion) override;
+
+public://Query
+	double calculate_time_step(void) const override;
+	Euclidean_Vector calculate_RHS(void) const override;
+	const Euclidean_Vector& get_solution_vector(void) const override;
+	
+private:
+	Discrete_Solution_DG discrete_solution_;
+	Cells_DG cells_;	
+};
+
+class Semi_Discrete_Equation_Factory
+{
+public:
+	static std::unique_ptr<Semi_Discrete_Equation> make(const Configuration& configuration, const Grid& grid);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//class Semi_Discrete_Equation
+//{
+//public:
+//	Semi_Discrete_Equation(const Configuration& configuration, const Grid& grid);
+//
+//public://Command
+//	void update_solution(Euclidean_Vector&& updated_soltuion);
+//
+//public://Query
+//	double calculate_time_step(void) const;
+//	Euclidean_Vector calculate_RHS(void) const;
+//	const Euclidean_Vector& get_solution_vector(void) const;	
+//
+//private:
+//	std::unique_ptr<Cells> cells_;
+//	std::vector<std::unique_ptr<Face>> faces_;
+//};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

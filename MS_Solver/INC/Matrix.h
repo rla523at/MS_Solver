@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <vector>
 
+using ushort = unsigned short;
+
 //for setting friend class
 namespace ms 
 {

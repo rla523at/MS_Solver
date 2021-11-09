@@ -7,15 +7,6 @@ class Cells
 public:
     Cells(const Configuration& configuration, const Grid& grid);
 
-public://Command
-    virtual void update_solution(Euclidean_Vector&& updated_solution_v) abstract;
-
-public://Query
-    virtual double calculate_time_step(void) const abstract;
-    virtual void calculate_RHS(double* RHS) const abstract;
-    virtual const Euclidean_Vector& get_solution_vector(void) const abstract;
-    virtual size_t num_solution_values(void) const abstract;
-
 protected:
     size_t num_cells_;
     std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
@@ -25,33 +16,129 @@ protected:
 class Cells_DG : public Cells
 {
 public:
-    Cells_DG(const Configuration& configuration, const Grid& grid);
-
-public://Command
-    void update_solution(Euclidean_Vector&& updated_solution_v) override;
+    Cells_DG(const Configuration& configuration, const Grid& grid, const Discrete_Solution_DG& discrete_solution);
 
 public://Query
-    double calculate_time_step(void) const override;
-    void calculate_RHS(double* rhs) const override;
-    const Euclidean_Vector& get_solution_vector(void) const override;
-    size_t num_solution_values(void) const override;
+    double calculate_time_step(const Discrete_Solution_DG& discrete_solution) const;
+    void calculate_RHS(double* rhs, const Discrete_Solution_DG& discrete_solution) const;
 
 private:
-    void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs) const;
-    //std::vector<ushort> calculate_integrand_degrees(const std::vector<ushort>& solution_degrees) const;
+    void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs, const Discrete_Solution_DG& discrete_solution) const;
 
 private:
-    Discrete_Solution_DG discrete_solution_;
     std::vector<double> P0_basis_values_;
     std::vector<Matrix> set_of_basis_QPs_m_;
     std::vector<Matrix> set_of_QWs_gradient_basis_m_;
 };
 
-class Cells_Factory//static class
-{
-public:
-    static std::unique_ptr<Cells> make(const Configuration& configuration, const Grid& grid);
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//class Cells
+//{
+//public:
+//    Cells(const Configuration& configuration, const Grid& grid);
+//
+//public://Command
+//    virtual void update_solution(Euclidean_Vector&& updated_solution_v) abstract;
+//
+//public://Query
+//    virtual double calculate_time_step(void) const abstract;
+//    virtual void calculate_RHS(double* RHS) const abstract;
+//    virtual const Euclidean_Vector& get_solution_vector(void) const abstract;
+//    virtual size_t num_solution_values(void) const abstract;
+//
+//protected:
+//    size_t num_cells_;
+//    std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
+//    std::unique_ptr<Governing_Equation> governing_equation_;
+//};
+//
+//class Cells_DG : public Cells
+//{
+//public:
+//    Cells_DG(const Configuration& configuration, const Grid& grid);
+//
+//public://Command
+//    void update_solution(Euclidean_Vector&& updated_solution_v) override;
+//
+//public://Query
+//    double calculate_time_step(void) const override;
+//    void calculate_RHS(double* rhs) const override;
+//    const Euclidean_Vector& get_solution_vector(void) const override;
+//    size_t num_solution_values(void) const override;
+//
+//private:
+//    void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs) const;
+//    //std::vector<ushort> calculate_integrand_degrees(const std::vector<ushort>& solution_degrees) const;
+//
+//private:
+//    Discrete_Solution_DG discrete_solution_;
+//    std::vector<double> P0_basis_values_;
+//    std::vector<Matrix> set_of_basis_QPs_m_;
+//    std::vector<Matrix> set_of_QWs_gradient_basis_m_;
+//};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //#include "Cells_FVM.h"

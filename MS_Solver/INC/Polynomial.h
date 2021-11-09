@@ -225,7 +225,7 @@ private:
 	double exponent_ = 1.0;
 
 public:
-	Irrational_Function(void) = default;
+	Irrational_Function(void) = default;	
 	Irrational_Function(const Polynomial& polynomial, const double root_index = 1.0) 
 		:base_(polynomial),
 		 exponent_(root_index) {};

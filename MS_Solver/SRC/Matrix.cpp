@@ -15,7 +15,7 @@ Matrix Matrix_Base::operator*(const double constant) const
 	const auto num_values = this->num_values();
 	std::vector<double> values(num_values);
 
-	const auto n = num_values;
+	const auto n = static_cast<int>(num_values);
 	const auto incx = 1;
 	cblas_dscal(n, constant, values.data(), incx);
 
