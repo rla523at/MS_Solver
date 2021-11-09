@@ -1,5 +1,5 @@
 
-#include "../INC/Profiler.h"
+#include "Profiler.h"
 
 void Profiler::record_Consumed_Memory(void){		
 	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&memory_recorder_, sizeof(memory_recorder_));

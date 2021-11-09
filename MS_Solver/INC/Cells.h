@@ -22,10 +22,10 @@ protected:
     std::unique_ptr<Governing_Equation> governing_equation_;
 };
 
-class Cells_HOM : public Cells
+class Cells_DG : public Cells
 {
 public:
-    Cells_HOM(const Configuration& configuration, const Grid& grid);
+    Cells_DG(const Configuration& configuration, const Grid& grid);
 
 public://Command
     void update_solution(Euclidean_Vector&& updated_solution_v) override;
@@ -38,16 +38,19 @@ public://Query
 
 private:
     void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs) const;
+    //std::vector<ushort> calculate_integrand_degrees(const std::vector<ushort>& solution_degrees) const;
 
 private:
-    ushort num_equations_;
-    ushort space_dimension_;
-
-    Discrete_Solution_HOM discrete_solution_;
-    std::vector<Matrix> set_of_QWs_gradient_basis_m_;
-
+    Discrete_Solution_DG discrete_solution_;
     std::vector<double> P0_basis_values_;
     std::vector<Matrix> set_of_basis_QPs_m_;
+    std::vector<Matrix> set_of_QWs_gradient_basis_m_;
+};
+
+class Cells_Factory//static class
+{
+public:
+    static std::unique_ptr<Cells> make(const Configuration& configuration, const Grid& grid);
 };
 
 

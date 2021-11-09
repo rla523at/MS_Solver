@@ -733,7 +733,7 @@ ushort Polynomial::domain_dimension(void) const {
 	return domain_dimension;
 }
 
-Vector_Function<Polynomial> Polynomial::gradient(void) const {
+std::vector<Polynomial> Polynomial::gradient(void) const {
 	const auto domain_dimension = this->domain_dimension();
 	std::vector<Polynomial> gradient(domain_dimension);
 

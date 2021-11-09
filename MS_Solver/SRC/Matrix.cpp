@@ -1,6 +1,7 @@
 #include "../INC/Matrix.h"
 
-void Matrix_Base::be_transpose(void) {
+void Matrix_Base::be_transpose(void) 
+{
 	std::swap(this->num_row_, this->num_column_);
 
 	if (this->is_transposed())
@@ -8,6 +9,19 @@ void Matrix_Base::be_transpose(void) {
 	else
 		this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
 }
+
+Matrix Matrix_Base::operator*(const double constant) const
+{
+	const auto num_values = this->num_values();
+	std::vector<double> values(num_values);
+
+	const auto n = num_values;
+	const auto incx = 1;
+	cblas_dscal(n, constant, values.data(), incx);
+
+	return { this->num_row_, this->num_column_, std::move(values) };
+}
+
 Matrix Matrix_Base::operator*(const Matrix_Base& other) const 
 {
 	const auto [num_row, num_column] = other.size();

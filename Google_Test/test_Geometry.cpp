@@ -206,7 +206,7 @@ TEST(Geometry, orthonormal_basis_1) {
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
 
 	double max_error = 0.0;
-	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+	for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
 		for (ushort j = 0; j <= i; ++j) {
 			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
@@ -238,7 +238,7 @@ TEST(Geometry, orthonormal_basis_2) {
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
 
 	double max_error = 0.0;
-	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+	for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
 		for (ushort j = 0; j <= i; ++j) {
 			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
@@ -271,7 +271,7 @@ TEST(Geometry, orthonormal_basis_3) {
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
 
 	double max_error = 0.0;
-	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+	for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
 		for (ushort j = 0; j <= i; ++j) {
 			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
@@ -303,7 +303,7 @@ TEST(Geometry, orthonormal_basis_4) {
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
 
 	double max_error = 0.0;
-	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+	for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
 		for (ushort j = 0; j <= i; ++j) {
 			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 
@@ -335,7 +335,7 @@ TEST(Geometry, orthonormal_basis_5) {
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
 
 	double max_error = 0.0;
-	for (ushort i = 0; i < orthonormal_basis.range_dimension(); ++i) {
+	for (ushort i = 0; i < orthonormal_basis.size(); ++i) {
 		for (ushort j = 0; j <= i; ++j) {
 			const auto result = ms::inner_product(orthonormal_basis[i], orthonormal_basis[j], geometry);
 

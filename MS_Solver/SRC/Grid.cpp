@@ -91,19 +91,26 @@ std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post
 	return set_of_connectivities;
 }
 
-std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const std::vector<ushort> solution_degrees) const 
+Quadrature_Rule Grid::cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const
 {
-	const auto& cell_elements = this->grid_elements_.cell_elements;
-	const auto num_cell = cell_elements.size();
-
-	std::vector<Quadrature_Rule> quadrature_rules;
-	quadrature_rules.reserve(num_cell);
-
-	for (uint i = 0; i < num_cell; ++i)
-		quadrature_rules.push_back(cell_elements[i].get_quadrature_rule(solution_degrees[i]));
-
-	return quadrature_rules;
+	const auto& cell_element = this->grid_elements_.cell_elements[cell_index];
+	return cell_element.get_quadrature_rule(solution_degree);
 }
+
+
+//std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const std::vector<ushort> solution_degrees) const 
+//{
+//	const auto& cell_elements = this->grid_elements_.cell_elements;
+//	const auto num_cell = cell_elements.size();
+//
+//	std::vector<Quadrature_Rule> quadrature_rules;
+//	quadrature_rules.reserve(num_cell);
+//
+//	for (uint i = 0; i < num_cell; ++i)
+//		quadrature_rules.push_back(cell_elements[i].get_quadrature_rule(solution_degrees[i]));
+//
+//	return quadrature_rules;
+//}
 
 std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
 {

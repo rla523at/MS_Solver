@@ -16,7 +16,7 @@ public:
 
 public://Query
 	template <typename V>	std::vector<double> operator()(const V& space_vector) const {
-		const auto range_dimension = this->range_dimension();
+		const auto range_dimension = this->size();
 
 		std::vector<double> result(range_dimension);
 		for (size_t i = 0; i < range_dimension; ++i)
@@ -25,7 +25,7 @@ public://Query
 		return result;
 	}
 	const Function& operator[](const size_t index) const {
-		REQUIRE(index < this->range_dimension(), "index can not exceed range size");
+		REQUIRE(index < this->size(), "index can not exceed range size");
 		return this->functions_[index];
 	}
 	bool operator==(const Vector_Function& other) const {
@@ -33,18 +33,18 @@ public://Query
 	}
 
 	const Function& at(const size_t index) const {
-		REQUIRE(index < this->range_dimension(), "index can not exceed range size");
+		REQUIRE(index < this->size(), "index can not exceed range size");
 		return this->functions_[index];
 	}
 	Vector_Function<Function> cross_product(const Vector_Function& other) const {
 		constexpr auto result_range_dimension = 3;
 		std::vector<Function> result(result_range_dimension);
 
-		if (this->range_dimension() == 2)
+		if (this->size() == 2)
 		{
 			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
 		}
-		else if (this->range_dimension() == 3)
+		else if (this->size() == 3)
 		{
 			result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
 			result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
@@ -71,7 +71,7 @@ public://Query
 
 		return differentiate_functions;
 	}
-	size_t range_dimension(void) const {
+	size_t size(void) const {
 		return this->functions_.size();
 	}
 	std::string to_string(void) const {
@@ -86,7 +86,6 @@ public://Query
 private:
 	std::vector<Function> functions_;
 };
-
 
 template <typename Function>
 std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf) {

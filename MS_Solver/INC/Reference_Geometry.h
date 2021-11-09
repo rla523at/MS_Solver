@@ -19,15 +19,15 @@ enum class Figure
 
 struct Quadrature_Rule
 {
-	std::vector<Euclidean_Vector> nodes;
+	std::vector<Euclidean_Vector> points;
 	std::vector<double> weights;
 
 	bool operator==(const Quadrature_Rule& other) const {
-		return this->nodes == other.nodes && this->weights == other.weights;
+		return this->points == other.points && this->weights == other.weights;
 	}
 
 	bool is_empty(void) const {
-		return this->nodes.empty();
+		return this->points.empty();
 	}
 };
 

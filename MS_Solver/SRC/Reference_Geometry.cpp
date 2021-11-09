@@ -7,7 +7,7 @@ Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const
 
 	//std::cout << mapping_monomial_vector_function; //debug
 
-	const auto matrix_order = mapping_monomial_vector_function.range_dimension();
+	const auto matrix_order = mapping_monomial_vector_function.size();
 	Matrix transformation_monomial_matrix(matrix_order);
 	for (size_t i = 0; i < matrix_order; ++i)
 		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));

@@ -1248,37 +1248,41 @@ TEST(Polynomial, get_differentiate_16) {
 	const auto ref = Y + 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, gradient_1) {
+TEST(Polynomial, gradient_1) 
+{
 	const Polynomial x("x0");
 	const Polynomial y("x1");
 
 	const auto p = x + y + 1;
 	const auto result = p.gradient();
 
-	const Vector_Function<Polynomial> ref = { 1, 1 };
+	const std::vector<Polynomial> ref = { 1, 1 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, gradient_2) {
+TEST(Polynomial, gradient_2) 
+{
 	const Polynomial x("x0");
 	const Polynomial y("x1");
 
 	const auto p = (x ^ 2) + x * y + 1;
 	const auto result = p.gradient();
 
-	const Vector_Function<Polynomial> ref = { 2 * x + y, x };
+	const std::vector<Polynomial> ref = { 2 * x + y, x };
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, gradient_3) {
+TEST(Polynomial, gradient_3) 
+{
 	const Polynomial X("x0");
 	const Polynomial Y("x1");
 
 	const auto p = (X ^ 2) + X * Y + 1;
 	const auto result = p.gradient();
 
-	const Vector_Function<Polynomial> ref = { 2 * X + Y, X };
+	const std::vector<Polynomial> ref = { 2 * X + Y, X };
 	EXPECT_EQ(result, ref);
 }
-TEST(Polynomial, gradient_4) {
+TEST(Polynomial, gradient_4) 
+{
 	const Polynomial X("x0");
 	const Polynomial Y("x1");
 	const Polynomial Z("x2");
@@ -1286,7 +1290,7 @@ TEST(Polynomial, gradient_4) {
 	const auto p = X * Y * Z;
 	const auto result = p.gradient();
 
-	const Vector_Function<Polynomial> ref = { Y * Z,  X * Z, X * Y };
+	const std::vector<Polynomial> ref = { Y * Z,  X * Z, X * Y };
 	EXPECT_EQ(result, ref);
 }
 TEST(Polynomial, to_constant_1)
@@ -1301,7 +1305,6 @@ TEST(Polynomial, to_constant_1)
 	const auto ref = 2;
 	EXPECT_EQ(result, ref);
 }
-
 TEST(Irrational_Function, operator_call_1) {
 	const auto x = Polynomial("x0");
 	const auto ir = x.root(0.5);

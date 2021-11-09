@@ -4,6 +4,9 @@
 
 class Semi_Discrete_Equation
 {
+public:
+	Semi_Discrete_Equation(const Configuration& configuration, const Grid& grid);
+
 public://Command
 	void update_solution(Euclidean_Vector&& updated_soltuion);
 

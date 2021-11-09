@@ -1,15 +1,13 @@
 #pragma once
-#include "Vector_Function.h"
+#include "Exception.h"
 
-#include <array>
 #include <algorithm>
-#include <vector>
-#include <sstream>
+#include <array>
 #include <iomanip>
-#include <iostream>
+#include <sstream>
+#include <vector>
 
 using ushort = unsigned short;
-
 
 //Linear combination of monomial degree 1
 class PolyTerm;
@@ -202,7 +200,7 @@ public://Query
 	ushort degree(void) const;
 	ushort domain_dimension(void) const;
 	Polynomial get_differentiate(const ushort variable_index) const;
-	Vector_Function<Polynomial> gradient(void) const;
+	std::vector<Polynomial> gradient(void) const;
 	size_t num_term(void) const;
 	double to_constant(void) const;
 	std::string to_string(void) const;
@@ -233,13 +231,16 @@ public:
 		 exponent_(root_index) {};
 
 public://Query
-	template <typename V> double operator()(const V& domain_vector) const {
+	template <typename V> double operator()(const V& domain_vector) const 
+	{
 		return std::pow(this->base_(domain_vector), this->exponent_);
 	}
-	bool operator==(const Irrational_Function& other) const {
+	bool operator==(const Irrational_Function& other) const 
+	{
 		return this->base_ == other.base_ && this->exponent_ == other.exponent_;
 	}
-	std::string to_string(void) const {
+	std::string to_string(void) const 
+	{
 		if (this->exponent_ != 1.0)
 			return "[" + this->base_.to_string() + "]^" + std::to_string(this->exponent_);
 		else

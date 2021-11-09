@@ -4,6 +4,8 @@ governing_equation			= Euler
 space_dimension				= 2
 solution_degree				= 3
 
+spatial_discrete_scheme		= DG
+
 solve_end_controller_type	= Time
 solve_end_time				= 0.2
 solve_end_iter				= 100

@@ -265,17 +265,17 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 	const auto reference_integrand_order = integrand_order + this->reference_geometry_->scale_function_order();
 	const auto& ref_quadrature_rule = this->reference_geometry_->get_quadrature_rule(reference_integrand_order);
 	
-	const auto num_QP = ref_quadrature_rule.nodes.size();
+	const auto num_QP = ref_quadrature_rule.points.size();
 	std::vector<Euclidean_Vector> transformed_QP;
 	transformed_QP.reserve(num_QP);
 
-	for (const auto& ref_node : ref_quadrature_rule.nodes)
+	for (const auto& ref_node : ref_quadrature_rule.points)
 		transformed_QP.push_back(this->mapping_function_(ref_node));
 
 	std::vector<double> transformed_QW(num_QP);
 
 	for (size_t i = 0; i < num_QP; ++i) {
-		const auto& point = ref_quadrature_rule.nodes[i];
+		const auto& point = ref_quadrature_rule.points[i];
 		const auto& weight = ref_quadrature_rule.weights[i];
 
 		transformed_QW[i] = this->scale_function_(point) * weight;
@@ -287,7 +287,7 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 namespace ms
 {
 	double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule) {
-		const auto& QP_set = quadrature_rule.nodes;
+		const auto& QP_set = quadrature_rule.points;
 		const auto& QW_set = quadrature_rule.weights;
 
 		double result = 0.0;
@@ -306,7 +306,7 @@ namespace ms
 		const auto integrand_degree = f1.degree() + f2.degree();
 
 		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_degree);
-		const auto& QP_set = quadrature_rule.nodes;
+		const auto& QP_set = quadrature_rule.points;
 		const auto& QW_set = quadrature_rule.weights;
 
 		double result = 0.0;
@@ -321,7 +321,7 @@ namespace ms
 	}
 
 	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry) {
-		const auto range_dimension = functions.range_dimension();
+		const auto range_dimension = functions.size();
 
 		std::vector<Polynomial> normalized_functions(range_dimension);
 
