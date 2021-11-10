@@ -57,9 +57,6 @@
     <ClInclude Include="INC\Solve_Controller.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Face.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Time_Step_Calculator.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -73,6 +70,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Initial_Condition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundaries.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundary_Flux_Function.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Inner_Faces.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

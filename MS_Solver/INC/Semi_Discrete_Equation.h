@@ -1,6 +1,7 @@
 #pragma once
 #include "Cells.h"
-#include "Face.h"
+#include "Boundaries.h"
+#include "Inner_Faces.h"
 
 class Semi_Discrete_Equation
 {
@@ -30,6 +31,8 @@ public://Query
 private:
 	Discrete_Solution_DG discrete_solution_;
 	Cells_DG cells_;	
+	Boundaries_DG boundaries_;
+	Inner_Faces_DG inter_cell_faces_;
 };
 
 class Semi_Discrete_Equation_Factory
