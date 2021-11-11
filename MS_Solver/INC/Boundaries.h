@@ -11,11 +11,7 @@ public:
             const auto oc_index = this->oc_indexes_[i];
             const auto solution_at_QPs = discrete_soltuion.calculate_solution_at_points(oc_index, this->set_of_oc_side_basis_QPs_m_[i]);
 
-            const auto oc_side_cvariables = this->set_of_oc_coefficient_m_[i] * this->set_of_oc_side_basis_QPs_m_[i];
-
-            const auto [num_equation, num_qnode] = oc_side_cvariables.size();
-
-            const auto& boundary_flux_function = *this->boundary_flux_functions_[i];
+            sconst auto& boundary_flux_function = *this->boundary_flux_functions_[i];
             const auto& normals = this->set_of_normals_[i];
 
             Matrix boundary_flux_quadrature(This_::num_equation_, num_qnode);
