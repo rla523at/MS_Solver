@@ -1,5 +1,34 @@
 #include "../INC/Grid.h"
 
+Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& grid_file_convertor)
+{
+	this->space_dimension_ = grid_file_convertor.get_space_dimension();
+
+	auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
+
+	std::vector<Element> periodic_boundary_elements;
+
+	for (auto& element : elements)
+	{
+		const auto type = element.type();
+		switch (type) 
+		{
+		case ElementType::cell:
+			this->cell_elements_.push_back(std::move(element));
+			break;
+		case ElementType::periodic:
+			periodic_boundary_elements.push_back(std::move(element));
+			break;
+		default:
+			this->boundary_elements_.push_back(std::move(element));
+			break;
+		}
+	}
+
+	this->inner_face_elements_ = this->make_inner_face_elements(periodic_boundary_elements);
+
+}
+
 
 size_t Grid::num_cells(void) const 
 {
@@ -139,3 +168,46 @@ std::vector<double> Grid::cell_volumes(void) const
 	return volumes;
 }
 
+std::vector<Element> Grid::make_inner_face_elements(const std::vector<Element>& periodic_boundary_elements)
+{
+	//check constructed face
+	std::set<std::vector<uint>> constructed_face_vnode_index_set;
+
+	for (const auto& boundray_element : this->boundary_elements_)
+	{
+		auto vnode_indexes = boundray_element.vertex_node_indexes();
+		std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
+		constructed_face_vnode_index_set.insert(std::move(vnode_indexes));
+	}
+	for (const auto& periodic_boundray_element : periodic_boundary_elements)
+	{
+		auto vnode_indexes = periodic_boundray_element.vertex_node_indexes();
+		std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
+		constructed_face_vnode_index_set.insert(std::move(vnode_indexes));
+	}
+
+	//construct face & select inner face
+	std::vector<Element> inner_face_elements;
+
+	for (const auto& cell_element : this->cell_elements_)
+	{
+		auto face_elements = cell_element.make_face_elements();
+		for (auto& face_element : face_elements)
+		{
+			auto vnode_indexes = face_element.vertex_node_indexes();
+			std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
+
+			if (constructed_face_vnode_index_set.contains(vnode_indexes))
+			{
+				continue;
+			}
+			else
+			{
+				constructed_face_vnode_index_set.insert(std::move(vnode_indexes));
+				inner_face_elements.push_back(std::move(face_element));
+			}
+		}
+	}
+
+	return inner_face_elements;
+}

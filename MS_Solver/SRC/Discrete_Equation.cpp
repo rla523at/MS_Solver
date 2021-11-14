@@ -1,13 +1,5 @@
 #include "../INC/Discrete_Equation.h"
 
-Discrete_Equation::Discrete_Equation(const Configuration& configuration)
-{
-    this->end_controller_ = Solve_End_Controller_Factory::make(configuration);
-    this->post_controller_ = Solve_Post_Controller_Factory::make(configuration);    
-    this->time_discrete_scheme_ = Time_Discrete_Scheme_Factory::make(configuration);
-}
-
-
 void Discrete_Equation::solve(void)
 {
     size_t current_iter = 0;
@@ -19,8 +11,10 @@ void Discrete_Equation::solve(void)
     Log::content_ << "================================================================================\n";
 
     SET_TIME_POINT;
-    while (true) {
-        if (this->end_controller_->is_time_to_end(current_iter, current_time)) {
+    while (true)
+    {
+        if (this->end_controller_->is_time_to_end(current_iter, current_time))
+        {
             //Post_Processing::post_solution(solutions, "final");//post
             break;
         }
@@ -30,10 +24,10 @@ void Discrete_Equation::solve(void)
             //Post_Processing::post_condition_ = true;
 
         SET_TIME_POINT;
-        auto time_step = this->semi_discrete_equation_.calculate_time_step();
+        auto time_step = this->semi_discrete_equation_->calculate_time_step();
         this->controll_time_step(current_time, time_step);
 
-        this->time_discrete_scheme_->update(this->semi_discrete_equation_, time_step);
+        this->time_discrete_scheme_->update(*this->semi_discrete_equation_, time_step);
         current_time += time_step;
         current_iter++;
 
@@ -59,5 +53,7 @@ void Discrete_Equation::controll_time_step(const double current_time, double& ti
     }
 
     if (this->post_controller_->is_need_to_controll_time_step(current_time, time_step))
+    {
         this->post_controller_->controll_time_step(current_time, time_step);
+    }
 }

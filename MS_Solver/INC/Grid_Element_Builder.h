@@ -29,7 +29,7 @@ struct Grid_Elements
 //
 //template <typename Grid_File_Type, ushort space_dimension>
 //class Grid_Element_Builder;
-//
+//find_matched_periodic_node_indexes
 //
 //template <ushort space_dimension>
 //class Grid_Element_Builder<Gmsh, space_dimension>
@@ -39,88 +39,51 @@ struct Grid_Elements
 //
 //private:
 //	using This_			= Grid_Element_Builder<Gmsh, space_dimension>;
-//	using Space_Vector_ = Euclidean_Vector<space_dimension>;
+//	using Euclidean_Vector = Euclidean_Vector<space_dimension>;
 //
 //public:
 //	static Grid_Elements<space_dimension> build_from_grid_file(const std::string& grid_file_name);
 //
 //	//private: for test
-//	static Text read_about(std::ifstream& grid_file_stream, const std::string& target);
-//	static std::vector<Space_Vector_> make_node_datas(const Text& node_text);
-//	static Grid_Elements<space_dimension> make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Space_Vector_>& node_datas);
 //	static std::vector<Element<space_dimension>> make_inner_face_elements(const std::vector<Element<space_dimension>>& cell_elements, const std::vector<Element<space_dimension>>& boundary_elements, const std::vector<Element<space_dimension>>& periodic_boundary_elements);
 //	static std::vector<std::pair<Element<space_dimension>, Element<space_dimension>>> match_periodic_boundaries(std::vector<Element<space_dimension>>& periodic_boundary_elements);
 //};
 //
 //
-//namespace ms {
-//	inline ElementType string_to_element_type(const std::string& str) {
-//		if (ms::contains_icase(str, "Unspecified"))						return ElementType::cell;
-//		else if (ms::contains_icase(str, "slip", "wall"))				return ElementType::slip_wall;
-//		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))	return ElementType::supersonic_inlet1;
-//		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))	return ElementType::supersonic_inlet2;
-//		else if (ms::contains_icase(str, "SuperSonic", "outlet"))		return ElementType::supersonic_outlet;
-//		else if (ms::contains_icase(str, "periodic"))					return ElementType::periodic;
-//		else if (ms::contains_icase(str, "initial", "constant"))		return ElementType::initial_constant_BC;
-//		else {
-//			throw std::runtime_error("wrong element_type");
-//			return ElementType::not_in_list;
-//		}
-//	};
-//}
+
 //
 //
 ////Template Definition
 //template <ushort space_dimension>
 //Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file(const std::string& grid_file_name) {
-//	SET_TIME_POINT;
-//	Log::content_ << "================================================================================\n";
-//	Log::content_ << "\t\t\t\t PreProcessing \n";
-//	Log::content_ << "================================================================================\n";	
-//	Log::print(); 		
-//
-//	SET_TIME_POINT;
-//	
-//	const auto grid_file_path = "RSC/Grid/" + std::to_string(space_dimension) + "D/" + grid_file_name + ".msh";
-//
-//
-//	std::ifstream grid_file_stream(grid_file_path);
-//	dynamic_require(grid_file_stream.is_open(), "fail to open " + grid_file_path);
-//	
-//	const auto node_text			= This_::read_about(grid_file_stream, "Nodes");
-//	const auto node_datas			= This_::make_node_datas(node_text);
-//	
-//	const auto element_text			= This_::read_about(grid_file_stream, "Elements");	
-//	const auto physical_name_text	= This_::read_about(grid_file_stream, "PhysicalNames");
-//
-//	Log::content_ << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << GET_TIME_DURATION << "s\n\n";
-//	Log::print();
-//
-//	return make_elements(element_text, physical_name_text, node_datas);
+	//SET_TIME_POINT;
+	//Log::content_ << "================================================================================\n";
+	//Log::content_ << "\t\t\t\t PreProcessing \n";
+	//Log::content_ << "================================================================================\n";	
+	//Log::print(); 		
+
+	//SET_TIME_POINT;
+	//
+	//const auto grid_file_path = "RSC/Grid/" + std::to_string(space_dimension) + "D/" + grid_file_name + ".msh";
+
+
+	//std::ifstream grid_file_stream(grid_file_path);
+	//dynamic_require(grid_file_stream.is_open(), "fail to open " + grid_file_path);
+	//
+	//const auto node_text			= This_::read_about(grid_file_stream, "Nodes");
+	//const auto node_datas			= This_::make_node_datas(node_text);
+	//
+	//const auto element_text			= This_::read_about(grid_file_stream, "Elements");	
+	//const auto physical_name_text	= This_::read_about(grid_file_stream, "PhysicalNames");
+
+	//Log::content_ << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+	//Log::print();
+
+	//return make_elements(element_text, physical_name_text, node_datas);
 //}
-//
+
 //template <ushort space_dimension>
-//std::vector<Euclidean_Vector<space_dimension>> Grid_Element_Builder<Gmsh, space_dimension>::make_node_datas(const Text& node_text) {
-//	std::vector<Space_Vector_> node_datas;
-//	node_datas.reserve(node_text.size());
-//
-//	for (const auto& node_data : node_text) {
-//		const char delimiter = ' ';
-//		auto parsed_data_set = ms::parse(node_data, delimiter);
-//
-//		//const auto node_index = ms::string_to_value<size_t>(parsed_data_set[0]);
-//		std::array<double, space_dimension> node_coords;
-//		for (ushort i = 0; i < space_dimension; ++i)
-//			node_coords[i] = ms::string_to_value<double>(parsed_data_set[i + 1]);
-//
-//		node_datas.push_back(node_coords);
-//	}
-//
-//	return node_datas;
-//}
-//
-//template <ushort space_dimension>
-//Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Space_Vector_>& node_datas) {
+//Grid_Elements<space_dimension> Grid_Element_Builder<Gmsh, space_dimension>::make_elements(const Text& element_text, const Text& physical_name_text, const std::vector<Euclidean_Vector>& node_datas) {
 //	SET_TIME_POINT;
 //
 //	std::map<ushort, ElementType> physical_group_index_to_element_type;
@@ -280,24 +243,7 @@ struct Grid_Elements
 //	dynamic_require(matched_periodic_element_pairs.size() == num_pair, "every pbdry should be matched");
 //	return matched_periodic_element_pairs;
 //}
-//
-//
-//
-//template <ushort space_dimension>
-//Text Grid_Element_Builder<Gmsh, space_dimension>::read_about(std::ifstream& grid_file_stream, const std::string& target) {
-//	const auto target_str = "$" + target;
-//
-//	std::string tmp_str;
-//	while (std::getline(grid_file_stream, tmp_str)) {
-//		if (tmp_str.find(target_str) != std::string::npos) {
-//			std::getline(grid_file_stream, tmp_str);
-//			break;
-//		}
-//	}
-//
-//	const auto num_data = ms::string_to_value<size_t>(tmp_str);
-//	return Text(grid_file_stream, num_data);
-//}
+
 
 
 ////inline function definition

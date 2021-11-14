@@ -59,9 +59,7 @@ Euclidean_Vector Euler2D::calculate_velocity(const Euclidean_Vector& solution) c
 }
 
 double Euler2D::calculate_pressure(const Euclidean_Vector& solution, const Euclidean_Vector& velocity) const
-{
-	constexpr auto gamma = 1.4;
-	
+{	
 	const auto rho = solution[0];
 	const auto rhou = solution[1];
 	const auto rhov = solution[2];
@@ -69,5 +67,11 @@ double Euler2D::calculate_pressure(const Euclidean_Vector& solution, const Eucli
 	const auto u = velocity[0];
 	const auto v = velocity[1];
 
-	return (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
+	return (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
+}
+
+double Euler2D::calculate_acoustic_speed(const Euclidean_Vector& solution, const double pressure) const
+{
+	const auto density = solution[0];
+	return  std::sqrt(this->gamma_ * pressure / density);
 }

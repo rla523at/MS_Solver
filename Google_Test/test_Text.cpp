@@ -8,6 +8,16 @@ TEST(Sentence, constructor_2) {
 	std::string str = "abc";
 	Sentence s = str;
 }
+TEST(Sentence, constain_icase_1) 
+{
+	Sentence s = "cat, dog, bird, cow";
+	EXPECT_TRUE(s.contain_icase("cat", "dog"));
+}
+TEST(Sentence, constain_icase_2)
+{
+	Sentence s = "cat, dog, bird, cow";
+	EXPECT_FALSE(s.contain_icase("cat", "dog", "shrimp"));
+}
 TEST(Sentence, remove_after_1) {
 	Sentence s = "abcdef";
 	s.remove_after("d");

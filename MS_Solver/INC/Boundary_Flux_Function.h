@@ -1,11 +1,25 @@
 #pragma once
+#include "Euclidean_Vector.h"
+#include "Numerical_Flux_Function.h"
 
 class Boundary_Flux_Function
 {
+public:
 	virtual Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) const abstract;
 };
 
+class Initial_Constant_BC : public Boundary_Flux_Function
+{
+public:
+	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) const override
+	{
+		const auto nc_cvariable = this->neighbor_solution_calculator_.calculate(oc_cvariable);
+		return Numerical_Flux_Function::calculate(oc_cvariable, nc_cvariable, normal);
+	}
 
+private:
+	
+};
 
 
 

@@ -1,7 +1,8 @@
 
+space_dimension				= 2
+grid_file_type				= Gmsh
 
 governing_equation			= Euler
-space_dimension				= 2
 solution_degree				= 3
 
 spatial_discrete_scheme		= DG

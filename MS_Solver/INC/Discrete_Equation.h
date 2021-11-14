@@ -6,10 +6,15 @@
 class Discrete_Equation
 {
 public:
-    Discrete_Equation(const Configuration& configuration);
+    Discrete_Equation(std::unique_ptr<Solve_End_Controller>&& end_controller, std::unique_ptr<Solve_Post_Controller>&& post_controller,
+        std::unique_ptr<Semi_Discrete_Equation>&& semi_discrete_equation, std::unique_ptr<Time_Discrete_Scheme>&& time_discrete_scheme)
+        : end_controller_(std::move(end_controller)),
+        post_controller_(std::move(post_controller)),
+        semi_discrete_equation_(std::move(semi_discrete_equation)),
+        time_discrete_scheme_(std::move(time_discrete_scheme)) {};
 
-public://Command
-    void solve(void);
+public://Command      
+    void solve(void); 
 
 private:
     void controll_time_step(const double current_time, double& time_step) const;
@@ -17,8 +22,8 @@ private:
 private:
     std::unique_ptr<Solve_End_Controller> end_controller_;
     std::unique_ptr<Solve_Post_Controller> post_controller_;
+    std::unique_ptr<Semi_Discrete_Equation> semi_discrete_equation_;
     std::unique_ptr<Time_Discrete_Scheme> time_discrete_scheme_;
-    Semi_Discrete_Equation semi_discrete_equation_;
 };
 
 

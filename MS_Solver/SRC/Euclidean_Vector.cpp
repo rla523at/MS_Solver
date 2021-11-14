@@ -134,6 +134,14 @@ const double* Euclidean_Vector_Base::data(void) const
 	return this->const_data_ptr_;
 }
 
+double Euclidean_Vector_Base::L1_norm(void) const
+{
+	const auto n = this->num_values_;
+	const auto incx = 1;
+
+	return cblas_dasum(n, this->const_data_ptr_, incx);
+}
+
 double Euclidean_Vector_Base::L2_norm(void) const
 {
 	return std::sqrt(this->inner_product(*this));
@@ -148,6 +156,19 @@ double Euclidean_Vector_Base::inner_product(const Euclidean_Vector_Base& other) 
 	const auto incy = 1;
 
 	return cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
+}
+
+bool Euclidean_Vector_Base::is_axis_translation(const Euclidean_Vector_Base& other) const
+{
+	const auto line_vector = *this - other;
+	const auto L1_norm = line_vector.L1_norm();
+	const auto L2_norm = line_vector.L2_norm();
+
+	constexpr auto epsilon = 1.0E-10;
+	if (std::abs(L1_norm - L2_norm) <= epsilon)
+		return true;
+	else
+		return false;
 }
 
 size_t Euclidean_Vector_Base::size(void) const

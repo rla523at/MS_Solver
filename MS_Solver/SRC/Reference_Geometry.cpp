@@ -850,3 +850,15 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vecto
 	}
 	return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
 }
+
+
+std::unique_ptr<Reference_Geometry> Reference_Geometry_Factory::make(const Figure figure, const ushort order)
+{
+	switch (figure)
+	{
+	case Figure::line:			return std::make_unique<Reference_Line>(order);
+	case Figure::triangle:		return std::make_unique<Reference_Triangle>(order);
+	case Figure::quadrilateral: return std::make_unique<Reference_Quadrilateral>(order);
+	default: EXCEPTION("not supproted figure"); return nullptr;
+	}
+};

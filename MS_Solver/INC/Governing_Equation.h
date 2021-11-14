@@ -27,16 +27,58 @@ public:
 	Euler2D(void);
 
 public://Query
+    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const override
+    {
+        auto num_solution = P0_solutions.size();
+
+         std::vector<std::vector<double>> coordinate_projected_maximum_lambdas(num_solution);
+
+         for (size_t i = 0; i < num_solution; ++i) 
+         {
+             const auto& solution = P0_solutions[i];
+             const auto velocity = this->calculate_velocity(solution);
+             const auto p = this->calculate_pressure(solution, velocity);
+             const auto a = this->calculate_acoustic_speed(solution, p);
+             
+             const auto u = velocity[0];
+             const auto v = velocity[1];
+
+            const auto x_projected_maximum_lambda = std::abs(u) + a;
+            const auto y_projected_maximum_lambda = std::abs(v) + a;
+
+            coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda };             
+         }
+
+        return coordinate_projected_maximum_lambdas;
+    }
+
+ 
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
 
 private:
 	Euclidean_Vector calculate_velocity(const Euclidean_Vector& solution) const;
 	double calculate_pressure(const Euclidean_Vector& solution, const Euclidean_Vector& velocity) const;
+    double calculate_acoustic_speed(const Euclidean_Vector& solution, const double pressure) const;
+
+private:
+    static constexpr auto gamma_ = 1.4;
 };
 
 class Governing_Equation_Factory//static class
 {
 public:
+    static std::shared_ptr<Governing_Equation> make_shared(const Configuration& config)
+    {
+        const auto governing_equation = config.get("Governing_Equation");
+        const auto space_dimension = config.get<ushort>("space_dimension");
+
+        if (ms::contains_icase(governing_equation, "Euler")) 
+        {
+            if (space_dimension == 2)
+                return std::make_shared<Euler2D>();
+        }
+    }
+
 	static std::unique_ptr<Governing_Equation> make(const Configuration& config) {
 		const auto governing_equation = config.get("Governing_Equation");
 		const auto space_dimension = config.get<ushort>("space_dimension");
@@ -322,42 +364,42 @@ private:
 //
 //template <ushort space_dimension_>
 //std::vector<std::array<double, space_dimension_>> Euler<space_dimension_>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& conservative_variables) {
-//    auto num_solution = conservative_variables.size();
-//
-//    std::vector<Solution_> primitive_variables;
-//    primitive_variables.reserve(num_solution);
-//
-//    for (size_t i = 0; i < num_solution; ++i)
-//        primitive_variables.push_back(Euler<space_dimension_>::conservative_to_primitive(conservative_variables[i]));
-//
-//    std::vector<std::array<double, space_dimension_>> coordinate_projected_maximum_lambdas(num_solution);
-//
-//    for (size_t i = 0; i < num_solution; ++i) {
-//        if constexpr (space_dimension_ == 2) {
-//            const auto u = primitive_variables[i].at(0);
-//            const auto v = primitive_variables[i].at(1);
-//            const auto a = primitive_variables[i].at(3);
-//
-//            const auto x_projected_maximum_lambda = std::abs(u) + a;
-//            const auto y_projected_maximum_lambda = std::abs(v) + a;
-//
-//            coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda };
-//        }
-//        else {
-//            const auto u = primitive_variables[i].at(0);
-//            const auto v = primitive_variables[i].at(1);
-//            const auto w = primitive_variables[i].at(2);
-//            const auto a = primitive_variables[i].at(4);
-//
-//            const auto x_projected_maximum_lambda = std::abs(u) + a;
-//            const auto y_projected_maximum_lambda = std::abs(v) + a;
-//            const auto z_projected_maximum_lambda = std::abs(w) + a;
-//
-//            coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda, z_projected_maximum_lambda };
-//        }
-//    }
-//
-//    return coordinate_projected_maximum_lambdas;
+    //auto num_solution = conservative_variables.size();
+
+    //std::vector<Solution_> primitive_variables;
+    //primitive_variables.reserve(num_solution);
+
+    //for (size_t i = 0; i < num_solution; ++i)
+    //    primitive_variables.push_back(Euler<space_dimension_>::conservative_to_primitive(conservative_variables[i]));
+
+    //std::vector<std::array<double, space_dimension_>> coordinate_projected_maximum_lambdas(num_solution);
+
+    //for (size_t i = 0; i < num_solution; ++i) {
+    //    if constexpr (space_dimension_ == 2) {
+    //        const auto u = primitive_variables[i].at(0);
+    //        const auto v = primitive_variables[i].at(1);
+    //        const auto a = primitive_variables[i].at(3);
+
+    //        const auto x_projected_maximum_lambda = std::abs(u) + a;
+    //        const auto y_projected_maximum_lambda = std::abs(v) + a;
+
+    //        coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda };
+    //    }
+    //    else {
+    //        const auto u = primitive_variables[i].at(0);
+    //        const auto v = primitive_variables[i].at(1);
+    //        const auto w = primitive_variables[i].at(2);
+    //        const auto a = primitive_variables[i].at(4);
+
+    //        const auto x_projected_maximum_lambda = std::abs(u) + a;
+    //        const auto y_projected_maximum_lambda = std::abs(v) + a;
+    //        const auto z_projected_maximum_lambda = std::abs(w) + a;
+
+    //        coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda, z_projected_maximum_lambda };
+    //    }
+    //}
+
+    //return coordinate_projected_maximum_lambdas;
 //}
 //
 //

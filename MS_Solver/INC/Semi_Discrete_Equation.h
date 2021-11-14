@@ -3,6 +3,7 @@
 #include "Boundaries.h"
 #include "Inner_Faces.h"
 
+
 class Semi_Discrete_Equation
 {
 public://Command
@@ -29,10 +30,10 @@ public://Query
 	const Euclidean_Vector& get_solution_vector(void) const override;
 	
 private:
-	Discrete_Solution_DG discrete_solution_;
-	Cells_DG cells_;	
-	Boundaries_DG boundaries_;
-	Inner_Faces_DG inter_cell_faces_;
+	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;
+	std::unique_ptr<Cells_DG> cells_;	
+	std::unique_ptr<Boundaries_DG> boundaries_;
+	std::unique_ptr<Inner_Faces_DG> inter_cell_faces_;
 };
 
 class Semi_Discrete_Equation_Factory

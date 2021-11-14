@@ -9,7 +9,7 @@ using uint = unsigned int;
 class Discrete_Solution
 {
 public:
-	Discrete_Solution(const Configuration& configuration, const Grid& grid);
+	Discrete_Solution(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation);
 
 public://Command
 	void update_solution(Euclidean_Vector&& updated_solution);
@@ -23,12 +23,13 @@ protected:
 	ushort num_equations_;
 	size_t num_cells_;
 	Euclidean_Vector value_v_;
+	std::shared_ptr<Governing_Equation> governing_equation_;
 };
 
 class Discrete_Solution_DG : public Discrete_Solution
 {
 public:	
-	Discrete_Solution_DG(const Configuration& configuration, const Grid& grid);
+	Discrete_Solution_DG(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation, const Initial_Condition& initial_condition, const ushort solution_degree);
 
 public://Query
 	double calculate_P0_basis_value(const uint cell_index) const;
@@ -37,14 +38,13 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_P0_solutions(const std::vector<double>& P0_basis_values) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_points(const uint cell_index, const Matrix& basis_points_m) const;
 
-	
 	size_t coefficient_start_index(const uint cell_index) const;
 	ushort num_basis(const uint cell_index) const;
 	ushort solution_degree(const uint cell_index) const;
 
+	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
 	const std::vector<ushort>& get_solution_degrees(void) const;
 	const std::vector<ushort>& get_set_of_num_basis(void) const;
-
 
 private:
 	Euclidean_Vector calculate_basis_vector_value(const uint cell_index, const Euclidean_Vector& node) const;

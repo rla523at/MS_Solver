@@ -21,6 +21,11 @@ void Sentence::remove_from_here(const size_t position) {
 	this->contents_.erase(position);
 }
 
+void Sentence::remove(const std::string_view target)
+{
+	ms::remove(this->contents_, target);
+}
+
 void Sentence::remove(const std::vector<char> targets) {
 	for (const auto target : targets)
 		ms::remove(this->contents_, target);
@@ -34,9 +39,23 @@ bool Sentence::operator==(const Sentence& other) const {
 	return this->contents_ == other.contents_;
 }
 
-size_t Sentence::find_position(const std::string_view target) const {
+bool Sentence::contain_icase(const char* target) const
+{
+	return ms::contains_icase(this->contents_, target);
+}
+
+size_t Sentence::find_position(const std::string_view target) const 
+{
 	return this->contents_.find(target.data());
 }
+
+Sentence Sentence::get_remove(const std::string_view target) const
+{
+	auto result = *this;
+	result.remove(target);
+	return result;
+}
+
 
 std::vector<Sentence> Sentence::parse(const char delimiter) const {
 	auto parsed_strs =ms::parse(this->contents_, delimiter);
@@ -50,7 +69,7 @@ std::vector<Sentence> Sentence::parse(const char delimiter) const {
 	return parsed_senteces;
 }
 
-std::string Sentence::to_string(void) const {
+std::string Sentence::get_string(void) const {
 	return this->contents_;
 }
 
@@ -84,11 +103,19 @@ void Text::add_empty_lines(const size_t num_line) {
 	this->senteces_.resize(num_line);
 }
 
-std::vector<Sentence>::iterator Text::begin(void) {
+std::vector<Sentence>::iterator Text::begin(void) 
+{
 	return this->senteces_.begin();
 }
 
-std::vector<Sentence>::iterator Text::end(void) {
+void Text::clear(void)
+{
+	this->senteces_.clear();
+}
+
+
+std::vector<Sentence>::iterator Text::end(void) 
+{
 	return this->senteces_.end();
 }
 
@@ -118,6 +145,7 @@ void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
 			break;
 	}
 }
+
 void Text::remove_empty_line(void) {
 	this->senteces_.erase(std::remove(this->senteces_.begin(), this->senteces_.end(), ""), this->senteces_.end());
 }
@@ -155,8 +183,8 @@ void Text::write(const std::string_view file_path) const {
 std::string Text::to_string(void) const {
 	std::string str;
 	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
-		str += i->to_string() + "\n";
-	str += this->senteces_.back().to_string();
+		str += i->get_string() + "\n";
+	str += this->senteces_.back().get_string();
 
 	return str;
 }
@@ -192,52 +220,108 @@ Binary_Writer& Binary_Writer::operator<<(const std::string& str) {
 }
 
 namespace ms {
-	void replace(std::string& str, const char target, const char replacement) {
-		while (true) {
-			const auto pos = str.find(target);
-
-			if (pos == std::string::npos)
-				break;
-
-			str[pos] = replacement;
-		}
+	bool contains_icase(const std::string& str, const char* target) 
+	{
+		return ms::find_icase(str, target) != std::string::npos;
 	}
 
-	void replace(std::string& str, const std::string_view target, const std::string_view replacement) {
-		if (target.empty())
+	std::string double_to_string(const double val) 
+	{
+		constexpr size_t precision = 16;
+		std::stringstream stream;
+		stream << std::setprecision(precision) << std::noshowpoint << val;
+		return stream.str();
+	}
+
+	std::string double_to_str_sp(const double value) 
+	{
+		std::ostringstream os;
+		os << std::setprecision(16) << std::showpoint << value;
+		return os.str();
+	}
+
+	std::vector<std::string> file_paths_in_path(const std::string& path) 
+	{
+		std::vector<std::string> file_name_text;
+
+		std::filesystem::directory_iterator iter(path);
+		while (iter != std::filesystem::end(iter)) 
+		{
+			const auto& entry = *iter;
+
+			if (entry.is_directory()) 
+			{
+				iter++;
+				continue;
+			}
+
+			file_name_text.push_back(entry.path().string());
+			iter++;
+		}
+
+		return file_name_text;
+	}
+
+	size_t find_icase(const std::string& str, const std::string& target) 
+	{
+		auto u_str = ms::get_upper_case(str);
+		auto u_target = ms::get_upper_case(target);
+
+		return u_str.find(u_target);
+	}
+
+	std::string get_replace(const std::string& str, const std::string_view target, const std::string_view replacement)
+	{
+		auto result = str;
+		ms::replace(result, target, replacement);
+		return result;
+	}
+
+	std::string get_remove(const std::string& str, const char target)
+	{
+		auto result = str;
+		ms::remove(result, target);
+		return result;
+	}
+
+
+	std::string get_remove(const std::string& str, const std::string_view target)
+	{
+		auto result = str;
+		ms::remove(result, target);
+		return result;
+	}
+
+	std::string get_upper_case(const std::string& str) 
+	{
+		auto result = str;
+		ms::upper_case(result);
+		return result;
+	}
+
+	void make_path(std::string_view file_path)
+	{
+		const auto file_name_size = file_path.size() - file_path.find_last_of("/") - 1;
+		file_path.remove_suffix(file_name_size);
+
+		if (file_path.empty())
 			return;
 
-		while (true) {
-			const auto pos = str.find(target.data());
-
-			if (pos == std::string::npos)
-				break;
-
-			str.replace(pos, target.size(), replacement.data());
-		}
+		std::filesystem::path p(file_path);
+		if (std::filesystem::exists(p))
+			return;
+		else
+			std::filesystem::create_directories(p);
 	}
 
-	void remove(std::string& str, const char target) {
-		while (true) {
-			const auto pos = str.find(target);
-
-			if (pos == std::string::npos)
-				break;
-
-			str.erase(pos, 1);
-		}
-	}
-
-	void remove(std::string& str, const std::string_view target) {
-		ms::replace(str, target, "");
-	}
-
-	std::vector<std::string> parse(const std::string& str, const char delimiter) {
+	std::vector<std::string> parse(const std::string& str, const char delimiter) 
+	{
 		if (str.empty())
 			return std::vector<std::string>();
 
 		std::vector<std::string> parsed_string_set;
-		for (auto iter1 = str.begin();;) {
+		for (auto iter1 = str.begin();;) 
+		{
 			auto iter2 = std::find(iter1, str.end(), delimiter);
 
 			if (iter1 != iter2)
@@ -250,7 +334,8 @@ namespace ms {
 		}
 	};
 
-	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) {
+	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) 
+	{
 		if (delimiters.empty())
 			return { str };
 
@@ -260,35 +345,63 @@ namespace ms {
 
 		auto temp_str = str;
 		for (size_t i = 1; i < num_delimiter; ++i)
+		{
 			ms::replace(temp_str, delimiters[i], reference_delimiter);
+		}
 
 		return ms::parse(temp_str, reference_delimiter);
 	}
 
-	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement) {
-		auto result = str;
-		ms::replace(result, target, replacement);
-		return result;
+	void replace(std::string& str, const char target, const char replacement) 
+	{
+		while (true) 
+		{
+			const auto pos = str.find(target);
+
+			if (pos == std::string::npos)
+				break;
+
+			str[pos] = replacement;
+		}
 	}
 
-	std::string remove(const std::string& str, const char target) {
-		auto result = str;
-		ms::remove(result, target);
-		return result;
+	void replace(std::string& str, const std::string_view target, const std::string_view replacement)
+	{
+		if (target.empty())
+			return;
+
+		while (true) 
+		{
+			const auto pos = str.find(target.data());
+
+			if (pos == std::string::npos)
+				break;
+
+			str.replace(pos, target.size(), replacement.data());
+		}
 	}
 
+	void remove(std::string& str, const char target) 
+	{
+		while (true) 
+		{
+			const auto pos = str.find(target);
 
-	std::string remove(const std::string& str, const std::string_view target) {
-		auto result = str;
-		ms::remove(result, target);
-		return result;
+			if (pos == std::string::npos)
+				break;
+
+			str.erase(pos, 1);
+		}
 	}
 
-	size_t find_icase(const std::string& str, const std::string& target) {
-		auto u_str = ms::get_upper_case(str);
-		auto u_target = ms::get_upper_case(target);
+	void remove(std::string& str, const std::string_view target) 
+	{
+		ms::replace(str, target, "");
+	}
 
-		return u_str.find(u_target);
+	void rename(const std::string& path, const std::string& old_name, const std::string& new_name)
+	{
+		std::filesystem::rename(path + old_name, path + new_name);
 	}
 
 	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n) {
@@ -306,76 +419,17 @@ namespace ms {
 		return pos;
 	}
 
-	void upper_case(std::string& str) {
+	void upper_case(std::string& str) 
+	{
 		std::transform(str.begin(), str.end(), str.begin(), toupper);
 		//std::transform(result.begin(), result.end(), result.begin(), std::toupper); //filesystem이랑 있으면 충돌
-	}
-
-	std::string get_upper_case(const std::string& str) {
-		auto result = str;
-		ms::upper_case(result);
-		//std::transform(result.begin(), result.end(), result.begin(), toupper);
-		//std::transform(result.begin(), result.end(), result.begin(), std::toupper); //filesystem이랑 있으면 충돌
-		return result;
-	}
-
-	bool contains_icase(const std::string& str, const char* target) {
-		return ms::find_icase(str, target) != std::string::npos;
-	}
-	std::string double_to_string(const double val) {
-		constexpr size_t precision = 16;
-		std::stringstream stream;
-		stream << std::setprecision(precision) << std::noshowpoint << val;
-		return stream.str();
-	}
-	std::string double_to_str_sp(const double value) {
-		std::ostringstream os;
-		os << std::setprecision(16) << std::showpoint << value;
-		return os.str();
-	}
-
-	std::vector<std::string> file_paths_in_path(const std::string& path) {
-		std::vector<std::string> file_name_text;
-
-		std::filesystem::directory_iterator iter(path);
-		while (iter != std::filesystem::end(iter)) {
-			const auto& entry = *iter;
-
-			if (entry.is_directory()) {
-				iter++;
-				continue;
-			}
-
-			file_name_text.push_back(entry.path().string());
-			iter++;
-		}
-
-		return file_name_text;
-	}
-
-	void make_path(std::string_view file_path) {
-		const auto file_name_size = file_path.size() - file_path.find_last_of("/") - 1;
-		file_path.remove_suffix(file_name_size);
-
-		if (file_path.empty())
-			return;
-
-		std::filesystem::path p(file_path);
-		if (std::filesystem::exists(p))
-			return;
-		else
-			std::filesystem::create_directories(p);
-	}
-
-	void rename(const std::string& path, const std::string& old_name, const std::string& new_name) {
-		std::filesystem::rename(path + old_name, path + new_name);
 	}
 }
 
 
 
 std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece) {
-	return ostream << sentece.to_string();
+	return ostream << sentece.get_string();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Text& text) {

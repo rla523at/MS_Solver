@@ -11,6 +11,54 @@
 #include <sstream>
 #include <vector>
 
+
+namespace ms
+{
+	bool contains_icase(const std::string& str, const char* target);
+	template <typename... Args>		bool contains_icase(const std::string& str, const Args... args)
+	{
+		static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
+		return (ms::contains_icase(str, args) && ...);
+	};
+	std::string double_to_string(const double val);
+	std::string double_to_str_sp(const double value); //double to string with show point
+	std::vector<std::string> file_paths_in_path(const std::string& path);
+	size_t find_icase(const std::string& str, const std::string& target);
+	std::string get_replace(const std::string& str, const std::string_view target, const std::string_view replacement);
+	std::string get_remove(const std::string& str, const char target);
+	std::string get_remove(const std::string& str, const std::string_view target);
+	std::string get_upper_case(const std::string& str);
+	void make_path(std::string_view file_path);
+	std::vector<std::string> parse(const std::string& str, const char delimiter);
+	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
+	void replace(std::string& str, const char target, const char replacement);
+	void replace(std::string& str, const std::string_view target, const std::string_view replacement);
+	void remove(std::string& str, const char target);
+	void remove(std::string& str, const std::string_view target);
+	void rename(const std::string& path, const std::string& old_name, const std::string& new_name);
+	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
+	template<typename T>	T string_to_value(const std::string& str)
+	{
+		std::istringstream iss(str);
+		T value;
+		iss >> value;
+		return value;
+	};
+	template<typename T>	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set)
+	{
+		std::vector<T> result;
+		result.reserve(str_set.size());
+
+		for (const auto& str : str_set)
+			result.push_back(ms::string_to_value<T>(str));
+
+		return result;
+	};
+	template<typename T>	std::vector<T> sentences_to_values(const std::vector<Sentence>& sentences);
+	void upper_case(std::string& str);
+}
+
+
 class Sentence
 {
 public:
@@ -19,6 +67,7 @@ public:
 	
 public://command
 	Sentence& operator<<(const std::string& str);
+	
 	template<typename T>	Sentence& insert_with_space(const T value) {
 		this->contents_ += " " + std::to_string(value);
 		return *this;
@@ -26,22 +75,31 @@ public://command
 	template<>	Sentence& insert_with_space(const double value);
 	void remove_after(const std::string_view target);
 	void remove_from_here(const size_t position);
+	void remove(const std::string_view target);
 	void remove(const std::vector<char> targets);
 	void upper_case(void);
 
-
 public://Query
 	bool operator==(const Sentence& other) const;
-	size_t find_position(const std::string_view target) const;
-	std::vector<Sentence> parse(const char delimiter) const;
-	std::string to_string(void) const;
-	Sentence get_upper_case(void) const;
 
+	bool contain_icase(const char* target) const;
+	template <typename... Args>		bool contain_icase(const Args... args) const  
+	{
+		return ms::contains_icase(this->contents_, args...);
+	};
+	size_t find_position(const std::string_view target) const;
+	Sentence get_remove(const std::string_view target) const;
+	std::vector<Sentence> parse(const char delimiter) const;
+	std::string get_string(void) const;
+	template <typename T>	T to_value(void) const
+	{
+		return ms::string_to_value<T>(contents_);
+	}
+	Sentence get_upper_case(void) const;
 
 private:
 	std::string contents_;
 };
-
 
 class Text
 {
@@ -56,6 +114,7 @@ public://command
 
 	void add_empty_lines(const size_t num_line);
 	std::vector<Sentence>::iterator begin(void);
+	void clear(void);
 	std::vector<Sentence>::iterator end(void);
 	void merge(Text&& other);
 	void remove_empty_line(void);
@@ -74,13 +133,6 @@ public://Query
 private:
 	std::vector<Sentence> senteces_;
 };
-
-
-
-
-std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece);
-std::ostream& operator<<(std::ostream& ostream, const Text& text);
-
 
 class Binary_Writer
 {
@@ -105,41 +157,11 @@ public:
 };
 
 
-namespace ms {
-	void replace(std::string& str, const char target, const char replacement);
-	void replace(std::string& str, const std::string_view target, const std::string_view replacement);
-	void remove(std::string& str, const char target);
-	void remove(std::string& str, const std::string_view target);
-
-	std::vector<std::string> parse(const std::string& str, const char delimiter);
-	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
-	std::string replace(const std::string& str, const std::string_view target, const std::string_view replacement);
-	std::string remove(const std::string& str, const char target);
-	std::string remove(const std::string& str, const std::string_view target);
-	void upper_case(std::string& str);
-	std::string get_upper_case(const std::string& str);
-	size_t find_icase(const std::string& str, const std::string& target);
-	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n);
-	bool contains_icase(const std::string& str, const char* target);
-	std::string double_to_string(const double val);
-	std::string double_to_str_sp(const double value); //double to string with show point
-	std::vector<std::string> file_paths_in_path(const std::string& path);
-	void make_path(std::string_view file_path);
-	void rename(const std::string& path, const std::string& old_name, const std::string& new_name);
-
-	template<typename T>
-	T string_to_value(const std::string& str);
-
-	template<typename T>
-	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set);
-
-	template <typename... Args>
-	bool contains_icase(const std::string& str, const Args... args);
-
-}
 
 
-//template definition
+std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece);
+std::ostream& operator<<(std::ostream& ostream, const Text& text);
+
 template <typename T>
 Binary_Writer& Binary_Writer::operator<<(const T value) {
 	this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
@@ -153,54 +175,17 @@ Binary_Writer& Binary_Writer::operator<<(const std::vector<T>& values) {
 	return *this;
 }
 
-namespace ms {
-	template<typename T>
-	T string_to_value(const std::string& str) {
-		std::istringstream iss(str);
-		T value;
-		iss >> value;
-		return value;
-	};
-	template<typename T>
-	std::vector<T> string_to_value_set(const std::vector<std::string>& str_set) {
+namespace ms
+{
+	template<typename T>	std::vector<T> sentences_to_values(const std::vector<Sentence>& sentences)
+	{
 		std::vector<T> result;
-		result.reserve(str_set.size());
+		result.reserve(sentences.size());
 
-		for (const auto& str : str_set)
-			result.push_back(ms::string_to_value<T>(str));
+		for (const auto& sentence : sentences)
+			result.push_back(sentence.to_value<T>());
 
 		return result;
 	};
 
-	template <typename... Args>
-	bool contains_icase(const std::string& str, const Args... args) {		
-		static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
-		return (ms::contains_icase(str, args) && ...);
-	};
 }
-
-
-//class Text : public std::vector<std::string>
-//{
-//public:
-//	template <typename ... Vals>
-//	explicit Text(Vals&&... values) : std::vector<std::string>(std::forward<Vals>(values)...) {};
-//	Text(std::initializer_list<std::string> list) : std::vector<std::string>( list ) {};
-//	Text(std::ifstream& file, const size_t num_read_line);
-//
-//public:
-//	Text& operator<<(const std::string& str);
-//	Text& operator<<(std::string&& str);
-//
-//public://command
-//	void merge(Text&& other);
-//	void remove_empty_line(void);
-//	void read(const std::string& read_file_path);
-//	void read(std::ifstream& file, const size_t num_read_line);
-//	void insert_with_space(const size_t line_index, const int value);
-//	void insert_with_space(const size_t line_index, const double value);
-//
-//public://Query
-//	void add_write(const std::string_view write_file_path) const;
-//	void write(const std::string_view write_file_path) const;
-//};

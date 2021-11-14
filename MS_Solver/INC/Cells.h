@@ -1,29 +1,27 @@
 #pragma once
 #include "Time_Step_Calculator.h"
 #include "Discrete_Solution.h"
+#include "Residual.h"
 
 class Cells
 {
 public:
-    Cells(const Configuration& configuration, const Grid& grid);
+    Cells(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid);
 
 protected:
     size_t num_cells_;
     std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
-    std::unique_ptr<Governing_Equation> governing_equation_;
+    std::shared_ptr<Governing_Equation> governing_equation_;
 };
 
 class Cells_DG : public Cells
 {
 public:
-    Cells_DG(const Configuration& configuration, const Grid& grid, const Discrete_Solution_DG& discrete_solution);
+    Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid, const Discrete_Solution_DG& discrete_solution);
 
 public://Query
     double calculate_time_step(const Discrete_Solution_DG& discrete_solution) const;
-    void calculate_RHS(double* rhs, const Discrete_Solution_DG& discrete_solution) const;
-
-private:
-    void update_rhs(const uint cell_index, double* RHS, const Matrix& delta_rhs, const Discrete_Solution_DG& discrete_solution) const;
+    void calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const;
 
 private:
     std::vector<double> P0_basis_values_;

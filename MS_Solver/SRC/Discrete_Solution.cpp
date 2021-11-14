@@ -1,12 +1,11 @@
 #include "../INC/Discrete_Solution.h"
 
-Discrete_Solution::Discrete_Solution(const Configuration& configuration, const Grid& grid)
+Discrete_Solution::Discrete_Solution(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation)
+	:governing_equation_(governing_equation)
 {
-	const auto governing_equation = Governing_Equation_Factory::make(configuration);
-
 	this->num_cells_ = grid.num_cells();
-	this->space_dimension_ = governing_equation->space_dimension();
-	this->num_equations_ = governing_equation->num_equations();	
+	this->space_dimension_ = this->governing_equation_->space_dimension();
+	this->num_equations_ = this->governing_equation_->num_equations();
 }
 
 void Discrete_Solution::update_solution(Euclidean_Vector&& updated_solution)
@@ -70,6 +69,25 @@ size_t Discrete_Solution::num_values(void) const
 //	std::vector<double> values = { start_iter, start_iter + num_variable };
 //	return values;
 //}
+
+Discrete_Solution_DG(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation, const Initial_Condition& initial_condition, const ushort solution_degree)
+	: Discrete_Solution(grid, governing_equation),
+{
+	this->solution_degrees_.resize(this->num_cells_, solution_degree);
+
+	this->basis_vector_functions_ = grid.cell_basis_vector_functions(this->solution_degrees_);
+
+	this->set_of_num_basis_.resize(this->num_cells_);
+	for (size_t i = 0; i < this->num_cells_; ++i)
+		this->set_of_num_basis_[i] = this->basis_vector_functions_[i].size();
+
+	this->coefficieint_start_indexes_.resize(this->num_cells_);
+	for (size_t i = 0; i < this->num_cells_ - 1; ++i)
+		this->coefficieint_start_indexes_[i + 1] = this->num_equations_ * this->set_of_num_basis_[i];
+
+	this->value_v_ = this->calculate_initial_values(grid, initial_condition);
+}
+
 
 Discrete_Solution_DG::Discrete_Solution_DG(const Configuration& configuration, const Grid& grid)
 	:Discrete_Solution(configuration, grid)
@@ -164,6 +182,10 @@ ushort Discrete_Solution_DG::solution_degree(const uint cell_index) const
 	return this->solution_degrees_[cell_index];
 }
 
+const std::vector<size_t>& Discrete_Solution_DG::get_coefficient_start_indexes(void) const
+{
+	return this->coefficieint_start_indexes_;
+}
 
 const std::vector<ushort>& Discrete_Solution_DG::get_solution_degrees(void) const
 {

@@ -19,8 +19,10 @@ public:
 	double at(const size_t position) const;
 	const double* begin(void) const;
 	const double* data(void) const;
+	double L1_norm(void) const;
 	double L2_norm(void) const;
 	double inner_product(const Euclidean_Vector_Base& other) const;
+	bool is_axis_translation(const Euclidean_Vector_Base& other) const;
 	size_t size(void) const;
 	std::string to_string(void) const;
 
@@ -193,7 +195,7 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //
 //
 ////Template Class Euclidean_Vector
-//template <size_t dimension_>
+
 //class Euclidean_Vector
 //{
 //private:
@@ -249,11 +251,11 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //template <typename... Args>
 //Euclidean_Vector(Args... args)->Euclidean_Vector<sizeof...(Args)>;
 //
-//template <size_t dimension_> 
-//std::ostream& operator<<(std::ostream& os, const Euclidean_Vector<dimension_>& x);
+ 
+//std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //
 //template <size_t dimension_, std::enable_if_t<dimension_ != 1, bool> = true>
-//Euclidean_Vector<dimension_> operator*(const double constant, const Euclidean_Vector<dimension_>& x);
+//Euclidean_Vector operator*(const double constant, const Euclidean_Vector& x);
 //
 //
 //class Dynamic_Euclidean_Vector
@@ -374,30 +376,30 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //
 //
 //// Template Definition Part
-//template <size_t dimension_>
+
 //template <typename... Args>
-//Euclidean_Vector<dimension_>::Euclidean_Vector(Args... args) : values_{ static_cast<double>(args)... } {
+//Euclidean_Vector::Euclidean_Vector(Args... args) : values_{ static_cast<double>(args)... } {
 //	static_require(sizeof...(Args) <= dimension_, "Number of arguments can not exceed dimension");
 //	static_require(ms::are_arithmetics<Args...>, "every arguments should be arithmetics");
 //};
 //
 //
-//template <size_t dimension_>
-//Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::operator+=(const Euclidean_Vector& y) {
+
+//Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& y) {
 //	for (size_t i = 0; i < dimension_; ++i)
 //		this->values_[i] += y.values_[i];
 //	return *this;
 //}
 //
-//template <size_t dimension_>
-//Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::operator-=(const Euclidean_Vector& y) {
+
+//Euclidean_Vector& Euclidean_Vector::operator-=(const Euclidean_Vector& y) {
 //	for (size_t i = 0; i < dimension_; ++i)
 //		this->values_[i] -= y.values_[i];
 //	return *this;
 //}
 //
-//template <size_t dimension_>
-//Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::operator*=(const double scalar) {
+
+//Euclidean_Vector& Euclidean_Vector::operator*=(const double scalar) {
 //	if constexpr (dimension_ < 10) {
 //		for (size_t i = 0; i < dimension_; ++i)
 //			this->values_[i] *= scalar;
@@ -408,27 +410,27 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //	return *this;
 //}
 //
-//template <size_t dimension_> 
+ 
 //template <size_t temp, std::enable_if_t<temp != 1, bool>>
-//Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator+(const Euclidean_Vector& y) const {
+//Euclidean_Vector Euclidean_Vector::operator+(const Euclidean_Vector& y) const {
 //	auto result = *this;
 //	return result += y;
 //}
 //
-//template <size_t dimension_> Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator-(const Euclidean_Vector& y) const {
+ //Euclidean_Vector Euclidean_Vector::operator-(const Euclidean_Vector& y) const {
 //	auto result = *this;
 //	return result -= y;
 //}
 //
-//template <size_t dimension_> 
+ 
 //template <size_t temp, std::enable_if_t<temp != 1, bool>>
-//Euclidean_Vector<dimension_> Euclidean_Vector<dimension_>::operator*(const double scalar) const {
+//Euclidean_Vector Euclidean_Vector::operator*(const double scalar) const {
 //	auto result = *this;
 //	return result *= scalar;
 //}
 //
-//template <size_t dimension_> 
-//bool Euclidean_Vector<dimension_>::operator==(const Euclidean_Vector& y) const {
+ 
+//bool Euclidean_Vector::operator==(const Euclidean_Vector& y) const {
 //	for (size_t i = 0; i < dimension_; ++i) {
 //		if (this->values_[i] != y.values_[i])
 //			return false;
@@ -436,8 +438,8 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //	return true;
 //}
 //
-////template <size_t dimension_>
-////bool Euclidean_Vector<dimension_>::operator==(const Dynamic_Euclidean_Vector& y) const {
+//
+////bool Euclidean_Vector::operator==(const Dynamic_Euclidean_Vector& y) const {
 ////	if (dimension_ != y.dimension())
 ////		return false;
 ////	
@@ -448,41 +450,41 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 ////	return true;
 ////}
 //
-//template <size_t dimension_> 
-//double Euclidean_Vector<dimension_>::operator[](const size_t position) const {
+ 
+//double Euclidean_Vector::operator[](const size_t position) const {
 //	dynamic_require(position <= dimension_, "Position should be less than dimension");
 //	return this->values_[position];
 //}
 //
-//template <size_t dimension_>
-//double Euclidean_Vector<dimension_>::at(const size_t position) const {
+
+//double Euclidean_Vector::at(const size_t position) const {
 //	dynamic_require(position <= dimension_, "Position should be less than dimension");
 //	return this->values_[position];
 //}
 //
-//template <size_t dimension_>
-//std::array<double, dimension_>::const_iterator Euclidean_Vector<dimension_>::cbegin(void) const {
+
+//std::array<double, dimension_>::const_iterator Euclidean_Vector::cbegin(void) const {
 //	return this->values_.cbegin();
 //}
 //
-//template <size_t dimension_>
-//std::array<double, dimension_>::const_iterator Euclidean_Vector<dimension_>::cend(void) const {
+
+//std::array<double, dimension_>::const_iterator Euclidean_Vector::cend(void) const {
 //	return this->values_.cend();
 //}
 //
-//template <size_t dimension_>
-//Euclidean_Vector<dimension_>& Euclidean_Vector<dimension_>::be_normalize(void) {
+
+//Euclidean_Vector& Euclidean_Vector::be_normalize(void) {
 //	const auto scale_factor = 1.0 / this->L2_norm();
 //	return (*this) *= scale_factor;
 //}
 //
-//template <size_t dimension_>
-//constexpr size_t Euclidean_Vector<dimension_>::dimension(void) {
+
+//constexpr size_t Euclidean_Vector::dimension(void) {
 //	return dimension_;
 //}
 //
-//template <size_t dimension_>
-//double Euclidean_Vector<dimension_>::inner_product(const Euclidean_Vector& y) const {
+
+//double Euclidean_Vector::inner_product(const Euclidean_Vector& y) const {
 //	if constexpr (dimension_ < ms::blas_dot_criteria) {
 //		double result = 0;
 //		for (size_t i = 0; i < dimension_; ++i)
@@ -493,8 +495,8 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //		return cblas_ddot(static_cast<MKL_INT>(dimension_), this->values_.data(), 1, y.values_.data(), 1);
 //}
 //
-//template <size_t dimension_>
-//double Euclidean_Vector<dimension_>::L1_norm(void) const {
+
+//double Euclidean_Vector::L1_norm(void) const {
 //	if constexpr (dimension_ < ms::blas_dasum_criteria) {
 //		double L1_norm = 0.0;
 //		for (size_t i = 0; i < dimension_; ++i)
@@ -505,26 +507,16 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //		return cblas_dasum(static_cast<MKL_INT>(dimension_), this->values_.data(), 1);
 //}
 //
-//template <size_t dimension_>
-//double Euclidean_Vector<dimension_>::L2_norm(void) const {
+
+//double Euclidean_Vector::L2_norm(void) const {
 //	return std::sqrt(this->inner_product(*this));
 //}
 //
-//template <size_t dimension_>
-//bool Euclidean_Vector<dimension_>::is_axis_translation(const Euclidean_Vector& other) const {
-//	const auto line_vector = *this - other;
-//	const auto L1_norm = line_vector.L1_norm();
-//	const auto L2_norm = line_vector.L2_norm();
+
+
 //
-//	constexpr auto epsilon = 1.0E-10;
-//	if (std::abs(L1_norm - L2_norm) <= epsilon)
-//		return true;
-//	else
-//		return false;
-//}
-//
-//template <size_t dimension_> 
-//std::string Euclidean_Vector<dimension_>::to_string(void) const {
+ 
+//std::string Euclidean_Vector::to_string(void) const {
 //	std::string result;
 //	for (const auto& element : this->values_)
 //		result += ms::double_to_string(element) + " ";
@@ -532,12 +524,12 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
 //	return result;
 //}
 //
-//template <size_t dimension_> std::ostream& operator<<(std::ostream& os, const Euclidean_Vector<dimension_>& x) {
+//  std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x) {
 //	return os << x.to_string();
 //};
 //
 //template <size_t dimension_, std::enable_if_t<dimension_ != 1, bool>>
-//Euclidean_Vector<dimension_> operator*(const double constant, const Euclidean_Vector<dimension_>& x) {
+//Euclidean_Vector operator*(const double constant, const Euclidean_Vector& x) {
 //	return x * constant;
 //}
 //

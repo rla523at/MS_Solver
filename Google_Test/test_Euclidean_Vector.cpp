@@ -171,6 +171,16 @@ TEST(Euclidean_Vector_Wrapper, inner_product_2)
 	const auto ref = 25;
 	EXPECT_EQ(result, ref);
 }
+TEST(Euclidean_Vector_Wrapper, L1_norm_1)
+{
+	std::vector<double> vec = { -3,4 };
+	const Euclidean_Vector_Wrapper v1 = vec;
+
+	const auto result = v1.L1_norm();
+
+	const auto ref = 7;
+	EXPECT_EQ(result, ref);
+}
 TEST(Euclidean_Vector_Wrapper, L2_norm_1)
 {
 	std::vector<double> vec = { 3,4 };

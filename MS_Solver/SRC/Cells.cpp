@@ -1,14 +1,14 @@
 #include "../INC/Cells.h"
 
-Cells::Cells(const Configuration& configuration, const Grid& grid)
+Cells::Cells(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid)
+    :governing_equation_(std::move(governing_equation)),
+     time_step_calculator_(std::move(time_step_calculator))
 {
-    this->governing_equation_ = Governing_Equation_Factory::make(configuration);
-    this->time_step_calculator_ = Time_Step_Calculator_Factory::make(configuration, grid);
     this->num_cells_ = grid.num_cells();
 }
 
-Cells_DG::Cells_DG(const Configuration& configuration, const Grid& grid, const Discrete_Solution_DG& discrete_solution)
-    : Cells(configuration, grid)
+Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid, const Discrete_Solution_DG& discrete_solution)
+    : Cells(std::move(governing_equation), std::move(time_step_calculator), grid)
 {
     const auto num_equations = this->governing_equation_->num_equations();
     const auto space_dimension = this->governing_equation_->space_dimension();
@@ -48,7 +48,7 @@ double Cells_DG::calculate_time_step(const Discrete_Solution_DG& discrete_soluti
     return this->time_step_calculator_->calculate(P0_solutions, *this->governing_equation_);
 }
 
-void Cells_DG::calculate_RHS(double* rhs, const Discrete_Solution_DG& discrete_solution) const
+void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const
 {
     const auto num_equations = this->governing_equation_->num_equations();
     const auto space_dimension = this->governing_equation_->space_dimension();
@@ -68,21 +68,9 @@ void Cells_DG::calculate_RHS(double* rhs, const Discrete_Solution_DG& discrete_s
         }
 
         const auto delta_rhs = flux_QPs_m * this->set_of_QWs_gradient_basis_m_[cell_index];
-        this->update_rhs(cell_index, rhs, delta_rhs, discrete_solution);
+        residual.update_rhs(cell_index, delta_rhs);
     }
 }
-
-void Cells_DG::update_rhs(const uint cell_index, double* rhs_ptr, const Matrix& delta_rhs, const Discrete_Solution_DG& discrete_solution) const
-{
-    const auto n = static_cast<MKL_INT>(delta_rhs.num_values());
-    const auto a = 1.0;
-    const auto incx = 1;
-    const auto incy = 1;
-
-    auto icell_rhs_ptr = rhs_ptr + discrete_solution.coefficient_start_index(cell_index);
-    cblas_daxpy(n, a, delta_rhs.data(), incx, icell_rhs_ptr, incy);
-}
-
 
 
 

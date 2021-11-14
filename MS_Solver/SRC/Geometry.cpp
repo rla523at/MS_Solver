@@ -177,6 +177,11 @@ double Geometry::volume(void) const
 	return volume;
 }
 
+bool Geometry::is_line(void) const
+{
+	return this->reference_geometry_->is_line();
+}
+
 const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_order) const 
 {
 	if (this->integrand_order_to_quadrature_rule_.find(integrand_order) == this->integrand_order_to_quadrature_rule_.end())
@@ -185,7 +190,39 @@ const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_orde
 	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
 }
 
-Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort solution_order) const 
+bool Geometry::can_be_periodic_pair(const Geometry& other) const
+{
+	if (this->reference_geometry_ != other.reference_geometry_)
+		return false;
+
+	if (this->nodes_.size() != other.nodes_.size())
+		return false;
+
+	if (this->is_on_same_axis(other))
+		return false;
+
+	for (const auto& node : other.nodes_)
+	{
+		if (this->is_axis_parallel_node(node))
+			continue;
+		else
+			return false;
+	}
+	return true;
+}
+
+ushort Geometry::check_space_dimension(void) const 
+{
+	const auto expect_dimension = static_cast<ushort>(this->nodes_.front().size());
+
+	const auto num_nodes = this->nodes_.size();
+	for (ushort i = 1; i < num_nodes; ++i)
+		REQUIRE(expect_dimension == this->nodes_[i].size(), "every node should have same space dimension");
+
+	return expect_dimension;
+}
+
+Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort solution_order) const
 {
 	const auto num_basis = ms::combination_with_repetition(1 + this->space_dimension_, solution_order);
 
@@ -224,19 +261,53 @@ Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort
 	else
 		throw std::runtime_error("not supported space dimension");
 
-	
+
 	return initial_basis_functions;
 }
 
-ushort Geometry::check_space_dimension(void) const 
+bool Geometry::is_axis_parallel_node(const Euclidean_Vector& node) const 
 {
-	const auto expect_dimension = static_cast<ushort>(this->nodes_.front().size());
+	for (const auto& my_node : this->nodes_) 
+	{
+		if (my_node.is_axis_translation(node)) 
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
-	const auto num_nodes = this->nodes_.size();
-	for (ushort i = 1; i < num_nodes; ++i)
-		REQUIRE(expect_dimension == this->nodes_[i].size(), "every node should have same space dimension");
 
-	return expect_dimension;
+bool Geometry::is_on_axis(const ushort axis_tag) const
+{
+	if (this->space_dimension_ <= axis_tag)\
+	{
+		return false;
+	}
+
+	const auto& ref_node = this->nodes_.front();
+
+	constexpr auto epsilon = 1.0E-10;
+	for (ushort j = 1; j < this->nodes_.size(); ++j)
+	{
+		if (std::abs(this->nodes_[j][axis_tag] - ref_node[axis_tag]) > epsilon)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+bool Geometry::is_on_same_axis(const Geometry& other) const 
+{
+	for (ushort i = 0; i < this->space_dimension_; ++i)
+	{
+		if (this->is_on_axis(i) && other.is_on_axis(i))
+			return true;
+	}
+
+	return false;
 }
 
 Vector_Function<Polynomial> Geometry::make_mapping_function(void) const 
