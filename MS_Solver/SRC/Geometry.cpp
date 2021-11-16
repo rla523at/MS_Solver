@@ -18,6 +18,17 @@ Geometry::Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std
 	this->scale_function_ = this->reference_geometry_->scale_function(mapping_function_);
 };
 
+void Geometry::change_nodes(std::vector<Euclidean_Vector>&& nodes)
+{
+	*this = Geometry(std::move(this->reference_geometry_), std::move(nodes));
+}
+
+bool Geometry::operator==(const Geometry& other) const
+{
+	return this->nodes_ == other.nodes_ &&
+		*this->reference_geometry_ == *other.reference_geometry_;
+}
+
 Euclidean_Vector Geometry::center_node(void) const 
 {
 	return this->mapping_function_(this->reference_geometry_->center_node());
@@ -190,27 +201,6 @@ const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_orde
 	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
 }
 
-bool Geometry::can_be_periodic_pair(const Geometry& other) const
-{
-	if (this->reference_geometry_ != other.reference_geometry_)
-		return false;
-
-	if (this->nodes_.size() != other.nodes_.size())
-		return false;
-
-	if (this->is_on_same_axis(other))
-		return false;
-
-	for (const auto& node : other.nodes_)
-	{
-		if (this->is_axis_parallel_node(node))
-			continue;
-		else
-			return false;
-	}
-	return true;
-}
-
 ushort Geometry::check_space_dimension(void) const 
 {
 	const auto expect_dimension = static_cast<ushort>(this->nodes_.front().size());
@@ -277,10 +267,9 @@ bool Geometry::is_axis_parallel_node(const Euclidean_Vector& node) const
 	return false;
 }
 
-
-bool Geometry::is_on_axis(const ushort axis_tag) const
+bool Geometry::is_on_axis_plane(const ushort axis_tag) const
 {
-	if (this->space_dimension_ <= axis_tag)\
+	if (this->space_dimension_ <= axis_tag)
 	{
 		return false;
 	}
@@ -298,13 +287,39 @@ bool Geometry::is_on_axis(const ushort axis_tag) const
 	return true;
 }
 
+bool Geometry::is_on_this_axis_plane(const ushort axis_tag, const double reference_value) const
+{
+	if (this->space_dimension_ <= axis_tag)
+	{
+		return false;
+	}
 
-bool Geometry::is_on_same_axis(const Geometry& other) const 
+	constexpr auto epsilon = 1.0E-10;
+	for (const auto& node : this->nodes_)
+	{
+		if (std::abs(node[axis_tag] - reference_value) > epsilon)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool Geometry::is_on_same_axis_plane(const Geometry& other) const 
 {
 	for (ushort i = 0; i < this->space_dimension_; ++i)
 	{
-		if (this->is_on_axis(i) && other.is_on_axis(i))
-			return true;
+		if (this->is_on_axis_plane(i))
+		{
+			const auto reference_value = this->nodes_.front()[i];
+			
+			if (other.is_on_this_axis_plane(i, reference_value))
+			{
+				return true;
+			}
+		}
 	}
 
 	return false;

@@ -1,50 +1,63 @@
 #include "../INC/Element.h"
 
-std::vector<uint> Element::find_periodic_match_node_sequences(const Element& other) const 
+void Element::rearrange_node_indexes(std::vector<uint>&& rearranged_node_indexes)
+{
+	auto nodes = this->nodes_at_indexes(rearranged_node_indexes);
+	this->node_indexes_ = std::move(rearranged_node_indexes);
+	this->change_nodes(std::move(nodes));
+}
+
+bool Element::operator==(const Element& other) const
+{
+	return this->element_type_ == other.element_type_ &&
+		this->node_indexes_ == other.node_indexes_ &&
+		*this->reference_geometry_ == *other.reference_geometry_;
+}
+
+
+std::vector<uint> Element::find_periodic_matched_node_indexes(const Element& other) const 
 {
 	REQUIRE(this->element_type_ == ElementType::periodic && other.element_type_ == ElementType::periodic, "both element should be periodic");
 
-	//if (this->reference_geometry_ != other.reference_geometry_ ||
-	//	this->is_on_same_axis(other) ||
-	//	ms::has_intersection(this->node_indexes_, other.node_indexes_))
-	//{
-	//	return {};
-	//}
+	if (!this->can_be_periodic_pair(other))
+		return {};
 
 	const auto this_num_node = this->node_indexes_.size();
 	const auto other_num_node = other.node_indexes_.size();
 
-	std::unordered_set<uint> matched_other_vnode_index;
-	matched_other_vnode_index.reserve(other_num_node);
+	std::unordered_set<uint> matched_vnode_index;
+	matched_vnode_index.reserve(other_num_node);
 
 	std::vector<uint> matched_periodic_node_indexes(this_num_node);
 
 	const auto& this_nodes = this->nodes_;
 	const auto& other_nodes = other.nodes_;
 
-	for (ushort i = 0; i < this_num_node; ++i) {
-		const auto& this_node = this_nodes[i];
-		const auto this_node_index = this->node_indexes_[i];
+	for (int i = 0; i < other_num_node; ++i)
+	{
+		const auto& other_node = other_nodes[i];
+		const auto other_node_index = other.node_indexes_[i];
 
-		for (ushort j = 0; j < other_num_node; ++j) {
-			const auto& other_node = other_nodes[j];
-			const auto other_node_index = other.node_indexes_[j];
+		for (int j = 0; j < this_num_node; ++j) 
+		{
+			const auto& this_node = this_nodes[j];
+			const auto this_node_index = this->node_indexes_[j];
 
-			if (matched_other_vnode_index.contains(other_node_index))
+			if (matched_vnode_index.contains(other_node_index))
 			{
 				continue;
 			}
 
 			if (this_node.is_axis_translation(other_node)) 
 			{
-				matched_periodic_node_indexes[i] = other_node_index;
-				matched_other_vnode_index.insert(other_node_index);
+				matched_periodic_node_indexes[i] = this_node_index;
+				matched_vnode_index.insert(this_node_index);
 				break;
 			}
 		}
 
-		//when i can not find pair
-		if (i + 1 != matched_other_vnode_index.size())
+		//when can not find pair
+		if (i + 1 != matched_vnode_index.size())
 			return {};
 	}
 
@@ -79,6 +92,22 @@ std::vector<Element> Element::make_face_elements(void) const {
 	return inner_face_elements;
 }
 
+std::vector<Euclidean_Vector> Element::nodes_at_indexes(const std::vector<uint>& indexes) const {
+	const auto num_index = indexes.size();
+	std::vector<Euclidean_Vector> nodes(num_index);
+
+	for (ushort i = 0; i < num_index; ++i)
+	{
+		const auto index_iter = std::find(this->node_indexes_.begin(), this->node_indexes_.end(), indexes[i]);
+		REQUIRE(index_iter != this->node_indexes_.end(), "index should be included");
+
+		const auto pos = index_iter - this->node_indexes_.begin();
+		nodes[i] = this->nodes_[pos];
+	}
+		
+	return nodes;
+}
+
 Euclidean_Vector Element::outward_normalized_normal_vector(const Element& owner_cell_element, const Euclidean_Vector& node) const
 {
 	auto normal_vector = this->normalized_normal_vector(node);
@@ -102,6 +131,16 @@ std::vector<uint> Element::vertex_node_indexes(void) const
 	return { this->node_indexes_.begin(), this->node_indexes_.begin() + num_vertex };
 }
 
+bool Element::can_be_periodic_pair(const Element& other) const
+{
+	if (*this->reference_geometry_ != *other.reference_geometry_)
+		return false;
+
+	if (this->is_on_same_axis_plane(other))
+		return false;
+
+	return true;
+}
 
 FaceType Element::check_face_type(const Element& owner_cell_element) const 
 {

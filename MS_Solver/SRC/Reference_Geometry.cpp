@@ -1,20 +1,24 @@
 #include "../INC/Reference_Geometry.h"
 
+bool Reference_Geometry::operator==(const Reference_Geometry& other) const
+{
+	return (this->figure() == other.figure()) && (this->order_ == other.order_);
+}
+
+bool Reference_Geometry::operator!=(const Reference_Geometry& other) const
+{
+	return !(*this == other);
+}
+
 Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const 
 {
 	const auto& mapping_nodes = this->get_mapping_nodes();
 	const auto& mapping_monomial_vector_function = this->get_mapping_monomial_vector_function();
 
-	//std::cout << mapping_monomial_vector_function; //debug
-
 	const auto matrix_order = mapping_monomial_vector_function.size();
 	Matrix transformation_monomial_matrix(matrix_order);
 	for (size_t i = 0; i < matrix_order; ++i)
 		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));
-
-	//std::cout << transformation_monomial_matrix; //debug
-	//std::cout << transformation_monomial_matrix.inverse(); //debug
-	//std::cout << transformation_monomial_matrix.be_inverse();//debug
 
 	return transformation_monomial_matrix.inverse();
 }
@@ -54,6 +58,11 @@ std::vector<std::unique_ptr<Reference_Geometry>> Reference_Line::face_reference_
 {
 	EXCEPTION("Reference Point class is not supported yet");
 	return {};
+}
+
+Figure Reference_Line::figure(void) const
+{
+	return Figure::line;
 }
 
 ushort Reference_Line::num_vertex(void) const 
@@ -298,6 +307,11 @@ std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::face_refere
 		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
 
 	return face_reference_geometries;
+}
+
+Figure Reference_Triangle::figure(void) const
+{
+	return Figure::triangle;
 }
 
 ushort Reference_Triangle::num_vertex(void) const 
@@ -591,6 +605,11 @@ std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::face_r
 		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
 
 	return face_reference_geometries;
+}
+
+Figure Reference_Quadrilateral::figure(void) const
+{
+	return Figure::quadrilateral;
 }
 
 ushort Reference_Quadrilateral::num_vertex(void) const 

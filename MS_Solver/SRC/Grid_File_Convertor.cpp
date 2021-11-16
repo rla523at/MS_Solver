@@ -135,10 +135,6 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		elements.push_back({ type, std::move(node_indexes), std::move(geometry) });
 	}
 
-	//Log::content_ << "  " << std::setw(8) << cell_elements.size() << " cell \n";
-	//Log::content_ << "  " << std::setw(8) << boundary_elements.size() << " boundary\n";
-	//Log::content_ << "  " << std::setw(8) << periodic_boundary_element_pairs.size() << " periodic boundary pair\n";
-	//Log::content_ << "  " << std::setw(8) << inner_face_elements.size() << " inner face\n\n";
 	return elements;
 }
 

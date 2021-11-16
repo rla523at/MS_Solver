@@ -32,39 +32,43 @@ struct Quadrature_Rule
 	}
 };
 
-
 class Reference_Geometry
 {
 public://Query
+	bool operator==(const Reference_Geometry& other) const;
+	bool operator!=(const Reference_Geometry& other) const;
+
 	virtual Euclidean_Vector center_node(void) const abstract;
 	virtual std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const abstract;
-	virtual ushort num_vertex(void) const abstract;
-	virtual ushort num_post_nodes(const ushort post_order) const abstract;
-	virtual ushort num_post_elements(const ushort post_order) const abstract;
-	virtual Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
-	virtual bool is_simplex(void) const abstract;
-	virtual bool is_line(void) const abstract;
-	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
-	virtual std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const abstract;
-	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
-	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
-	virtual ushort scale_function_order(void) const abstract;
+	virtual Figure figure(void) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const abstract;
 	virtual const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const abstract;
 	virtual const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const abstract;
 	virtual const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const abstract;
 	virtual const Matrix& get_inverse_mapping_monomial_matrix(void) const abstract;
+	virtual bool is_simplex(void) const abstract;
+	virtual bool is_line(void) const abstract;
+	virtual ushort num_vertex(void) const abstract;
+	virtual ushort num_post_nodes(const ushort post_order) const abstract;
+	virtual ushort num_post_elements(const ushort post_order) const abstract;
+	virtual Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
+	virtual std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const abstract;
+	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
+	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
+	virtual ushort scale_function_order(void) const abstract;	
+	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
 
 protected:
+	Matrix make_inverse_mapping_monomial_matrix(void) const;
+	std::vector<std::vector<uint>> quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const;
+
 	virtual Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual std::vector<Euclidean_Vector> make_mapping_nodes(void) const abstract;
 	virtual std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const abstract;
 	virtual std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const abstract;
 	virtual Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const abstract;
 
-	Matrix make_inverse_mapping_monomial_matrix(void) const;
-	std::vector<std::vector<uint>> quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const;
 	std::vector<std::vector<uint>> sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const;
 	std::vector<std::vector<uint>> hexahedral_connectivities(const std::array<uint, 8>& node_indexes) const;
 
@@ -83,6 +87,7 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
@@ -125,6 +130,7 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
@@ -167,6 +173,7 @@ public:
 public://Query
 	Euclidean_Vector center_node(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;

@@ -23,102 +23,24 @@ public:
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
 	std::vector<double> cell_volumes(void) const;
 
-	std::vector<uint> boundary_owner_cell_indexes(void) const 
-	{
-		const auto& boundary_elements = this->boundary_elements_;
-
-		const auto num_boundary = boundary_elements.size();
-		std::vector<uint> oc_indexes(num_boundary);
-
-		for (uint i = 0; i < num_boundary; ++i) {
-			const auto& boundary_element = boundary_elements[i];
-
-			const auto vnode_indexes = boundary_element.vertex_node_indexes();
-			const auto indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(vnode_indexes);
-			dynamic_require(indexes.size() == 1, "boundary should have unique owner cell");
-
-			oc_indexes[i] = indexes.front();
-		}
-
-		return oc_indexes;
-	}
+	std::vector<uint> boundary_owner_cell_indexes(void) const;
 
 private:	
-	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const 
-	{
-		const auto num_vnode = vnode_indexes.size();
-
-		std::vector<const std::set<uint>*> share_cell_index_set_ptrs;
-		share_cell_index_set_ptrs.reserve(num_vnode);
-
-		for (int i = 0; i < num_vnode; ++i)
-		{
-			share_cell_index_set_ptrs.push_back(&this->vnode_index_to_share_cell_index_set_ignore_pbdry_.at(vnode_indexes[i]));
-		}
-
-		return ms::set_intersection(share_cell_index_set_ptrs);
-	}
-
-	
-	std::vector<Element> make_inner_face_elements(const std::vector<Element>& periodic_boundary_elements);
-	std::vector<std::pair<Element, Element>> match_periodic_boundaries(std::vector<Element>& periodic_boundary_elements) 
-	{
-		const auto num_periodic_element = periodic_boundary_elements.size();
-		const auto num_pair = static_cast<uint>(0.5 * num_periodic_element);
-
-		std::unordered_set<uint> matched_index_set;
-		matched_index_set.reserve(num_periodic_element);
-
-		std::vector<std::pair<Element, Element>> matched_periodic_element_pairs;
-		matched_periodic_element_pairs.reserve(num_pair);
-
-		for (uint i = 0; i < num_periodic_element; ++i) 
-		{
-			if (matched_index_set.contains(i))
-			{
-				continue;
-			}
-
-			auto& i_element = periodic_boundary_elements[i];
-
-			for (uint j = i + 1; j < num_periodic_element; ++j) 
-			{
-				if (matched_index_set.contains(j))
-				{
-					continue;
-				}
-
-				const auto& j_element = periodic_boundary_elements[j];
-
-				auto matched_periodic_node_indexes = i_element.find_matched_periodic_node_indexes(j_element);
-
-				if (!matched_periodic_node_indexes.empty()) 
-				{
-					//modify j_element based on i_element				
-					auto matched_periodic_nodes = j_element.nodes_at_indexes(matched_periodic_node_indexes);
-
-					const auto j_reference_geometry = j_element.geometry_.reference_geometry_;
-					Geometry matched_j_geometry(j_reference_geometry, std::move(matched_periodic_nodes));
-					Element matched_j_element(ElementType::periodic, std::move(matched_j_geometry), std::move(matched_periodic_node_indexes));
-
-					matched_periodic_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(matched_j_element)));
-					matched_index_set.insert(i);
-					matched_index_set.insert(j);
-					break;
-				}
-			}
-		}
-
-		dynamic_require(matched_periodic_element_pairs.size() == num_pair, "every pbdry should be matched");
-		return matched_periodic_element_pairs;
-	}
+	std::unordered_map<uint, std::set<uint>> calculate_vnode_index_to_peridoic_matched_node_index_set(void) const;
+	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const;
+	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
+	std::vector<Element> make_inner_face_elements(void) const;
 
 private:
 	ushort space_dimension_;
+
 	std::vector<Element> cell_elements_;
 	std::vector<Element> boundary_elements_;
 	std::vector<Element> inner_face_elements_;
+	std::vector<std::pair<Element, Element>> periodic_boundary_element_pairs_;
+
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_index_set_ignore_pbdry_;
+	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_index_set_consider_pbdry_;
 };
 
 
@@ -231,11 +153,6 @@ namespace ms {
 //template <ushort space_dimension>
 //class Grid
 //{
-//private:
-//	Grid_Elements elements;
-//	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_index_set_ignore_pbdry_;
-//	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_index_set_consider_pbdry_;
-//
 //public:
 //	Grid(Grid_Elements&& grid_elements);
 //
@@ -289,7 +206,8 @@ namespace ms {
 //	std::vector<std::pair<Quadrature_Rule, Quadrature_Rule>> periodic_boundary_quadrature_rule_pairs(const ushort polynomial_degree) const;
 //
 //public:
-//	std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_pbdry_vnode_index_set(void) const;
+//	
+// 
 //	std::vector<Ghost_Cell> make_ghost_cells(void) const;
 //	std::vector<std::vector<uint>> ANN_indexes(void) const; //temporary	
 //	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_ignore_pbdry(void) const;
@@ -325,41 +243,7 @@ namespace ms {
 //	}
 //}
 //
-//template <ushort space_dimension>
-//Grid::Grid(Grid_Elements&& grid_elements) : elements(std::move(grid_elements)) {
-//	SET_TIME_POINT;
-//	
-//	//calculate vnode_index_to_share_cell_index_set_ignore_pbdry_
-//	const auto num_cell = this->grid_elements_.cell_elements.size();
-//
-//	for (uint i = 0; i < num_cell; ++i) {
-//		const auto vnode_indexes = this->grid_elements_.cell_elements[i].vertex_node_indexes();
-//		for (const auto vnode_index : vnode_indexes) {
-//			if (!this->vnode_index_to_share_cell_index_set_ignore_pbdry_.contains(vnode_index))
-//				this->vnode_index_to_share_cell_index_set_ignore_pbdry_.emplace(vnode_index, std::set<uint>());
-//
-//			this->vnode_index_to_share_cell_index_set_ignore_pbdry_.at(vnode_index).insert(i);
-//		}
-//	}
-//
-//	const auto pbdry_vnode_index_to_matched_vnode_index_set = this->pbdry_vnode_index_to_matched_pbdry_vnode_index_set();
-//
-//	//calculate vnode_index_to_share_cell_index_set_consider_pbdry_
-//	this->vnode_index_to_share_cell_index_set_consider_pbdry_ = this->vnode_index_to_share_cell_index_set_ignore_pbdry_;
-//
-//	for (const auto& [vnode_index, matched_vnode_index_set] : pbdry_vnode_index_to_matched_vnode_index_set) {
-//		for (const auto matched_vnode_index : matched_vnode_index_set) {
-//			auto& i_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_index);
-//			const auto& j_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(matched_vnode_index);
-//			const auto difference = ms::set_difference(j_set, i_set);
-//
-//			i_set.insert(difference.begin(), difference.end());
-//		}
-//	}
-//
-//	Log::content_ << std::left << std::setw(50) << "@ Make grid " << " ----------- " << GET_TIME_DURATION << "s\n\n";
-//	Log::print();
-//}
+
 //
 //template <ushort space_dimension>
 //std::vector<uint> Grid::boundary_owner_cell_indexes(void) const {			
@@ -976,54 +860,7 @@ namespace ms {
 //	return quadrature_rule_pairs;
 //}
 //
-//template <ushort space_dimension>
-//std::unordered_map<uint, std::set<uint>> Grid::pbdry_vnode_index_to_matched_pbdry_vnode_index_set(void) const {
-//	std::unordered_map<uint, std::set<uint>> pbdry_vnode_index_to_matched_vnode_index_set;
-//
-//	for (const auto& [oc_side_element, nc_side_element] : this->grid_elements_.periodic_boundary_element_pairs) {
-//		const auto oc_side_vnode_indexes = oc_side_element.vertex_node_indexes();
-//		const auto nc_side_vnode_indexes = nc_side_element.vertex_node_indexes();
-//
-//		const auto num_vnode = oc_side_vnode_indexes.size();
-//		for (ushort i = 0; i < num_vnode; ++i) {
-//			const auto i_vnode_index = oc_side_vnode_indexes[i];
-//			const auto j_vnode_index = nc_side_vnode_indexes[i];
-//
-//			if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(i_vnode_index))
-//				pbdry_vnode_index_to_matched_vnode_index_set.emplace(i_vnode_index, std::set<uint>());
-//
-//			if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(j_vnode_index))
-//				pbdry_vnode_index_to_matched_vnode_index_set.emplace(j_vnode_index, std::set<uint>());
-//
-//			pbdry_vnode_index_to_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
-//			pbdry_vnode_index_to_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
-//		}
-//	}
-//
-//	//consider pbdry conner
-//	for (ushort i = 0; i < space_dimension - 1; ++i) {
-//		for (auto& [vnode_index, matched_vnode_index_set] : pbdry_vnode_index_to_matched_vnode_index_set) {
-//			if (matched_vnode_index_set.size() == 1)
-//				continue;
-//
-//			for (const auto matched_vnode_index : matched_vnode_index_set) {
-//				const auto& other_matched_vnode_index_set = pbdry_vnode_index_to_matched_vnode_index_set.at(matched_vnode_index);
-//
-//				auto& i_set = matched_vnode_index_set;
-//				const auto& j_set = other_matched_vnode_index_set;
-//				const auto difference = ms::set_difference(j_set, i_set);
-//
-//				if (difference.empty())
-//					continue;
-//
-//				i_set.insert(difference.begin(), difference.end());
-//				i_set.erase(vnode_index);
-//			}
-//		}
-//	}
-//
-//	return pbdry_vnode_index_to_matched_vnode_index_set;
-//}
+
 //
 //
 //template <ushort space_dimension>
