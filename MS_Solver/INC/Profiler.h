@@ -7,7 +7,7 @@
 #include <vector>
 
 
-#define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
+//#define dynamic_require(requirement, state) if (!(requirement)) throw std::runtime_error(state)
 
 
 class Profiler

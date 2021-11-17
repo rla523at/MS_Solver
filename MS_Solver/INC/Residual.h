@@ -34,7 +34,6 @@ private:
         return this->values_.data() + coefficieint_start_indexes_[cell_index];
     }
 
-
 private:
     std::vector<size_t> coefficieint_start_indexes_;
 	std::vector<double> values_;

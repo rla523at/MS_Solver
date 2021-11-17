@@ -49,7 +49,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, const Discrete_Solution_DG& discr
         this->set_of_normals_.push_back(grid.boundary_normals(bdry_index, oc_index, QPs));
     }
 
-    LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n" << Log::print_;
+    LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n" << LOG.print_;
 }
 
 void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const

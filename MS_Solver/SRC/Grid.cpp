@@ -210,7 +210,7 @@ uint Grid::boundary_owner_cell_index(const uint bdry_index) const
 {
 	const auto vnode_indexes = this->boundary_elements_[bdry_index].vertex_node_indexes();
 	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(vnode_indexes);
-	dynamic_require(cell_indexes.size() == 1, "boundary should have unique owner cell");
+	REQUIRE(cell_indexes.size() == 1, "boundary should have unique owner cell");
 
 	return cell_indexes.front();
 }
@@ -256,6 +256,60 @@ std::vector<Euclidean_Vector> Grid::boundary_normals(const uint bdry_index, cons
 	const auto& oc_element = this->cell_elements_[oc_indexes];
 
 	return bdry_element.outward_normalized_normal_vectors(oc_element, points);
+}
+
+size_t Grid::num_inner_faces(void) const
+{
+	return this->inner_face_elements_.size();
+}
+
+std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_index) const
+{
+	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inner_face_elements_[inner_face_index].vertex_node_indexes());
+	REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
+
+	//set first index as oc index
+	const auto oc_index = cell_indexes[0];
+	const auto nc_index = cell_indexes[1];
+	return { oc_index,nc_index };
+}
+
+Quadrature_Rule Grid::inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const
+{
+	return  this->inner_face_elements_[inner_face_index].get_quadrature_rule(polynomial_degree);
+}
+
+std::vector<Euclidean_Vector> Grid::inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const
+{
+	const auto& inner_face_element = this->inner_face_elements_[inner_face_index];
+	const auto& oc_element = this->cell_elements_[oc_index];
+
+	return inner_face_element.outward_normalized_normal_vectors(oc_element, points);
+}
+
+size_t Grid::num_periodic_boundary_pairs(void) const
+{
+	return this->periodic_boundary_element_pairs_.size();
+}
+
+std::pair<uint, uint> Grid::periodic_boundary_oc_nc_index_pair(const uint pbdry_pair_index) const
+{
+	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
+
+	const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_node_indexes());
+	const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_node_indexes());
+	REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
+	REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
+
+	const auto oc_index = oc_indexes.front();
+	const auto nc_index = nc_indexes.front();
+	return { oc_index,nc_index };
+}
+
+std::pair<Quadrature_Rule, Quadrature_Rule> Grid::periodic_boundary_quadrature_rule_pair(const uint pbdry_pair_index, const ushort solution_degree) const
+{
+	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
+	return { oc_side_element.get_quadrature_rule(solution_degree), nc_side_element.get_quadrature_rule(solution_degree) };
 }
 
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const

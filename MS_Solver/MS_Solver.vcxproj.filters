@@ -84,9 +84,6 @@
     <ClInclude Include="INC\Residual.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Boundaries_HOM.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Numerical_Flux_Function.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -159,6 +156,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Boundaries.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Inner_Faces.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
