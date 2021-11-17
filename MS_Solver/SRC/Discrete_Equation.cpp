@@ -6,9 +6,9 @@ void Discrete_Equation::solve(void)
     double current_time = 0.0;
     Post_Processing::syncronize_solution_time(current_time);
 
-    Log::content_ << "================================================================================\n";
-    Log::content_ << "\t\t\t\t Solving\n";
-    Log::content_ << "================================================================================\n";
+    LOG << "================================================================================\n";
+    LOG << "\t\t\t\t Solving\n";
+    LOG << "================================================================================\n" << LOG.print_;
 
     SET_TIME_POINT;
     while (true)
@@ -31,17 +31,16 @@ void Discrete_Equation::solve(void)
         current_time += time_step;
         current_iter++;
 
-        Log::content_ << std::left << std::setw(5);
-        Log::content_ << "Iter:" << current_iter << "\t";
-        Log::content_ << "Time:" << current_time << "(" << this->end_controller_->progress_percentage_str(current_iter, current_time) << ")";
-        Log::content_ << "Computation cost:" << std::to_string(GET_TIME_DURATION) << "s \n";
-        Log::print();
+        LOG << std::left << std::setw(5);
+        LOG << "Iter:" << current_iter << "\t";
+        LOG << "Time:" << current_time << "(" << this->end_controller_->progress_percentage_str(current_iter, current_time) << ")";
+        LOG << "Computation cost:" << std::to_string(GET_TIME_DURATION) << "s \n" << LOG.print_;
     }
 
-    Log::content_ << "\n================================================================================\n";
-    Log::content_ << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
-    Log::content_ << "================================================================================\n\n";
-    Log::print();
+    LOG << "\n================================================================================\n";
+    LOG << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
+    LOG << "================================================================================\n\n" << LOG.print_;
+    
 }
 
 void Discrete_Equation::controll_time_step(const double current_time, double& time_step) const

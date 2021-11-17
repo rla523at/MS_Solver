@@ -37,5 +37,5 @@ private:
 class Time_Step_Calculator_Factory
 {
 public:
-    static std::unique_ptr<Time_Step_Calculator> make(const Configuration& configuration, const Grid& grid);
+    static std::unique_ptr<Time_Step_Calculator> make_unique(const Configuration& configuration, const Grid& grid);
 };

@@ -161,6 +161,9 @@
     <ClCompile Include="SRC\Inner_Faces.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Residual.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="RSC\configuration.dat">

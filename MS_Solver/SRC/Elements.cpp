@@ -79,7 +79,7 @@ bool Element::is_periodic_pair(const Element& other) const
 
 std::vector<Element> Element::make_face_elements(void) const 
 {
-	REQUIRE(this->element_type_ == ElementType::cell, "make inner face elements should be called from cell element");
+	REQUIRE(this->element_type_ == ElementType::cell, "make_unique inner face elements should be called from cell element");
 
 	auto face_geometries = this->face_geometries();
 	auto set_of_face_node_indexes = this->set_of_face_node_indexes();

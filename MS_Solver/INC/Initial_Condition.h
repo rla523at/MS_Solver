@@ -12,7 +12,7 @@ public:
 class Initial_Condition_Factory//static class
 {
 public:
-	static std::unique_ptr<Initial_Condition> make(const Configuration& configuration);
+	static std::unique_ptr<Initial_Condition> make_unique(const Configuration& configuration);
 };
 
 //

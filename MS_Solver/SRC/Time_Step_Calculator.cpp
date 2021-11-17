@@ -35,7 +35,7 @@ double Constant_Dt::calculate(const std::vector<Euclidean_Vector>& P0_solutions,
     return this->constant_dt_;
 }
 
-std::unique_ptr<Time_Step_Calculator> Time_Step_Calculator_Factory::make(const Configuration& configuration, const Grid& grid)
+std::unique_ptr<Time_Step_Calculator> Time_Step_Calculator_Factory::make_unique(const Configuration& configuration, const Grid& grid)
 {
     const auto type_name = configuration.get("time_step_calculator_type");
     if (ms::contains_icase(type_name, "CFL"))
