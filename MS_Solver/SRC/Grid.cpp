@@ -173,21 +173,6 @@ Quadrature_Rule Grid::cell_quadrature_rule(const uint cell_index, const ushort s
 	return cell_element.get_quadrature_rule(solution_degree);
 }
 
-
-//std::vector<Quadrature_Rule> Grid::cell_quadrature_rules(const std::vector<ushort> solution_degrees) const 
-//{
-//	const auto& cell_elements = this->cell_elements_;
-//	const auto num_cell = cell_elements.size();
-//
-//	std::vector<Quadrature_Rule> quadrature_rules;
-//	quadrature_rules.reserve(num_cell);
-//
-//	for (uint i = 0; i < num_cell; ++i)
-//		quadrature_rules.push_back(cell_elements[i].get_quadrature_rule(solution_degrees[i]));
-//
-//	return quadrature_rules;
-//}
-
 std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
 {
 	const auto& cell_elements = this->cell_elements_;
@@ -215,25 +200,62 @@ std::vector<double> Grid::cell_volumes(void) const
 	return volumes;
 }
 
+
+size_t Grid::num_boundaries(void) const
+{
+	return this->boundary_elements_.size();
+}
+
+uint Grid::boundary_owner_cell_index(const uint bdry_index) const
+{
+	const auto vnode_indexes = this->boundary_elements_[bdry_index].vertex_node_indexes();
+	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(vnode_indexes);
+	dynamic_require(cell_indexes.size() == 1, "boundary should have unique owner cell");
+
+	return cell_indexes.front();
+}
+
 std::vector<uint> Grid::boundary_owner_cell_indexes(void) const
 {
-	const auto& boundary_elements = this->boundary_elements_;
-
-	const auto num_boundary = boundary_elements.size();
+	const auto num_boundary = this->boundary_elements_.size();
 	std::vector<uint> oc_indexes(num_boundary);
 
 	for (uint i = 0; i < num_boundary; ++i)
 	{
-		const auto& boundary_element = boundary_elements[i];
-
-		const auto vnode_indexes = boundary_element.vertex_node_indexes();
-		const auto indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(vnode_indexes);
-		dynamic_require(indexes.size() == 1, "boundary should have unique owner cell");
-
-		oc_indexes[i] = indexes.front();
+		oc_indexes[i] = this->boundary_owner_cell_index(i);
 	}
 
 	return oc_indexes;
+}
+
+ElementType Grid::boundary_type(const uint bdry_index) const
+{
+	return this->boundary_elements_[bdry_index].type();
+}
+
+std::vector<ElementType> Grid::boundary_types(void) const {
+	const auto num_boundary = this->boundary_elements_.size();
+	std::vector<ElementType> types(num_boundary);
+
+	for (uint i = 0; i < num_boundary; ++i)
+	{
+		types[i] = this->boundary_type(i);
+	}
+
+	return types;
+}
+
+Quadrature_Rule Grid::boundary_quadrature_rule(const uint bdry_index, const ushort polynomial_degree) const
+{
+	return this->boundary_elements_[bdry_index].get_quadrature_rule(polynomial_degree);
+}
+
+std::vector<Euclidean_Vector> Grid::boundary_normals(const uint bdry_index, const uint oc_indexes, const std::vector<Euclidean_Vector>& points) const
+{
+	const auto& bdry_element = this->boundary_elements_[bdry_index];
+	const auto& oc_element = this->cell_elements_[oc_indexes];
+
+	return bdry_element.outward_normalized_normal_vectors(oc_element, points);
 }
 
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const

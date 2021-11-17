@@ -20,6 +20,7 @@ public://Query
 	ushort num_post_nodes(const ushort post_order) const;
 	ushort num_post_elements(const ushort post_order) const;
 	Euclidean_Vector normalized_normal_vector(const Euclidean_Vector& node) const;
+	std::vector<Euclidean_Vector> normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const;
 	Vector_Function<Polynomial> orthonormal_basis_vector_function(const ushort solution_order) const;
 	std::vector<Euclidean_Vector> post_nodes(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
@@ -46,7 +47,6 @@ protected:
 	mutable std::map<size_t, Quadrature_Rule> integrand_order_to_quadrature_rule_;
 
 //public:
-//	bool operator==(const Geometry & other) const;
 //	std::vector<Geometry> sub_simplex_geometries(void) const;
 };
 
@@ -102,10 +102,4 @@ namespace ms
 //	}
 //
 //	return sub_simplex_geometries;
-//}
-
-
-
-//bool Geometry::operator==(const Geometry& other) const {
-//	return this->reference_geometry_ == other.reference_geometry_ && this->nodes_ == other.nodes_;
 //}

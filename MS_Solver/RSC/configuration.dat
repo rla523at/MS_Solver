@@ -6,6 +6,7 @@ governing_equation			= Euler
 solution_degree				= 3
 
 spatial_discrete_scheme		= DG
+numerical_flux				= LLF
 
 solve_end_controller_type	= Time
 solve_end_time				= 0.2

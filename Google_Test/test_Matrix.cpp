@@ -1,6 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Matrix.h"
+#include "../MS_Solver/INC/Euclidean_Vector.h"
 
 #include <array>
 
@@ -60,6 +61,15 @@ TEST(Matrix, operator_multiplication3) {
 	const Matrix ref = { 3,3,{ 1,0,0,4,0,0,7,0,0 } };
 	EXPECT_EQ(result, ref);
 }
+TEST(Matrix, operator_multiplication4)
+{
+	const Matrix m = { 3,3,{ 1,2,3,4,5,6,7,8,9 } };
+	const Euclidean_Vector v = { -1,-1,1 };
+	const auto result = m * v;
+	const Euclidean_Vector ref = { 0,-3,-6 };
+	EXPECT_EQ(result, ref);
+}
+
 TEST(Matrix, row1) {
 	Matrix dm(2, 3, { 1,2,3,4,5,6 });
 	const auto result = dm.row(0);

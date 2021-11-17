@@ -69,6 +69,25 @@ Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& node
 	return normal_vector.normalize();
 }
 
+std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const
+{
+	const auto normal_vector_function = this->reference_geometry_->normal_vector_function(this->mapping_function_);
+
+	const auto num_points = points.size();
+
+	std::vector<Euclidean_Vector> normalized_normal_vectors;
+	normalized_normal_vectors.reserve(num_points);
+
+	for (int i = 0; i < num_points; ++i)
+	{
+		auto normal_vector = Euclidean_Vector(normal_vector_function(points[i]));
+		normalized_normal_vectors[i] = normal_vector.normalize();
+	}
+
+	return normalized_normal_vectors;
+}
+
+
 std::vector<Euclidean_Vector> Geometry::post_nodes(const ushort post_order) const 
 {
 	const auto& ref_post_nodes = this->reference_geometry_->get_post_nodes(post_order);

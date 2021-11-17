@@ -3,9 +3,6 @@
 #include "Governing_Equation.h"
 #include "Initial_Condition.h"
 
-using ushort = unsigned short;
-using uint = unsigned int;
-
 class Discrete_Solution
 {
 public:
@@ -34,12 +31,15 @@ public:
 public://Query
 	double calculate_P0_basis_value(const uint cell_index) const;
 	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
+
 	std::vector<Euclidean_Vector> calculate_P0_solutions(const std::vector<double>& P0_basis_values) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_points(const uint cell_index, const Matrix& basis_points_m) const;
 
 	size_t coefficient_start_index(const uint cell_index) const;
 	ushort num_basis(const uint cell_index) const;
+	ushort num_equations(void) const;
 	ushort solution_degree(const uint cell_index) const;
 
 	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
@@ -47,21 +47,19 @@ public://Query
 	const std::vector<ushort>& get_set_of_num_basis(void) const;
 
 private:
-	Euclidean_Vector calculate_basis_vector_value(const uint cell_index, const Euclidean_Vector& node) const;
-
+	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;
 	const double* coefficient_pointer(const uint cell_index) const;
-	Matrix_Wrapper coefficient_matrix(const uint cell_index) const;
+	Matrix_Wrapper coefficient_m(const uint cell_index) const;
 	size_t num_total_basis(void) const;
-	Euclidean_Vector P0_coefficient_vector(const uint cell_index) const;
 	Euclidean_Vector calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
 	
-
 private:
 	std::vector<ushort> solution_degrees_;
 	std::vector<Vector_Function<Polynomial>> basis_vector_functions_;
 	std::vector<ushort> set_of_num_basis_;
 	std::vector<size_t> coefficieint_start_indexes_;
 };
+
 
 //class Discretized_Solution_FVM : public Discrete_Solution
 //{
@@ -79,59 +77,11 @@ private:
 //};
 
 
-//class Discretized_Solution_Factory
+//namespace ms 
 //{
-//public:
-//	static std::unique_ptr<Discretized_Solution> make(const Configuration& configuration, const Grid& grid, const Initial_Condition& initial_condition) {
-//		const auto governing_eqaution = Governing_Equation_Factory::make(configuration);
-//
-//		const auto spatial_discretization_method = configuration.get("spatial_discretization_method");
-//		
-//		if (ms::contains_icase(spatial_discretization_method, "FVM")) 
-//		{
-//			return std::make_unique<Discretized_Solution_FVM>(*governing_eqaution);
-//		}
-//		else if (ms::contains_icase(spatial_discretization_method, "HOM")) 
-//		{
-//			const auto solution_order = configuration.get<ushort>("solution_order");
-//			return std::make_unique<Discretized_Solution_HOM>(*governing_eqaution, solution_order);
-//		}
-//		else
-//			EXCEPTION("discretization method in configuration file was not supported");
+//	template <typename T>
+//	void insert(std::vector<T>& vec, const std::vector<T>& other_vec) 
+//	{
+//		vec.insert(vec.end(), other_vec.begin(), other_vec.end());
 //	}
-//};
-
-//class Discrete_Solution
-//{
-//public:
-//	Discrete_Solution(const Governing_Equation& governing_equation, const Grid& grid);
-//
-//	//public://Command
-//		//virtual void set_initial_condition(const Grid& grid, const Initial_Condition& initial_condition) abstract;
-//
-//	//public://Query
-//		//virtual std::vector<Euclidean_Vector> calculate_P0_solutions(void) const abstract;
-//		//virtual std::vector<std::vector<Euclidean_Vector>> calculate_set_of_post_point_solutions(void) const abstract;
-//
-//public://Command
-//	void update_solution(Euclidean_Vector&& updated_solution);
-//
-//public://Query
-//	const std::vector<std::string>& get_variable_names(void) const;
-//	const Euclidean_Vector& get_solution_vector(void) const;
-//	size_t num_values(void) const;
-//
-//protected:
-//	ushort num_equations_;
-//	std::vector<std::string> solution_variable_names_;
-//	size_t num_cells_;
-//	Euclidean_Vector value_v_;
-//};
-
-
-namespace ms {
-	template <typename T>
-	void insert(std::vector<T>& vec, const std::vector<T>& other_vec) {
-		vec.insert(vec.end(), other_vec.begin(), other_vec.end());
-	}
-}
+//}

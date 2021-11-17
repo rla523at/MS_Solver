@@ -64,7 +64,8 @@ std::vector<uint> Element::find_periodic_matched_node_indexes(const Element& oth
 	return matched_periodic_node_indexes;
 }
 
-bool Element::is_periodic_pair(const Element& other) const {
+bool Element::is_periodic_pair(const Element& other) const 
+{
 	REQUIRE(this->is_periodic_boundary() && other.is_periodic_boundary(), "both elemets should be periodic boundary");
 
 	if (this->element_type_ != other.element_type_)
@@ -76,7 +77,8 @@ bool Element::is_periodic_pair(const Element& other) const {
 		return false;
 }
 
-std::vector<Element> Element::make_face_elements(void) const {
+std::vector<Element> Element::make_face_elements(void) const 
+{
 	REQUIRE(this->element_type_ == ElementType::cell, "make inner face elements should be called from cell element");
 
 	auto face_geometries = this->face_geometries();
@@ -92,7 +94,8 @@ std::vector<Element> Element::make_face_elements(void) const {
 	return inner_face_elements;
 }
 
-std::vector<Euclidean_Vector> Element::nodes_at_indexes(const std::vector<uint>& indexes) const {
+std::vector<Euclidean_Vector> Element::nodes_at_indexes(const std::vector<uint>& indexes) const 
+{
 	const auto num_index = indexes.size();
 	std::vector<Euclidean_Vector> nodes(num_index);
 
@@ -112,12 +115,29 @@ Euclidean_Vector Element::outward_normalized_normal_vector(const Element& owner_
 {
 	auto normal_vector = this->normalized_normal_vector(node);
 
-	const auto face_type = this->check_face_type(owner_cell_element);
+	const auto face_type = this->check_face_type(owner_cell_element);	
 	if (face_type == FaceType::inward_face)
+	{
 		normal_vector *= -1.0;
+	}
 
 	return normal_vector;
 }
+
+std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector>& points) const
+{
+	auto normalized_normal_vectors = this->normalized_normal_vectors(points);
+	
+	const auto face_type = this->check_face_type(owner_cell_element);
+	if (face_type == FaceType::inward_face) 
+	{
+		for (auto& normal_vector : normalized_normal_vectors)
+			normal_vector *= -1;
+	}
+
+	return normalized_normal_vectors;
+}
+
 
 ElementType Element::type(void) const 
 {

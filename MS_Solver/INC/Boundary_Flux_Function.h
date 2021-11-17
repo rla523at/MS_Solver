@@ -1,33 +1,46 @@
 #pragma once
 #include "Euclidean_Vector.h"
+#include "Element.h"
 #include "Numerical_Flux_Function.h"
 
 class Boundary_Flux_Function
 {
-public:
-	virtual Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) const abstract;
+public://Query
+	virtual Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) abstract;
 };
 
 class Initial_Constant_BC : public Boundary_Flux_Function
 {
 public:
-	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) const override
-	{
-		const auto nc_cvariable = this->neighbor_solution_calculator_.calculate(oc_cvariable);
-		return Numerical_Flux_Function::calculate(oc_cvariable, nc_cvariable, normal);
-	}
+	Initial_Constant_BC(const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function)
+		: numerical_flux_function_(numerical_flux_function) {};
+
+public://Query
+	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override;
 
 private:
-	
+	Euclidean_Vector calculate_neighbor_solution(const Euclidean_Vector& oc_solution);
+
+private:
+	bool is_initialized_ = false;
+	Euclidean_Vector initial_value_;
+	std::shared_ptr<Numerical_Flux_Function> numerical_flux_function_;
+};
+
+
+class Boundary_Flux_Function_Factory//static class
+{
+public:
+	static std::unique_ptr<Boundary_Flux_Function> make_unique(const ElementType boundary_type, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function);
+
+private:
+	Boundary_Flux_Function_Factory(void) = delete;
 };
 
 
 
 
 
-
-//#include "Numerical_Flux_Function.h"
-//#include "Element.h"
 
 //template <ushort num_equation>
 //class Supersonic_Inlet1_Neighbor_Solution_Calculator
@@ -57,8 +70,7 @@ private:
 //	static void initialize(const Euclidean_Vector<num_equation>& inflow) { inflow_ = inflow; };
 //	static Euclidean_Vector<num_equation> calculate(void) { return inflow_; };
 //};
-//
-//
+
 //template <ushort num_equation>
 //class Slip_Wall_Neighbor_Solution_Calculator
 //{
@@ -92,26 +104,9 @@ private:
 //		return this->initial_constant_;
 //	};
 //};
-//
-//
-//template <typename Numerical_Flux_Function>
-//class Boundary_Flux_Function
-//{
-//protected:
-//	static_require(ms::is_numeirical_flux_function<Numerical_Flux_Function>, "it shuld be numerical flux function");
-//
-//	static constexpr ushort space_dimension_	= Numerical_Flux_Function::space_dimension();
-//	static constexpr ushort num_equation_		= Numerical_Flux_Function::num_equation();
-//
-//	using Space_Vector_		= Euclidean_Vector<space_dimension_>;
-//	using Solution_			= Euclidean_Vector<num_equation_>;
-//	using Boundary_Flux_	= Euclidean_Vector<num_equation_>;
-//
-//public:
-//	virtual Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const abstract; //virtual은 함수 템플릿에서 사용할 수 없습니다.
-//};
-//
-//
+
+
+
 //template <typename Numerical_Flux_Function>
 //class Supersonic_Inlet1 : public Boundary_Flux_Function<Numerical_Flux_Function>
 //{
@@ -125,8 +120,8 @@ private:
 //		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet1_Neighbor_Solution_Calculator<This_::num_equation_>::calculate(), normal);
 //	}
 //};
-//
-//
+
+
 //template <typename Numerical_Flux_Function>
 //class Supersonic_Inlet2 : public Boundary_Flux_Function<Numerical_Flux_Function>
 //{
@@ -140,8 +135,8 @@ private:
 //		return Numerical_Flux_Function::calculate(solution, Supersonic_Inlet2_Neighbor_Solution_Calculator<This_::num_equation_>::calculate(), normal);
 //	}
 //};
-//
-//
+
+
 //template <typename Numerical_Flux_Function>
 //class Supersonic_Outlet : public Boundary_Flux_Function<Numerical_Flux_Function>
 //{
@@ -155,8 +150,8 @@ private:
 //		return Numerical_Flux_Function::calculate(solution, solution, normal);
 //	}
 //};
-//
-//
+
+
 //template <typename Numerical_Flux_Function>
 //class Slip_Wall : public Boundary_Flux_Function<Numerical_Flux_Function>
 //{
@@ -187,47 +182,7 @@ private:
 //		}
 //	}
 //};
-//
-//template <typename Numerical_Flux_Function>
-//class Initial_Constant_BC : public Boundary_Flux_Function<Numerical_Flux_Function>
-//{
-//private:
-//	using This_ = Initial_Constant_BC<Numerical_Flux_Function>;
-//	using Space_Vector_ = This_::Space_Vector_;
-//	using Solution_ = This_::Solution_;
-//
-//	static constexpr ushort space_dimension_	= Numerical_Flux_Function::space_dimension();
-//	static constexpr ushort num_equation_		= Numerical_Flux_Function::num_equation();
-//
-//private:
-//	mutable Initial_Constant_BC_Neighbor_Solution_Calculator<num_equation_> neighbor_solution_calculator_;
-//
-//public:
-//	This_::Boundary_Flux_ calculate(const Solution_& oc_cvariable, const Space_Vector_& normal) const override {
-//		static_require(This_::space_dimension_ <= 3, "size can not exceed 3");
-//
-//		const auto nc_cvariable = this->neighbor_solution_calculator_.calculate(oc_cvariable);
-//		return Numerical_Flux_Function::calculate(oc_cvariable, nc_cvariable, normal);
-//	}
-//};
-//
-//
-//template <typename Numerical_Flux_Function>
-//class Boundary_Flux_Function_Factory
-//{
-//public:
-//	static std::unique_ptr<Boundary_Flux_Function<Numerical_Flux_Function>> make(const ElementType boundary_type) {
-//		switch (boundary_type)	{
-//			case ElementType::supersonic_inlet1:		return std::make_unique<Supersonic_Inlet1<Numerical_Flux_Function>>();
-//			case ElementType::supersonic_inlet2:		return std::make_unique<Supersonic_Inlet2<Numerical_Flux_Function>>();
-//			case ElementType::supersonic_outlet:		return std::make_unique<Supersonic_Outlet<Numerical_Flux_Function>>();
-//			case ElementType::slip_wall:				return std::make_unique<Slip_Wall<Numerical_Flux_Function>>();
-//			case ElementType::initial_constant_BC:		return std::make_unique<Initial_Constant_BC<Numerical_Flux_Function>>();
-//			default:
-//				throw std::runtime_error("wrong element type");
-//				break;
-//		}
-//	};
-//};
+
+
 
 

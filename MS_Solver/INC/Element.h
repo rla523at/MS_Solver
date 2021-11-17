@@ -40,6 +40,7 @@ public://Query
 	std::vector<Element> make_face_elements(void) const;
 	std::vector<Euclidean_Vector> nodes_at_indexes(const std::vector<uint>& indexes) const;
 	Euclidean_Vector outward_normalized_normal_vector(const Element& owner_cell_element, const Euclidean_Vector& point) const;
+	std::vector<Euclidean_Vector> outward_normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector>& points) const;
 	ElementType type(void) const;
 	std::vector<uint> vertex_node_indexes(void) const;
 
@@ -54,25 +55,6 @@ private:
 	ElementType element_type_;
 	std::vector<uint> node_indexes_;
 };
-
-
-//std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector>& nodes) const {
-//	const auto num_node = nodes.size();	
-//	std::vector<Euclidean_Vector> normalized_normal_vectors(num_node);
-//
-//	for (uint i = 0; i < num_node; ++i)
-//		normalized_normal_vectors[i] = this->geometry_.normalized_normal_vector(nodes[i]);
-//
-//	const auto face_type = this->check_face_type(owner_cell_element);
-//	if (face_type == FaceType::inward_face) {
-//		for (auto& normal_vector : normalized_normal_vectors)
-//			normal_vector *= -1;
-//	}
-//
-//	return normalized_normal_vectors;
-//}
-
-
 
 namespace ms
 {

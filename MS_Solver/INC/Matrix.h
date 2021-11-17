@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Exception.h"
 
 #include <mkl.h>
@@ -9,45 +8,61 @@
 
 using ushort = unsigned short;
 
-//for setting friend class
-namespace ms 
-{
-	class BLAS;
-}
-
 class Matrix;
 class Matrix_Base
 {
-	friend class ms::BLAS;
+	template <typename T>
+	using is_not_matrix = std::enable_if_t<!std::is_base_of_v<Matrix_Base, T>, bool>;
 
 public: //Command
 	void be_transpose(void);
 
 public: //Query
-	Matrix operator*(const double constant) const;
+	Matrix operator*(const double constant) const;	
+	template <typename V, is_not_matrix<V> = true>	V operator*(const V& vec) const
+	{
+		REQUIRE(this->num_columns_ == vec.size(), "size should be mathced");
+
+		const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+		const auto trans = this->transpose_type_;
+		const auto m = static_cast<MKL_INT>(this->num_rows_);
+		const auto n = static_cast<MKL_INT>(this->num_columns_);
+		const auto alpha = 1.0;
+		const auto lda = static_cast<MKL_INT>(this->leading_dimension());
+		const auto incx = 1;
+		const auto beta = 0;
+		const auto incy = 1;
+
+		std::vector<double> values(this->num_rows_);
+		cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, values.data(), incy);
+
+		return values;
+	}
 	Matrix operator*(const Matrix_Base& other) const;
+	Matrix operator+(const Matrix_Base& other) const;
 
 	double at(const size_t row, const size_t column) const;
 	std::vector<double> column(const size_t column_index) const;
 	const double* data(void) const;
 	bool is_finite(void) const;
-	std::vector<double> row(const size_t row_index) const;
+	size_t leading_dimension(void) const;
 	size_t num_column(void) const;
+	size_t num_row(void) const;
 	size_t num_values(void) const;
+	std::vector<double> row(const size_t row_index) const;
 	std::pair<size_t, size_t> size(void) const;
 	std::string to_string(void) const;
+	CBLAS_TRANSPOSE transpose_type(void) const;
 
 protected:
-	size_t leading_dimension(void) const;
 	bool is_transposed(void) const;
 	bool is_square_matrix(void) const;
-	bool is_in_range(const size_t irow, const size_t jcolumn) const;
-	
+	bool is_in_range(const size_t irow, const size_t jcolumn) const;	
 
 protected:
 	CBLAS_TRANSPOSE transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
-	size_t num_row_ = 0;
-	size_t num_column_ = 0;
+	size_t num_rows_ = 0;
+	size_t num_columns_ = 0;
 	const double* const_data_ptr_ = nullptr;
 };
 
@@ -65,19 +80,20 @@ public:
 public://Command 
 	void operator=(const Matrix& other);
 	void operator=(Matrix&& other) noexcept;
+	void operator*=(const double constant);
 
 	Matrix& be_inverse(void);
 	template <typename V>	void change_column(const size_t column_index, const V& vec) {
-		REQUIRE(column_index < this->num_column_, "column idnex can not exceed number of column");
+		REQUIRE(column_index < this->num_columns_, "column idnex can not exceed number of column");
 
-		for (size_t i = 0; i < this->num_row_; ++i)
+		for (size_t i = 0; i < this->num_rows_; ++i)
 			this->value_at(i, column_index) = vec.at(i);
 	}
 	template <typename V>	void change_row(const size_t start_row_index, const V& vec) {
-		REQUIRE(start_row_index <= this->num_row_, "index can not exceed given range");
+		REQUIRE(start_row_index <= this->num_rows_, "index can not exceed given range");
 		REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
 
-		const auto jump_index = start_row_index * this->num_column_;
+		const auto jump_index = start_row_index * this->num_columns_;
 		std::copy(vec.begin(), vec.end(), this->values_.begin() + jump_index);
 
 	}
@@ -101,11 +117,7 @@ private:
 class Matrix_Wrapper : public Matrix_Base
 {
 public:
-	Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr) {
-		this->num_row_ = num_row;
-		this->num_column_ = num_column;
-		this->const_data_ptr_ = ptr;
-	}
+	Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr);
 };
 
 template <typename Function>
@@ -180,49 +192,7 @@ private:
 
 namespace ms 
 {
-	//static class
-	class BLAS 
-	{
-	private:
-		BLAS(void) = delete;
-
-	public:
-		static void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr) {
-			REQUIRE(A.num_column_ == B.num_row_, "size should be matched for matrix multiplication");
-
-			const auto layout = CBLAS_LAYOUT::CblasRowMajor;
-			const auto transA = A.transpose_type_;
-			const auto transB = B.transpose_type_;
-			const auto m = static_cast<MKL_INT>(A.num_row_);
-			const auto n = static_cast<MKL_INT>(B.num_column_);
-			const auto k = static_cast<MKL_INT>(A.num_column_);
-			const auto alpha = 1.0;
-			const auto lda = static_cast<MKL_INT>(A.leading_dimension());
-			const auto ldb = static_cast<MKL_INT>(B.leading_dimension());
-			const auto beta = 0.0;
-			const auto ldc = n;
-
-			cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.const_data_ptr_, lda, B.const_data_ptr_, ldb, beta, output_ptr, ldc);
-		}
-		//static void gemvpv(const Matrix& A, const Dynamic_Euclidean_Vector& v1, Dynamic_Euclidean_Vector& v2) {
-		//	REQUIRE(A.num_column_ == v1.dimension(), "dimension should be matched for matrix vector multiplication");
-		//	const auto layout = CBLAS_LAYOUT::CblasRowMajor;
-		//	const auto transA = A.transpose_type_;
-		//	const auto m = static_cast<MKL_INT>(A.num_row_);
-		//	const auto n = static_cast<MKL_INT>(A.num_column_);
-		//	const auto alpha = 1.0;
-		//	const auto lda = static_cast<MKL_INT>(A.leading_dimension());
-		//	const auto incx = 1;
-		//	const auto beta = 1.0;
-		//	const auto incy = 1;
-		//	cblas_dgemv(layout, transA, m, n, alpha, A.values_.data(), lda, v1.data(), incx, beta, v2.values_.data(), incy);
-		//};
-	};
-
-	//alias
-	inline void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr) {
-		BLAS::gemm(A, B, output_ptr);
-	}
+	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr);
 }
 
 

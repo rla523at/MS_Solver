@@ -7,18 +7,20 @@ using ushort = unsigned short;
 
 class Governing_Equation
 {
-public://Query
-	virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
-	virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
-
-	const std::vector<std::string>& get_variable_names(void) const;
-	ushort num_equations(void) const;
-	ushort space_dimension(void) const;
+public://Query    
+    const std::vector<std::string>& get_variable_names(void) const;
+    ushort num_equations(void) const;
+    ushort space_dimension(void) const;
+    
+    virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
+    virtual double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const abstract;
+    virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
+    virtual Euclidean_Vector calculate_solution(const Euclidean_Vector& governing_equation_solution) const abstract;
 		
 protected:
-	ushort space_dimension_;
 	ushort num_equations_;
-	std::vector<std::string> variable_names_;
+    ushort space_dimension_;
+    std::vector<std::string> variable_names_;
 };
 
 class Euler2D : public Governing_Equation
@@ -27,38 +29,10 @@ public:
 	Euler2D(void);
 
 public://Query
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const override
-    {
-        auto num_solution = P0_solutions.size();
-
-         std::vector<std::vector<double>> coordinate_projected_maximum_lambdas(num_solution);
-
-         for (size_t i = 0; i < num_solution; ++i) 
-         {
-             const auto& solution = P0_solutions[i];
-             const auto velocity = this->calculate_velocity(solution);
-             const auto p = this->calculate_pressure(solution, velocity);
-             const auto a = this->calculate_acoustic_speed(solution, p);
-             
-             const auto u = velocity[0];
-             const auto v = velocity[1];
-
-            const auto x_projected_maximum_lambda = std::abs(u) + a;
-            const auto y_projected_maximum_lambda = std::abs(v) + a;
-
-            coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda };             
-         }
-
-        return coordinate_projected_maximum_lambdas;
-    }
-
- 
+    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
+    Euclidean_Vector calculate_solution(const Euclidean_Vector& governing_equation_solution) const override;
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
-
-private:
-	Euclidean_Vector calculate_velocity(const Euclidean_Vector& solution) const;
-	double calculate_pressure(const Euclidean_Vector& solution, const Euclidean_Vector& velocity) const;
-    double calculate_acoustic_speed(const Euclidean_Vector& solution, const double pressure) const;
 
 private:
     static constexpr auto gamma_ = 1.4;
@@ -67,53 +41,15 @@ private:
 class Governing_Equation_Factory//static class
 {
 public:
-    static std::shared_ptr<Governing_Equation> make_shared(const Configuration& config)
-    {
-        const auto governing_equation = config.get("Governing_Equation");
-        const auto space_dimension = config.get<ushort>("space_dimension");
-
-        if (ms::contains_icase(governing_equation, "Euler")) 
-        {
-            if (space_dimension == 2)
-                return std::make_shared<Euler2D>();
-        }
-    }
-
-	static std::unique_ptr<Governing_Equation> make(const Configuration& config) {
-		const auto governing_equation = config.get("Governing_Equation");
-		const auto space_dimension = config.get<ushort>("space_dimension");
-		
-		if (ms::contains_icase(governing_equation, "Euler")) {
-			if (space_dimension == 2)
-				return std::make_unique<Euler2D>();
-		}
-	}
+    static std::shared_ptr<Governing_Equation> make_shared(const Configuration& config);
+    static std::unique_ptr<Governing_Equation> make_unique(const Configuration& config);
 
 private:
 	Governing_Equation_Factory(void) = delete;
 };
 
-//
-//using uint = unsigned int;
-//
-//class GE {}; // Governing Equation
-//
-//template <ushort space_dimension_>
-//class SCL : public GE    //Scalar Conservation Law 
-//{
-//private:
-//    SCL(void) = delete;
-//
-//protected:
-//    static constexpr ushort num_equation_ = 1;
-//
-//public:
-//    static constexpr ushort space_dimension(void) { return space_dimension_; };
-//    static constexpr ushort num_equation(void) { return num_equation_; };
-//};
-//
-//
-//template <ushort space_dimension>
+
+
 //class Linear_Advection : public SCL<space_dimension>
 //{
 //private:
@@ -141,9 +77,8 @@ private:
 //public:
 //    static std::string name(void) { return "Linear_Advection_" + std::to_string(space_dimension) + "D"; }; 
 //};
-//
-//
-//template <ushort space_dimension>
+
+
 //class Burgers : public SCL<space_dimension>
 //{
 //private:
@@ -164,8 +99,7 @@ private:
 //public:
 //    static std::string name(void) { return "Burgers_" + std::to_string(space_dimension) + "D"; };
 //};
-//
-//
+
 //template <ushort space_dimension_>
 //class Euler : public GE
 //{
@@ -213,7 +147,7 @@ private:
 //
 //
 ////Template Definition Part
-//template <ushort space_dimension>
+
 //auto Linear_Advection<space_dimension>::physical_flux(const Solution_& solution) {
 //    std::array<double, space_dimension> flux_values;
 //    for (ushort i = 0; i < space_dimension; ++i)
@@ -222,7 +156,7 @@ private:
 //    return Matrix<1, space_dimension>(flux_values);
 //}
 //
-//template <ushort space_dimension>
+
 //auto Linear_Advection<space_dimension>::physical_fluxes(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();    
 //    std::vector<This_::Physical_Flux_> physical_fluxes(num_solution);
@@ -233,7 +167,7 @@ private:
 //    return physical_fluxes;
 //}
 //
-//template <ushort space_dimension>
+
 //std::vector<std::array<double, space_dimension>> Linear_Advection<space_dimension>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();
 //    
@@ -244,12 +178,12 @@ private:
 //    return std::vector<std::array<double, space_dimension>>(num_solution, projected_maximum_lambda);
 //}
 //
-//template <ushort space_dimension>
+
 //double Linear_Advection<space_dimension>::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
 //    return std::abs(This_::advection_speeds_.inner_product(nomal_vector));
 //}
 //
-//template <ushort space_dimension>
+
 //auto Burgers<space_dimension>::physical_flux(const Solution_& solution) {
 //    const double flux_value = 0.5 * std::pow(solution,2.0);
 //
@@ -259,7 +193,7 @@ private:
 //    return Physical_Flux_(flux_values);
 //}
 //
-//template <ushort space_dimension>
+
 //auto Burgers<space_dimension>::physical_fluxes(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();
 //    std::vector<This_::Physical_Flux_> physical_fluxes(num_solution);
@@ -270,7 +204,7 @@ private:
 //    return physical_fluxes;
 //}
 //
-//template <ushort space_dimension>
+
 //std::vector<std::array<double, space_dimension>> Burgers<space_dimension>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();
 //
@@ -283,7 +217,7 @@ private:
 //    return projected_maximum_lambdas;
 //}
 //
-//template <ushort space_dimension>
+
 //double Burgers<space_dimension>::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& normal_vector) {
 //    double normal_component_sum = 0.0;
 //    for (ushort i = 0; i < space_dimension; ++i)
@@ -301,27 +235,7 @@ private:
 //
 //template <ushort space_dimension_>
 //auto Euler<space_dimension_>::physical_flux(const Solution_& conservative_variable, const Solution_& primitivie_variable) {
-//    if constexpr (space_dimension_ == 2) {
-        //const auto rho = conservative_variable.at(0);
-        //const auto rhou = conservative_variable.at(1);
-        //const auto rhov = conservative_variable.at(2);
-        //const auto rhoE = conservative_variable.at(3);
-        //const auto u = primitivie_variable.at(0);
-        //const auto v = primitivie_variable.at(1);
-        //const auto p = primitivie_variable.at(2);
-        //const auto a = primitivie_variable.at(3);
-        //const auto rhouv = rhou * v;
-
-        //dynamic_require(rho >= 0 && p >= 0, "density and pressure shold be positive");
-
-        //return Matrix<num_equation_,space_dimension_>({
-        //    rhou,				rhov,
-        //    rhou * u + p,		rhouv,
-        //    rhouv,				rhov * v + p,
-        //    (rhoE + p) * u,		(rhoE + p) * v
-        //});
-//    }
-//    else {
+// //    else {
 //        const auto rho = conservative_variable[0];
 //        const auto rhou = conservative_variable[1];
 //        const auto rhov = conservative_variable[2];
@@ -407,18 +321,7 @@ private:
 //double Euler<space_dimension_>::inner_face_maximum_lambda(const Solution_& oc_primitive_variable, const Solution_& nc_primitive_variable, const Space_Vector_& normal_vector) {
 //    double oc_side_face_maximum_lambda = 0;
 //    double nc_side_face_maximum_lambda = 0;
-//    
-//    if (space_dimension_ == 2) {
-//        const auto oc_u = oc_primitive_variable[0];
-//        const auto oc_v = oc_primitive_variable[1];
-//        const auto oc_a = oc_primitive_variable[3];
-//        oc_side_face_maximum_lambda = std::abs(oc_u * normal_vector[0] + oc_v * normal_vector[1]) + oc_a;
-//
-//        const auto nc_u = nc_primitive_variable[0];
-//        const auto nc_v = nc_primitive_variable[1];
-//        const auto nc_a = nc_primitive_variable[3];
-//        nc_side_face_maximum_lambda = std::abs(nc_u * normal_vector[0] + nc_v * normal_vector[1]) + nc_a;
-//    }
+
 //    else {
 //        const auto oc_u = oc_primitive_variable[0];
 //        const auto oc_v = oc_primitive_variable[1];
@@ -436,81 +339,3 @@ private:
 //    return (std::max)(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
 //}
 //
-//
-//template <ushort space_dimension_>
-//std::vector<double> Euler<space_dimension_>::pressures(const std::vector<Solution_>& cvariables) {
-//    constexpr auto gamma = 1.4;
-//
-//    const auto num_cell = cvariables.size();
-//    std::vector<double> pressures(num_cell);
-//
-//    for (uint i = 0; i < num_cell; ++i) {
-//        double p = 0.0;
-//
-//        const auto rho = cvariables[i][0];
-//        const auto one_over_rho = 1.0 / rho;
-//
-//        if constexpr (space_dimension_ == 2) {
-//            const auto rhou = cvariables[i][1];
-//            const auto rhov = cvariables[i][2];
-//            const auto rhoE = cvariables[i][3];
-//
-//            const auto u = rhou * one_over_rho;
-//            const auto v = rhov * one_over_rho;
-//            p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
-//        }
-//        else {
-//            const auto rhou = cvariables[i][1];
-//            const auto rhov = cvariables[i][2];
-//            const auto rhow = cvariables[i][3];
-//            const auto rhoE = cvariables[i][4];
-//
-//            const auto u = rhou * one_over_rho;
-//            const auto v = rhov * one_over_rho;
-//            const auto w = rhow * one_over_rho;
-//            p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (gamma - 1);
-//        }
-//
-//        pressures[i] = p;
-//    }
-//
-//    return pressures;
-//}
-//
-//template <ushort space_dimension_>
-//Euler<space_dimension_>::Solution_ Euler<space_dimension_>::conservative_to_primitive(const Solution_& conservative_variable) {
-//    constexpr auto gamma = 1.4;
-//
-//    if constexpr (space_dimension_ == 2) {
-//        const auto rho = conservative_variable[0];
-//        const auto rhou = conservative_variable[1];
-//        const auto rhov = conservative_variable[2];
-//        const auto rhoE = conservative_variable[3];
-//
-//        const auto one_over_rho = 1.0 / rho;
-//
-//        const auto u = rhou * one_over_rho;
-//        const auto v = rhov * one_over_rho;
-//        const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (gamma - 1);
-//        const auto a = std::sqrt(gamma * p * one_over_rho);
-//
-//        return { u,v,p,a };
-//    }
-//    else {
-//        const auto rho = conservative_variable[0];
-//        const auto rhou = conservative_variable[1];
-//        const auto rhov = conservative_variable[2];
-//        const auto rhow = conservative_variable[3];
-//        const auto rhoE = conservative_variable[4];
-//
-//        const auto one_over_rho = 1.0 / rho;
-//
-//        const auto u = rhou * one_over_rho;
-//        const auto v = rhov * one_over_rho;
-//        const auto w = rhow * one_over_rho;
-//        const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (gamma - 1);
-//        const auto a = std::sqrt(gamma * p * one_over_rho);
-//
-//        return { u,v,w,p,a };
-//    }
-//}
