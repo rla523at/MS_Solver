@@ -16,15 +16,21 @@
     <Filter Include="설정 파일">
       <UniqueIdentifier>{93659159-b533-4462-a7e8-aac33f439fda}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Grid">
+      <UniqueIdentifier>{e354b306-6f31-4721-8389-5e1275ea9f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Grid">
+      <UniqueIdentifier>{a1f8cac5-099c-456f-a9e8-7cd5152fa896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Post">
+      <UniqueIdentifier>{fbf81fba-137d-407d-8830-b666fa6cac43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Post">
+      <UniqueIdentifier>{a5ad08e9-733a-4865-b0c5-98ca3fa6f403}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="INC\Geometry.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Polynomial.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Reference_Geometry.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Vector_Function.h">
@@ -40,9 +46,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Discrete_Solution.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Semi_Discrete_Equation.h">
@@ -61,9 +64,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Governing_Equation.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Element.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Cells.h">
@@ -87,36 +87,48 @@
     <ClInclude Include="INC\Numerical_Flux_Function.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Grid_Element_Builder.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Convertor.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Text.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Geometry.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reference_Geometry.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Element.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Convertor.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Post_Processor.h">
+      <Filter>헤더 파일\Post</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Post_Variables.h">
+      <Filter>헤더 파일\Post</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Tecplot_File_Writer.h">
+      <Filter>헤더 파일\Post</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Post_Variable_Convertor.h">
+      <Filter>헤더 파일\Post</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Geometry.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Polynomial.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Reference_Geometry.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Matrix.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Discrete_Solution.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Grid.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
@@ -140,12 +152,6 @@
     <ClCompile Include="SRC\Governing_Equation.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Elements.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Grid_File_Convertor.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Text.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -163,6 +169,33 @@
     </ClCompile>
     <ClCompile Include="SRC\Residual.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Elements.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Geometry.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Grid.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Grid_File_Convertor.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Reference_Geometry.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Tecplot_File_Writer.cpp">
+      <Filter>소스 파일\Post</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Post_Processor.cpp">
+      <Filter>소스 파일\Post</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Post_Variables.cpp">
+      <Filter>소스 파일\Post</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Post_Variable_Convertor.cpp">
+      <Filter>소스 파일\Post</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

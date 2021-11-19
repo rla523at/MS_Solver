@@ -4,7 +4,7 @@ void Discrete_Equation::solve(void)
 {
     size_t current_iter = 0;
     double current_time = 0.0;
-    Post_Processing::syncronize_solution_time(current_time);
+    Post_Processor::syncronize_solution_time(current_time);
 
     LOG << "================================================================================\n";
     LOG << "\t\t\t\t Solving\n";
@@ -14,14 +14,15 @@ void Discrete_Equation::solve(void)
     while (true)
     {
         if (this->end_controller_->is_time_to_end(current_iter, current_time))
-        {
-            //Post_Processing::post_solution(solutions, "final");//post
+        {            
+            Post_Processor::post_solution();//post
             break;
         }
 
-        //if (this->post_controller_->is_time_to_post(current_time))
-            //Post_Processing::post_solution(solutions);//post
-            //Post_Processing::post_condition_ = true;
+        if (this->post_controller_->is_time_to_post(current_iter, current_time))
+        {
+            Post_Processor::post_solution();//post
+        }
 
         SET_TIME_POINT;
         auto time_step = this->semi_discrete_equation_->calculate_time_step();

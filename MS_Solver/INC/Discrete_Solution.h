@@ -13,11 +13,14 @@ public://Command
 
 public://Query
 	const Euclidean_Vector& get_solution_vector(void) const;
+	const std::vector<std::string>& get_solution_names(void) const;
+	ushort num_equations(void) const;
+	ushort num_solutions(void) const;
 	size_t num_values(void) const;
 
 protected:
 	ushort space_dimension_;
-	ushort num_equations_;
+	ushort num_equations_;	
 	size_t num_cells_;
 	Euclidean_Vector value_v_;
 	std::shared_ptr<Governing_Equation> governing_equation_;
@@ -34,12 +37,12 @@ public://Query
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
 
+	Euclidean_Vector calculate_P0_solution(const uint cell_index, const double P0_basis_value) const;
 	std::vector<Euclidean_Vector> calculate_P0_solutions(const std::vector<double>& P0_basis_values) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_points(const uint cell_index, const Matrix& basis_points_m) const;
 
 	size_t coefficient_start_index(const uint cell_index) const;
 	ushort num_basis(const uint cell_index) const;
-	ushort num_equations(void) const;
 	ushort solution_degree(const uint cell_index) const;
 
 	const std::vector<size_t>& get_coefficient_start_indexes(void) const;

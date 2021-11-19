@@ -18,6 +18,22 @@ const Euclidean_Vector& Discrete_Solution::get_solution_vector(void) const
 	return this->value_v_;
 }
 
+const std::vector<std::string>& Discrete_Solution::get_solution_names(void) const
+{
+	return this->governing_equation_->get_solution_names();
+}
+
+
+ushort Discrete_Solution::num_equations(void) const
+{
+	return this->num_equations_;
+}
+
+ushort Discrete_Solution::num_solutions(void) const
+{
+	return this->governing_equation_->num_solutions();
+}
+
 size_t Discrete_Solution::num_values(void) const
 {
 	return this->value_v_.size();
@@ -133,16 +149,24 @@ Matrix_Function<Polynomial> Discrete_Solution_DG::calculate_tranposed_gradient_b
 	return transposed_gradient_basis;
 }
 
+Euclidean_Vector Discrete_Solution_DG::calculate_P0_solution(const uint cell_index, const double P0_basis_value) const
+{
+	const auto P0_coefficient_v = this->P0_coefficient_v(cell_index);
+	const auto P0_basis = P0_basis_value;
+	const auto GE_solution = P0_coefficient_v * P0_basis;
+	return this->governing_equation_->calculate_solution(GE_solution);
+}
+
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_P0_solutions(const std::vector<double>& P0_basis_values) const
 {
 	std::vector<Euclidean_Vector> P0_solutions(this->num_cells_);
 
-	for (size_t i = 0; i < this->num_cells_; ++i)
+	for (size_t cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		const auto P0_coefficient_v = this->P0_coefficient_v(i);
-		const auto P0_basis = P0_basis_values[i];
+		const auto P0_coefficient_v = this->P0_coefficient_v(cell_index);
+		const auto P0_basis = P0_basis_values[cell_index];
 		const auto GE_solution = P0_coefficient_v * P0_basis;
-		P0_solutions[i] = this->governing_equation_->calculate_solution(GE_solution);
+		P0_solutions[cell_index] = this->governing_equation_->calculate_solution(GE_solution);
 	}
 
 	return P0_solutions;
@@ -175,10 +199,6 @@ ushort Discrete_Solution_DG::num_basis(const uint cell_index) const
 	return this->set_of_num_basis_[cell_index];
 }
 
-ushort Discrete_Solution_DG::num_equations(void) const
-{
-	return this->num_equations_;
-}
 
 ushort Discrete_Solution_DG::solution_degree(const uint cell_index) const
 {

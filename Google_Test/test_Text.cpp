@@ -71,6 +71,18 @@ TEST(Text, write_1) {
 	const auto ref = 5;
 	EXPECT_EQ(result, ref);
 }
+TEST(Text, add_empty_line_1)
+{
+	Text txt;
+	txt << "test";
+	txt << "test";
+	txt << "test";
+	txt.add_empty_lines(3);
+	const auto result = txt.size();
+
+	constexpr auto ref = 6;
+	EXPECT_EQ(result, ref);
+}
 
 TEST(ms, replace_1) {
 	std::string str = "abc_qwer,wer__,,";

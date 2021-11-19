@@ -1,22 +1,26 @@
 #include "../INC/Text.h"
 
-Sentence& Sentence::operator<<(const std::string& str) {
+Sentence& Sentence::operator<<(const std::string& str) 
+{
 	this->contents_ += str;
 	return *this;
 }
 
 template<>
-Sentence& Sentence::insert_with_space(const double value) {
+Sentence& Sentence::insert_with_space(const double value) 
+{
 	this->contents_ += " " + ms::double_to_string(value);
 	return *this;
 }
 
-void Sentence::remove_after(const std::string_view target) {
+void Sentence::remove_after(const std::string_view target) 
+{
 	const auto pos = this->contents_.find(target.data());
 	this->contents_.erase(pos + 1);
 }
 
-void Sentence::remove_from_here(const size_t position) {
+void Sentence::remove_from_here(const size_t position) 
+{
 	REQUIRE(position < this->contents_.size(), "position can not exceed given range");
 	this->contents_.erase(position);
 }
@@ -26,16 +30,19 @@ void Sentence::remove(const std::string_view target)
 	ms::remove(this->contents_, target);
 }
 
-void Sentence::remove(const std::vector<char> targets) {
+void Sentence::remove(const std::vector<char> targets) 
+{
 	for (const auto target : targets)
 		ms::remove(this->contents_, target);
 }
 
-void Sentence::upper_case(void) {
+void Sentence::upper_case(void) 
+{
 	ms::upper_case(this->contents_);
 }
 
-bool Sentence::operator==(const Sentence& other) const {
+bool Sentence::operator==(const Sentence& other) const 
+{
 	return this->contents_ == other.contents_;
 }
 
@@ -57,7 +64,8 @@ Sentence Sentence::get_remove(const std::string_view target) const
 }
 
 
-std::vector<Sentence> Sentence::parse(const char delimiter) const {
+std::vector<Sentence> Sentence::parse(const char delimiter) const 
+{
 	auto parsed_strs =ms::parse(this->contents_, delimiter);
 	
 	std::vector<Sentence> parsed_senteces;
@@ -69,38 +77,45 @@ std::vector<Sentence> Sentence::parse(const char delimiter) const {
 	return parsed_senteces;
 }
 
-std::string Sentence::get_string(void) const {
+std::string Sentence::get_string(void) const 
+{
 	return this->contents_;
 }
 
-Sentence Sentence::get_upper_case(void) const {	
+Sentence Sentence::get_upper_case(void) const 
+{	
 	return ms::get_upper_case(this->contents_);
 }
 
-Text::Text(std::initializer_list<std::string> list) {
+Text::Text(std::initializer_list<std::string> list) 
+{
 	this->senteces_.reserve(list.size());
 
 	for (const auto& str : list)
 		this->senteces_.push_back(str);
 }
 
-Sentence& Text::operator[](const size_t index) {
+Sentence& Text::operator[](const size_t index) 
+{
 	REQUIRE(index < this->size(), "index can not exceed given range");
 	return this->senteces_[index];
 }
 
-Text& Text::operator<<(const std::string& str) {
+Text& Text::operator<<(const std::string& str) 
+{
 	this->senteces_.push_back(str);
 	return *this;
 }
 
-Text& Text::operator<<(std::string&& str) {
+Text& Text::operator<<(std::string&& str) 
+{
 	this->senteces_.push_back(std::move(str));
 	return *this;
 }
 
-void Text::add_empty_lines(const size_t num_line) {
-	this->senteces_.resize(num_line);
+void Text::add_empty_lines(const size_t num_line) 
+{
+	this->senteces_.resize(this->senteces_.size() + num_line);
 }
 
 std::vector<Sentence>::iterator Text::begin(void) 
@@ -119,11 +134,13 @@ std::vector<Sentence>::iterator Text::end(void)
 	return this->senteces_.end();
 }
 
-void Text::merge(Text&& other) {
+void Text::merge(Text&& other) 
+{
 	this->senteces_.insert(this->senteces_.end(), std::make_move_iterator(other.senteces_.begin()), std::make_move_iterator(other.senteces_.end()));
 }
 
-void Text::read(const std::string_view file_path) {
+void Text::read(const std::string_view file_path) 
+{
 	std::ifstream file_stream(file_path);
 	REQUIRE(file_stream.is_open(), "Fail to open file");
 
@@ -134,25 +151,30 @@ void Text::read(const std::string_view file_path) {
 	file_stream.close();
 }
 
-void Text::read(std::ifstream& file_stream, const size_t num_read_line) {
+void Text::read(std::ifstream& file_stream, const size_t num_read_line) 
+{
 	REQUIRE(file_stream.is_open(), "Fail to open file");
 
 	size_t index = 0;
 	std::string str;
-	while (std::getline(file_stream, str)) {
+	while (std::getline(file_stream, str)) 
+{
 		this->senteces_.push_back(std::move(str));
 		if (++index == num_read_line)
 			break;
 	}
 }
 
-void Text::remove_empty_line(void) {
+void Text::remove_empty_line(void) 
+{
 	this->senteces_.erase(std::remove(this->senteces_.begin(), this->senteces_.end(), ""), this->senteces_.end());
 }
-bool Text::operator==(const Text& other) const {
+bool Text::operator==(const Text& other) const 
+{
 	return this->senteces_ == other.senteces_;
 }
-void Text::add_write(const std::string_view file_path) const {
+void Text::add_write(const std::string_view file_path) const 
+{
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path, std::ios::app);
 	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
@@ -163,13 +185,16 @@ void Text::add_write(const std::string_view file_path) const {
 
 	output_file.close();
 }
-std::vector<Sentence>::const_iterator Text::begin(void) const {
+std::vector<Sentence>::const_iterator Text::begin(void) const 
+{
 	return this->senteces_.begin();
 }
-std::vector<Sentence>::const_iterator Text::end(void) const {
+std::vector<Sentence>::const_iterator Text::end(void) const 
+{
 	return this->senteces_.end();
 }
-void Text::write(const std::string_view file_path) const {
+void Text::write(const std::string_view file_path) const 
+{
 	ms::make_path(file_path);
 	std::ofstream output_file(file_path);
 	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
@@ -180,7 +205,8 @@ void Text::write(const std::string_view file_path) const {
 
 	output_file.close();
 }
-std::string Text::to_string(void) const {
+std::string Text::to_string(void) const 
+{
 	std::string str;
 	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
 		str += i->get_string() + "\n";
@@ -188,19 +214,22 @@ std::string Text::to_string(void) const {
 
 	return str;
 }
-size_t Text::size(void) const {
+size_t Text::size(void) const 
+{
 	return this->senteces_.size();
 }
 
 
-Binary_Writer::Binary_Writer(const std::string_view file_path) {
+Binary_Writer::Binary_Writer(const std::string_view file_path) 
+{
 	ms::make_path(file_path);
 	binary_file_stream_.open(file_path.data(), std::ios::binary);
 
 	REQUIRE(this->binary_file_stream_.is_open(), "file should be opened");
 }
 
-Binary_Writer::Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode) {
+Binary_Writer::Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode) 
+{
 	ms::make_path(file_path);
 	binary_file_stream_.open(file_path.data(), std::ios::binary | mode);
 
@@ -208,18 +237,21 @@ Binary_Writer::Binary_Writer(const std::string_view file_path, std::ios_base::op
 }
 
 template <>
-Binary_Writer& Binary_Writer::operator<<(const char* value) {
+Binary_Writer& Binary_Writer::operator<<(const char* value) 
+{
 	this->binary_file_stream_.write(reinterpret_cast<const char*>(value), sizeof(value));
 	return *this;
 }
 
 template <>
-Binary_Writer& Binary_Writer::operator<<(const std::string& str) {
+Binary_Writer& Binary_Writer::operator<<(const std::string& str) 
+{
 	this->binary_file_stream_ << str;
 	return *this;
 }
 
-namespace ms {
+namespace ms 
+{
 	bool contains_icase(const std::string& str, const char* target) 
 	{
 		return ms::find_icase(str, target) != std::string::npos;
@@ -337,7 +369,8 @@ namespace ms {
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) 
 	{
 		if (delimiters.empty())
-			return { str };
+			return 
+{ str };
 
 		const auto num_delimiter = delimiters.size();
 
@@ -404,12 +437,14 @@ namespace ms {
 		std::filesystem::rename(path + old_name, path + new_name);
 	}
 
-	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n) {
+	size_t rfind_nth(const std::string& object_str, const std::string& target_str, const size_t n) 
+{
 		if (n < 1)
 			return std::string::npos;
 
 		auto pos = std::string::npos;
-		for (size_t i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) 
+{
 			if (pos == 0)
 				return std::string::npos;
 
@@ -428,10 +463,12 @@ namespace ms {
 
 
 
-std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece) {
+std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece) 
+{
 	return ostream << sentece.get_string();
 }
 
-std::ostream& operator<<(std::ostream& ostream, const Text& text) {
+std::ostream& operator<<(std::ostream& ostream, const Text& text) 
+{
 	return ostream << text.to_string();
 }

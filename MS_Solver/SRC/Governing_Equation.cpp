@@ -1,14 +1,20 @@
 #include "../INC/Governing_Equation.h"
 
-const std::vector<std::string>& Governing_Equation::get_variable_names(void) const 
+const std::vector<std::string>& Governing_Equation::get_solution_names(void) const 
 {
-	return variable_names_;
+	return solution_names_;
 }
 
 ushort Governing_Equation::num_equations(void) const 
 {
 	return this->num_equations_;
 }
+
+ushort Governing_Equation::num_solutions(void) const
+{
+	return this->num_solutions_;
+}
+
 
 ushort Governing_Equation::space_dimension(void) const 
 {
@@ -18,8 +24,9 @@ ushort Governing_Equation::space_dimension(void) const
 Euler2D::Euler2D(void) 
 {
 	this->space_dimension_ = 2;
+	this->num_solutions_ = 8;
 	this->num_equations_ = 4;
-	this->variable_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "e" };
+	this->solution_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "a" };
 }
 
 Euclidean_Vector Euler2D::calculate_solution(const Euclidean_Vector& GE_solution) const 

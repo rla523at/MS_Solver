@@ -76,6 +76,11 @@ Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& gri
 	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << GET_TIME_DURATION << "s\n\n" << Log::print_;	
 }
 
+ushort Grid::space_dimension(void) const
+{
+	return this->space_dimension_;
+}
+
 
 size_t Grid::num_cells(void) const 
 {
@@ -109,7 +114,7 @@ std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const
 	return center_nodes;
 }
 
-std::vector<ushort> Grid::cell_set_of_num_post_nodes(const ushort post_order) const 
+std::vector<ushort> Grid::cell_set_of_num_post_points(const ushort post_order) const 
 {
 	const auto& cell_elements = this->cell_elements_;
 
@@ -117,7 +122,9 @@ std::vector<ushort> Grid::cell_set_of_num_post_nodes(const ushort post_order) co
 	std::vector<ushort> cell_set_of_num_post_nodes(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
+	{
 		cell_set_of_num_post_nodes[i] = cell_elements[i].num_post_nodes(post_order);
+	}
 
 	return cell_set_of_num_post_nodes;
 }
@@ -134,7 +141,7 @@ std::vector<ushort> Grid::cell_set_of_num_post_elements(const ushort post_order)
 	return cell_set_of_num_post_elements;
 }
 
-std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_nodes(const ushort post_order) const 
+std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_points(const ushort post_order) const 
 {
 	const auto& cell_elements = this->cell_elements_;
 
@@ -142,12 +149,14 @@ std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_nodes(const us
 	std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
+	{
 		set_of_post_nodes[i] = cell_elements[i].post_nodes(post_order);
+	}
 
 	return set_of_post_nodes;
 }
 
-std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const 
+std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) const 
 {
 	const auto& cell_elements = this->cell_elements_;
 
@@ -155,13 +164,14 @@ std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post
 
 	std::vector<std::vector<int>> set_of_connectivities;
 
-	for (uint i = 0; i < cell_elements.size(); ++i) {
+	for (uint i = 0; i < cell_elements.size(); ++i) 
+	{
 		auto icell_connectivities = cell_elements[i].post_connectivities(post_order, connectivity_start_index);
 		ms::merge(set_of_connectivities, std::move(icell_connectivities));
 
-		const auto& post_nodes = set_of_post_nodes[i];
-		const auto num_post_nodes = post_nodes.size();
-		connectivity_start_index += num_post_nodes;
+		const auto& post_points = set_of_post_points[i];
+		const auto num_post_points = post_points.size();
+		connectivity_start_index += num_post_points;
 	}
 
 	return set_of_connectivities;

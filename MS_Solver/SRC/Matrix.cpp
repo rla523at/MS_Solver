@@ -242,7 +242,7 @@ void Matrix::operator=(Matrix&& other) noexcept
 
 void Matrix::operator*=(const double constant)
 {
-	const auto n = this->num_values();
+	const auto n = static_cast<int>(this->num_values());
 	const auto incx = 1;
 	cblas_dscal(n, constant, this->values_.data(), incx);	
 }

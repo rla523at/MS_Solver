@@ -8,8 +8,9 @@ using ushort = unsigned short;
 class Governing_Equation
 {
 public://Query    
-    const std::vector<std::string>& get_variable_names(void) const;
+    const std::vector<std::string>& get_solution_names(void) const;
     ushort num_equations(void) const;
+    ushort num_solutions(void) const;
     ushort space_dimension(void) const;
     
     virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
@@ -19,8 +20,9 @@ public://Query
 		
 protected:
 	ushort num_equations_;
+    ushort num_solutions_;
     ushort space_dimension_;
-    std::vector<std::string> variable_names_;
+    std::vector<std::string> solution_names_;
 };
 
 class Euler2D : public Governing_Equation

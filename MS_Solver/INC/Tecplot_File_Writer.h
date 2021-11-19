@@ -1,99 +1,60 @@
 #pragma once
 #include "Text.h"
 #include "Post_Variables.h"
+#include "Post_Variable_Convertor.h"
 
 class Tecplot_File_Writer
 {
 public:
 	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
-	void write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path);
-
-private:
-	std::unique_ptr<TecPlot_Header_Writer> header_writer_;
-	std::unique_ptr<Tecplot_Data_Writer> data_writer_;
-};
-
-class TecPlot_Header_Writer
-{
-public:
-	void write_grid_header(const Post_Variables& post_variables, const std::string_view post_file_path);
-	void write_solution_header(const Post_Variables& post_variables, const std::string_view post_file_path);
+	void write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path);
 
 protected:
-	void set_common_variable(const Post_Variables& post_variables);
-	virtual void set_grid_mode(const Post_Variables& post_variables) abstract;
-	virtual void set_solution_mode(const Post_Variables& post_variables) abstract;
+	void set_common_header_variable(const Post_Variables& post_variables);
+	virtual void set_grid_header_variable(const Post_Variables& post_variables) abstract;
+	virtual void set_solution_header_variable(const Post_Variables& post_variables) abstract;
 	virtual void write_header(const std::string_view post_file_path) abstract;
-
+	virtual void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
+	virtual void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
+	
 protected:
+	//common header variable
 	Zone_Type zone_type_;
-	int num_post_nodes_ = 0;
+	int num_post_points_ = 0;
 	int num_post_elements_ = 0;
 	double solution_time_ = 0.0;
 	size_t strand_id_ = 0;
 };
 
-class Tecplot_ASCII_Header_Writer : public TecPlot_Header_Writer
+class Tecplot_ASCII_File_Writer : public Tecplot_File_Writer
 {
 private:
-	void set_grid_mode(const Post_Variables& post_variables) override;
-	void set_solution_mode(const Post_Variables& post_variables) override;
+    void set_grid_header_variable(const Post_Variables& post_variables) override;
+	void set_solution_header_variable(const Post_Variables& post_variables) override;
 	void write_header(const std::string_view post_file_path) override;
+    void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
+	void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
-private:
-	std::string title_;
-	std::string file_type_str_;
-	std::string variable_names_;
-	std::string zone_title_;
-	std::string variable_location_str_;
-};
-class Tecplot_Binary_Header_Writer : public TecPlot_Header_Writer
-{
-private:
-	void set_grid_mode(const Post_Variables& post_variables) override;
-	void set_solution_mode(const Post_Variables& post_variables) override;
-	void write_header(const std::string_view post_file_path) override;
-
-private:
-	std::vector<int> to_tecplot_binary_format(const std::string& str) const;
-	std::vector<int> to_tecplot_binary_format(const std::vector<std::string>& strs) const;
-
-private:
-	int file_type_;
-	std::vector<int> title_tecplot_binary_format_;
-	int num_variable_;
-	std::vector<int> variable_names_tecplot_binary_format_;
-	std::vector<int> zone_name_tecplot_binary_format_;
-	int specify_variable_location_;
-};
-
-class Tecplot_Data_Writer
-{
-public: 
-	virtual void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
-	virtual void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
-};
-
-class Tecplot_ASCII_Data_Writer : public Tecplot_Data_Writer
-{
-public:
-	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
-	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
-
-private:
 	std::vector<std::vector<int>> convert_to_ASCII_connectivities(const std::vector<std::vector<int>>& connectivities) const;
-	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const std::string_view post_file_path) const {
+	std::string make_post_variable_str(const std::vector<std::string>& post_variable_names, const std::vector<std::string>& cell_center_post_variable_names) const;
+	std::string make_variable_location_str(const ushort num_post_variable, const ushort num_cell_center_post_variable) const;
+	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const std::string_view post_file_path) const  
+	{
 		ushort str_per_line = 0;
 		const auto num_data = set_of_post_datas.size();
 
 		Text ASCII_data_text;
 		ASCII_data_text.add_empty_lines(num_data);
 
-		for (ushort i = 0; i < num_data; ++i) {
+		for (ushort i = 0; i < num_data; ++i) 
+		{
 			const auto& post_datas = set_of_post_datas[i];
-			for (const auto post_data : post_datas) {
+
+			for (const auto post_data : post_datas) 
+			{
 				ASCII_data_text[i].insert_with_space(post_data);
-				if (++str_per_line == 10) {
+				if (++str_per_line == 10) 
+				{
 					ASCII_data_text[i] << "\n";
 					str_per_line = 0;
 				}
@@ -104,44 +65,69 @@ private:
 
 		ASCII_data_text.add_write(post_file_path);
 	}
-};
-
-class Tecplot_Binary_Data_Writer : public Tecplot_Data_Writer
-{
-public:
-	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
-	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
 private:
-	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const std::string_view post_file_path) const {
-		const auto num_post_variable = set_of_post_datas.size();
+    //header variable for ASCII
+    std::string title_;
+    std::string file_type_str_;
+    std::string solution_names_;
+    std::string zone_title_;
+    std::string variable_location_str_;
+};
 
-		//II. DATA SECTION		
-		Binary_Writer binary_data_file(post_file_path, std::ios::app);
+class Tecplot_Binary_File_Writer : public Tecplot_File_Writer
+{
+private:
+	void set_grid_header_variable(const Post_Variables& post_variables) override;
+	void set_solution_header_variable(const Post_Variables& post_variables) override;
+	void write_header(const std::string_view post_file_path) override;
+	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
+	void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
-		//zone
-		binary_data_file << 299.0f;								//zone marker
+	std::vector<int> to_tecplot_binary_format(const std::string& str) const;
+	std::vector<int> to_tecplot_binary_format(const std::vector<std::string>& strs) const;
+	void write_data(const std::vector<std::vector<double>>& set_of_post_datas, const std::string_view post_file_path) const;
 
-		for (ushort i = 0; i < num_post_variable; ++i)
-			binary_data_file << 2;								//variable data format, double = 2
+private:
+	//header variable for Binary
+	int file_type_;
+	std::vector<int> title_tecplot_binary_format_;
+	int num_variable_;
+	std::vector<int> variable_names_tecplot_binary_format_;
+	std::vector<int> zone_name_tecplot_binary_format_;
+	int specify_variable_location_;
+};
 
-		binary_data_file << 0 << 0 << -1;						//has passive variable, has variable sharing, zone number to share connectivity - default
+class Tecplot_File_Writer_Factory//static class
+{
+public:
+	static std::unique_ptr<Tecplot_File_Writer> make_unique(const Configuration& configuration);
 
-		for (ushort i = 0; i < num_post_variable; ++i) {
-			const auto min_value = *std::min_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
-			const auto max_value = *std::max_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
-			binary_data_file << min_value << max_value;			//min,max value of each variable
-		}
-
-		for (ushort i = 0; i < set_of_post_datas.size(); ++i)
-			binary_data_file << set_of_post_datas[i];			//values of datas
-	}
+private:
+	Tecplot_File_Writer_Factory(void) = delete;
 };
 
 namespace ms
 {
 	std::string to_string(const Zone_Type get_zone_type);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

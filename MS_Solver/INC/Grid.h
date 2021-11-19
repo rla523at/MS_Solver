@@ -11,12 +11,14 @@ public:
 	Grid(const std::string_view grid_file_path, const Grid_File_Convertor& grid_file_convertor);
 
 public:
+	ushort space_dimension(void) const;
+
 	size_t num_cells(void) const;
 	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const;
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
-	std::vector<ushort> cell_set_of_num_post_nodes(const ushort post_order) const;
+	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
-	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_nodes(const ushort post_order) const;
+	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_points(const ushort post_order) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 	Quadrature_Rule cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
@@ -59,24 +61,39 @@ private:
 };
 
 
-namespace ms {
+namespace ms 
+{
+	template <typename T, typename... Args>		std::vector<T>& merge(std::vector<T>& vec1, const std::vector<T>& vec2, const Args&... args)
+	{
+		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+
+		vec1.reserve(vec1.size() + vec2.size());
+		vec1.insert(vec1.end(), vec2.begin(), vec2.end());
+
+		if constexpr (sizeof...(Args) == 0)
+			return vec1;
+		else
+			return ms::merge(vec1, args...);
+	}
 	template <typename T, typename... Args>		std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args)
 	{
 		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
 
 		vec1.reserve(vec1.size() + vec2.size());
-		vec1.insert_with_space(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
+		vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
 
 		if constexpr (sizeof...(Args) == 0)
 			return vec1;
 		else
 			return ms::merge(vec1, std::move(args)...);
 	}
-	template <typename T>	void sort(std::vector<T>& vec) {
+	template <typename T>	void sort(std::vector<T>& vec) 
+	{
 		std::sort(vec.begin(), vec.end());
 	}
-	template <typename T>	std::vector<T>::const_iterator find(const std::vector<T>& vec, const T& val) {
-		return std::find(vec.cbegin(), vec.cend(), val);
+	template <typename T>	std::vector<T>::const_iterator find(const std::vector<T>& vec, const T& val) 
+	{
+		return std::find(vec.begin(), vec.end(), val);
 	}
 	template <typename Container1, typename Container2, std::enable_if_t<std::is_same_v<typename Container1::value_type, typename Container2::value_type>, bool> = true>
 	std::vector<typename Container1::value_type> set_intersection(const Container1& container1, const Container2& container2)

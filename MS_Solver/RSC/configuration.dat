@@ -19,3 +19,7 @@ solve_post_iter_unit		= 10
 time_step_calculator_type	= CFL
 CFL_number					= 0.9
 constant_dt					= 0.0001
+
+post_file_path				=
+post_order					=
+post_file_format			=

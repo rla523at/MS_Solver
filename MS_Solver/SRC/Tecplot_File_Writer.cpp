@@ -1,61 +1,61 @@
-#include "../INC/Tecplot.h"
+#include "../INC/Tecplot_File_Writer.h"
 
-void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->header_writer_->write_grid_header(post_variables, post_file_path);
-	this->data_writer_->write_grid_data(post_variables, post_file_path);
-}
-
-void Tecplot_File_Writer::write_solution_file(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->header_writer_->write_solution_header(post_variables, post_file_path);
-	this->data_writer_->write_solution_data(post_variables, post_file_path);
-}
-
-void TecPlot_Header_Writer::write_grid_header(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->set_grid_mode(post_variables);
-	this->write_header(post_file_path);
-}
-void TecPlot_Header_Writer::write_solution_header(const Post_Variables& post_variables, const std::string_view post_file_path) {
-	this->set_solution_mode(post_variables);
-	this->write_header(post_file_path);
-}
-void TecPlot_Header_Writer::set_common_variable(const Post_Variables& post_variables) {
+void Tecplot_File_Writer::set_common_header_variable(const Post_Variables& post_variables)
+{
 	this->zone_type_ = post_variables.zone_type();
-	this->num_post_nodes_ = static_cast<int>(post_variables.num_post_node());
+	this->num_post_points_ = static_cast<int>(post_variables.num_post_node());
 	this->num_post_elements_ = static_cast<int>(post_variables.num_post_element());
 	this->solution_time_ = post_variables.solution_time();
 }
 
-void Tecplot_ASCII_Header_Writer::set_grid_mode(const Post_Variables& post_variables) {
-	this->set_common_variable(post_variables);
+void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path)
+{
+	this->set_grid_header_variable(post_variables);
+	this->write_header(post_file_path);
+	this->write_grid_data(post_variables, post_file_path);
+}
+
+void Tecplot_File_Writer::write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path)
+{
+	this->set_solution_header_variable(post_variables);
+	this->write_header(post_file_path);
+	this->write_solution_data(post_variables, post_file_path);
+}
+
+void Tecplot_ASCII_File_Writer::set_grid_header_variable(const Post_Variables& post_variables)
+{
+	this->set_common_header_variable(post_variables);
 
 	this->title_ = "Grid";
 	this->file_type_str_ = "Grid";
-	this->variable_names_ = post_variables.grid_variable_str();
+	this->solution_names_ = post_variables.grid_variable_str();
 	this->zone_title_ = "Grid";
 	this->variable_location_str_ = "()";
 }
 
-//void Tecplot_ASCII_Header_Writer::set_solution_mode(const Post_Variables& post_variables) {
-//	this->set_common_variable(post_variables);
-//
-//	this->title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
-//	this->file_type_str_ = "Solution";
-//	this->variable_names_ = post_variables.solution_variable_str();
-//	this->zone_title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
-//	this->variable_location_str_ = post_variables.solution_variable_location_str();
-//}
+void Tecplot_ASCII_File_Writer::set_solution_header_variable(const Post_Variables& post_variables)
+{
+	this->set_common_header_variable(post_variables);
 
-void Tecplot_ASCII_Header_Writer::write_header(const std::string_view post_file_path) {
+	this->title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
+	this->file_type_str_ = "Solution";
+	this->solution_names_ = this->make_post_variable_str(post_variables.get_post_variable_names(), post_variables.get_cell_center_post_variable_names());
+	this->zone_title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
+	this->variable_location_str_ = this->make_variable_location_str(post_variables.num_post_variables(), post_variables.num_cell_center_post_variables());
+}
+
+void Tecplot_ASCII_File_Writer::write_header(const std::string_view post_file_path)
+{
 	Text header_text;
 	constexpr ushort num_line = 11;
 
 	header_text.add_empty_lines(num_line);
 	header_text[0] << "Title = " + this->title_;
 	header_text[1] << "FileType = " + this->file_type_str_;
-	header_text[2] << "Variables = " + this->variable_names_;
+	header_text[2] << "Variables = " + this->solution_names_;
 	header_text[3] << "Zone T = " + this->zone_title_;
 	header_text[4] << "ZoneType =  " + ms::to_string(this->zone_type_);
-	header_text[5] << "Nodes = " + std::to_string(this->num_post_nodes_);
+	header_text[5] << "Nodes = " + std::to_string(this->num_post_points_);
 	header_text[6] << "Elements = " + std::to_string(this->num_post_elements_);
 	header_text[7] << "DataPacking = Block";
 	header_text[8] << "StrandID = " + std::to_string(this->strand_id_++);
@@ -65,8 +65,70 @@ void Tecplot_ASCII_Header_Writer::write_header(const std::string_view post_file_
 	header_text.write(post_file_path);
 }
 
-void Tecplot_Binary_Header_Writer::set_grid_mode(const Post_Variables& post_variables) {
-	this->set_common_variable(post_variables);
+void Tecplot_ASCII_File_Writer::write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const
+{
+	this->write_data(post_variables.get_post_coordinate_blocks(), post_file_path);
+
+	const auto ASCII_connecitivities = this->convert_to_ASCII_connectivities(post_variables.get_connectivities());
+	this->write_data(ASCII_connecitivities, post_file_path);
+}
+
+void Tecplot_ASCII_File_Writer::write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const
+{
+	auto total_post_variable_values = post_variables.get_set_of_post_variable_values();
+	ms::merge(total_post_variable_values, post_variables.get_set_of_cell_center_post_variable_values());
+	this->write_data(total_post_variable_values, post_file_path);
+}
+
+std::vector<std::vector<int>> Tecplot_ASCII_File_Writer::convert_to_ASCII_connectivities(const std::vector<std::vector<int>>& connectivities) const
+{
+	auto ASCII_connecitivities = connectivities;
+
+	for (auto& connecitivity : ASCII_connecitivities)
+	{
+		for (auto& index : connecitivity)
+		{
+			index += 1; //ASCII connecitivity start with 1
+		}
+	}
+
+	return ASCII_connecitivities;
+}
+
+std::string Tecplot_ASCII_File_Writer::make_post_variable_str(const std::vector<std::string>& post_variable_names, const std::vector<std::string>& cell_center_post_variable_names) const
+{
+	std::string post_variable_str;
+
+	for (const auto& name : post_variable_names)
+	{
+		post_variable_str += name + ", ";
+	}
+	for (const auto& name : cell_center_post_variable_names)
+	{
+		post_variable_str += name + ", ";
+	}
+
+	post_variable_str.pop_back();
+	post_variable_str.pop_back();
+
+	return post_variable_str;
+}
+
+std::string Tecplot_ASCII_File_Writer::make_variable_location_str(const ushort num_post_variable, const ushort num_cell_center_post_variable) const
+{
+	if (num_cell_center_post_variable == 0)
+	{
+		return "()";
+	}
+
+	const auto cell_center_variable_start_index = num_post_variable + 1;
+	const auto cell_center_variable_end_index = num_post_variable + num_cell_center_post_variable;
+	return "([" + std::to_string(cell_center_variable_start_index) + "-" + std::to_string(cell_center_variable_end_index) + "]=CELLCENTERED)";
+}
+
+void Tecplot_Binary_File_Writer::set_grid_header_variable(const Post_Variables& post_variables)
+{
+	this->set_common_header_variable(post_variables);
 
 	this->file_type_ = 1;
 	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
@@ -76,22 +138,38 @@ void Tecplot_Binary_Header_Writer::set_grid_mode(const Post_Variables& post_vari
 	this->specify_variable_location_ = 0;
 }
 
-//void Tecplot_Binary_Header_Writer::set_solution_mode(const Post_Variables& post_variables) {
-//	this->set_common_variable(post_variables);
-//
-//	this->file_type_ = 2;
-//	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
-//	this->num_variable_ = static_cast<int>(post_variables.num_solution_variable());
-//	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.solution_variable_str(), ','));
-//	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
-//
-//	if (post_variables.solution_variable_location_str() == "()")
-//		this->specify_variable_location_ = 0;
-//	else
-//		this->specify_variable_location_ = 1;
-//}
+void Tecplot_Binary_File_Writer::set_solution_header_variable(const Post_Variables& post_variables)
+{
+	this->set_common_header_variable(post_variables);
 
-void Tecplot_Binary_Header_Writer::write_header(const std::string_view post_file_path) {
+	this->file_type_ = 2;
+	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
+	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
+
+	const auto num_post_variables = post_variables.num_post_variables();
+	const auto num_cell_center_post_variables = post_variables.num_cell_center_post_variables();
+
+	if (num_post_variables == 0)
+	{
+		this->num_variable_ = static_cast<int>(num_cell_center_post_variables);
+		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_cell_center_post_variable_names());
+		this->specify_variable_location_ = 1;
+	}
+	else if (num_cell_center_post_variables == 0)
+	{
+		this->num_variable_ = static_cast<int>(num_post_variables);
+		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_post_variable_names());
+		this->specify_variable_location_ = 0;
+	}
+	else
+	{
+		EXCEPTION("Binary writer does not allow mixed variable location");
+	}
+}
+
+
+void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_path)
+{
 	Binary_Writer writer(post_file_path);
 
 	//I. HEADER SECTION
@@ -122,24 +200,58 @@ void Tecplot_Binary_Header_Writer::write_header(const std::string_view post_file
 		writer << 1 << 1;												//Var location : Node
 	writer << 0;														//one to one face neighbor - default
 	writer << 0;														//user define face neighbor connection -default
-	writer << this->num_post_nodes_;									//num points
+	writer << this->num_post_points_;									//num points
 	writer << this->num_post_elements_;									//num elements
 	writer << 0 << 0 << 0;												//i,j,k cell dim - default
 	writer << 0;														//auxilarily name index pair - default
 	writer << 357.0f;													//EOH_marker
 }
 
-std::vector<int> Tecplot_Binary_Header_Writer::to_tecplot_binary_format(const std::string& str) const {
+
+void Tecplot_Binary_File_Writer::write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const
+{
+	this->write_data(post_variables.get_post_coordinate_blocks(), post_file_path);
+
+	//add write connectivity info
+	Binary_Writer binary_data_file(post_file_path, std::ios::app);
+
+	const auto& connectivities = post_variables.get_connectivities();
+	for (const auto& connectivity : connectivities)
+	{
+		binary_data_file << connectivity;
+	}
+}
+
+void Tecplot_Binary_File_Writer::write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const
+{
+	if (post_variables.num_cell_center_post_variables() == 0)
+	{
+		this->write_data(post_variables.get_set_of_post_variable_values(), post_file_path);
+	}
+	else if (post_variables.num_post_variables() == 0)
+	{
+		this->write_data(post_variables.get_set_of_cell_center_post_variable_values(), post_file_path);
+	}
+	else
+	{
+		EXCEPTION("Binary writer does not allow mixed variable location");
+	}
+}
+
+std::vector<int> Tecplot_Binary_File_Writer::to_tecplot_binary_format(const std::string& str) const 
+{
 	std::vector<int> tecplot_binary_format;
 	tecplot_binary_format.insert(tecplot_binary_format.end(), str.begin(), str.end());
 	tecplot_binary_format.push_back(0); // null
 	return tecplot_binary_format;
 }
 
-std::vector<int> Tecplot_Binary_Header_Writer::to_tecplot_binary_format(const std::vector<std::string>& strs) const {
+std::vector<int> Tecplot_Binary_File_Writer::to_tecplot_binary_format(const std::vector<std::string>& strs) const 
+{
 	std::vector<int> tecplot_binary_format;
 
-	for (const auto& str : strs) {
+	for (const auto& str : strs) 
+	{
 		auto str_tecplot_binary_format = this->to_tecplot_binary_format(str);
 		ms::merge(tecplot_binary_format, std::move(str_tecplot_binary_format));
 	}
@@ -147,41 +259,50 @@ std::vector<int> Tecplot_Binary_Header_Writer::to_tecplot_binary_format(const st
 	return tecplot_binary_format;
 }
 
-void Tecplot_ASCII_Data_Writer::write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
-	const auto ASCII_connecitivities = this->convert_to_ASCII_connectivities(post_variables.get_connectivities());
+void Tecplot_Binary_File_Writer::write_data(const std::vector<std::vector<double>>& set_of_post_datas, const std::string_view post_file_path) const
+{
+	const auto num_post_variable = set_of_post_datas.size();
 
-	this->write_data(post_variables.get_post_nodes_by_axis(), post_file_path);
-	this->write_data(ASCII_connecitivities, post_file_path);
-}
-
-//void Tecplot_ASCII_Data_Writer::write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
-//	this->write_data(post_variables.calculate_set_of_solution_datas(), post_file_path);
-//}
-
-std::vector<std::vector<int>> Tecplot_ASCII_Data_Writer::convert_to_ASCII_connectivities(const std::vector<std::vector<int>>& connectivities) const {
-	auto ASCII_connecitivities = connectivities;
-
-	for (auto& connecitivity : ASCII_connecitivities)
-		for (auto& index : connecitivity)
-			index += 1; //ASCII connecitivity start with 1
-
-	return ASCII_connecitivities;
-}
-
-void Tecplot_Binary_Data_Writer::write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
-	const auto& post_nodes_by_axis = post_variables.get_post_nodes_by_axis();
-	this->write_data(post_nodes_by_axis, post_file_path);
-
-	//add write connectivity info
-	const auto& connectivities = post_variables.get_connectivities();
+	//II. DATA SECTION		
 	Binary_Writer binary_data_file(post_file_path, std::ios::app);
-	for (ushort i = 0; i < connectivities.size(); ++i)
-		binary_data_file << connectivities[i];
+
+	//zone
+	binary_data_file << 299.0f;								//zone marker
+
+	for (int i = 0; i < num_post_variable; ++i)
+	{
+		binary_data_file << 2;								//variable data format, double = 2
+	}
+
+	binary_data_file << 0 << 0 << -1;						//has passive variable, has variable sharing, zone number to share connectivity - default
+
+	for (int i = 0; i < num_post_variable; ++i)
+	{
+		const auto min_value = *std::min_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
+		const auto max_value = *std::max_element(set_of_post_datas[i].begin(), set_of_post_datas[i].end());
+		binary_data_file << min_value << max_value;			//min,max value of each variable
+	}
+
+	for (int i = 0; i < set_of_post_datas.size(); ++i)
+	{
+		binary_data_file << set_of_post_datas[i];			//values of datas
+	}
 }
 
-//void Tecplot_Binary_Data_Writer::write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const {
-//	this->write_data(post_variables.calculate_set_of_solution_datas(), post_variables.num_solution_variable(), post_file_path);
-//}
+std::unique_ptr<Tecplot_File_Writer> Tecplot_File_Writer_Factory::make_unique(const Configuration& configuration)
+{
+	const auto format = configuration.get("post_file_format");
+
+	if (ms::contains_icase(format, "ASCII"))
+	{
+		return std::make_unique<Tecplot_ASCII_File_Writer>();
+	}
+	else
+	{
+		EXCEPTION("post file format in configuration file is not supported");
+		return nullptr;
+	}
+}
 
 namespace ms
 {
@@ -196,6 +317,52 @@ namespace ms
 		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
