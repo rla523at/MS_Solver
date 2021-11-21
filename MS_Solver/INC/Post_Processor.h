@@ -5,7 +5,7 @@
 class Post_Processor//static class
 {
 public:
-	static void initialize(const Configuration& configuration, const Grid& grid, const Discrete_Solution_DG& discrete_solution);
+	static void initialize(const Configuration& configuration, const Grid& grid, Discrete_Solution_DG& discrete_solution);
 	static void post_grid(void);
 	static void post_solution(void);
 	static void record_variables(const std::string& name, const std::vector<double>& values);	
@@ -22,4 +22,4 @@ private:
 	static inline ushort post_order_ = 0;
 	static inline std::unique_ptr<Post_Variables> post_variables_;
 	static inline std::unique_ptr<Tecplot_File_Writer> file_writer_;
-};
+};	

@@ -5,7 +5,7 @@
 
 class Tecplot_File_Writer
 {
-public:
+public: //Command
 	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
 	void write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path);
 
@@ -15,7 +15,7 @@ protected:
 	virtual void set_solution_header_variable(const Post_Variables& post_variables) abstract;
 	virtual void write_header(const std::string_view post_file_path) abstract;
 	virtual void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
-	virtual void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
+	virtual void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const abstract;
 	
 protected:
 	//common header variable
@@ -33,11 +33,10 @@ private:
 	void set_solution_header_variable(const Post_Variables& post_variables) override;
 	void write_header(const std::string_view post_file_path) override;
     void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
-	void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const override;
+	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
 	std::vector<std::vector<int>> convert_to_ASCII_connectivities(const std::vector<std::vector<int>>& connectivities) const;
-	std::string make_post_variable_str(const std::vector<std::string>& post_variable_names, const std::vector<std::string>& cell_center_post_variable_names) const;
-	std::string make_variable_location_str(const ushort num_post_variable, const ushort num_cell_center_post_variable) const;
+	std::string make_post_variable_str(const std::vector<std::string>& post_variable_names) const;
 	template <typename T>	void write_data(const std::vector<std::vector<T>>& set_of_post_datas, const std::string_view post_file_path) const  
 	{
 		ushort str_per_line = 0;
@@ -82,7 +81,7 @@ private:
 	void set_solution_header_variable(const Post_Variables& post_variables) override;
 	void write_header(const std::string_view post_file_path) override;
 	void write_grid_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
-	void write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const override;
+	void write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const override;
 
 	std::vector<int> to_tecplot_binary_format(const std::string& str) const;
 	std::vector<int> to_tecplot_binary_format(const std::vector<std::string>& strs) const;

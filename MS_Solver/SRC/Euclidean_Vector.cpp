@@ -191,6 +191,20 @@ Euclidean_Vector& Euclidean_Vector::operator*=(const double constant)
 	return *this;
 }
 
+Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
+{
+	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
+
+	const auto n = this->num_values_;
+	const auto a = 1.0;
+	const auto incx = 1;
+	const auto incy = 1;
+
+	cblas_daxpy(n, a, other.const_data_ptr_, incx, this->values_.data(), incy);
+
+	return *this;
+}
+
 //Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
 //{
 //	REQUIRE(this->size() == other.size(), "other vector should be same size");

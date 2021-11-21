@@ -27,28 +27,10 @@ Post_Variables::Post_Variables(const Grid& grid, std::unique_ptr<Post_Variable_C
 	}
 }
 
-void Post_Variables::record_cell_center_solution(void)
+void Post_Variables::clear_variables(void)
 {
-	const auto& solution_names = this->post_variable_convertor_->get_solution_names();
-	auto set_of_cell_center_solution_values = this->post_variable_convertor_->calculate_set_of_cell_center_solution_values();
-	const auto num_solutions = solution_names.size();
-
-	for (ushort i = 0; i < num_solutions; ++i)
-	{
-		this->cell_center_post_variable_names_.push_back(solution_names[i]);
-		this->set_of_cell_center_post_variable_values_.push_back(std::move(set_of_cell_center_solution_values[i]));
-	}
-}
-
-void Post_Variables::record_cell_center_variable(const std::string& name, const std::vector<double>& values)
-{
-	REQUIRE(!name.empty(), "post variable should have name");
-	REQUIRE(!ms::contains(post_variable_names_, name), "post variable does not allow duplicate record");
-
-	auto post_variable_values = this->post_variable_convertor_->convert_cell_center_values(values);
-
-	this->cell_center_post_variable_names_.push_back(name);
-	this->set_of_cell_center_post_variable_values_.push_back(std::move(post_variable_values));
+	this->post_variable_names_.clear();
+	this->set_of_post_variable_values_.clear();
 }
 
 void Post_Variables::record_solution(void)
@@ -57,7 +39,7 @@ void Post_Variables::record_solution(void)
 	auto set_of_post_point_solution_values = this->post_variable_convertor_->calculate_set_of_post_point_solution_values();
 	const auto num_solutions = solution_names.size();
 
-	for (ushort i = 0; i < num_solutions; ++i)
+	for (int i = 0; i < num_solutions; ++i)
 	{
 		this->post_variable_names_.push_back(solution_names[i]);
 		this->set_of_post_variable_values_.push_back(std::move(set_of_post_point_solution_values[i]));
@@ -98,16 +80,6 @@ const std::vector<std::vector<double>>& Post_Variables::get_set_of_post_variable
 const std::vector<std::string>& Post_Variables::get_post_variable_names(void) const
 {
 	return this->post_variable_names_;
-}
-
-const std::vector<std::vector<double>>& Post_Variables::get_set_of_cell_center_post_variable_values(void) const
-{
-	return this->set_of_cell_center_post_variable_values_;
-}
-
-const std::vector<std::string>& Post_Variables::get_cell_center_post_variable_names(void) const
-{
-	return this->cell_center_post_variable_names_;
 }
 
 std::string Post_Variables::grid_variable_str(void) const
@@ -151,15 +123,29 @@ ushort Post_Variables::num_post_variables(void) const
 	return this->post_variable_names_.size();
 }
 
-ushort Post_Variables::num_cell_center_post_variables(void) const
-{
-	return this->cell_center_post_variable_names_.size();
-}
-
 double Post_Variables::solution_time(void) const 
 {
 	REQUIRE(this->solution_time_ptr_ != nullptr, "solution time should be syncronized");
 	return *solution_time_ptr_;
+}
+
+std::string Post_Variables::variable_location_str(void) const
+{
+	const auto variable_location_str = this->post_variable_convertor_->variable_location_str();
+
+	if (ms::contains_icase(variable_location_str, "center"))
+	{
+		return "([1-" + std::to_string(this->num_post_variables()) + "]=CELLCENTERED)";
+	}
+	else if (ms::contains_icase(variable_location_str, "node"))
+	{
+		return "()";
+	}
+	else
+	{
+		EXCEPTION("not supported variable location");
+		return "";
+	}
 }
 
 Zone_Type Post_Variables::zone_type(void) const
@@ -190,3 +176,42 @@ std::vector<std::vector<double>> Post_Variables::make_post_coordinate_blocks(con
 	return coordinate_blocks;
 }
 
+
+//void Post_Variables::record_cell_center_solution(void)
+//{
+//	const auto& solution_names = this->post_variable_convertor_->get_solution_names();
+//	auto set_of_cell_center_solution_values = this->post_variable_convertor_->calculate_set_of_cell_center_solution_values();
+//	const auto num_solutions = solution_names.size();
+//
+//	for (ushort i = 0; i < num_solutions; ++i)
+//	{
+//		this->cell_center_post_variable_names_.push_back(solution_names[i]);
+//		this->set_of_cell_center_post_variable_values_.push_back(std::move(set_of_cell_center_solution_values[i]));
+//	}
+//}
+//
+//void Post_Variables::record_cell_center_variable(const std::string& name, const std::vector<double>& values)
+//{
+//	REQUIRE(!name.empty(), "post variable should have name");
+//	REQUIRE(!ms::contains(post_variable_names_, name), "post variable does not allow duplicate record");
+//
+//	auto post_variable_values = this->post_variable_convertor_->convert_cell_center_values(values);
+//
+//	this->cell_center_post_variable_names_.push_back(name);
+//	this->set_of_cell_center_post_variable_values_.push_back(std::move(post_variable_values));
+//}
+//
+//const std::vector<std::vector<double>>& Post_Variables::get_set_of_cell_center_post_variable_values(void) const
+//{
+//	return this->set_of_cell_center_post_variable_values_;
+//}
+//
+//const std::vector<std::string>& Post_Variables::get_cell_center_post_variable_names(void) const
+//{
+//	return this->cell_center_post_variable_names_;
+//}
+//
+//ushort Post_Variables::num_cell_center_post_variables(void) const
+//{
+//	return this->cell_center_post_variable_names_.size();
+//}

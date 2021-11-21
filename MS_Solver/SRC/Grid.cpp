@@ -141,16 +141,27 @@ std::vector<ushort> Grid::cell_set_of_num_post_elements(const ushort post_order)
 	return cell_set_of_num_post_elements;
 }
 
+std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_element_centers(const ushort post_order) const
+{
+	const auto num_cell = this->cell_elements_.size();
+	std::vector<std::vector<Euclidean_Vector>> set_of_post_element_centers(num_cell);
+
+	for (int i = 0; i < num_cell; ++i)
+	{
+		set_of_post_element_centers[i] = this->cell_elements_[i].post_element_centers(post_order);
+	}
+
+	return set_of_post_element_centers;
+}
+
 std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_points(const ushort post_order) const 
 {
-	const auto& cell_elements = this->cell_elements_;
-
-	const auto num_cell = cell_elements.size();
+	const auto num_cell = this->cell_elements_.size();
 	std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
 	{
-		set_of_post_nodes[i] = cell_elements[i].post_nodes(post_order);
+		set_of_post_nodes[i] = this->cell_elements_[i].post_nodes(post_order);
 	}
 
 	return set_of_post_nodes;

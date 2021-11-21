@@ -19,6 +19,7 @@ public:
 	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_points(const ushort post_order) const;
+	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_element_centers(const ushort post_order) const;
 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 	Quadrature_Rule cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;

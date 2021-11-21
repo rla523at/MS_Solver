@@ -50,6 +50,7 @@ public://Command
 	void operator=(const Euclidean_Vector& other);
 	void operator=(Euclidean_Vector&& other) noexcept;
 	Euclidean_Vector& operator*=(const double constant);
+	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
 
 	Euclidean_Vector& normalize(void);
 

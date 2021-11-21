@@ -23,6 +23,7 @@ public://Query
 	std::vector<Euclidean_Vector> normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const;
 	Vector_Function<Polynomial> orthonormal_basis_vector_function(const ushort solution_order) const;
 	std::vector<Euclidean_Vector> post_nodes(const ushort post_order) const;
+	std::vector<Euclidean_Vector> post_element_centers(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	std::vector<double> projected_volume(void) const;
 	std::vector<std::vector<Euclidean_Vector>> set_of_face_nodes(void) const;

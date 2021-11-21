@@ -106,8 +106,8 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_D
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[i];
         const auto& [oc_side_basis_QPs_m, nc_side_basis_QPs_m] = this->oc_nc_side_basis_QPs_m_pairs_[i];
 
-        const auto oc_side_solution_at_QPs = discrete_soltuion.calculate_solution_at_points(oc_index, oc_side_basis_QPs_m);
-        const auto nc_side_solution_at_QPs = discrete_soltuion.calculate_solution_at_points(nc_index, nc_side_basis_QPs_m);
+        const auto oc_side_solution_at_QPs = discrete_soltuion.calculate_solution_at_precalulated_points(oc_index, oc_side_basis_QPs_m);
+        const auto nc_side_solution_at_QPs = discrete_soltuion.calculate_solution_at_precalulated_points(nc_index, nc_side_basis_QPs_m);
         const auto num_QPs = oc_side_solution_at_QPs.size();
 
         const auto& normals = this->set_of_normals_[i];

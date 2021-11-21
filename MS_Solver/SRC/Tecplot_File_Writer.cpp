@@ -39,9 +39,9 @@ void Tecplot_ASCII_File_Writer::set_solution_header_variable(const Post_Variable
 
 	this->title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
 	this->file_type_str_ = "Solution";
-	this->solution_names_ = this->make_post_variable_str(post_variables.get_post_variable_names(), post_variables.get_cell_center_post_variable_names());
+	this->solution_names_ = this->make_post_variable_str(post_variables.get_post_variable_names());
 	this->zone_title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
-	this->variable_location_str_ = this->make_variable_location_str(post_variables.num_post_variables(), post_variables.num_cell_center_post_variables());
+	this->variable_location_str_ = post_variables.variable_location_str();
 }
 
 void Tecplot_ASCII_File_Writer::write_header(const std::string_view post_file_path)
@@ -73,11 +73,9 @@ void Tecplot_ASCII_File_Writer::write_grid_data(const Post_Variables& post_varia
 	this->write_data(ASCII_connecitivities, post_file_path);
 }
 
-void Tecplot_ASCII_File_Writer::write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const
+void Tecplot_ASCII_File_Writer::write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const
 {
-	auto total_post_variable_values = post_variables.get_set_of_post_variable_values();
-	ms::merge(total_post_variable_values, post_variables.get_set_of_cell_center_post_variable_values());
-	this->write_data(total_post_variable_values, post_file_path);
+	this->write_data(post_variables.get_set_of_post_variable_values(), post_file_path);
 }
 
 std::vector<std::vector<int>> Tecplot_ASCII_File_Writer::convert_to_ASCII_connectivities(const std::vector<std::vector<int>>& connectivities) const
@@ -95,15 +93,11 @@ std::vector<std::vector<int>> Tecplot_ASCII_File_Writer::convert_to_ASCII_connec
 	return ASCII_connecitivities;
 }
 
-std::string Tecplot_ASCII_File_Writer::make_post_variable_str(const std::vector<std::string>& post_variable_names, const std::vector<std::string>& cell_center_post_variable_names) const
+std::string Tecplot_ASCII_File_Writer::make_post_variable_str(const std::vector<std::string>& post_variable_names) const
 {
 	std::string post_variable_str;
 
 	for (const auto& name : post_variable_names)
-	{
-		post_variable_str += name + ", ";
-	}
-	for (const auto& name : cell_center_post_variable_names)
 	{
 		post_variable_str += name + ", ";
 	}
@@ -112,18 +106,6 @@ std::string Tecplot_ASCII_File_Writer::make_post_variable_str(const std::vector<
 	post_variable_str.pop_back();
 
 	return post_variable_str;
-}
-
-std::string Tecplot_ASCII_File_Writer::make_variable_location_str(const ushort num_post_variable, const ushort num_cell_center_post_variable) const
-{
-	if (num_cell_center_post_variable == 0)
-	{
-		return "()";
-	}
-
-	const auto cell_center_variable_start_index = num_post_variable + 1;
-	const auto cell_center_variable_end_index = num_post_variable + num_cell_center_post_variable;
-	return "([" + std::to_string(cell_center_variable_start_index) + "-" + std::to_string(cell_center_variable_end_index) + "]=CELLCENTERED)";
 }
 
 void Tecplot_Binary_File_Writer::set_grid_header_variable(const Post_Variables& post_variables)
@@ -143,30 +125,25 @@ void Tecplot_Binary_File_Writer::set_solution_header_variable(const Post_Variabl
 	this->set_common_header_variable(post_variables);
 
 	this->file_type_ = 2;
+	this->num_variable_ = static_cast<int>(post_variables.num_post_variables());
 	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
 	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
+	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_post_variable_names());
 
-	const auto num_post_variables = post_variables.num_post_variables();
-	const auto num_cell_center_post_variables = post_variables.num_cell_center_post_variables();
-
-	if (num_post_variables == 0)
+	const auto post_variable_location_str = post_variables.variable_location_str();
+	if (ms::contains_icase(post_variable_location_str, "Node"))
 	{
-		this->num_variable_ = static_cast<int>(num_cell_center_post_variables);
-		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_cell_center_post_variable_names());
-		this->specify_variable_location_ = 1;
-	}
-	else if (num_cell_center_post_variables == 0)
-	{
-		this->num_variable_ = static_cast<int>(num_post_variables);
-		this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_post_variable_names());
 		this->specify_variable_location_ = 0;
+	}
+	else if (ms::contains_icase(post_variable_location_str,"Center"))
+	{
+		this->specify_variable_location_ = 1;
 	}
 	else
 	{
 		EXCEPTION("Binary writer does not allow mixed variable location");
 	}
 }
-
 
 void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_path)
 {
@@ -195,9 +172,9 @@ void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_p
 	writer << -1;														//not used - default
 	writer << static_cast<int>(this->zone_type_);						//zone type
 	if (this->specify_variable_location_ == 0)							//specify var location
-		writer << 0;													//Var location : Cell center
+		writer << 0;													//Var location : Node
 	else
-		writer << 1 << 1;												//Var location : Node
+		writer << 1 << 1;												//Var location : Cell center
 	writer << 0;														//one to one face neighbor - default
 	writer << 0;														//user define face neighbor connection -default
 	writer << this->num_post_points_;									//num points
@@ -222,20 +199,9 @@ void Tecplot_Binary_File_Writer::write_grid_data(const Post_Variables& post_vari
 	}
 }
 
-void Tecplot_Binary_File_Writer::write_solution_data(Post_Variables& post_variables, const std::string_view post_file_path) const
+void Tecplot_Binary_File_Writer::write_solution_data(const Post_Variables& post_variables, const std::string_view post_file_path) const
 {
-	if (post_variables.num_cell_center_post_variables() == 0)
-	{
-		this->write_data(post_variables.get_set_of_post_variable_values(), post_file_path);
-	}
-	else if (post_variables.num_post_variables() == 0)
-	{
-		this->write_data(post_variables.get_set_of_cell_center_post_variable_values(), post_file_path);
-	}
-	else
-	{
-		EXCEPTION("Binary writer does not allow mixed variable location");
-	}
+	this->write_data(post_variables.get_set_of_post_variable_values(), post_file_path);
 }
 
 std::vector<int> Tecplot_Binary_File_Writer::to_tecplot_binary_format(const std::string& str) const 

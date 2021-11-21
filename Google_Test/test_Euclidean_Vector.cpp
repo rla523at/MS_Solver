@@ -62,6 +62,15 @@ TEST(Euclidean_Vector, operator_addition_5)
 	const Euclidean_Vector ref = { 5,7,9,11 };
 	EXPECT_EQ(result, ref);
 }
+TEST(Euclidean_Vector, operator_addition_assign_1)
+{
+	Euclidean_Vector v1 = { 1,2,3,4 };
+	const Euclidean_Vector v2 = { 4,5,6,7 };
+	v1 += v2;
+
+	const Euclidean_Vector ref = { 5,7,9,11 };
+	EXPECT_EQ(v1, ref);
+}
 TEST(Euclidean_Vector, operator_substraction_1) {
 	const Euclidean_Vector v1 = { 1,2,3 };
 	const Euclidean_Vector v2 = { 4,5,6 };

@@ -87,7 +87,6 @@ std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vec
 	return normalized_normal_vectors;
 }
 
-
 std::vector<Euclidean_Vector> Geometry::post_nodes(const ushort post_order) const 
 {
 	const auto& ref_post_nodes = this->reference_geometry_->get_post_nodes(post_order);
@@ -97,9 +96,37 @@ std::vector<Euclidean_Vector> Geometry::post_nodes(const ushort post_order) cons
 	post_nodes.reserve(num_post_nodes);
 
 	for (const auto& ref_post_node : ref_post_nodes)
+	{
 		post_nodes.push_back(this->mapping_function_(ref_post_node));
+	}
 	
 	return post_nodes;
+}
+
+std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_order) const
+{
+	const auto post_nodes = this->post_nodes(post_order);
+	const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+
+	const auto num_post_element = ref_connectivities.size();
+	std::vector<Euclidean_Vector> post_element_centers;
+	post_element_centers.reserve(num_post_element);
+
+	for (const auto& connectivity : ref_connectivities)
+	{
+		Euclidean_Vector center(this->space_dimension_);
+
+		for (const auto index : connectivity)
+		{
+			center += post_nodes[index];
+		}
+
+		center *= 1.0 / connectivity.size();
+
+		post_element_centers.push_back(center);
+	}
+
+	return post_element_centers;
 }
 
 std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const 
