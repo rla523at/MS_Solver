@@ -13,10 +13,10 @@ public://Query
     ushort num_solutions(void) const;
     ushort space_dimension(void) const;
     
-    virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
+    virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
     virtual double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const abstract;
     virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
-    virtual Euclidean_Vector calculate_solution(const Euclidean_Vector& governing_equation_solution) const abstract;
+    virtual void extend_to_solution(Euclidean_Vector& governing_equation_solution) const abstract;
 		
 protected:
 	ushort num_equations_;
@@ -25,16 +25,68 @@ protected:
     std::vector<std::string> solution_names_;
 };
 
-class Euler2D : public Governing_Equation
+class Scalar_Equation : public Governing_Equation
 {
 public:
-	Euler2D(void);
+    Scalar_Equation(void);
+
+public:
+    void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override {};
+};
+
+class Linear_Advection : public Scalar_Equation
+{
+public://Query
+    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+
+protected:
+    Euclidean_Vector advection_speeds_;
+};
+
+class Linear_Advection_2D : public Linear_Advection
+{
+public:
+    Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed);
+};
+
+class Linear_Advection_3D : public Linear_Advection
+{
+public:
+    Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed);
+};
+
+class Burgers : public Scalar_Equation
+{
+public:
+    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+};
+
+class Burgers_2D : public Burgers
+{
+public:
+    Burgers_2D(void);
+};
+
+class Burgers_3D : public Burgers
+{
+public:
+    Burgers_3D(void);
+};
+
+class Euler_2D : public Governing_Equation
+{
+public:
+	Euler_2D(void);
 
 public://Query
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
-    Euclidean_Vector calculate_solution(const Euclidean_Vector& governing_equation_solution) const override;
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+    void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
 
 private:
     static constexpr auto gamma_ = 1.4;
@@ -52,55 +104,10 @@ private:
 
 
 
-//class Linear_Advection : public SCL<space_dimension>
-//{
-//private:
-//    Linear_Advection(void) = delete;
-//
-//private:
-//    using This_             = Linear_Advection<space_dimension>;
-//    using Space_Vector_     = Euclidean_Vector<space_dimension>;
-//    using Solution_         = Euclidean_Vector<This_::num_equation_>;
-//    using Physical_Flux_    = Matrix<This_::num_equation_, space_dimension>;
-//
-//private:
-//    inline static Euclidean_Vector<space_dimension> advection_speeds_;
-//
-//public:
-//    static void initialize(const Euclidean_Vector<space_dimension>& advection_speed) { advection_speeds_ = advection_speed; };
-//
-//public:
-//    static Euclidean_Vector<space_dimension> advection_speed(void) { return advection_speeds_; };
-//    static auto physical_flux(const This_::Solution_& solution);
-//    static auto physical_fluxes(const std::vector<This_::Solution_>& solutions);
-//    static std::vector<std::array<double, space_dimension>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
-//    static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
-//
-//public:
-//    static std::string name(void) { return "Linear_Advection_" + std::to_string(space_dimension) + "D"; }; 
-//};
 
 
-//class Burgers : public SCL<space_dimension>
-//{
-//private:
-//    Burgers(void) = delete;
-//
-//private:
-//    using This_             = Burgers<space_dimension>;
-//    using Space_Vector_     = Euclidean_Vector<space_dimension>;
-//    using Solution_         = Euclidean_Vector<This_::num_equation_>;
-//    using Physical_Flux_    = Matrix<This_::num_equation_, space_dimension>;
-//
-//public:
-//    static auto physical_flux(const Solution_& solution);
-//    static auto physical_fluxes(const std::vector<Solution_>& solutions);
-//    static std::vector<std::array<double, space_dimension>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions);
-//    static double inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector);
-//
-//public:
-//    static std::string name(void) { return "Burgers_" + std::to_string(space_dimension) + "D"; };
-//};
+
+
 
 //template <ushort space_dimension_>
 //class Euler : public GE
@@ -150,15 +157,6 @@ private:
 //
 ////Template Definition Part
 
-//auto Linear_Advection<space_dimension>::physical_flux(const Solution_& solution) {
-//    std::array<double, space_dimension> flux_values;
-//    for (ushort i = 0; i < space_dimension; ++i)
-//        flux_values[i] = This_::advection_speeds_[i] * solution;
-//    
-//    return Matrix<1, space_dimension>(flux_values);
-//}
-//
-
 //auto Linear_Advection<space_dimension>::physical_fluxes(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();    
 //    std::vector<This_::Physical_Flux_> physical_fluxes(num_solution);
@@ -170,31 +168,9 @@ private:
 //}
 //
 
-//std::vector<std::array<double, space_dimension>> Linear_Advection<space_dimension>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-//    const auto num_solution = solutions.size();
-//    
-//    std::array<double, space_dimension> projected_maximum_lambda;
-//    for (ushort i = 0; i < space_dimension; ++i)
-//        projected_maximum_lambda[i] = std::abs(This_::advection_speeds_[i]);
-//    
-//    return std::vector<std::array<double, space_dimension>>(num_solution, projected_maximum_lambda);
-//}
-//
 
-//double Linear_Advection<space_dimension>::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& nomal_vector) {
-//    return std::abs(This_::advection_speeds_.inner_product(nomal_vector));
-//}
-//
 
-//auto Burgers<space_dimension>::physical_flux(const Solution_& solution) {
-//    const double flux_value = 0.5 * std::pow(solution,2.0);
-//
-//    std::array<double, space_dimension> flux_values;
-//    flux_values.fill(flux_value);
-//
-//    return Physical_Flux_(flux_values);
-//}
-//
+
 
 //auto Burgers<space_dimension>::physical_fluxes(const std::vector<Solution_>& solutions) {
 //    const auto num_solution = solutions.size();
@@ -207,28 +183,7 @@ private:
 //}
 //
 
-//std::vector<std::array<double, space_dimension>> Burgers<space_dimension>::calculate_coordinate_projected_maximum_lambdas(const std::vector<Solution_>& solutions) {
-//    const auto num_solution = solutions.size();
-//
-//    std::vector<std::array<double, space_dimension>> projected_maximum_lambdas(num_solution);
-//    for (size_t i = 0; i < num_solution; ++i) {
-//        const auto maximum_lambdas = std::abs(solutions[i]);
-//        projected_maximum_lambdas[i].fill(maximum_lambdas);
-//    }
-//
-//    return projected_maximum_lambdas;
-//}
-//
 
-//double Burgers<space_dimension>::inner_face_maximum_lambda(const Solution_& solution_o, const Solution_& solution_n, const Space_Vector_& normal_vector) {
-//    double normal_component_sum = 0.0;
-//    for (ushort i = 0; i < space_dimension; ++i)
-//        normal_component_sum += normal_vector[i];
-//            
-//    return (std::max)(std::abs(solution_o * normal_component_sum), std::abs(solution_n * normal_component_sum));
-//}
-//
-//
 ////template <ushort space_dimension_>
 ////auto Euler<space_dimension_>::physical_flux(const Solution_& cvariable) {
 ////    const auto pvariable = conservative_to_primitive(cvariable);

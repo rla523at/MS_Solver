@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Matrix.h"
 #include "../MS_Solver/INC/Euclidean_Vector.h"
+#include "../MS_Solver/INC/Polynomial.h"
 
 #include <array>
 
@@ -111,8 +112,6 @@ TEST(Matrix, change_columns_2)
 	const Matrix ref = { 2,3,{ 1,1,1,4,4,4 } };
 	EXPECT_EQ(m, ref);
 }
-
-
 
 //TEST(Matrix, construct_diagonal_matrix_1) {
 //	std::array<double, 2> ar = { 2,2 };
@@ -239,6 +238,49 @@ TEST(Matrix, change_columns_2)
 //	const auto result = m.column(2);
 //
 //	const Euclidean_Vector ref = { 3,6 };
+//	EXPECT_EQ(result, ref);
+//}
+
+
+
+TEST(Matrix_Function, change_column_1)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf = { x + y , 2 * x + y };
+
+	Matrix_Function<Polynomial> result(2, 2);
+	result.change_column(0, vf[0].gradient());
+	result.change_column(1, vf[1].gradient());
+
+	Matrix_Function<Polynomial> ref(2, 2, { 1,2,1,1 });
+	EXPECT_EQ(result, ref);
+}
+//TEST(ms, Jacobian_1) {
+//	constexpr ushort domain_dimension = 2;
+//
+//	Polynomial x("x0");
+//	Polynomial y("x1");
+//
+//	Vector_Function<Polynomial, domain_dimension> vf = { x * y , 2 * x + y };
+//
+//	const auto result = ms::Jacobian(vf);
+//
+//	Matrix_Function<Polynomial, domain_dimension, domain_dimension> ref = { y,x,2,1 };
+//	EXPECT_EQ(result, ref);
+//}
+//TEST(Vector_Function, mv_1) {
+//	constexpr ushort domain_dimension = 2;
+//
+//	Polynomial x("x0");
+//	Polynomial y("x1");
+//
+//	Static_Matrix<2, 2> m = { 1,2,3,4 };
+//	Vector_Function<Polynomial<2>, 2> vf = { x , y };
+//	const auto result = m * vf;
+//
+//	Vector_Function<Polynomial<2>, 2> ref = { x + 2 * y ,3 * x + 4 * y };
 //	EXPECT_EQ(result, ref);
 //}
 

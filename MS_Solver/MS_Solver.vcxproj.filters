@@ -33,9 +33,6 @@
     <ClInclude Include="INC\Polynomial.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Vector_Function.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Euclidean_Vector.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -116,6 +113,9 @@
     </ClInclude>
     <ClInclude Include="INC\Post_Variable_Convertor.h">
       <Filter>헤더 파일\Post</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Configuration.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

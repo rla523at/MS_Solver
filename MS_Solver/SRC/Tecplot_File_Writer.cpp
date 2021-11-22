@@ -19,7 +19,9 @@ void Tecplot_File_Writer::write_solution_file(Post_Variables& post_variables, co
 {
 	this->set_solution_header_variable(post_variables);
 	this->write_header(post_file_path);
+	post_variables.record_solution();
 	this->write_solution_data(post_variables, post_file_path);
+	post_variables.clear_variables();
 }
 
 void Tecplot_ASCII_File_Writer::set_grid_header_variable(const Post_Variables& post_variables)

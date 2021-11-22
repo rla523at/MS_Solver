@@ -15,13 +15,102 @@ ushort Governing_Equation::num_solutions(void) const
 	return this->num_solutions_;
 }
 
-
 ushort Governing_Equation::space_dimension(void) const 
 {
 	return this->space_dimension_;
 }
 
-Euler2D::Euler2D(void) 
+Scalar_Equation::Scalar_Equation(void)
+{
+	this->num_solutions_ = 1;
+	this->num_equations_ = 1;
+	this->solution_names_ = { "q" };
+}
+
+std::vector<std::vector<double>> Linear_Advection::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+{
+	const auto num_solution = P0_solutions.size();
+
+	std::vector<double> coordinate_projected_maximum_lambda(this->space_dimension_);
+
+	for (int i = 0; i < this->space_dimension_; ++i)
+	{
+		coordinate_projected_maximum_lambda[i] = std::abs(this->advection_speeds_[i]);
+	}		
+
+	return std::vector<std::vector<double>>(num_solution, coordinate_projected_maximum_lambda);
+}
+
+double Linear_Advection::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
+{
+	return std::abs(this->advection_speeds_.inner_product(normal_vector));
+}
+
+Matrix Linear_Advection::calculate_physical_flux(const Euclidean_Vector& solution) const
+{
+	std::vector<double> values(this->space_dimension_);
+
+	for (int i = 0; i < this->space_dimension_; ++i)
+	{
+		values[i] = this->advection_speeds_[i] * solution[0];
+	}
+
+	return { this->num_equations_, this->space_dimension_, std::move(values) };
+}
+
+Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed)
+{
+	this->space_dimension_ = 2;
+	this->advection_speeds_ = { x_advection_speed, y_advection_speed };
+}
+
+Linear_Advection_3D::Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed)
+{
+	this->space_dimension_ = 3;
+	this->advection_speeds_ = { x_advection_speed, y_advection_speed, z_advection_speed };
+}
+
+std::vector<std::vector<double>> Burgers::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+{
+	const auto num_solution = P0_solutions.size();
+
+	std::vector<std::vector<double>> projected_maximum_lambdas(num_solution);
+	for (int i = 0; i < num_solution; ++i) 
+	{
+		const auto maximum_lambda = std::abs(P0_solutions[i][0]);		
+		projected_maximum_lambdas[i] = std::vector<double>(this->space_dimension_, maximum_lambda);
+	}
+
+	return projected_maximum_lambdas;
+}
+double Burgers::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
+{
+	double normal_component_sum = 0.0;
+	for (ushort i = 0; i < this->space_dimension_; ++i)
+		normal_component_sum += normal_vector[i];
+
+	return (std::max)(std::abs(oc_solution[0] * normal_component_sum), std::abs(nc_solution[0] * normal_component_sum));
+}
+Matrix Burgers::calculate_physical_flux(const Euclidean_Vector& solution) const
+{
+	const double flux_value = 0.5 * std::pow(solution[0], 2.0);
+
+	std::vector<double> flux_values(this->space_dimension_, flux_value);
+
+	return { this->num_equations_, this->space_dimension_, std::move(flux_values) };
+}
+
+Burgers_2D::Burgers_2D(void)
+{
+	this->space_dimension_ = 2;
+}
+
+Burgers_3D::Burgers_3D(void)
+{
+	this->space_dimension_ = 3;
+}
+
+Euler_2D::Euler_2D(void) 
 {
 	this->space_dimension_ = 2;
 	this->num_solutions_ = 8;
@@ -29,24 +118,7 @@ Euler2D::Euler2D(void)
 	this->solution_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "a" };
 }
 
-Euclidean_Vector Euler2D::calculate_solution(const Euclidean_Vector& GE_solution) const 
-{
-	const auto rho = GE_solution.at(0);
-	const auto rhou = GE_solution.at(1);
-	const auto rhov = GE_solution.at(2);
-	const auto rhoE = GE_solution.at(3);
-
-	const auto one_over_rho = 1.0 / rho;
-
-	const auto u = rhou * one_over_rho;
-	const auto v = rhov * one_over_rho;
-	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
-	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
-
-	return { rho, rhou, rhov, rhoE, u, v, p, a };
-}
-
-std::vector<std::vector<double>> Euler2D::calculate_coordinate_projected_maximum_lambda(const std::vector<Euclidean_Vector>& P0_solutions) const
+std::vector<std::vector<double>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	auto num_solution = P0_solutions.size();
 
@@ -68,7 +140,7 @@ std::vector<std::vector<double>> Euler2D::calculate_coordinate_projected_maximum
 	return coordinate_projected_maximum_lambdas;
 }
 
-double Euler2D::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
+double Euler_2D::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
 {
 	const auto oc_u = oc_solution[4];
 	const auto oc_v = oc_solution[5];
@@ -83,8 +155,7 @@ double Euler2D::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_s
 	return (std::max)(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);	
 }
 
-
-Matrix Euler2D::calculate_physical_flux(const Euclidean_Vector& solution) const
+Matrix Euler_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 {
 	const auto rho = solution[0];
 	const auto rhou = solution[1];
@@ -107,17 +178,58 @@ Matrix Euler2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 		} };
 }
 
+void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
+{
+	const auto rho = GE_solution.at(0);
+	const auto rhou = GE_solution.at(1);
+	const auto rhov = GE_solution.at(2);
+	const auto rhoE = GE_solution.at(3);
+
+	const auto one_over_rho = 1.0 / rho;
+
+	const auto u = rhou * one_over_rho;
+	const auto v = rhov * one_over_rho;
+	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
+	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	GE_solution = { rho, rhou, rhov, rhoE, u, v, p, a };
+}
+
 std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(const Configuration& config)
 {
 	const auto governing_equation = config.get("Governing_Equation");
 	const auto space_dimension = config.get<ushort>("space_dimension");
 
-	if (ms::contains_icase(governing_equation, "Euler"))
+	if (ms::contains_icase(governing_equation, "Linear_Advection"))
 	{
 		if (space_dimension == 2)
 		{
-			return std::make_shared<Euler2D>();
+			const auto x_advection_speed = config.get<double>("x_advection_speed");
+			const auto y_advection_speed = config.get<double>("y_advection_speed");
+			return std::make_shared<Linear_Advection_2D>(x_advection_speed, y_advection_speed);
 		}
+		else
+		{
+			EXCEPTION("Linear advection does not support space dimension in configuration file");
+			return nullptr;
+		}
+	}
+	else if (ms::contains_icase(governing_equation, "Euler"))
+	{
+		if (space_dimension == 2)
+		{
+			return std::make_shared<Euler_2D>();
+		}
+		else
+		{
+			EXCEPTION("Euler does not support space dimension in configuration file");
+			return nullptr;
+		}
+	}
+	else
+	{
+		EXCEPTION("governing equation in configuration file is not supported");
+		return nullptr;
 	}
 }
 
@@ -126,11 +238,35 @@ std::unique_ptr<Governing_Equation> Governing_Equation_Factory::make_unique(cons
 	const auto governing_equation = config.get("Governing_Equation");
 	const auto space_dimension = config.get<ushort>("space_dimension");
 
-	if (ms::contains_icase(governing_equation, "Euler")) 
+	if (ms::contains_icase(governing_equation, "Linear_Advection"))
 	{
 		if (space_dimension == 2)
 		{
-			return std::make_unique<Euler2D>();
+			const auto x_advection_speed = config.get<double>("x_advection_speed");
+			const auto y_advection_speed = config.get<double>("y_advection_speed");
+			return std::make_unique<Linear_Advection_2D>(x_advection_speed,y_advection_speed);
 		}
+		else
+		{
+			EXCEPTION("Linear advection does not support space dimension in configuration file");
+			return nullptr;
+		}
+	}
+	else if (ms::contains_icase(governing_equation, "Euler")) 
+	{
+		if (space_dimension == 2)
+		{
+			return std::make_unique<Euler_2D>();
+		}
+		else
+		{
+			EXCEPTION("Euler does not support space dimension in configuration file");
+			return nullptr;
+		}
+	}
+	else
+	{
+		EXCEPTION("governing equation in configuration file is not supported");
+		return nullptr;
 	}
 }

@@ -15,7 +15,7 @@ public:
 	ValueType get(const std::string_view config_name) const 
 	{
 		REQUIRE(this->name_to_value_str_.contains(ms::get_upper_case(config_name.data())), "name should be exist in configuration file");		
-		const auto& value_str = name_to_value_str_.at(ms::get_upper_case(config_name));
+		const auto& value_str = name_to_value_str_.at(ms::get_upper_case(config_name.data()));
 		return ms::string_to_value<ValueType>(value_str);
 	};
 

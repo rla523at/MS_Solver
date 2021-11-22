@@ -185,15 +185,22 @@ public://Query
 	Polynomial operator*(const Polynomial& other) const;
 	Polynomial operator*(const double constant) const;
 	Polynomial operator^(const ushort power_index) const;
-	template<typename V> double operator()(const V& domain_vector) const {
+	template<typename V> double operator()(const V& domain_vector) const 
+	{
 		auto result = this->simple_poly_term_(domain_vector);
 		for (const auto& poly_term : this->poly_terms_)
+		{
 			result += poly_term(domain_vector);
+		}
 
 		if (this->is_absolute_)
+		{
 			return std::abs(result);
+		}
 		else
+		{
 			return result;
+		}
 	}
 	bool operator==(const Polynomial& other) const;
 
@@ -254,6 +261,8 @@ Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple
 PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term);
 PolyTerm operator*(const double constant, const PolyTerm& poly_term);
 Polynomial operator*(const double constant, const Polynomial& polynomial);
+Polynomial operator+(const double constant, const Polynomial& polynomial);
+Polynomial operator-(const double constant, const Polynomial& polynomial);
 
 std::ostream& operator<<(std::ostream& ostream, const Simple_Poly_Term& simple_poly_term);
 std::ostream& operator<<(std::ostream& ostream, const PolyTerm& poly_term);

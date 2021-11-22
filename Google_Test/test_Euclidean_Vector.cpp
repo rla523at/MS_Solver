@@ -1,6 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Euclidean_Vector.h"
+#include "../MS_Solver/INC/Polynomial.h"
 
 TEST(Euclidean_Vector, constructor_1)
 {
@@ -209,7 +210,6 @@ TEST(Euclidean_Vector_Wrapper, L2_norm_1)
 //	const Dynamic_Euclidean_Vector ref = { 1,2,3,4,5 };
 //	EXPECT_EQ(v1, ref);
 //}
-
 //
 //TEST(ms, min_value_gathering_vector_1) 
 //{
@@ -234,5 +234,239 @@ TEST(Euclidean_Vector_Wrapper, L2_norm_1)
 //
 //	const auto result = ms::gather_max_value(vec);
 //	const Euclidean_Vector ref = { 3,3,3 };
+//	EXPECT_EQ(result, ref);
+//}
+
+
+TEST(Vector_Function, constructor) 
+{
+	constexpr ushort domain_dimension = 2;
+
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	constexpr ushort range_dimension = 3;
+	Vector_Function<Polynomial> vf = { 1,x,y };
+
+	EXPECT_EQ(vf.at(0), 1);
+	EXPECT_EQ(vf.at(1), x);
+	EXPECT_EQ(vf.at(2), y);
+}
+TEST(Vector_Function, at_1)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf = { 0 , 2 * x + y };
+
+	const auto ref = 2 * x + y;
+	EXPECT_EQ(ref, vf.at(1));
+}
+TEST(Vector_Function, operator_call_1)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf = { x + y , 2 * x + y };
+	std::vector<double> v = { 1,1 };
+	const auto result = vf(v);
+
+	std::vector<double> ref = { 2,3 };
+	EXPECT_EQ(ref, result);
+}
+TEST(Vector_Function, operator_call_2)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = (x ^ 2) + 3 * (x ^ 2) * y + (y ^ 3) + (z ^ 2) - 6;
+	auto p2 = x + y + z - 3;
+	auto p3 = (y ^ 2) * z + x * z - 2;
+
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+	std::vector<double> node = { 1,1,1 };
+	const auto result = f(node);
+
+	std::vector<double> ref = { 0,0,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_1)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = x + 1;
+	auto p2 = x + y + z - 3;
+	auto p3 = y + z;
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+
+	constexpr size_t variable_index = 0;
+	const auto result = f.get_differentiate(variable_index);
+
+	Vector_Function<Polynomial> ref = { 1,1,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_2)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = x * y + 1;
+	auto p2 = x + y * z + z - 3;
+	auto p3 = y + z;
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+
+	constexpr size_t variable_index = 0;
+	const auto result = f.get_differentiate(variable_index);
+
+	Vector_Function<Polynomial> ref = { y,1,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_3)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = x * y + 1;
+	auto p2 = x + y * z + z - 3;
+	auto p3 = y + z;
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+
+	constexpr size_t variable_index = 1;
+	const auto result = f.get_differentiate(variable_index);
+
+	Vector_Function<Polynomial> ref = { x,z,1 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_4)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = 1.5 * x + 0.5 * y + 3;
+	auto p2 = y + 3;
+	auto p3 = 0;
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+
+	constexpr size_t variable_index = 0;
+	const auto result = f.get_differentiate(variable_index);
+
+	Vector_Function<Polynomial> ref = { 1.5,0,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_5)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+	Polynomial z("x2");
+
+	auto p1 = 1.5 * x + 0.5 * y + 3;
+	auto p2 = y + 3;
+	auto p3 = 0;
+	Vector_Function<Polynomial> f = { p1,p2,p3 };
+
+	constexpr size_t variable_index = 1;
+	const auto result = f.get_differentiate(variable_index);
+
+	Vector_Function<Polynomial> ref = { 0.5,1,0 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, get_differentiate_6)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf = { x + y , 2 * x + y };
+	const auto result = vf.get_differentiate(0);
+
+	Vector_Function<Polynomial> ref = { 1,2 };
+	EXPECT_EQ(ref, result);
+}
+TEST(Vector_Function, get_differentiate_7)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf = { 0.25 * x * y + 1.25 * x + 0.25 * y + 2.25, -0.25 * x * y - 0.75 * x + 0.25 * y + 1.75 };
+	const auto result = vf.get_differentiate(0);
+
+	Vector_Function<Polynomial> ref = { 0.25 * y + 1.25,-0.25 * y - 0.75 };
+	EXPECT_EQ(ref, result);
+}
+TEST(Vector_Function, cross_product_1)
+{
+	Vector_Function<Polynomial> vf1 = { 1.5,0,0 };
+	Vector_Function<Polynomial> vf2 = { 0.5,1,0 };
+	const auto result = vf1.cross_product(vf2);
+
+	Vector_Function<Polynomial> ref = { 0,0,1.5 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Vector_Function, cross_product_2)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf1 = { 1 + x ,		2 * x + y,		3 };
+	Vector_Function<Polynomial> vf2 = { 2 * x - y ,	1 + (-1 * x),	2 };
+	const auto result = vf1.cross_product(vf2);
+
+	Vector_Function<Polynomial> ref = { 7 * x + 2 * y - 3,4 * x - 3 * y - 2, 1 - 5 * (x ^ 2) + (y ^ 2) };
+	EXPECT_EQ(ref, result);
+}
+TEST(Vector_Function, cross_product_3)
+{
+	Polynomial x("x0");
+	Polynomial y("x1");
+
+	Vector_Function<Polynomial> vf1 = { 1 + x ,		2 * x + y };
+	Vector_Function<Polynomial> vf2 = { 2 * x - y ,	1 + (-1 * x) };
+	const auto result = vf1.cross_product(vf2);
+
+	Vector_Function<Polynomial> ref = { 0, 0, 1 - 5 * (x ^ 2) + (y ^ 2) };
+	EXPECT_EQ(ref, result);
+}
+
+
+//TEST(Vector_Function, L2_NORM1) 
+//{
+//	Vector_Function<Polynomial> vf = { 0,0,1.5 };
+//	const auto result = vf.L2_norm();
+//
+//	Polynomial ref = 1.5;
+//	EXPECT_EQ(result, ref);
+//}
+// TEST(Vector_Function, L2_norm_1) {
+//constexpr size_t domain_dimension = 2;
+//Polynomial x("x0");
+//Polynomial y("x1");
+//
+//constexpr ushort range_dimension = 3;
+//
+//Vector_Function<Polynomial, range_dimension> vf1 = { 1, x, y };
+//const auto result = vf1.L2_norm();
+//
+//Irrational_Function ref(1 + (x ^ 2) + (y ^ 2), 0.5);
+//EXPECT_EQ(ref, result);
+//}
+
+//TEST(ms, scalar_triple_product_1) {
+//	constexpr ushort domain_dimension = 3;
+//
+//	Polynomial x("x0");
+//	Polynomial y("x1");
+//	Polynomial z("x1");
+//
+//	Vector_Function<Polynomial, domain_dimension> a = { x + y, x, y };
+//	Vector_Function<Polynomial, domain_dimension> b = { x, x, 0 };
+//	Vector_Function<Polynomial, domain_dimension> c = { -1 * y, y, 1 };
+//	const auto result = ms::scalar_triple_product(a, b, c);
+//
+//	Polynomial ref = x * y + 2 * x * (y ^ 2);
 //	EXPECT_EQ(result, ref);
 //}

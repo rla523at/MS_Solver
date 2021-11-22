@@ -73,23 +73,27 @@ Simple_Poly_Term& Simple_Poly_Term::operator*=(const double constant) {
 	return *this;
 }
 
-Simple_Poly_Term Simple_Poly_Term::operator+(const Simple_Poly_Term& other) const {
+Simple_Poly_Term Simple_Poly_Term::operator+(const Simple_Poly_Term& other) const 
+{
 	auto result = *this;
 	return result += other;
 }
 
-Simple_Poly_Term Simple_Poly_Term::operator*(const double constant) const {
+Simple_Poly_Term Simple_Poly_Term::operator*(const double constant) const 
+{
 	auto result = *this;
 	return result *= constant;
 }
 
-PolyTerm Simple_Poly_Term::operator*(const Simple_Poly_Term& other) const {
+PolyTerm Simple_Poly_Term::operator*(const Simple_Poly_Term& other) const 
+{
 	PolyTerm result = *this;
 	return result *= other;
 }
 
 
-bool Simple_Poly_Term::operator==(const Simple_Poly_Term& other) const {
+bool Simple_Poly_Term::operator==(const Simple_Poly_Term& other) const 
+{
 	if (this->domain_dimension_ != other.domain_dimension_)
 		return false;
 	
@@ -104,11 +108,13 @@ bool Simple_Poly_Term::operator==(const Simple_Poly_Term& other) const {
 	return true;
 }
 
-bool Simple_Poly_Term::operator!=(const Simple_Poly_Term& other) const {
+bool Simple_Poly_Term::operator!=(const Simple_Poly_Term& other) const 
+{
 	return !(*this == other);
 }
 
-bool Simple_Poly_Term::operator<(const Simple_Poly_Term& other) const {
+bool Simple_Poly_Term::operator<(const Simple_Poly_Term& other) const 
+{
 	if (this->domain_dimension_ != other.domain_dimension_)
 		return this->domain_dimension_ < other.domain_dimension_;
 
@@ -120,37 +126,43 @@ bool Simple_Poly_Term::operator<(const Simple_Poly_Term& other) const {
 	return this->constant_ < other.constant_;
 }
 
-//bool SimplePolyTerm::operator>(const SimplePolyTerm& other) const {
+//bool SimplePolyTerm::operator>(const SimplePolyTerm& other) const 
+//{
 //	if (this->coefficients_ == other.coefficients_)
 //		return this->constant_ > other.constant_;
 //	else
 //		return this->coefficients_ > other.coefficients_;
 //}
 
-double Simple_Poly_Term::to_constant(void) const {
+double Simple_Poly_Term::to_constant(void) const 
+{
 	REQUIRE(this->is_constant(), "it should be constant");
 	return this->constant_;
 }
 
-double Simple_Poly_Term::get_differentiate(const ushort variable_index) const {
+double Simple_Poly_Term::get_differentiate(const ushort variable_index) const 
+{
 	if (this->domain_dimension_ <= variable_index)
 		return 0;
 	else
 		return this->coefficient_ptr_[variable_index];
 }
 
-ushort Simple_Poly_Term::degree(void) const {
+ushort Simple_Poly_Term::degree(void) const 
+{
 	if (this->is_constant())
 		return 0;
 	else
 		return 1;
 }
 
-ushort Simple_Poly_Term::domain_dimension(void) const {
+ushort Simple_Poly_Term::domain_dimension(void) const 
+{
 	return this->domain_dimension_;
 }
 
-bool Simple_Poly_Term::is_constant(void) const {	
+bool Simple_Poly_Term::is_constant(void) const 
+{	
 	for (ushort i = 0; i < this->domain_dimension_; ++i) {
 		if (this->coefficient_ptr_[i] != 0)
 			return false;
@@ -159,7 +171,8 @@ bool Simple_Poly_Term::is_constant(void) const {
 	return true;
 }
 
-std::string Simple_Poly_Term::to_string(void) const {
+std::string Simple_Poly_Term::to_string(void) const 
+{
 	std::ostringstream os;
 	os << std::setprecision(16) << std::showpos;
 
@@ -208,7 +221,8 @@ void Simple_Poly_Term::change_domain_dimension(const ushort new_domain_dimension
 	this->domain_dimension_ = new_domain_dimension;
 }
 
-bool Simple_Poly_Term::is_small(void) const {
+bool Simple_Poly_Term::is_small(void) const 
+{
 	return this->coefficients_.empty();
 }
 
@@ -219,38 +233,45 @@ void PoweredPolyTerm::multiply_assign_with_same_base(const PoweredPolyTerm& othe
 	this->exponent_ += other.exponent_;
 }
 
-PolyTerm PoweredPolyTerm::operator*(const double constant) const {
+PolyTerm PoweredPolyTerm::operator*(const double constant) const 
+{
 	return { constant, *this };
 }
 
 
-bool PoweredPolyTerm::operator==(const PoweredPolyTerm& other) const {
+bool PoweredPolyTerm::operator==(const PoweredPolyTerm& other) const 
+{
 	return this->base_ == other.base_ && this->exponent_ == other.exponent_;
 }
 
-bool PoweredPolyTerm::operator<(const PoweredPolyTerm& other) const {
+bool PoweredPolyTerm::operator<(const PoweredPolyTerm& other) const 
+{
 	if (this->exponent_ == other.exponent_)
 		return this->base_ < other.base_;
 	else
 		return this->exponent_ < other.exponent_;
 }
 
-//bool PoweredPolyTerm::operator>(const PoweredPolyTerm& other) const {
+//bool PoweredPolyTerm::operator>(const PoweredPolyTerm& other) const 
+//{
 //	if (this->exponent_ == other.exponent_)
 //		return this->base_ > other.base_;
 //	else
 //		return this->exponent_ > other.exponent_;
 //}
 
-double PoweredPolyTerm::to_constant(void) const {
+double PoweredPolyTerm::to_constant(void) const 
+{
 	return std::pow(this->base_.to_constant(), this->exponent_);
 }
 
-Simple_Poly_Term PoweredPolyTerm::be_simple(void) const {
+Simple_Poly_Term PoweredPolyTerm::be_simple(void) const 
+{
 	return this->base_;
 }
 
-PolyTerm PoweredPolyTerm::get_differentiate(const ushort variable_index) const {
+PolyTerm PoweredPolyTerm::get_differentiate(const ushort variable_index) const 
+{
 	const auto base_derivative = this->base_.get_differentiate(variable_index);
 
 	if (base_derivative == 0.0)
@@ -262,30 +283,36 @@ PolyTerm PoweredPolyTerm::get_differentiate(const ushort variable_index) const {
 		return this->exponent_ * PoweredPolyTerm(this->base_, this->exponent_ - 1) * base_derivative;
 }
 
-bool PoweredPolyTerm::has_same_base(const PoweredPolyTerm& other) const {
+bool PoweredPolyTerm::has_same_base(const PoweredPolyTerm& other) const 
+{
 	return this->base_ == other.base_;
 }
 
-ushort PoweredPolyTerm::domain_dimension(void) const {
+ushort PoweredPolyTerm::domain_dimension(void) const 
+{
 	return this->base_.domain_dimension();
 }
 
-bool PoweredPolyTerm::is_constant(void) const {
+bool PoweredPolyTerm::is_constant(void) const 
+{
 	return this->base_.is_constant();
 }
 
-bool PoweredPolyTerm::is_simple(void) const {
+bool PoweredPolyTerm::is_simple(void) const 
+{
 	return this->exponent_ == 1;
 }
 
- ushort PoweredPolyTerm::degree(void) const {
+ ushort PoweredPolyTerm::degree(void) const 
+{
 	if (this->is_constant())
 		return 0;
 	else
 		return this->exponent_;
 }
 
-std::string PoweredPolyTerm::to_string(void) const {
+std::string PoweredPolyTerm::to_string(void) const 
+{
 	auto str = this->base_.to_string();
 	if (this->exponent_ != 1)
 		return str + "^" + std::to_string(this->exponent_);
@@ -380,24 +407,28 @@ PolyTerm& PolyTerm::operator*=(const PolyTerm& other) {
 	return *this;
 }
 
-PolyTerm PolyTerm::operator*(const double constant) const {
+PolyTerm PolyTerm::operator*(const double constant) const 
+{
 	auto result = *this;
 	return result *= constant;
 }
 
-PolyTerm PolyTerm::operator*(const PolyTerm& other) const {
+PolyTerm PolyTerm::operator*(const PolyTerm& other) const 
+{
 	auto result = *this;
 	return result *= other;
 }
 
-bool PolyTerm::operator==(const PolyTerm& other) const {
+bool PolyTerm::operator==(const PolyTerm& other) const 
+{
 	if (this->constant_ != other.constant_)
 		return false;
 
 	return this->has_same_form(other);
 }
 
-bool PolyTerm::operator!=(const PolyTerm& other) const {
+bool PolyTerm::operator!=(const PolyTerm& other) const 
+{
 	return !(*this == other);
 }
 
@@ -417,11 +448,13 @@ PolyTerm& PolyTerm::operator=(const PolyTerm& other) {
 	return *this;
 }
 
-Simple_Poly_Term PolyTerm::be_simple(void) const {
+Simple_Poly_Term PolyTerm::be_simple(void) const 
+{
 	return this->term_ptr_[0].be_simple() * this->constant_;
 }
 
-Polynomial PolyTerm::get_differentiate(const ushort variable_index) const {
+Polynomial PolyTerm::get_differentiate(const ushort variable_index) const 
+{
 	Polynomial result = 0.0;
 
 	for (ushort i = 0; i < this->num_term_; ++i) {
@@ -447,13 +480,15 @@ Polynomial PolyTerm::get_differentiate(const ushort variable_index) const {
 }
 
 
-double PolyTerm::to_constant(void) const {
+double PolyTerm::to_constant(void) const 
+{
 	return this->constant_;
 }
 
 
 
-ushort PolyTerm::degree(void) const {
+ushort PolyTerm::degree(void) const 
+{
 	ushort result = 0;
 
 	for (ushort i = 0; i < this->num_term_; ++i)
@@ -462,7 +497,8 @@ ushort PolyTerm::degree(void) const {
 	return result;
 }
 
-ushort PolyTerm::domain_dimension(void) const {
+ushort PolyTerm::domain_dimension(void) const 
+{
 	ushort domain_dimension = 0;
 
 	for (ushort i = 0; i < this->num_term_; ++i)
@@ -471,7 +507,8 @@ ushort PolyTerm::domain_dimension(void) const {
 	return domain_dimension;
 }
 
-bool PolyTerm::has_same_form(const PolyTerm& other) const {
+bool PolyTerm::has_same_form(const PolyTerm& other) const 
+{
 	if (this->num_term_ != other.num_term_)
 		return false;
 
@@ -481,19 +518,22 @@ bool PolyTerm::has_same_form(const PolyTerm& other) const {
 		return this->terms == other.terms;
 }
 
-bool PolyTerm::is_simple(void) const {
+bool PolyTerm::is_simple(void) const 
+{
 	if (this->num_term_ != 1)
 		return false;
 
 	return this->term_ptr_[0].is_simple();
 }
 
-bool PolyTerm::is_zero(void) const {
+bool PolyTerm::is_zero(void) const 
+{
 	return this->constant_ == 0.0;
 }
 
 
-std::string PolyTerm::to_string(void) const {
+std::string PolyTerm::to_string(void) const 
+{
 	std::ostringstream oss;
 	oss << std::setprecision(16) << std::showpos;
 
@@ -553,11 +593,13 @@ void PolyTerm::multiply_assign_powered_poly_term(const PoweredPolyTerm& power_po
 	this->add_term(power_poly_term);
 }
 
-bool PolyTerm::is_constant(void) const {
+bool PolyTerm::is_constant(void) const 
+{
 	return this->num_term_ == 1 && this->term_ptr_->is_constant();
 }
 
-bool PolyTerm::is_small(void) const {
+bool PolyTerm::is_small(void) const 
+{
 	return this->terms.empty();
 }
 
@@ -620,17 +662,20 @@ Polynomial& Polynomial::operator*=(const double constant) {
 	return *this;
 }
 
-Polynomial Polynomial::operator+(const Polynomial& other) const {
+Polynomial Polynomial::operator+(const Polynomial& other) const 
+{
 	Polynomial result(*this);
 	return result += other;
 }
 
-Polynomial Polynomial::operator-(const Polynomial& other) const {
+Polynomial Polynomial::operator-(const Polynomial& other) const 
+{
 	Polynomial result(*this);
 	return result -= other;
 }
 
-Polynomial Polynomial::operator*(const Polynomial& other) const {
+Polynomial Polynomial::operator*(const Polynomial& other) const 
+{
 	REQUIRE(this->is_operable() && other.is_operable(), "polynomials should be operable");
 
 	Polynomial result = 0.0;
@@ -649,7 +694,8 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
 		for (ushort i = 0; i < num_this_term; ++i)
 			result.add_assign_poly_term(this->poly_terms_[i] * other.simple_poly_term_);
 
-	if (this->simple_poly_term_ != 0.0 && other.simple_poly_term_ != 0.0) {
+	if (this->simple_poly_term_ != 0.0 && other.simple_poly_term_ != 0.0) 
+	{
 		if (this->simple_poly_term_.is_constant())
 			result.simple_poly_term_ = other.simple_poly_term_ * this->simple_poly_term_.to_constant();
 		else if (other.simple_poly_term_.is_constant())
@@ -661,12 +707,14 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
 	return result;
 }
 
-Polynomial Polynomial::operator*(const double constant) const {
+Polynomial Polynomial::operator*(const double constant) const 
+{
 	Polynomial result = *this;
 	return result *= constant;
 }
 
-Polynomial Polynomial::operator^(const ushort power_index) const {
+Polynomial Polynomial::operator^(const ushort power_index) const 
+{
 	if (power_index == 0)
 		return 1.0;
 
@@ -680,7 +728,8 @@ Polynomial Polynomial::operator^(const ushort power_index) const {
 	return result;
 }
 
-bool Polynomial::operator==(const Polynomial& other) const {
+bool Polynomial::operator==(const Polynomial& other) const 
+{
 	const auto max_degree = std::max(this->degree(), other.degree());
 	const auto max_domain_dimension = std::max(this->domain_dimension(), other.domain_dimension());
 	const auto compare_node_set = ms::polynomial_compare_node_set(max_degree, max_domain_dimension);
@@ -703,7 +752,8 @@ Polynomial& Polynomial::differentiate(const ushort variable_index) {
 	return *this = std::move(result);
 };
 
-Polynomial Polynomial::get_differentiate(const ushort variable_index) const {
+Polynomial Polynomial::get_differentiate(const ushort variable_index) const 
+{
 	if (this->domain_dimension() <= variable_index)
 		return 0.0;
 
@@ -717,14 +767,16 @@ Polynomial Polynomial::get_differentiate(const ushort variable_index) const {
 	return result;
 }
 
-ushort Polynomial::degree(void) const {
+ushort Polynomial::degree(void) const 
+{
 	ushort result = this->simple_poly_term_.degree();
 	for (const auto& term : this->poly_terms_)
 		result = std::max(result, term.degree());
 	return result;
 }
 
-ushort Polynomial::domain_dimension(void) const {
+ushort Polynomial::domain_dimension(void) const 
+{
 	ushort domain_dimension = this->simple_poly_term_.domain_dimension();
 
 	for (const auto& term : poly_terms_)
@@ -733,7 +785,8 @@ ushort Polynomial::domain_dimension(void) const {
 	return domain_dimension;
 }
 
-std::vector<Polynomial> Polynomial::gradient(void) const {
+std::vector<Polynomial> Polynomial::gradient(void) const 
+{
 	const auto domain_dimension = this->domain_dimension();
 	std::vector<Polynomial> gradient(domain_dimension);
 
@@ -743,11 +796,13 @@ std::vector<Polynomial> Polynomial::gradient(void) const {
 	return gradient;
 }
 
-size_t Polynomial::num_term(void) const {
+size_t Polynomial::num_term(void) const 
+{
 	return this->poly_terms_.size();
 };
 
-double Polynomial::to_constant(void) const {
+double Polynomial::to_constant(void) const 
+{
 	REQUIRE(this->poly_terms_.empty(), "constant polynomial should have empty poly term set");
 
 	if (this->is_absolute_)
@@ -756,7 +811,8 @@ double Polynomial::to_constant(void) const {
 		return this->simple_poly_term_.to_constant();
 };
 
-std::string Polynomial::to_string(void) const {
+std::string Polynomial::to_string(void) const 
+{
 	if (this->poly_terms_.empty())
 		return this->simple_poly_term_.to_string();
 
@@ -773,7 +829,8 @@ std::string Polynomial::to_string(void) const {
 	return str;
 }
 
-Irrational_Function Polynomial::root(const double root_index) const {
+Irrational_Function Polynomial::root(const double root_index) const 
+{
 	return Irrational_Function(*this, root_index);
 }
 
@@ -806,7 +863,8 @@ void Polynomial::minus_assign_poly_term(const PolyTerm& term) {
 	this->poly_terms_.push_back(-1 * term);
 }
 
-bool Polynomial::is_operable(void) const {
+bool Polynomial::is_operable(void) const 
+{
 	return !this->is_absolute_;
 }
 
@@ -832,15 +890,33 @@ std::ostream& operator<<(std::ostream& ostream, const Irrational_Function& irrat
 }
 
 
-Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple_poly_term) {
+Simple_Poly_Term operator*(const double constant, const Simple_Poly_Term& simple_poly_term)
+{
 	return simple_poly_term * constant;
 }
-PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term) {
+
+PolyTerm operator*(const double constant, const PoweredPolyTerm& powered_poly_term) 
+{
 	return powered_poly_term * constant;
 }
-PolyTerm operator*(const double constant, const PolyTerm& poly_term) {
+
+PolyTerm operator*(const double constant, const PolyTerm& poly_term) 
+{
 	return poly_term * constant;
 }
-Polynomial operator*(const double constant, const Polynomial& polynomial) {
+
+Polynomial operator*(const double constant, const Polynomial& polynomial) 
+{
 	return polynomial * constant;
 }
+
+Polynomial operator+(const double constant, const Polynomial& polynomial)
+{
+	return polynomial + constant;
+}
+
+Polynomial operator-(const double constant, const Polynomial& polynomial)
+{
+	return  (-1.0 * polynomial) + constant;
+}
+

@@ -42,6 +42,8 @@ public://Command
 	void precalculate_basis_bdry_QPs(const std::vector<uint>& oc_indexes, const std::vector<Quadrature_Rule>& quadrature_rules);
 	void precalcualte_cell_QPs(const std::vector<Quadrature_Rule>& quadrature_rules);
 	void precalculate_cell_P0_basis_values(void);
+	void precalculate_infs_ocs_QPs(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
+	void precalculate_infs_ncs_QPs(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
 
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
@@ -50,9 +52,8 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_P0_solutions(void) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_bdry_QPs(const uint bdry_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
-
-
-
+	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
+	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
 
 
 

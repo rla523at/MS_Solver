@@ -6,6 +6,9 @@
 #include <sstream>
 #include <vector>
 
+using ushort = unsigned short;
+
+
 class Euclidean_Vector;
 class Euclidean_Vector_Base
 {
@@ -65,6 +68,105 @@ public:
 	Euclidean_Vector_Wrapper(const std::vector<double>& values);
 };
 
+template <typename Function>
+class Vector_Function
+{
+public:
+	Vector_Function(void) = default;
+	Vector_Function(std::vector<Function>&& functions) : functions_(std::move(functions)) {};
+	Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
+
+public://Query
+	template <typename V>	std::vector<double> operator()(const V& space_vector) const
+	{
+		const auto range_dimension = this->size();
+
+		std::vector<double> result(range_dimension);
+		for (size_t i = 0; i < range_dimension; ++i)
+		{
+			result[i] = this->functions_[i](space_vector);
+		}
+
+		return result;
+	}
+	const Function& operator[](const size_t index) const
+	{
+		REQUIRE(index < this->size(), "index can not exceed range size");
+		return this->functions_[index];
+	}
+	bool operator==(const Vector_Function& other) const
+	{
+		return this->functions_ == other.functions_;
+	}
+
+	const Function& at(const size_t index) const
+	{
+		REQUIRE(index < this->size(), "index can not exceed range size");
+		return this->functions_[index];
+	}
+	Vector_Function<Function> cross_product(const Vector_Function& other) const
+	{
+		constexpr auto result_range_dimension = 3;
+		std::vector<Function> result(result_range_dimension);
+
+		if (this->size() == 2)
+		{
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		}
+		else if (this->size() == 3)
+		{
+			result[0] = this->at(1) * other.at(2) - this->at(2) * other.at(1);
+			result[1] = this->at(2) * other.at(0) - this->at(0) * other.at(2);
+			result[2] = this->at(0) * other.at(1) - this->at(1) * other.at(0);
+		}
+		else
+			EXCEPTION("cross product only valid for R^3 dimension");
+
+		return result;
+	};
+	auto L2_norm(void) const
+	{
+		Function result = 0.0;
+
+		for (const auto& function : this->functions_)
+			result += (function ^ 2);
+
+		return result.root(0.5);
+	}
+	Vector_Function<Function> get_differentiate(const ushort variable_index) const
+	{
+		auto differentiate_functions = this->functions_;
+
+		for (auto& differentiate_function : differentiate_functions)
+			differentiate_function.differentiate(variable_index);
+
+		return differentiate_functions;
+	}
+	size_t size(void) const
+	{
+		return this->functions_.size();
+	}
+	std::string to_string(void) const
+	{
+		std::string result;
+
+		for (const auto& function : this->functions_)
+		{
+			result += function.to_string() + "\t";
+		}
+
+		return result;
+	}
+
+private:
+	std::vector<Function> functions_;
+};
+
+template <typename Function>
+std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf)
+{
+	return os << vf.to_string();
+}
 
 //class Euclidean_Vector
 //{

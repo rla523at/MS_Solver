@@ -83,13 +83,15 @@ public://Command
 	void operator*=(const double constant);
 
 	Matrix& be_inverse(void);
-	template <typename V>	void change_column(const size_t column_index, const V& vec) {
+	template <typename V>	void change_column(const size_t column_index, const V& vec) 
+	{
 		REQUIRE(column_index < this->num_columns_, "column idnex can not exceed number of column");
 
 		for (size_t i = 0; i < this->num_rows_; ++i)
 			this->value_at(i, column_index) = vec.at(i);
 	}
-	template <typename V>	void change_row(const size_t start_row_index, const V& vec) {
+	template <typename V>	void change_row(const size_t start_row_index, const V& vec) 
+	{
 		REQUIRE(start_row_index <= this->num_rows_, "index can not exceed given range");
 		REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
 

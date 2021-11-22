@@ -23,9 +23,7 @@ void Post_Processor::post_solution(void)
 {
 	REQUIRE(This_::is_initialized_, "Post processore should be initialized before post solution");
 	
-	This_::post_variables_->record_solution();
 	This_::file_writer_->write_solution_file(*This_::post_variables_, post_file_path_);
-	This_::post_variables_->clear_variables();
 }
 
 void Post_Processor::record_variables(const std::string& name, const std::vector<double>& values) 

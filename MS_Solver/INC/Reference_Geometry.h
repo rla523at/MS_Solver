@@ -2,7 +2,6 @@
 #include "Euclidean_Vector.h"
 #include "Matrix.h"
 #include "Polynomial.h"
-#include "Vector_Function.h"
 
 #include <array>
 #include <map>
