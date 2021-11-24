@@ -295,102 +295,96 @@ TEST(Burgers_3D, calculate_physical_flux_1) {
 }
 
 
+TEST(Euler_2D, extend_to_solution_1) 
+{
+	Euler_2D gov_eq;
+	Euclidean_Vector gov_sol = { 1,1,1,1 };
+	gov_eq.extend_to_solution(gov_sol);
 
+	const Euclidean_Vector ref = { 1,1,1,1,1,1,0,0 };
+	EXPECT_EQ(gov_sol, ref);
+}
+TEST(Euler_2D, calculate_coordinate_projected_maximum_lambda_1)
+{
+	Euler_2D gov_eq;
 
-//TEST(Euler, conservative_to_primitive_1) {
-//	constexpr ushort space_dimension = 2;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> solution = { 1,1,1,1 };
-//	const auto result = Euler::conservative_to_primitive(solution);
-//
-//	const Euclidean_Vector<num_equation> ref = { 1,1,0,0 };
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Euler, conservative_to_primitive_2) {
-//	constexpr ushort space_dimension = 3;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> solution = { 1,1,1,1,1.5 };
-//	const auto result = Euler::conservative_to_primitive(solution);
-//
-//	const Euclidean_Vector<num_equation> ref = { 1,1,1,0,0 };
-//	EXPECT_EQ(result, ref);
-//}
-//
-//TEST(Euler, physical_flux_1) {
-//	constexpr ushort space_dimension = 2;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> solution = { 1,1,1,1 };
-//	const auto result = Euler::physical_flux(solution);
-//
-//	const Static_Matrix<num_equation,space_dimension> ref = { 1,1,1,1,1,1,1,1 };
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Euler, physical_flux_2) {
-//	constexpr ushort space_dimension = 3;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> solution = { 1,1,1,1,1.5 };
-//	const auto result = Euler::physical_flux(solution);
-//
-//	const Static_Matrix<num_equation, space_dimension> ref = { 1,1,1,1,1,1,1,1,1,1,1,1,1.5,1.5,1.5 };
-//	EXPECT_EQ(result, ref);
-//}
-//
-//TEST(Euler, coordinate_projected_maximum_lambda_1) {
-//	constexpr ushort space_dimension = 2;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	std::vector<Euclidean_Vector<num_equation>> solution = { { 1,1,1,1 } };
-//	const auto result = Euler::calculate_coordinate_projected_maximum_lambdas(solution);
-//
-//	const std::array<double, space_dimension> ref = { 1,1 };
-//	EXPECT_EQ(result[0], ref);
-//}
-//TEST(Euler, coordinate_projected_maximum_lambda_2) {
-//	constexpr ushort space_dimension = 3;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	std::vector<Euclidean_Vector<num_equation>> solution = { { 1,1,1,1,1.5 } };
-//	const auto result = Euler::calculate_coordinate_projected_maximum_lambdas(solution);
-//
-//	const std::array<double, space_dimension> ref = { 1,1,1 };
-//	EXPECT_EQ(result[0], ref);
-//}
-//
-//TEST(Euler, inner_face_maximum_lambda_1) {
-//	constexpr ushort space_dimension = 2;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> oc_solution = { 1,1,1,1 };
-//	Euclidean_Vector<num_equation> nc_solution = { 1,0,0,0 };
-//
-//	Euclidean_Vector normal = { 1,0 };
-//
-//	const auto oc_pvariable = Euler::conservative_to_primitive(oc_solution);
-//	const auto nc_pvariable = Euler::conservative_to_primitive(nc_solution);
-//
-//	const auto result = Euler::inner_face_maximum_lambda(oc_pvariable, nc_pvariable, normal);
-//
-//	const auto ref = 1.0;
-//	EXPECT_EQ(result, ref);
-//}
-//TEST(Euler, inner_face_maximum_lambda_2) {
-//	constexpr ushort space_dimension = 3;
-//	constexpr ushort num_equation = space_dimension + 2;
-//
-//	Euclidean_Vector<num_equation> oc_solution = { 1,1,1,1,1.5 };
-//	Euclidean_Vector<num_equation> nc_solution = { 1,0,0,0,0 };
-//
-//	Euclidean_Vector normal = { 1,0,0 };
-//
-//	const auto oc_pvariable = Euler::conservative_to_primitive(oc_solution);
-//	const auto nc_pvariable = Euler::conservative_to_primitive(nc_solution);
-//
-//	const auto result = Euler::inner_face_maximum_lambda(oc_pvariable, nc_pvariable, normal);
-//
-//	const auto ref = 1.0;
-//	EXPECT_EQ(result, ref);
-//}
+	std::vector<Euclidean_Vector> solution = { { 1,1,1,1 } };
+	gov_eq.extend_to_solution(solution[0]);
+	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solution);
+
+	const std::vector<double> ref = { 1,1 };
+	EXPECT_EQ(result[0], ref);
+}
+TEST(Euler_2D, calculate_inner_face_maximum_lambda_1) {
+	Euler_2D gov_eq;
+
+	Euclidean_Vector oc_solution = { 1,1,1,1 };
+	Euclidean_Vector nc_solution = { 1,0,0,0 };
+	Euclidean_Vector normal = { 1,0 };
+
+	gov_eq.extend_to_solution(oc_solution);
+	gov_eq.extend_to_solution(nc_solution);
+	const auto result = gov_eq.calculate_inner_face_maximum_lambda(oc_solution, nc_solution, normal);
+
+	const auto ref = 1.0;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euler_2D, calculate_physical_flux_1)
+{
+	Euler_2D gov_eq;
+
+	Euclidean_Vector solution = { 1,1,1,1 };
+	gov_eq.extend_to_solution(solution);
+	const auto result = gov_eq.calculate_physical_flux(solution);
+
+	const Matrix ref = { gov_eq.num_equations(), gov_eq.space_dimension(), { 1,1,1,1,1,1,1,1 } };
+	EXPECT_EQ(result, ref);
+}
+
+TEST(Euler_3D, extend_to_solution_1) 
+{
+	Euler_3D gov_eq;
+
+	Euclidean_Vector gov_sol = { 1,1,1,1,1.5 };
+	gov_eq.extend_to_solution(gov_sol);
+
+	const Euclidean_Vector ref = { 1,1,1,1,1.5,1,1,1,0,0 };
+	EXPECT_EQ(gov_sol, ref);
+}
+TEST(Euler_3D, calculate_coordinate_projected_maximum_lambda_1)
+{
+	Euler_3D gov_eq;
+
+	std::vector<Euclidean_Vector> solution = { { 1,1,1,1,1.5 } };
+	gov_eq.extend_to_solution(solution[0]);
+	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solution);
+
+	const std::vector<double> ref = { 1,1,1 };
+	EXPECT_EQ(result[0], ref);
+}
+TEST(Euler_3D, calculate_inner_face_maximum_lambda_1)
+{
+	Euler_3D gov_eq;
+
+	Euclidean_Vector oc_solution = { 1,1,1,1,1.5 };
+	Euclidean_Vector nc_solution = { 1,0,0,0,0 };
+	Euclidean_Vector normal = { 1,0,0 };
+
+	gov_eq.extend_to_solution(oc_solution);
+	gov_eq.extend_to_solution(nc_solution);
+	const auto result = gov_eq.calculate_inner_face_maximum_lambda(oc_solution, nc_solution, normal);
+
+	const auto ref = 1.0;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euler_3D, calculate_physical_flux_1) 
+{
+	Euler_3D gov_eq;
+
+	Euclidean_Vector solution = { 1,1,1,1,1.5 };
+	gov_eq.extend_to_solution(solution);
+	const auto result = gov_eq.calculate_physical_flux(solution);
+
+	const Matrix ref = { gov_eq.num_equations(), gov_eq.space_dimension(), { 1,1,1,1,1,1,1,1,1,1,1,1,1.5,1.5,1.5 } };
+	EXPECT_EQ(result, ref);
+}

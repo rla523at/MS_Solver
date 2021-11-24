@@ -195,6 +195,104 @@ void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	GE_solution = { rho, rhou, rhov, rhoE, u, v, p, a };
 }
 
+
+Euler_3D::Euler_3D(void)
+{
+	this->space_dimension_ = 3;
+	this->num_solutions_ = 10;
+	this->num_equations_ = 5;
+	this->solution_names_ = { "rho", "rhou", "rhov", "rhow", "rhoE", "u", "v", "w", "p", "a" };
+}
+
+std::vector<std::vector<double>> Euler_3D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+{
+	auto num_solution = P0_solutions.size();
+
+	std::vector<std::vector<double>> coordinate_projected_maximum_lambdas(num_solution);
+
+	for (int i = 0; i < num_solution; ++i)
+	{
+		const auto& solution = P0_solutions[i];
+		const auto u = solution[5];
+		const auto v = solution[6];
+		const auto w = solution[7];
+		const auto a = solution[9];
+
+		const auto x_projected_maximum_lambda = std::abs(u) + a;
+		const auto y_projected_maximum_lambda = std::abs(v) + a;
+		const auto z_projected_maximum_lambda = std::abs(w) + a;
+
+		coordinate_projected_maximum_lambdas[i] = { x_projected_maximum_lambda, y_projected_maximum_lambda, z_projected_maximum_lambda };
+	}
+
+	return coordinate_projected_maximum_lambdas;
+}
+
+double Euler_3D::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
+{
+	const auto oc_u = oc_solution[5];
+	const auto oc_v = oc_solution[6];
+	const auto oc_w = oc_solution[7];
+	const auto oc_a = oc_solution[9];
+	const auto oc_side_face_maximum_lambda = std::abs(oc_u * normal_vector[0] + oc_v * normal_vector[1] + oc_w * normal_vector[2]) + oc_a;
+
+	const auto nc_u = nc_solution[5];
+	const auto nc_v = nc_solution[6];
+	const auto nc_w = nc_solution[7];
+	const auto nc_a = nc_solution[9];
+	const auto nc_side_face_maximum_lambda = std::abs(nc_u * normal_vector[0] + nc_v * normal_vector[1] + nc_w * normal_vector[2]) + nc_a;
+
+	return (std::max)(oc_side_face_maximum_lambda, nc_side_face_maximum_lambda);
+}
+
+Matrix Euler_3D::calculate_physical_flux(const Euclidean_Vector& solution) const
+{
+	const auto rho = solution[0];
+	const auto rhou = solution[1];
+	const auto rhov = solution[2];
+	const auto rhow = solution[3];
+	const auto rhoE = solution[4];
+	const auto u = solution[5];
+	const auto v = solution[6];
+	const auto w = solution[7];
+	const auto p = solution[8];
+	const auto a = solution[9];
+
+	const auto rhouv = rhou * v;
+	const auto rhouw = rhou * w;
+	const auto rhovw = rhov * w;
+
+	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
+
+	return { this->num_equations_, this->space_dimension_,
+	{
+		rhou,				rhov,               rhow,
+		rhou * u + p,		rhouv,              rhouw,
+		rhouv,				rhov * v + p,       rhovw,
+		rhouw,              rhovw,              rhow * w + p,
+		(rhoE + p) * u,		(rhoE + p) * v,      (rhoE + p) * w
+	} };
+}
+
+void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const
+{
+	const auto rho = GE_solution[0];
+	const auto rhou = GE_solution[1];
+	const auto rhov = GE_solution[2];
+	const auto rhow = GE_solution[3];
+	const auto rhoE = GE_solution[4];
+
+	const auto one_over_rho = 1.0 / rho;
+
+	const auto u = rhou * one_over_rho;
+	const auto v = rhov * one_over_rho;
+	const auto w = rhow * one_over_rho;
+	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
+	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	GE_solution = { rho, rhou, rhov, rhow, rhoE, u, v, w, p, a };
+}
+
 std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(const Configuration& config)
 {
 	const auto governing_equation = config.get("Governing_Equation");
