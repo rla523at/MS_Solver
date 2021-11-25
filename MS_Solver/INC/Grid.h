@@ -65,7 +65,7 @@ namespace ms
 {
 	template <typename T, typename... Args>		std::vector<T>& merge(std::vector<T>& vec1, const std::vector<T>& vec2, const Args&... args)
 	{
-		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+		static_assert((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
 
 		vec1.reserve(vec1.size() + vec2.size());
 		vec1.insert(vec1.end(), vec2.begin(), vec2.end());
@@ -77,7 +77,7 @@ namespace ms
 	}
 	template <typename T, typename... Args>		std::vector<T>& merge(std::vector<T>& vec1, std::vector<T>&& vec2, Args&&... args)
 	{
-		static_require((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
+		static_assert((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
 
 		vec1.reserve(vec1.size() + vec2.size());
 		vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));

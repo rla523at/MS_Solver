@@ -19,19 +19,35 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SRC\Boundaries.cpp" />
+    <ClCompile Include="SRC\Boundary_Flux_Function.cpp" />
+    <ClCompile Include="SRC\Elements.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
+    <ClCompile Include="SRC\Geometry.cpp" />
     <ClCompile Include="SRC\Governing_Equation.cpp" />
+    <ClCompile Include="SRC\Grid.cpp" />
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
+    <ClCompile Include="SRC\Numerical_Flux_Function.cpp" />
+    <ClCompile Include="SRC\Polynomial.cpp" />
+    <ClCompile Include="SRC\Reference_Geometry.cpp" />
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="INC\Boundaries.h" />
+    <ClInclude Include="INC\Boundary_Flux_Function.h" />
     <ClInclude Include="INC\Configuration.h" />
+    <ClInclude Include="INC\Element.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exception.h" />
+    <ClInclude Include="INC\Geometry.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
+    <ClInclude Include="INC\Grid.h" />
     <ClInclude Include="INC\Matrix.h" />
+    <ClInclude Include="INC\Numerical_Flux_Function.h" />
+    <ClInclude Include="INC\Polynomial.h" />
+    <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />
   </ItemGroup>

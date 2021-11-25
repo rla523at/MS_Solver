@@ -22,6 +22,7 @@ public:
 	double at(const size_t position) const;
 	const double* begin(void) const;
 	const double* data(void) const;
+	const double* end(void) const;
 	double L1_norm(void) const;
 	double L2_norm(void) const;
 	double inner_product(const Euclidean_Vector_Base& other) const;

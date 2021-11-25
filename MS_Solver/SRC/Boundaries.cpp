@@ -4,7 +4,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
 {
     SET_TIME_POINT;
 
-    this->num_boundaries_ = grid.num_boundaries();
+    this->num_boundaries_ = static_cast<uint>(grid.num_boundaries());
     this->num_equations_ = discrete_solution.num_equations();
 
     this->oc_indexes_.resize(this->num_boundaries_);
@@ -14,7 +14,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
 
     std::vector<Quadrature_Rule> quadrature_rules(this->num_boundaries_);
 
-    for (int bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
+    for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
         //set oc index
         const auto oc_index = grid.boundary_owner_cell_index(bdry_index);
@@ -36,7 +36,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
         const auto num_basis = discrete_solution.num_basis(oc_index);
 
         Matrix QWs_basis_m(num_QPs, num_basis);
-        for (int q = 0; q < num_QPs; ++q)
+        for (ushort q = 0; q < num_QPs; ++q)
         {
             QWs_basis_m.change_row(q, discrete_solution.calculate_basis_point_v(oc_index, QPs[q]) * QWs[q]);
         }
@@ -57,7 +57,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
 
 void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const
 {
-    for (int bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
+    for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
         const auto oc_index = this->oc_indexes_[bdry_index];
         const auto solution_at_QPs = discrete_soltuion.calculate_solution_at_bdry_QPs(bdry_index, oc_index);

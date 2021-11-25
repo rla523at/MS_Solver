@@ -2,101 +2,52 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Boundary_Flux_Function.h"
 
-GTEST_TEST(Supersonic_Outlet, Linear_Advection_1) {
-	constexpr ushort space_dimension = 2;
-	Linear_Advection<space_dimension>::initialize({ 1.0,0.5 });
-	
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Linear_Advection<space_dimension>>>::make(boundary_type);				
+TEST(Initial_Constant_BC, Linear_Advection_2D_1) 
+{
+	const auto gov_eq = std::make_shared<Linear_Advection_2D>(1.0, 0.5);
+	const auto numerical_flux_function = std::make_shared<LLF>(gov_eq);
+	Initial_Constant_BC boundary_flux_function(numerical_flux_function);
 
-	const Euclidean_Vector solution = { 2 };
-	const Euclidean_Vector normal = { 1,0 };
-	const auto result = bff->calculate(solution, normal);
+	for (int i = 0; i < 10; ++i)
+	{
+		const Euclidean_Vector solution = { 1.0 * i + 1.0 };
+		const Euclidean_Vector normal = { 1,0 };
+		const auto result = boundary_flux_function.calculate(solution, normal);
 
-	const Euclidean_Vector ref = { 2 };
-	EXPECT_EQ(result, ref);
+		const Euclidean_Vector ref = { 1.0 + i };
+		EXPECT_EQ(result, ref);
+	}
 }
-GTEST_TEST(Supersonic_Outlet, Linear_Advection_2) {
-	constexpr ushort space_dimension = 2;
-	Linear_Advection<space_dimension>::initialize({ 1.0,0.5 });
+TEST(Initial_Constant_BC, Linear_Advection_2D_2) 
+{
+	const auto gov_eq = std::make_shared<Linear_Advection_2D>(1.5, 0.5);
+	const auto numerical_flux_function = std::make_shared<LLF>(gov_eq);
+	Initial_Constant_BC boundary_flux_function(numerical_flux_function);
 
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Linear_Advection<space_dimension>>>::make(boundary_type);
+	for (int i = 0; i < 10; ++i)
+	{
+		const Euclidean_Vector solution = { 1.0 * i + 1.0 };
+		const Euclidean_Vector normal = { std::sqrt(2) / 2.0, std::sqrt(2) / 2.0 };
+		const auto result = boundary_flux_function.calculate(solution, normal);
 
-	const Euclidean_Vector solution = { 2 };
-	const Euclidean_Vector normal = { 1,1 };
-	const auto result = bff->calculate(solution, normal);
-
-	const Euclidean_Vector ref = { 3 };
-	EXPECT_EQ(result, ref);
-}
-GTEST_TEST(Supersonic_Outlet, Linear_Advection_3) {
-	constexpr ushort space_dimension = 2;
-	Linear_Advection<space_dimension>::initialize({ 1.0,0.5 });
-
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Linear_Advection<space_dimension>>>::make(boundary_type);
-
-	const Euclidean_Vector solution = { 2 };
-	const Euclidean_Vector normal = { 1,-1 };
-	const auto result = bff->calculate(solution, normal);
-
-	const Euclidean_Vector ref = { 1 };
-	EXPECT_EQ(result, ref);
+		const Euclidean_Vector ref = { (1.0 + i) *std::sqrt(2) };
+		EXPECT_DOUBLE_EQ(result[0], ref[0]);
+	}
 }
 
+TEST(Initial_Constant_BC, Burgers_2D_1) 
+{
+	const auto gov_eq = std::make_shared<Burgers_2D>();
+	const auto numerical_flux_function = std::make_shared<LLF>(gov_eq);
+	Initial_Constant_BC boundary_flux_function(numerical_flux_function);
 
-GTEST_TEST(Supersonic_Outlet, Burgers_1) {
-	constexpr ushort space_dimension = 2;
+	for (int i = 0; i < 10; ++i)
+	{
+		const Euclidean_Vector solution = { 1.0 * i + 1.0 };
+		const Euclidean_Vector normal = { 1,0 };
+		const auto result = boundary_flux_function.calculate(solution, normal);
 
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Burgers<space_dimension>>>::make(boundary_type);
-
-	const Euclidean_Vector solution = { 4 };
-	const Euclidean_Vector normal = { 1,0 };
-	const auto result = bff->calculate(solution, normal);
-
-	const Euclidean_Vector ref = { 8 };
-	EXPECT_EQ(result, ref);
-}
-GTEST_TEST(Supersonic_Outlet, Burgers_2) {
-	constexpr ushort space_dimension = 2;
-
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Burgers<space_dimension>>>::make(boundary_type);
-
-	const Euclidean_Vector solution = { 4 };
-	const Euclidean_Vector normal = { 1,1 };
-	const auto result = bff->calculate(solution, normal);
-
-	const Euclidean_Vector ref = { 16 };
-	EXPECT_EQ(result, ref);
-}
-GTEST_TEST(Supersonic_Outlet, Burgers_3) {
-	constexpr ushort space_dimension = 2;
-
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Burgers<space_dimension>>>::make(boundary_type);
-
-	const Euclidean_Vector solution = { 4 };
-	const Euclidean_Vector normal = { 1,-1 };
-	const auto result = bff->calculate(solution, normal);
-
-	const Euclidean_Vector ref = { 0 };
-	EXPECT_EQ(result, ref);
-}
-
-
-GTEST_TEST(Supersonic_Outlet, Euler_1) {
-	constexpr ushort space_dimension = 2;
-
-	const auto boundary_type = ElementType::supersonic_outlet;
-	const auto bff = Boundary_Flux_Function_Factory<LLF<Euler<space_dimension>>>::make(boundary_type);
-
-	const Euclidean_Vector cvariable = { 1,0,0,1 };
-	const Euclidean_Vector normal = { 1,0 };
-	const auto result = bff->calculate(cvariable, normal);
-
-	const Euclidean_Vector ref = { 0, (1.4 - 1), 0, 0 };
-	EXPECT_EQ(result, ref);
+		const Euclidean_Vector ref = { 0.25 * (normal[0] + normal[1]) * (3 * i * i + 4 * i + 2) };
+		EXPECT_EQ(result, ref);
+	}
 }

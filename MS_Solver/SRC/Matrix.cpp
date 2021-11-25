@@ -25,13 +25,14 @@ Matrix Matrix_Base::operator*(const double constant) const
 Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 {
 	REQUIRE(this->size() == other.size(), "two matrix should be same size");
+	REQUIRE(this->transpose_type_ == other.transpose_type_, "two matrix should be same transpose type");
 
 	const auto n = static_cast<MKL_INT>(this->num_values());
 	const auto a = 1.0;
 	const auto incx = 1;
 	const auto incy = 1;
 
-	std::vector<double> values(n);
+	std::vector<double> values(this->const_data_ptr_, this->const_data_ptr_ + n);
 	cblas_daxpy(n, a, other.const_data_ptr_, incx, values.data(), incy);
 
 	return { this->num_rows_,this->num_columns_,std::move(values) };

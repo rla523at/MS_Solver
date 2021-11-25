@@ -39,6 +39,24 @@ TEST(Matrix, change_rows1) {
 	const Matrix ref(4, 2, { 1,2,3,4,0,0,0,0 });
 	EXPECT_EQ(dm, ref);
 }
+TEST(Matrix, operator_addition1) 
+{
+	const Matrix m1 = { 1,2, { 1,2 } };
+	const Matrix m2 = { 1,2, { 2,2 } };
+	const auto result = m1 + m2;
+
+	const Matrix ref = { 1,2,{ 3,4 } };
+	EXPECT_EQ(result, ref);
+}
+TEST(Matrix, operator_addition2) 
+{
+	const Matrix m1 = { 2,1, { 1,2 } };
+	const Matrix m2 = { 2,1, { 2,2 } };
+	const auto result = m1 + m2;
+
+	const Matrix ref = { 2,1,{ 3,4 } };
+	EXPECT_EQ(result, ref);
+}
 TEST(Matrix, operator_multiplication1) {
 	const Matrix m1 = { 1,2, {1,2} };
 	const Matrix m2 = { 2,2,{ 2,2,2,2 } };

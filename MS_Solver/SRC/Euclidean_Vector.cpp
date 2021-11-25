@@ -134,6 +134,12 @@ const double* Euclidean_Vector_Base::data(void) const
 	return this->const_data_ptr_;
 }
 
+const double* Euclidean_Vector_Base::end(void) const
+{
+	return this->const_data_ptr_ + this->num_values_;
+}
+
+
 double Euclidean_Vector_Base::L1_norm(void) const
 {
 	const auto n = this->num_values_;
