@@ -2,7 +2,7 @@
 
 Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux)
 {
-    SET_TIME_POINT;
+    Profiler::set_time_point();
 
     this->num_boundaries_ = static_cast<uint>(grid.num_boundaries());
     this->num_equations_ = discrete_solution.num_equations();
@@ -52,7 +52,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
 
     discrete_solution.precalculate_basis_bdry_QPs(this->oc_indexes_, quadrature_rules);
 
-    LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n" << LOG.print_;
+    LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
 void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const

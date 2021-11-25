@@ -1,10 +1,10 @@
 #pragma once
 #include "gtest/gtest.h"
-
 #include "../MS_Solver/INC/Grid.h"
 
 
-TEST(Grid, set_of_face_share_cell_indexes) {
+TEST(Grid, set_of_face_share_cell_indexes) 
+{
 	constexpr ushort space_dimension = 2;
 	
 	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
@@ -18,7 +18,8 @@ TEST(Grid, set_of_face_share_cell_indexes) {
 	EXPECT_EQ(ref, result);
 }
 
-TEST(Grid, vnode_index_to_matched_vnode_index_set_1) {
+TEST(Grid, vnode_index_to_matched_vnode_index_set_1) 
+{
 	constexpr ushort space_dimension = 2;
 
 	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");

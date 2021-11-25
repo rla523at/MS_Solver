@@ -1,5 +1,4 @@
-
-#include "Profiler.h"
+#include "../INC/Profiler.h"
 
 void Profiler::record_Consumed_Memory(void){		
 	GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&memory_recorder_, sizeof(memory_recorder_));
@@ -21,7 +20,7 @@ void Profiler::set_time_point(void){
 }
 
 double Profiler::get_time_duration(void){
-	dynamic_require(!time_points_.empty(), "time point should be exist to get time duration");
+	REQUIRE(!time_points_.empty(), "time point should be exist to get time duration");
 
 	std::chrono::duration<double> time_duration = std::chrono::steady_clock::now() - time_points_.back();	
 	time_points_.pop_back();

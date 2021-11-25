@@ -5,7 +5,7 @@ Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& gri
 	this->space_dimension_ = grid_file_convertor.get_space_dimension();
 	auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
 
-	SET_TIME_POINT;
+	Profiler::set_time_point();
 
 	std::vector<Element> periodic_boundary_elements;
 
@@ -29,14 +29,14 @@ Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& gri
 	this->periodic_boundary_element_pairs_ = this->make_periodic_boundary_element_pairs(std::move(periodic_boundary_elements));
 	this->inner_face_elements_ = this->make_inner_face_elements();
 
-	LOG << std::left << std::setw(50) << "@ Make Grid Element" << " ----------- " << GET_TIME_DURATION << "s\n\n";
+	LOG << std::left << std::setw(50) << "@ Make Grid Element" << " ----------- " << Profiler::get_time_duration() << "s\n\n";
 	LOG << "  " << std::setw(8) << this->cell_elements_.size() << " cell \n";
 	LOG << "  " << std::setw(8) << this->boundary_elements_.size() << " boundary\n";
 	LOG << "  " << std::setw(8) << this->periodic_boundary_element_pairs_.size() << " periodic boundary pair\n";
 	LOG << "  " << std::setw(8) << this->inner_face_elements_.size() << " inner face\n\n" << Log::print_;
 
 
-	SET_TIME_POINT;
+	Profiler::set_time_point();
 
 	//calculate vnode_index_to_share_cell_index_set_ignore_pbdry_
 	const auto num_cell = this->cell_elements_.size();
@@ -73,7 +73,7 @@ Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& gri
 		}
 	}
 
-	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << GET_TIME_DURATION << "s\n\n" << Log::print_;	
+	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;	
 }
 
 ushort Grid::space_dimension(void) const

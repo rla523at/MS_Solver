@@ -26,10 +26,12 @@
     <ClCompile Include="SRC\Geometry.cpp" />
     <ClCompile Include="SRC\Governing_Equation.cpp" />
     <ClCompile Include="SRC\Grid.cpp" />
+    <ClCompile Include="SRC\Grid_File_Convertor.cpp" />
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
     <ClCompile Include="SRC\Numerical_Flux_Function.cpp" />
     <ClCompile Include="SRC\Polynomial.cpp" />
+    <ClCompile Include="SRC\Profiler.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
@@ -44,9 +46,12 @@
     <ClInclude Include="INC\Geometry.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
     <ClInclude Include="INC\Grid.h" />
+    <ClInclude Include="INC\Grid_File_Convertor.h" />
+    <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\Numerical_Flux_Function.h" />
     <ClInclude Include="INC\Polynomial.h" />
+    <ClInclude Include="INC\Profiler.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />

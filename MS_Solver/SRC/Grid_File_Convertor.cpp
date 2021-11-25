@@ -8,12 +8,7 @@ Gmsh_Convertor::Gmsh_Convertor(const ushort space_dimension)
 
 std::vector<Element> Gmsh_Convertor::convert_to_elements(const std::string_view grid_file_path) const
 {
-	SET_TIME_POINT;
-	LOG << "================================================================================\n";
-	LOG << "\t\t\t\t PreProcessing \n";
-	LOG << "================================================================================\n" << Log::print_;
-
-	SET_TIME_POINT;
+	Profiler::set_time_point();
 
 	std::ifstream grid_file_stream(grid_file_path);
 	REQUIRE(grid_file_stream.is_open(), "fail to open grid file");
@@ -22,15 +17,15 @@ std::vector<Element> Gmsh_Convertor::convert_to_elements(const std::string_view 
 	const auto element_text = this->read_about(grid_file_stream, "Elements");
 	const auto physical_name_text = this->read_about(grid_file_stream, "PhysicalNames");
 
-	LOG << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << GET_TIME_DURATION << "s\n\n" << Log::print_;
+	LOG << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
-	SET_TIME_POINT;
+	Profiler::set_time_point();
 
 	const auto nodes = this->make_nodes(node_text);
 	const auto physical_group_index_to_element_type = this->make_physical_group_index_to_element_type(physical_name_text);
 	const auto elements = this->make_elements(element_text, physical_group_index_to_element_type, nodes);
 
-	LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << GET_TIME_DURATION << "s\n\n" << Log::print_;
+	LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
 	return elements;
 }

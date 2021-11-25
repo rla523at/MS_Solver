@@ -69,6 +69,12 @@
     <ClCompile Include="SRC\Numerical_Flux_Function.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Grid_File_Convertor.cpp">
+      <Filter>소스 파일\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Profiler.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Governing_Equation.h">
@@ -114,6 +120,15 @@
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
     <ClInclude Include="INC\Numerical_Flux_Function.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Convertor.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Log.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Profiler.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
