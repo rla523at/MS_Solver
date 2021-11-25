@@ -23,6 +23,7 @@
     <ClCompile Include="SRC\Governing_Equation.cpp" />
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
+    <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ClInclude Include="INC\Exception.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
     <ClInclude Include="INC\Matrix.h" />
+    <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

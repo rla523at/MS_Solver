@@ -24,8 +24,8 @@ public://Query
 	const std::vector<std::vector<double>>& get_set_of_post_variable_values(void) const;
 	const std::vector<std::string>& get_post_variable_names(void) const;
 	std::string grid_variable_str(void) const;
-	size_t num_post_node(void) const;
-	size_t num_post_element(void) const;
+	size_t num_post_points(void) const;
+	size_t num_post_elements(void) const;
 	ushort num_grid_variable(void) const;
 	ushort num_post_variables(void) const;
 	double solution_time(void) const;

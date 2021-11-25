@@ -1,13 +1,5 @@
 #include "../INC/Tecplot_File_Writer.h"
 
-void Tecplot_File_Writer::set_common_header_variable(const Post_Variables& post_variables)
-{
-	this->zone_type_ = post_variables.zone_type();
-	this->num_post_points_ = static_cast<int>(post_variables.num_post_node());
-	this->num_post_elements_ = static_cast<int>(post_variables.num_post_element());
-	this->solution_time_ = post_variables.solution_time();
-}
-
 void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path)
 {
 	this->set_grid_header_variable(post_variables);
@@ -24,13 +16,21 @@ void Tecplot_File_Writer::write_solution_file(Post_Variables& post_variables, co
 	post_variables.clear_variables();
 }
 
+void Tecplot_File_Writer::set_common_header_variable(const Post_Variables& post_variables)
+{
+	this->zone_type_ = post_variables.zone_type();
+	this->num_post_points_ = static_cast<int>(post_variables.num_post_points());
+	this->num_post_elements_ = static_cast<int>(post_variables.num_post_elements());
+	this->solution_time_ = post_variables.solution_time();
+}
+
 void Tecplot_ASCII_File_Writer::set_grid_header_variable(const Post_Variables& post_variables)
 {
 	this->set_common_header_variable(post_variables);
 
 	this->title_ = "Grid";
 	this->file_type_str_ = "Grid";
-	this->solution_names_ = post_variables.grid_variable_str();
+	this->post_variable_names_ = post_variables.grid_variable_str();
 	this->zone_title_ = "Grid";
 	this->variable_location_str_ = "()";
 }
@@ -41,7 +41,7 @@ void Tecplot_ASCII_File_Writer::set_solution_header_variable(const Post_Variable
 
 	this->title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
 	this->file_type_str_ = "Solution";
-	this->solution_names_ = this->make_post_variable_str(post_variables.get_post_variable_names());
+	this->post_variable_names_ = this->make_post_variable_str(post_variables.get_post_variable_names());
 	this->zone_title_ = "Solution_at_" + ms::double_to_string(this->solution_time_);
 	this->variable_location_str_ = post_variables.variable_location_str();
 }
@@ -49,20 +49,23 @@ void Tecplot_ASCII_File_Writer::set_solution_header_variable(const Post_Variable
 void Tecplot_ASCII_File_Writer::write_header(const std::string_view post_file_path)
 {
 	Text header_text;
-	constexpr ushort num_line = 11;
+	constexpr ushort num_line = 12;
 
 	header_text.add_empty_lines(num_line);
+	//File Header
 	header_text[0] << "Title = " + this->title_;
 	header_text[1] << "FileType = " + this->file_type_str_;
-	header_text[2] << "Variables = " + this->solution_names_;
-	header_text[3] << "Zone T = " + this->zone_title_;
-	header_text[4] << "ZoneType =  " + ms::to_string(this->zone_type_);
-	header_text[5] << "Nodes = " + std::to_string(this->num_post_points_);
-	header_text[6] << "Elements = " + std::to_string(this->num_post_elements_);
-	header_text[7] << "DataPacking = Block";
-	header_text[8] << "StrandID = " + std::to_string(this->strand_id_++);
-	header_text[9] << "SolutionTime = " + std::to_string(this->solution_time_);
-	header_text[10] << "VarLocation = " + this->variable_location_str_;
+	header_text[2] << "Variables = " + this->post_variable_names_;
+	//Zone Header
+	header_text[3] << "Zone";
+	header_text[4] << "T = " + this->zone_title_;
+	header_text[5] << "ZoneType =  " + ms::to_string(this->zone_type_);
+	header_text[6] << "Nodes = " + std::to_string(this->num_post_points_);
+	header_text[7] << "Elements = " + std::to_string(this->num_post_elements_);
+	header_text[8] << "DataPacking = Block";
+	header_text[9] << "VarLocation = " + this->variable_location_str_;
+	header_text[10] << "StrandID = " + std::to_string(this->strand_id_++);
+	header_text[11] << "SolutionTime = " + std::to_string(this->solution_time_);
 
 	header_text.write(post_file_path);
 }
@@ -71,6 +74,7 @@ void Tecplot_ASCII_File_Writer::write_grid_data(const Post_Variables& post_varia
 {
 	this->write_data(post_variables.get_post_coordinate_blocks(), post_file_path);
 
+	//Zone Footer
 	const auto ASCII_connecitivities = this->convert_to_ASCII_connectivities(post_variables.get_connectivities());
 	this->write_data(ASCII_connecitivities, post_file_path);
 }
@@ -127,10 +131,10 @@ void Tecplot_Binary_File_Writer::set_solution_header_variable(const Post_Variabl
 	this->set_common_header_variable(post_variables);
 
 	this->file_type_ = 2;
-	this->num_variable_ = static_cast<int>(post_variables.num_post_variables());
 	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
-	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
+	this->num_variable_ = static_cast<int>(post_variables.num_post_variables());
 	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(post_variables.get_post_variable_names());
+	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
 
 	const auto post_variable_location_str = post_variables.variable_location_str();
 	if (ms::contains_icase(post_variable_location_str, "Node"))
@@ -171,7 +175,7 @@ void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_p
 	writer << -1;														//parent zone - default
 	writer << static_cast<int>(this->strand_id_++);						//strand id
 	writer << this->solution_time_;										//solution_time
-	writer << -1;														//not used - default
+	writer << -1;														//Default zone color, seldom used - default
 	writer << static_cast<int>(this->zone_type_);						//zone type
 	if (this->specify_variable_location_ == 0)							//specify var location
 		writer << 0;													//Var location : Node
@@ -183,7 +187,7 @@ void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_p
 	writer << this->num_post_elements_;									//num elements
 	writer << 0 << 0 << 0;												//i,j,k cell dim - default
 	writer << 0;														//auxilarily name index pair - default
-	writer << 357.0f;													//EOH_marker
+	writer << 357.0f;													//EOH_marker - seperate the header from the data
 }
 
 
@@ -210,7 +214,7 @@ std::vector<int> Tecplot_Binary_File_Writer::to_tecplot_binary_format(const std:
 {
 	std::vector<int> tecplot_binary_format;
 	tecplot_binary_format.insert(tecplot_binary_format.end(), str.begin(), str.end());
-	tecplot_binary_format.push_back(0); // null
+	tecplot_binary_format.push_back(0); // null terminated
 	return tecplot_binary_format;
 }
 

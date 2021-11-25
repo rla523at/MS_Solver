@@ -5,7 +5,7 @@
 
 class Tecplot_File_Writer
 {
-public: //Command
+public://Command
 	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
 	void write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path);
 
@@ -45,7 +45,7 @@ private:
 		Text ASCII_data_text;
 		ASCII_data_text.add_empty_lines(num_data);
 
-		for (ushort i = 0; i < num_data; ++i) 
+		for (int i = 0; i < num_data; ++i) 
 		{
 			const auto& post_datas = set_of_post_datas[i];
 
@@ -59,7 +59,7 @@ private:
 				}
 			}
 			str_per_line = 0;
-			ASCII_data_text[i] << "\n";
+			ASCII_data_text[i] << "\n\n";
 		}
 
 		ASCII_data_text.add_write(post_file_path);
@@ -69,7 +69,7 @@ private:
     //header variable for ASCII
     std::string title_;
     std::string file_type_str_;
-    std::string solution_names_;
+    std::string post_variable_names_;
     std::string zone_title_;
     std::string variable_location_str_;
 };
