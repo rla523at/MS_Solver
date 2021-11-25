@@ -1,6 +1,6 @@
 #include "../INC/Grid.h"
 
-Grid::Grid(const std::string_view grid_file_path, const Grid_File_Convertor& grid_file_convertor)
+Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path)
 {
 	this->space_dimension_ = grid_file_convertor.get_space_dimension();
 	auto elements = grid_file_convertor.convert_to_elements(grid_file_path);

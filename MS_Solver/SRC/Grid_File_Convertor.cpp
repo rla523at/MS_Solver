@@ -17,30 +17,39 @@ std::vector<Element> Gmsh_Convertor::convert_to_elements(const std::string_view 
 	const auto element_text = this->read_about(grid_file_stream, "Elements");
 	const auto physical_name_text = this->read_about(grid_file_stream, "PhysicalNames");
 
-	LOG << std::left << std::setw(50) << "@ Read Grid" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+	LOG << std::left << std::setw(50) << "@ Read Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
 	Profiler::set_time_point();
 
 	const auto nodes = this->make_nodes(node_text);
 	const auto physical_group_index_to_element_type = this->make_physical_group_index_to_element_type(physical_name_text);
-	const auto elements = this->make_elements(element_text, physical_group_index_to_element_type, nodes);
+	return this->make_elements(element_text, physical_group_index_to_element_type, nodes);
 
-	LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
-	return elements;
+	//복사가 발생해서 error가 나는데 왜 어디서 복사가 발생하는거지 ?
+	//const auto elements = this->make_elements(element_text, physical_group_index_to_element_type, nodes);
+	//return elements;
+	//LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+
 }
 
 Text Gmsh_Convertor::read_about(std::ifstream& grid_file_stream, const std::string& target) const
 {
+	bool is_find = false;
 	const auto target_str = "$" + target;
 
 	std::string tmp_str;
-	while (std::getline(grid_file_stream, tmp_str)) {
-		if (tmp_str.find(target_str) != std::string::npos) {
+	while (std::getline(grid_file_stream, tmp_str)) 
+	{		
+		if (ms::contains_icase(tmp_str,target_str)) 
+		{
+			is_find = true;
 			std::getline(grid_file_stream, tmp_str);
 			break;
 		}
 	}
+
+	REQUIRE(is_find, "\"" + target_str + "\" should be contained in grid file");
 
 	const auto num_data = ms::string_to_value<size_t>(tmp_str);
 
@@ -59,11 +68,13 @@ std::vector<Euclidean_Vector> Gmsh_Convertor::make_nodes(const Text& node_text) 
 		const char delimiter = ' ';
 		auto parsed_sentences = node_sentence.parse(delimiter);
 
-		parsed_sentences.erase(parsed_sentences.begin());// parsed_sentences[0] : node index
+		std::vector<double> node_coords(this->space_dimension_);
+		for (ushort i = 0; i < this->space_dimension_; ++i)
+		{
+			node_coords[i] = parsed_sentences[i + 1].to_value<double>();// parsed_sentences[0] : node index
+		}
 
-		const auto node_coords = ms::sentences_to_values<double>(parsed_sentences);
-
-		node_datas.push_back(node_coords);
+		node_datas.push_back(std::move(node_coords));
 	}
 
 	return node_datas;
@@ -78,7 +89,7 @@ std::map<ushort, ElementType> Gmsh_Convertor::make_physical_group_index_to_eleme
 		const char delimiter = ' ';
 		const auto parsed_sentences = physical_name_sentence.parse(delimiter);
 
-		//const size_t dimension		= parsed_sentence_set[0].toValue<size_t>();
+		//const size_t dimension		= parsed_sentence_set[0].to_value<size_t>();
 		const auto physical_group_index = parsed_sentences[1].to_value<ushort>();
 		const auto name					= parsed_sentences[2].get_remove("\"");
 		const auto element_type			= ms::sentece_to_element_type(name);
@@ -103,9 +114,9 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		auto value_set = ms::sentences_to_values<uint>(parsed_sentences);
 
 		//const auto index					= value_set[0];
-		const auto figure_type_index = value_set[1];
+		const auto figure_type_index		= value_set[1];
 		//const auto tag_index				= value_set[2];
-		const auto physical_gorup_index = value_set[3];
+		const auto physical_gorup_index		= value_set[3];
 		//const auto element_group_index	= value_set[4];
 
 		//reference geometry
@@ -114,13 +125,15 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		auto reference_geometry = Reference_Geometry_Factory::make(figure, figure_order);
 
 		//geometry
-		constexpr ushort num_index = 5;
-		value_set.erase(value_set.begin(), value_set.begin() + num_index);
+		constexpr auto num_indexes = 5;
+		value_set.erase(value_set.begin(), value_set.begin() + num_indexes);
 
 		const auto num_nodes = value_set.size();
 		std::vector<uint> node_indexes(num_nodes);
 		for (ushort i = 0; i < num_nodes; ++i)
+		{
 			node_indexes[i] = value_set[i] - 1;		//Gmsh node index start with 1
+		}
 
 		auto nodes = ms::extract_by_index(node_datas, node_indexes);
 		Geometry geometry(std::move(reference_geometry), std::move(nodes));
@@ -129,6 +142,8 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		const auto type = physical_group_index_to_element_type.at(physical_gorup_index);
 		elements.push_back({ type, std::move(node_indexes), std::move(geometry) });
 	}
+	
+	LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
 	return elements;
 }
@@ -278,21 +293,6 @@ namespace ms {
 		else
 		{
 			EXCEPTION("wrong element_type");
-			return ElementType::not_in_list;
-		}
-	};
-
-	inline ElementType string_to_element_type(const std::string& str)
-	{
-		if (ms::contains_icase(str, "Unspecified"))						return ElementType::cell;
-		else if (ms::contains_icase(str, "slip", "wall"))				return ElementType::slip_wall;
-		else if (ms::contains_icase(str, "SuperSonic", "inlet", "1"))	return ElementType::supersonic_inlet1;
-		else if (ms::contains_icase(str, "SuperSonic", "inlet", "2"))	return ElementType::supersonic_inlet2;
-		else if (ms::contains_icase(str, "SuperSonic", "outlet"))		return ElementType::supersonic_outlet;
-		else if (ms::contains_icase(str, "periodic"))					return ElementType::periodic;
-		else if (ms::contains_icase(str, "initial", "constant"))		return ElementType::initial_constant_BC;
-		else {
-			throw std::runtime_error("wrong element_type");
 			return ElementType::not_in_list;
 		}
 	};

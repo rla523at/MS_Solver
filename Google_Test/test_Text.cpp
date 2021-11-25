@@ -84,6 +84,13 @@ TEST(Text, add_empty_line_1)
 	EXPECT_EQ(result, ref);
 }
 
+TEST(ms, contain_icase_1) 
+{
+	std::string str = "abc_qwer,wer__,,";
+	std::string target_str = "abc";
+	EXPECT_TRUE(ms::contains_icase(str, target_str));
+}
+
 TEST(ms, replace_1) {
 	std::string str = "abc_qwer,wer__,,";
 	ms::replace(str, ",", "_");

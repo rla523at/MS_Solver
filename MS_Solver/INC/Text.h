@@ -113,9 +113,10 @@ template <typename T>	Binary_Writer& Binary_Writer::operator<<(const std::vector
 namespace ms
 {
 	bool contains_icase(const std::string& str, const char* target);
+	bool contains_icase(const std::string& str, const std::string& target);
 	template <typename... Args>		bool contains_icase(const std::string& str, const Args... args)
 	{
-		static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
+		//static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};
 	std::string double_to_string(const double val);

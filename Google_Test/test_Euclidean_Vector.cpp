@@ -113,7 +113,19 @@ TEST(Euclidean_Vector, inner_product_2)
 	const auto ref = 25;
 	EXPECT_EQ(result, ref);
 }
-TEST(Euclidean_Vector, L2_norm_1) 
+TEST(Euclidean_Vector, is_axis_translation_1)
+{
+	Euclidean_Vector p1 = { 1, 0 };
+	Euclidean_Vector p2 = { 0, 1.0 / 3.0 };
+	EXPECT_FALSE(p1.is_axis_translation(p2));
+}
+TEST(Euclidean_Vector, is_axis_translation_2)
+{
+	Euclidean_Vector p1 = { 1, 0, 0 };
+	Euclidean_Vector p2 = { 3, 0, 0 };
+	EXPECT_TRUE(p1.is_axis_translation(p2));
+}
+TEST(Euclidean_Vector, L2_norm_1)
 {
 	const Euclidean_Vector v1 = { 3,4 };
 	const auto result = v1.L2_norm();

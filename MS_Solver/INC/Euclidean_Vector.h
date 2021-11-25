@@ -43,7 +43,8 @@ public:
 	Euclidean_Vector(const std::initializer_list<double> list);
 	Euclidean_Vector(std::vector<double>&& values);
 	Euclidean_Vector(const std::vector<double>& values);
-	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) : values_(first, last) {
+	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) : values_(first, last) 
+	{
 		this->num_values_ = static_cast<int>(this->values_.size());
 		this->const_data_ptr_ = this->values_.data();
 	};

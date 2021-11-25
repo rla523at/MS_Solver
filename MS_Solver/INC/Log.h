@@ -11,7 +11,9 @@ class Log
 private:
 	enum class Command
 	{
-		print
+		print,
+		print_off,
+		print_on
 	};
 
 public://Command
@@ -24,8 +26,25 @@ public://Command
 	{
 		switch (command)
 		{
-		case Command::print:	this->print(); break;
-		default:				EXCEPTION("not supported command");
+		case Command::print:	
+		{
+			this->print(); 
+			break;
+		}
+		case Command::print_off:	
+		{
+			this->is_print_on = false;
+			break;
+		}
+		case Command::print_on:
+		{
+			this->is_print_on = true;
+			break;
+		}
+		default:				
+		{
+			EXCEPTION("not supported command");
+		}
 		}
 		return *this;
 	}
@@ -78,7 +97,9 @@ private:
 	void print(void) 
 	{
 		auto log_str = this->content_.str();
-		std::cout << log_str;
+		
+		if (this->is_print_on)
+			std::cout << log_str;
 
 		this->log_txt_ << std::move(log_str);
 
@@ -87,11 +108,14 @@ private:
 	}
 
 private:
-	std::string path_;
-	Text log_txt_;
 	std::ostringstream content_;
+	bool is_print_on = true;
+	Text log_txt_;
+	std::string path_;
 
 public:
 	static constexpr Command print_ = Command::print;
+	static constexpr Command print_off = Command::print_off;
+	static constexpr Command print_on = Command::print_on;
 };
 

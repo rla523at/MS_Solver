@@ -59,5 +59,4 @@ private:
 namespace ms 
 {
 	ElementType sentece_to_element_type(const Sentence& sentence);
-	ElementType string_to_element_type(const std::string& str);
 }

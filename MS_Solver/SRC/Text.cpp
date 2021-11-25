@@ -257,6 +257,11 @@ namespace ms
 		return ms::find_icase(str, target) != std::string::npos;
 	}
 
+	bool contains_icase(const std::string& str, const std::string& target)
+	{
+		return ms::find_icase(str, target) != std::string::npos;
+	}
+
 	std::string double_to_string(const double val) 
 	{
 		constexpr size_t precision = 16;

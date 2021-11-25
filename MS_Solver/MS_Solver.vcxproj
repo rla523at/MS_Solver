@@ -26,7 +26,10 @@
     <ClCompile Include="SRC\Geometry.cpp" />
     <ClCompile Include="SRC\Governing_Equation.cpp" />
     <ClCompile Include="SRC\Grid.cpp" />
-    <ClCompile Include="SRC\Grid_File_Convertor.cpp" />
+    <ClCompile Include="SRC\Grid_File_Convertor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
     <ClCompile Include="SRC\Numerical_Flux_Function.cpp" />
@@ -46,7 +49,10 @@
     <ClInclude Include="INC\Geometry.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
     <ClInclude Include="INC\Grid.h" />
-    <ClInclude Include="INC\Grid_File_Convertor.h" />
+    <ClInclude Include="INC\Grid_File_Convertor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\Numerical_Flux_Function.h" />

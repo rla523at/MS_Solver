@@ -2,44 +2,90 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Grid.h"
 
-
-TEST(Grid, set_of_face_share_cell_indexes) 
+TEST(Grid, turn_off_log_print)
 {
-	constexpr ushort space_dimension = 2;
+	LOG << Log::print_off;
+}
+TEST(Grid, num_pbdry_pairs_1) 
+{
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad3.msh";
+
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
 	
-	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
-	const auto grid = Grid<space_dimension>(std::move(grid_elements));
-	const auto set_of_face_share_cell_indexes = grid.set_of_face_share_cell_indexes_consider_pbdry();
+	const auto result = grid.num_periodic_boundary_pairs();
 
-	auto result = set_of_face_share_cell_indexes[0];
-	std::sort(result.begin(), result.end());
-
-	const std::vector<size_t> ref = { 1,2,3,6 };
+	const auto ref = 6;
 	EXPECT_EQ(ref, result);
 }
-
-TEST(Grid, vnode_index_to_matched_vnode_index_set_1) 
+TEST(Grid, pbdry_oc_nc_index_pair_1)
 {
-	constexpr ushort space_dimension = 2;
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad3.msh";
 
-	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
-	const auto grid = Grid<space_dimension>(std::move(grid_elements));
-	const auto result = grid.pbdry_vnode_index_to_matched_pbdry_vnode_index_set().at(0);
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
 
-	const std::set<uint> ref = { 3,12,15 };
+	const auto result = grid.periodic_boundary_oc_nc_index_pair(0);
+
+	const std::pair<uint, uint> ref = { 2,0 };
 	EXPECT_EQ(ref, result);
 }
+TEST(Grid, pbdry_oc_nc_index_pair_2)
+{
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad3.msh";
 
-TEST(Grid, vnode_index_to_share_cell_indexes_1) {
-	constexpr ushort space_dimension = 2;
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
 
-	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
-	const auto grid = Grid<space_dimension>(std::move(grid_elements));
-	const auto result = grid.get_vnode_index_to_share_cell_index_set_consider_pbdry().at(0);
+	const auto result = grid.periodic_boundary_oc_nc_index_pair(3);
 
-	const std::set<uint> ref = { 0,2,6,8 };
+	const std::pair<uint, uint> ref = { 0,6 };
 	EXPECT_EQ(ref, result);
 }
+TEST(Grid, pbdry_oc_nc_index_pair_3)
+{
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad3.msh";
+
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
+
+	const auto result = grid.periodic_boundary_oc_nc_index_pair(5);
+
+	const std::pair<uint, uint> ref = { 2,8 };
+	EXPECT_EQ(ref, result);
+}
+TEST(Grid, turn_on_log_print)
+{
+	LOG << Log::print_on;
+}
+
+//
+//TEST(Grid, vnode_index_to_matched_vnode_index_set_1) 
+//{
+//	constexpr ushort space_dimension = 2;
+//
+//	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
+//	const auto grid = Grid<space_dimension>(std::move(grid_elements));
+//	const auto result = grid.pbdry_vnode_index_to_matched_pbdry_vnode_index_set().at(0);
+//
+//	const std::set<uint> ref = { 3,12,15 };
+//	EXPECT_EQ(ref, result);
+//}
+//
+//TEST(Grid, vnode_index_to_share_cell_indexes_1) {
+//	constexpr ushort space_dimension = 2;
+//
+//	auto grid_elements = Grid_Element_Builder<Gmsh, space_dimension>::build_from_grid_file("Quad3");
+//	const auto grid = Grid<space_dimension>(std::move(grid_elements));
+//	const auto result = grid.get_vnode_index_to_share_cell_index_set_consider_pbdry().at(0);
+//
+//	const std::set<uint> ref = { 0,2,6,8 };
+//	EXPECT_EQ(ref, result);
+//}
 
 //
 //GTEST_TEST(Grid_Info_Extractor, volume) {

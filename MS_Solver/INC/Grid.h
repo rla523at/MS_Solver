@@ -7,7 +7,7 @@
 class Grid 
 {
 public:
-	Grid(const std::string_view grid_file_path, const Grid_File_Convertor& grid_file_convertor);
+	Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path);
 
 public:
 	ushort space_dimension(void) const;

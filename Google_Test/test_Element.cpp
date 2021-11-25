@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Element.h"
 
+
 TEST(Element, vertex_node_indexes_1) 
 {
 	const Figure fig = Figure::quadrilateral;
@@ -311,6 +312,102 @@ TEST(Element, find_periodic_matched_node_indexes_3)
 
 	const auto result = element2.find_periodic_matched_node_indexes(element1);
 	std::vector<uint> ref = { 3,4 };
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, find_periodic_matched_node_indexes_4)
+{
+	//make element 1
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1, 0 };
+	const Euclidean_Vector n2 = { 1, 1.0 / 3.0 };
+	std::vector<Euclidean_Vector> nodes = { n1,n2 };
+	Geometry geometry1(std::move(ref_geo), std::move(nodes));
+
+	const auto element_type = ElementType::periodic;
+	std::vector<uint> node_indexes = { 3,7 };
+	Element element1(element_type, std::move(node_indexes), std::move(geometry1));
+
+	//make element 2
+	auto ref_geo2 = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n3 = { 0, 1.0 / 3.0 };
+	const Euclidean_Vector n4 = { 0, 0 };
+	std::vector<Euclidean_Vector> nodes2 = { n3,n4 };
+	Geometry geometry2(std::move(ref_geo2), std::move(nodes2));
+
+	std::vector<uint> node_indexes2 = { 4,0 };
+	Element element2(element_type, std::move(node_indexes2), std::move(geometry2));
+
+	const auto result = element2.find_periodic_matched_node_indexes(element1);
+	std::vector<uint> ref = { 0,4 };
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, find_periodic_matched_node_indexes_5)
+{
+	//make element 1
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1, 0, 0 };
+	const Euclidean_Vector n2 = { 1, 1.0 / 3.0, 0 };
+	std::vector<Euclidean_Vector> nodes = { n1,n2 };
+	Geometry geometry1(std::move(ref_geo), std::move(nodes));
+
+	const auto element_type = ElementType::periodic;
+	std::vector<uint> node_indexes = { 3,7 };
+	Element element1(element_type, std::move(node_indexes), std::move(geometry1));
+
+	//make element 2
+	auto ref_geo2 = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n3 = { 0, 1.0 / 3.0, 0 };
+	const Euclidean_Vector n4 = { 0, 0, 0 };
+	std::vector<Euclidean_Vector> nodes2 = { n3,n4 };
+	Geometry geometry2(std::move(ref_geo2), std::move(nodes2));
+
+	std::vector<uint> node_indexes2 = { 4,0 };
+	Element element2(element_type, std::move(node_indexes2), std::move(geometry2));
+
+	const auto result = element2.find_periodic_matched_node_indexes(element1);
+	std::vector<uint> ref = { }; // 두 element는 z=0 plane에 같이 있음으로 periodic pair가 될 수 없다.
+
+	EXPECT_EQ(result, ref);
+}
+TEST(Element, find_periodic_matched_node_indexes_6)
+{
+	//make element 1
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1, 0, 0 };
+	const Euclidean_Vector n2 = { 1, 1.0 / 3.0, 0 };
+	std::vector<Euclidean_Vector> nodes = { n1,n2 };
+	Geometry geometry1(std::move(ref_geo), std::move(nodes));
+
+	const auto element_type = ElementType::periodic;
+	std::vector<uint> node_indexes = { 3,7 };
+	Element element1(element_type, std::move(node_indexes), std::move(geometry1));
+
+	//make element 2
+	auto ref_geo2 = Reference_Geometry_Factory::make(fig, fig_order);
+
+	const Euclidean_Vector n3 = { 0, 1.0 / 3.0, 1 };
+	const Euclidean_Vector n4 = { 0, 0, 1 };
+	std::vector<Euclidean_Vector> nodes2 = { n3,n4 };
+	Geometry geometry2(std::move(ref_geo2), std::move(nodes2));
+
+	std::vector<uint> node_indexes2 = { 4,0 };
+	Element element2(element_type, std::move(node_indexes2), std::move(geometry2));
+
+	const auto result = element2.find_periodic_matched_node_indexes(element1);
+	std::vector<uint> ref = { }; // 두 element는 axis translation이 되지 않아 periodic pair가 될 수 없다.
 
 	EXPECT_EQ(result, ref);
 }
