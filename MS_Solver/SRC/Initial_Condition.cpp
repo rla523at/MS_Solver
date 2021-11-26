@@ -7,7 +7,8 @@ Euclidean_Vector Constant1::calculate_solution(const Euclidean_Vector& space_vec
 
 Sine_Wave::Sine_Wave(const std::vector<double>& wave_lengths)
 {
-	this->space_dimension_ = wave_lengths.size();
+	this->space_dimension_ = static_cast<ushort>(wave_lengths.size());
+	this->wave_numbers_.resize(this->space_dimension_);
 
 	for (ushort i = 0; i < this->space_dimension_; ++i)
 	{
@@ -65,14 +66,14 @@ Euclidean_Vector Square_Wave::calculate_solution(const Euclidean_Vector& space_v
 Circle_Wave::Circle_Wave(const ushort space_dimension)
 	:space_dimension_(space_dimension) 
 {
-	this->center_ = std::vector<double>(this->space_dimension_, 0.5);
+	this->center_v_ = std::vector<double>(this->space_dimension_, 0.5);
 };
 
 Euclidean_Vector Circle_Wave::calculate_solution(const Euclidean_Vector& space_vector) const
 {
 	constexpr auto shock_radius = 0.25;
 
-	const auto distance_from_center = (space_vector - this->center_).L2_norm();
+	const auto distance_from_center = (space_vector - this->center_v_).L2_norm();
 
 	if (distance_from_center <= shock_radius)
 	{
@@ -87,15 +88,15 @@ Euclidean_Vector Circle_Wave::calculate_solution(const Euclidean_Vector& space_v
 Gaussian_Wave::Gaussian_Wave(const ushort space_dimension)
 	:space_dimension_(space_dimension)
 {
-	this->center_ = std::vector<double>(this->space_dimension_, 0.5);
+	this->center_v_ = std::vector<double>(this->space_dimension_, 0.5);
 };
 
-Euclidean_Vector Gaussian_Wave::calculate_solution(const Euclidean_Vector& space_vector) const
+Euclidean_Vector Gaussian_Wave::calculate_solution(const Euclidean_Vector& point_v) const
 {
 	constexpr auto beta = 20.0;
-	const auto distance_from_center = (space_vector - this->center_).L2_norm();
+	const auto center_to_point_v = point_v - this->center_v_;
 
-	return { std::exp(-beta * distance_from_center) };
+	return { std::exp(-beta * center_to_point_v.inner_product(center_to_point_v)) };
 }
 
 Euclidean_Vector Euler_Shocktube_2D::primitive_to_conservative(const Euclidean_Vector& primitive_variable) const
@@ -738,6 +739,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "square"))
@@ -753,6 +755,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "circle"))
@@ -768,6 +771,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "gaussian"))
@@ -783,6 +787,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "SOD"))
@@ -798,6 +803,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Modified_SOD"))
@@ -813,6 +819,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Supersonic_Expansion"))
@@ -828,6 +835,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Left_Half_Blast_Wave"))
@@ -843,6 +851,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Double_Strong_Shock"))
@@ -858,6 +867,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Slowly_Moving_Contact"))
@@ -873,6 +883,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Harten_Lax"))
@@ -888,6 +899,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Shu_Osher"))
@@ -903,6 +915,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Blast_Wave"))
@@ -918,6 +931,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
 	}
 	else if (ms::contains_icase(name, "Explosion"))
@@ -933,6 +947,12 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 		else
 		{
 			EXCEPTION("not supproted space dimension");
+			return nullptr;
 		}
+	}
+	else
+	{
+		EXCEPTION("initial condition in configuration file is not supported");
+		return nullptr;
 	}
 }

@@ -82,7 +82,7 @@ public:
 
 private:	
 	ushort space_dimension_ = 0;
-	Euclidean_Vector center_;
+	Euclidean_Vector center_v_;
 };
 
 class Circle_Wave_2D : public Circle_Wave
@@ -109,7 +109,7 @@ public:
 
 private:
 	ushort space_dimension_ = 0;
-	Euclidean_Vector center_;
+	Euclidean_Vector center_v_;
 };
 
 class Gaussian_Wave_2D : public Gaussian_Wave
