@@ -20,7 +20,7 @@ Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const
 	for (size_t i = 0; i < matrix_order; ++i)
 		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));
 
-	return transformation_monomial_matrix.inverse();
+	return transformation_monomial_matrix.get_inverse();
 }
 
 std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const 

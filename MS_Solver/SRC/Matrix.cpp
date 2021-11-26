@@ -1,6 +1,6 @@
 #include "../INC/Matrix.h"
 
-void Matrix_Base::be_transpose(void) 
+void Matrix_Base::transpose(void) 
 {
 	std::swap(this->num_rows_, this->num_columns_);
 
@@ -13,7 +13,7 @@ void Matrix_Base::be_transpose(void)
 Matrix Matrix_Base::operator*(const double constant) const
 {
 	const auto num_values = this->num_values();
-	std::vector<double> values(num_values);
+	std::vector<double> values(this->const_data_ptr_, this->const_data_ptr_ + num_values);
 
 	const auto n = static_cast<int>(num_values);
 	const auto incx = 1;
@@ -25,7 +25,7 @@ Matrix Matrix_Base::operator*(const double constant) const
 Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 {
 	REQUIRE(this->size() == other.size(), "two matrix should be same size");
-	REQUIRE(this->transpose_type_ == other.transpose_type_, "two matrix should be same transpose type");
+	REQUIRE(!this->is_transposed() && !other.is_transposed(), "both matrixes should not be transposed");
 
 	const auto n = static_cast<MKL_INT>(this->num_values());
 	const auto a = 1.0;
@@ -248,7 +248,8 @@ void Matrix::operator*=(const double constant)
 	cblas_dscal(n, constant, this->values_.data(), incx);	
 }
 
-Matrix& Matrix::be_inverse(void) {
+Matrix& Matrix::inverse(void) 
+{
 	REQUIRE(this->is_square_matrix(), "invertable matrix should be square matrix");
 
 	const auto ipiv = this->PLU_decomposition();
@@ -258,7 +259,7 @@ Matrix& Matrix::be_inverse(void) {
 	const lapack_int lda = n;
 	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data(), lda, ipiv.data());
 
-	REQUIRE(info == 0, "info should be 0 when success matrix inverse");
+	REQUIRE(info == 0, "info should be 0 when success matrix get_inverse");
 	//info > 0 "U is singular matrix in L-U decomposition"
 	//info < 0 "fail to inverse the matrix"
 
@@ -306,25 +307,35 @@ bool  Matrix::operator==(const Matrix& other) const
 	if (this->num_columns_ != other.num_columns_)
 		return false;
 
-	for (size_t i = 0; i < this->num_values(); ++i) {
-		if (this->const_data_ptr_[i] != other.const_data_ptr_[i])
-			return false;
+	if (this->transpose_type_ == other.transpose_type_)
+	{
+		return std::equal(this->const_data_ptr_, this->const_data_ptr_ + this->num_values(), other.const_data_ptr_);
 	}
-
-	return true;
+	else
+	{
+		for (size_t i = 0; i < this->num_rows_; ++i) 
+		{
+			for (size_t j = 0; j < this->num_columns_; ++j)
+			{
+				if (this->at(i,j) != other.at(i,j))
+					return false;
+			}
+		}
+		return true;
+	}
 }
 
-Matrix Matrix::transpose(void) const 
+Matrix Matrix::get_transpose(void) const 
 {
 	auto result = *this;
-	result.be_transpose();
+	result.transpose();
 	return result;
 }
 
-Matrix Matrix::inverse(void) const 
+Matrix Matrix::get_inverse(void) const 
 {
 	auto result = *this;
-	return result.be_inverse();
+	return result.inverse();
 }
 
 double& Matrix::value_at(const size_t row, const size_t column) 

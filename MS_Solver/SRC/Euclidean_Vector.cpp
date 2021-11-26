@@ -187,7 +187,9 @@ std::string Euclidean_Vector_Base::to_string(void) const
 	std::ostringstream oss;
 	oss << std::setprecision(16) << std::showpoint << std::left;
 	for (int i = 0; i < this->num_values_; ++i)
+	{
 		oss << std::setw(25) << this->const_data_ptr_[i];
+	}
 	return oss.str();
 }
 
@@ -211,109 +213,10 @@ Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
 	return *this;
 }
 
-//Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
-//{
-//	REQUIRE(this->size() == other.size(), "other vector should be same size");
-//
-//	const auto n = static_cast<MKL_INT>(this->size());
-//	const auto a = 1.0;
-//	const auto incx = 1;
-//	const auto incy = 1;
-//
-//	cblas_daxpy(n, a, other.values_.data(), incx, this->values_.data(), incy);
-//	
-//	return *this;
-//}
-//
-//Euclidean_Vector& Euclidean_Vector::operator-=(const Euclidean_Vector& other)
-//{
-//	REQUIRE(this->size() == other.size(), "other vector should be same size");
-//
-//	const auto n = static_cast<MKL_INT>(this->size());
-//	const auto a = -1.0;
-//	const auto incx = 1;
-//	const auto incy = 1;
-//
-//	cblas_daxpy(n, a, other.values_.data(), incx, this->values_.data(), incy);
-//
-//	return *this;
-//}
-
 Euclidean_Vector& Euclidean_Vector::normalize(void)
 {
 	return *this *= 1.0 / this->L2_norm();
 }
-
-//Euclidean_Vector Euclidean_Vector::operator+(const Euclidean_Vector& other) const
-//{
-//	auto result = *this;
-//	return result += other;
-//}
-//
-//Euclidean_Vector Euclidean_Vector::operator-(const Euclidean_Vector& other) const
-//{
-//	auto result = *this;
-//	return result -= other;
-//}
-//
-//Euclidean_Vector Euclidean_Vector::operator*(const double constant) const
-//{
-//	auto result = *this;
-//	return result *= constant;	
-//}
-
-//double Euclidean_Vector::operator[](const size_t position) const 
-//{
-//	REQUIRE(position < this->size(), "position should be less then size");
-//	return this->values_[position];
-//}
-//
-//bool Euclidean_Vector::operator==(const Euclidean_Vector& other) const 
-//{
-//	return this->values_ == other.values_;
-//}
-//
-//double Euclidean_Vector::at(const size_t position) const 
-//{
-//	REQUIRE(position < this->size(), "position should be less then size");
-//	return this->values_[position];
-//}
-//
-//const double* Euclidean_Vector::begin(void) const 
-//{
-//	return this->values_.data();
-//}
-//
-//double Euclidean_Vector::L2_norm(void) const
-//{
-//	return std::sqrt(this->inner_product(*this));
-//}
-//
-//double Euclidean_Vector::inner_product(const Euclidean_Vector& other) const
-//{
-//	REQUIRE(this->size() == other.size(), "other vector should be same size");
-//
-//	const auto n = static_cast<MKL_INT>(this->values_.size());
-//	const auto incx = 1;
-//	const auto incy = 1;
-//
-//	return cblas_ddot(n, this->values_.data(), incx, other.values_.data(), incy);
-//}
-//
-//size_t Euclidean_Vector::size(void) const 
-//{
-//	return values_.size();
-//}
-//
-//std::string Euclidean_Vector::to_string(void) const 
-//{
-//	std::ostringstream oss;
-//	oss << std::setprecision(16) << std::showpoint << std::left;
-//	for (const auto value : this->values_)
-//		oss << std::setw(25) << value;
-//	return oss.str();
-//}
-
 
 Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(const size_t num_value, const double* ptr)
 {
@@ -327,8 +230,6 @@ Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(const std::vector<double>& va
 	this->const_data_ptr_ = values.data();
 }
 
-
-
 Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Base& x)
 {
 	return x * constant;
@@ -338,61 +239,3 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x)
 {
 	return os << x.to_string();
 }
-
-//
-//Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator-=(const Dynamic_Euclidean_Vector& other) {
-//	dynamic_require(this->dimension() == other.dimension(), "dimension should be matched");
-//
-//	cblas_daxpy(static_cast<MKL_INT>(this->dimension()), -1.0, other.values_.data(), 1, this->values_.data(), 1);
-//	return *this;
-//}
-//
-//Dynamic_Euclidean_Vector& Dynamic_Euclidean_Vector::operator*=(const double constant) {
-//	cblas_dscal(static_cast<MKL_INT>(this->dimension()), constant, this->values_.data(), 1);
-//	return *this;
-//}
-//
-//Dynamic_Euclidean_Vector Dynamic_Euclidean_Vector::operator-(const Dynamic_Euclidean_Vector& other) const {
-//	auto result = *this;
-//	return result -= other;
-//}
-//
-//double Dynamic_Euclidean_Vector::operator[](const size_t position) const {
-//	dynamic_require(position < this->dimension(), "position should be less then dimension");
-//	return this->values_[position];
-//}
-
-//double Dynamic_Euclidean_Vector::at(const size_t position) const {
-//	dynamic_require(position < this->dimension(), "position should be less then dimension");
-//	return this->values_[position];
-//}
-//
-//std::vector<double>::const_iterator Dynamic_Euclidean_Vector::begin(void) const {
-//	return this->values_.cbegin();
-//}
-//
-//std::vector<double>::const_iterator Dynamic_Euclidean_Vector::end(void) const {
-//	return this->values_.cend();
-//}
-//
-//const double* Dynamic_Euclidean_Vector::data(void) const {
-//	return this->values_.data();
-//};
-//
-//size_t Dynamic_Euclidean_Vector::dimension(void) const {
-//	return values_.size();
-//}
-//
-
-//double Dynamic_Euclidean_Vector::inner_product(const Dynamic_Euclidean_Vector& other) const {
-//	dynamic_require(this->dimension() == other.dimension(), "dimension should be matched");
-//
-//	return cblas_ddot(static_cast<MKL_INT>(this->dimension()), this->values_.data(), 1, other.values_.data(), 1);
-//}
-//
-//
-//void Dynamic_Euclidean_Vector::be_absolute(void){
-//	for (auto& value : this->values_)
-//		value = std::abs(value);	
-//};
-

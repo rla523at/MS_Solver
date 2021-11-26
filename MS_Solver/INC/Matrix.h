@@ -14,12 +14,15 @@ class Matrix_Base
 	template <typename T>
 	using is_not_matrix = std::enable_if_t<!std::is_base_of_v<Matrix_Base, T>, bool>;
 
+	template <typename T>
+	using is_class = std::enable_if_t<std::is_class_v<T>, bool>;
+
 public: //Command
-	void be_transpose(void);
+	void transpose(void);
 
 public: //Query
 	Matrix operator*(const double constant) const;	
-	template <typename V, is_not_matrix<V> = true>	V operator*(const V& vec) const
+	template <typename V, is_class<V> = true, is_not_matrix<V> = true>	V operator*(const V& vec) const
 	{
 		REQUIRE(this->num_columns_ == vec.size(), "size should be mathced");
 
@@ -82,7 +85,7 @@ public://Command
 	void operator=(Matrix&& other) noexcept;
 	void operator*=(const double constant);
 
-	Matrix& be_inverse(void);
+	Matrix& inverse(void);
 	template <typename V>	void change_column(const size_t column_index, const V& vec) 
 	{
 		REQUIRE(column_index < this->num_columns_, "column idnex can not exceed number of column");
@@ -105,8 +108,8 @@ public://Command
 public://Query
 	bool operator==(const Matrix& other) const;
 
-	Matrix transpose(void) const;
-	Matrix inverse(void) const;
+	Matrix get_transpose(void) const;
+	Matrix get_inverse(void) const;
 	
 private:
 	double& value_at(const size_t row, const size_t column);
