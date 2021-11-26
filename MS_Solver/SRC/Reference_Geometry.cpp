@@ -10,6 +10,109 @@ bool Reference_Geometry::operator!=(const Reference_Geometry& other) const
 	return !(*this == other);
 }
 
+const std::vector<Euclidean_Vector>& Reference_Geometry::get_mapping_nodes(void) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+	return this->set_of_mapping_nodes_[figure_index][this->order_];
+}
+
+const Vector_Function<Polynomial>& Reference_Geometry::get_mapping_monomial_vector_function(void) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+	return this->set_of_mapping_monomial_vector_function_[figure_index][this->order_];
+}
+
+const Matrix& Reference_Geometry::get_inverse_mapping_monomial_matrix(void) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+	return this->set_of_inverse_mapping_monomial_matrix_[figure_index][this->order_];
+}
+
+const std::vector<Euclidean_Vector>& Reference_Geometry::get_post_nodes(const ushort post_order) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+
+	if (this->set_of_post_nodes_[figure_index].size() <= post_order) 
+	{
+		const auto new_size = post_order + 1;
+		this->set_of_post_nodes_[figure_index].resize(new_size);
+	}
+
+	if (this->set_of_post_nodes_[figure_index][post_order].empty())
+	{
+		this->set_of_post_nodes_[figure_index][post_order] = this->make_post_nodes(post_order);
+	}
+
+	return this->set_of_post_nodes_[figure_index][post_order];
+}
+
+const std::vector<std::vector<uint>>& Reference_Geometry::get_connectivities(const ushort post_order) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+
+	if (this->set_of_connectivities_[figure_index].size() <= post_order) 
+	{
+		const auto new_size = post_order + 1;
+		this->set_of_connectivities_[figure_index].resize(new_size);
+	}
+
+	if (this->set_of_connectivities_[figure_index][post_order].empty())
+	{
+		this->set_of_connectivities_[figure_index][post_order] = this->make_connectivities(post_order);
+	}
+
+	return this->set_of_connectivities_[figure_index][post_order];
+}
+
+const Quadrature_Rule& Reference_Geometry::get_quadrature_rule(const ushort integrand_order) const
+{
+	const auto figure_index = static_cast<int>(this->figure());
+
+	if (this->quadrature_rules_[figure_index].size() <= integrand_order)
+	{
+		const auto new_size = integrand_order + 1;
+		this->quadrature_rules_[figure_index].resize(new_size);
+	}
+
+	if (this->quadrature_rules_[figure_index][integrand_order].is_empty())
+	{
+		this->quadrature_rules_[figure_index][integrand_order] = this->make_quadrature_rule(integrand_order);
+	}
+
+	return this->quadrature_rules_[figure_index][integrand_order];
+}
+
+std::vector<ushort> Reference_Geometry::vertex_node_index_sequneces(void) const
+{
+	const auto num_vertex = this->num_vertex();
+	std::vector<ushort> vnode_index_orders(num_vertex);
+
+	for (ushort i = 0; i < num_vertex; ++i)
+		vnode_index_orders[i] = i;
+
+	return vnode_index_orders;
+}
+
+void Reference_Geometry::initialize(void)
+{
+	const auto figure_index = static_cast<int>(this->figure());
+
+	if (this->set_of_mapping_nodes_[figure_index].size() < this->order_)
+	{
+		const auto new_size = this->order_ + 1;
+		this->set_of_mapping_nodes_[figure_index].resize(new_size);
+		this->set_of_mapping_monomial_vector_function_[figure_index].resize(new_size);
+		this->set_of_inverse_mapping_monomial_matrix_[figure_index].resize(new_size);
+	}
+
+	if (this->set_of_mapping_nodes_[figure_index][this->order_].empty())
+	{
+		this->set_of_mapping_nodes_[figure_index][this->order_] = this->make_mapping_nodes();
+		this->set_of_mapping_monomial_vector_function_[figure_index][this->order_] = this->make_mapping_monomial_vector_function();
+		this->set_of_inverse_mapping_monomial_matrix_[figure_index][this->order_] = this->make_inverse_mapping_monomial_matrix();
+	}
+}
+
 Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const 
 {
 	const auto& mapping_nodes = this->get_mapping_nodes();
@@ -32,26 +135,33 @@ std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(
 			 { node_indexes[1],node_indexes[3],node_indexes[2] } };
 };
 
-Reference_Line::Reference_Line(const ushort order) {
-	this->order_ = order;
+//Reference_Line::Reference_Line(const ushort order) {
+//	this->order_ = order;
+//
+//	if (this->set_of_mapping_nodes_.size() < this->order_) 
+//	{
+//		const auto new_size = this->order_ + 1;
+//		this->set_of_mapping_nodes_.resize(new_size);
+//		this->set_of_mapping_monomial_vector_function_.resize(new_size);
+//		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
+//	}
+//
+//	if (this->set_of_mapping_nodes_[this->order_].empty()) {
+//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
+//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
+//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
+//	}
+//};
 
-	if (this->set_of_mapping_nodes_.size() < this->order_) {
-		const auto new_size = this->order_ + 1;
-		this->set_of_mapping_nodes_.resize(new_size);
-		this->set_of_mapping_monomial_vector_function_.resize(new_size);
-		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
-	}
-
-	if (this->set_of_mapping_nodes_[this->order_].empty()) {
-		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-	}
-};
-
-Euclidean_Vector Reference_Line::center_node(void) const 
+Reference_Line::Reference_Line(const ushort order)
 {
-	return { 0.0 };
+	this->order_ = order;
+	this->initialize();
+}
+
+Euclidean_Vector Reference_Line::center_point(const ushort space_dimension) const
+{
+	return std::vector<double>(space_dimension);
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Line::face_reference_geometries(void) const
@@ -133,11 +243,6 @@ bool Reference_Line::is_line(void) const
 	return true;
 }
 
-std::vector<ushort> Reference_Line::vertex_node_index_sequneces(void) const 
-{
-	return { 0,1 };
-};
-
 std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_node_index_sequences(void) const 
 {
 	// 0 式式式式 1
@@ -167,58 +272,46 @@ ushort Reference_Line::scale_function_order(void) const
 	return 0;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const 
-{
-	return this->set_of_mapping_nodes_[this->order_];
-}
+//const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const 
+//{
+//	return this->set_of_mapping_nodes_[this->order_];
+//}
+//
+//
+//const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const 
+//{
+//	return this->set_of_mapping_monomial_vector_function_[this->order_];
+//}
+//
+//const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const 
+//{
+//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
+//}
 
-const Quadrature_Rule& Reference_Line::get_quadrature_rule(const ushort integrand_order) const 
-{
-	if (this->quadrature_rules_.size() <= integrand_order) {
-		const auto new_isze = integrand_order + 1;
-		this->quadrature_rules_.resize(new_isze);
-	}
-
-	if (this->quadrature_rules_[integrand_order].is_empty())
-		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
-
-	return this->quadrature_rules_[integrand_order];
-}
-
-const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const 
-{
-	return this->set_of_mapping_monomial_vector_function_[this->order_];
-}
-
-const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const 
-{
-	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-}
-
-const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const 
-{
-	if (this->set_of_post_nodes_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_post_nodes_.resize(new_size);
-	}
-
-	if (this->set_of_post_nodes_[post_order].empty())
-		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-
-	return this->set_of_post_nodes_[post_order];
-}
-const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const 
-{
-	if (this->set_of_connectivities_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_connectivities_.resize(new_size);
-	}
-
-	if (this->set_of_connectivities_[post_order].empty())
-		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
-
-	return this->set_of_connectivities_[post_order];
-}
+//const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const 
+//{
+//	if (this->set_of_post_nodes_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_post_nodes_.resize(new_size);
+//	}
+//
+//	if (this->set_of_post_nodes_[post_order].empty())
+//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
+//
+//	return this->set_of_post_nodes_[post_order];
+//}
+//const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const 
+//{
+//	if (this->set_of_connectivities_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_connectivities_.resize(new_size);
+//	}
+//
+//	if (this->set_of_connectivities_[post_order].empty())
+//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
+//
+//	return this->set_of_connectivities_[post_order];
+//}
 std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const 
 {
 	// 0 式式式式 1 		
@@ -277,24 +370,36 @@ Vector_Function<Polynomial> Reference_Line::make_mapping_monomial_vector_functio
 	return mapping_monomial_vector;	// 1 r r^2 ...		
 }
 
-Reference_Triangle::Reference_Triangle(const ushort order) {
-	this->order_ = order;
+//Reference_Triangle::Reference_Triangle(const ushort order) 
+//{
+//	this->order_ = order;
+//
+//	if (this->set_of_mapping_nodes_.size() < this->order_) 
+//	{
+//		this->set_of_mapping_nodes_.resize(this->order_ + 1);
+//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
+//
+//		this->set_of_mapping_monomial_vector_function_.resize(this->order_ + 1);
+//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
+//
+//		this->set_of_inverse_mapping_monomial_matrix_.resize(this->order_ + 1);
+//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
+//	}
+//};
 
-	if (this->set_of_mapping_nodes_.size() < this->order_) {
-		this->set_of_mapping_nodes_.resize(this->order_ + 1);
-		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-
-		this->set_of_mapping_monomial_vector_function_.resize(this->order_ + 1);
-		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-
-		this->set_of_inverse_mapping_monomial_matrix_.resize(this->order_ + 1);
-		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-	}
-};
-
-Euclidean_Vector Reference_Triangle::center_node(void) const 
+Reference_Triangle::Reference_Triangle(const ushort order)
 {
-	return { -1.0 / 3.0, -1.0 / 3.0 };
+	this->order_ = order;
+	this->initialize();
+}
+
+Euclidean_Vector Reference_Triangle::center_point(const ushort space_dimension) const
+{
+	std::vector<double> coordinate_values(space_dimension);
+	coordinate_values[0] = -1.0 / 3.0;
+	coordinate_values[1] = -1.0 / 3.0;
+
+	return coordinate_values;
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::face_reference_geometries(void) const
@@ -379,11 +484,6 @@ bool Reference_Triangle::is_line(void) const
 	return false;
 };
 
-std::vector<ushort> Reference_Triangle::vertex_node_index_sequneces(void) const 
-{
-	return { 0,1,2 };
-};
-
 std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_index_sequences(void) const 
 {
 	//      2
@@ -438,58 +538,46 @@ ushort Reference_Triangle::scale_function_order(void) const
 	return 0;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const 
-{
-	return this->set_of_mapping_nodes_[this->order_];
-}
+//const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const 
+//{
+//	return this->set_of_mapping_nodes_[this->order_];
+//}
+//
+//const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const 
+//{
+//	return this->set_of_mapping_monomial_vector_function_[this->order_];
+//}
+//
+//const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const 
+//{
+//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
+//}
+//
+//const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const 
+//{
+//	if (this->set_of_post_nodes_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_post_nodes_.resize(new_size);
+//	}
+//
+//	if (this->set_of_post_nodes_[post_order].empty())
+//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
+//
+//	return this->set_of_post_nodes_[post_order];
+//}
+//const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const 
+//{
+//	if (this->set_of_connectivities_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_connectivities_.resize(new_size);
+//	}
+//	
+//	if (this->set_of_connectivities_[post_order].empty())
+//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);	
+//
+//	return this->set_of_connectivities_[post_order];
+//}
 
-const Quadrature_Rule& Reference_Triangle::get_quadrature_rule(const ushort integrand_order) const 
-{
-	if (this->quadrature_rules_.size() <= integrand_order) {
-		const auto new_isze = integrand_order + 1;
-		this->quadrature_rules_.resize(new_isze);
-	}
-
-	if (this->quadrature_rules_[integrand_order].is_empty())
-		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
-
-	return this->quadrature_rules_[integrand_order];
-}
-
-const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const 
-{
-	return this->set_of_mapping_monomial_vector_function_[this->order_];
-}
-
-const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const 
-{
-	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-}
-
-const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const 
-{
-	if (this->set_of_post_nodes_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_post_nodes_.resize(new_size);
-	}
-
-	if (this->set_of_post_nodes_[post_order].empty())
-		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-
-	return this->set_of_post_nodes_[post_order];
-}
-const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const 
-{
-	if (this->set_of_connectivities_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_connectivities_.resize(new_size);
-	}
-	
-	if (this->set_of_connectivities_[post_order].empty())
-		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);	
-
-	return this->set_of_connectivities_[post_order];
-}
 std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const 
 {
 	//	  2
@@ -503,6 +591,7 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
+
 std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort post_order) const 
 {
 	const auto n = post_order;
@@ -527,6 +616,7 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort p
 
 	return post_nodes;
 }
+
 std::vector<std::vector<uint>> Reference_Triangle::make_connectivities(const ushort post_order) const 
 {
 	const auto n = post_order;
@@ -572,27 +662,34 @@ Vector_Function<Polynomial> Reference_Triangle::make_mapping_monomial_vector_fun
 	return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...	
 }
 
-Reference_Quadrilateral::Reference_Quadrilateral(ushort order)
+//Reference_Quadrilateral::Reference_Quadrilateral(ushort order)
+//{
+//	this->order_ = order;
+//
+//	if (this->set_of_mapping_nodes_.size() < this->order_) {
+//		const auto new_size = this->order_ + 1;
+//
+//		this->set_of_mapping_nodes_.resize(new_size);
+//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
+//
+//		this->set_of_mapping_monomial_vector_function_.resize(new_size);
+//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
+//
+//		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
+//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
+//	}
+//};
+
+
+Reference_Quadrilateral::Reference_Quadrilateral(const ushort order)
 {
 	this->order_ = order;
+	this->initialize();
+}
 
-	if (this->set_of_mapping_nodes_.size() < this->order_) {
-		const auto new_size = this->order_ + 1;
-
-		this->set_of_mapping_nodes_.resize(new_size);
-		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-
-		this->set_of_mapping_monomial_vector_function_.resize(new_size);
-		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-
-		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
-		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-	}
-};
-
-Euclidean_Vector Reference_Quadrilateral::center_node(void) const 
+Euclidean_Vector Reference_Quadrilateral::center_point(const ushort space_dimension) const
 {
-	return { 0.0, 0.0 };
+	return std::vector<double>(space_dimension);		
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::face_reference_geometries(void) const
@@ -671,14 +768,12 @@ bool Reference_Quadrilateral::is_simplex(void) const
 {
 	return false;
 };
+
 bool Reference_Quadrilateral::is_line(void) const 
 {
 	return false;
 }
-std::vector<ushort> Reference_Quadrilateral::vertex_node_index_sequneces(void) const 
-{
-	return { 0,1,2,3 };
-};
+
 std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_node_index_sequences(void) const 
 {
 	//      2
@@ -692,6 +787,7 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_nod
 	std::vector<ushort> face3_node_index = { 3,0 };
 	return { face0_node_index,face1_node_index, face2_node_index,face3_node_index };
 };
+
 std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index_sequences(void) const 
 {
 	//      2
@@ -734,59 +830,47 @@ ushort Reference_Quadrilateral::scale_function_order(void) const
 	return 1;
 }
 
-const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const 
-{
-	return this->set_of_mapping_nodes_[this->order_];
-}
+//const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const 
+//{
+//	return this->set_of_mapping_nodes_[this->order_];
+//}
+//
+//const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const 
+//{
+//	return this->set_of_mapping_monomial_vector_function_[this->order_];
+//}
+//
+//const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const 
+//{
+//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
+//}
 
-const Quadrature_Rule& Reference_Quadrilateral::get_quadrature_rule(const ushort integrand_order) const 
-{
-	if (this->quadrature_rules_.size() <= integrand_order) {
-		const auto new_isze = integrand_order + 1;
-		this->quadrature_rules_.resize(new_isze);
-	}
+//const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const 
+//{
+//	if (this->set_of_post_nodes_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_post_nodes_.resize(new_size);
+//	}
+//
+//	if (this->set_of_post_nodes_[post_order].empty())
+//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
+//
+//	return this->set_of_post_nodes_[post_order];
+//}
+//
+//const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const 
+//{
+//	if (this->set_of_connectivities_.size() <= post_order) {
+//		const auto new_size = post_order + 1;
+//		this->set_of_connectivities_.resize(new_size);
+//	}
+//
+//	if (this->set_of_connectivities_[post_order].empty())
+//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
+//
+//	return this->set_of_connectivities_[post_order];
+//}
 
-	if (this->quadrature_rules_[integrand_order].is_empty())
-		this->quadrature_rules_[integrand_order] = this->make_quadrature_rule(integrand_order);
-
-	return this->quadrature_rules_[integrand_order];
-}
-
-const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const 
-{
-	return this->set_of_mapping_monomial_vector_function_[this->order_];
-}
-
-const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const 
-{
-	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-}
-
-const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const 
-{
-	if (this->set_of_post_nodes_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_post_nodes_.resize(new_size);
-	}
-
-	if (this->set_of_post_nodes_[post_order].empty())
-		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-
-	return this->set_of_post_nodes_[post_order];
-}
-
-const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const 
-{
-	if (this->set_of_connectivities_.size() <= post_order) {
-		const auto new_size = post_order + 1;
-		this->set_of_connectivities_.resize(new_size);
-	}
-
-	if (this->set_of_connectivities_[post_order].empty())
-		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
-
-	return this->set_of_connectivities_[post_order];
-}
 std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) const 
 {
 	//   3式式式式式2
@@ -798,6 +882,7 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) 
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
+
 std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ushort post_order) const 
 {
 	const auto n = post_order;
@@ -822,6 +907,7 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ush
 
 	return post_nodes;
 }
+
 std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(const ushort post_order) const 
 {
 	const auto n = post_order;
@@ -848,6 +934,7 @@ std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(cons
 
 	return connectivities;
 }
+
 Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vector_function(void) const 
 {
 	Polynomial r("x0");

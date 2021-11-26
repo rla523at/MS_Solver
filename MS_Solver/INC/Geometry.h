@@ -13,7 +13,7 @@ public://Command
 public://Query
 	bool operator==(const Geometry& other) const;
 
-	Euclidean_Vector center_node(void) const;
+	Euclidean_Vector center_point(void) const;
 	std::vector<Geometry> face_geometries(void) const;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const;
 	bool is_line(void) const;

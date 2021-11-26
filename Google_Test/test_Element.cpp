@@ -104,7 +104,7 @@ TEST(Element, outward_normalized_normal_vector_1)
 
 	Element cell_element(cell_element_type, std::move(cell_node_indexes), std::move(cell_geometry));
 
-	const auto result = face_element.outward_normalized_normal_vector(cell_element, face_element.center_node());
+	const auto result = face_element.outward_normalized_normal_vector(cell_element, face_element.center_point());
 	Euclidean_Vector ref = { 0,-1 };
 	EXPECT_EQ(result, ref);
 }
@@ -139,7 +139,7 @@ TEST(Element, outward_normalized_normal_vector_2)
 
 	Element cell_element(cell_element_type, std::move(cell_node_indexes), std::move(cell_geometry));
 
-	const auto result = face_element.outward_normalized_normal_vector(cell_element, face_element.center_node());
+	const auto result = face_element.outward_normalized_normal_vector(cell_element, face_element.center_point());
 	Euclidean_Vector ref = { 0,-1 };
 	EXPECT_EQ(result, ref);
 }

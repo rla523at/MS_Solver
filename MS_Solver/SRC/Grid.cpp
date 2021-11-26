@@ -109,7 +109,9 @@ std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const
 	std::vector<Euclidean_Vector> center_nodes(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
-		center_nodes[i] = cell_elements[i].center_node();
+	{
+		center_nodes[i] = cell_elements[i].center_point();
+	}
 
 	return center_nodes;
 }

@@ -12,7 +12,7 @@ TEST(Geometry, center_1) {
 
 	Geometry geometry(fig, fig_order, std::move(nodes));
 
-	const auto result = geometry.center_node();
+	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 1.5,1 };
 	EXPECT_EQ(result, ref);
@@ -28,7 +28,7 @@ TEST(Geometry, center_2) {
 
 	Geometry geometry(fig, fig_order, std::move(nodes));
 
-	const auto result = geometry.center_node();
+	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 7.0 / 3.0, 4.0 / 3.0 };
 	EXPECT_EQ(result, ref);
@@ -45,7 +45,7 @@ TEST(Geometry, center_3) {
 
 	Geometry geometry(fig, fig_order, std::move(nodes));
 	
-	const auto result = geometry.center_node();
+	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 2,1.5 };
 	EXPECT_EQ(result, ref);
@@ -529,7 +529,7 @@ TEST(Geometry, normalized_normal_vector_1)
 	std::vector<Euclidean_Vector> nodes = { n1,n2 };
 
 	Geometry geometry(std::move(ref_geo), std::move(nodes));
-	const auto normal = geometry.normalized_normal_vector(geometry.center_node());
+	const auto normal = geometry.normalized_normal_vector(geometry.center_point());
 
 	const Euclidean_Vector ref_direct = { 0,1 };
 
@@ -558,7 +558,7 @@ TEST(Geometry, normalized_normal_vector_2)
 
 
 	Geometry geometry(std::move(ref_geo), std::move(nodes));
-	const auto normal = geometry.normalized_normal_vector(geometry.center_node());
+	const auto normal = geometry.normalized_normal_vector(geometry.center_point());
 
 	const auto tangent = n2 - n1;
 	const auto normality = tangent.inner_product(normal);

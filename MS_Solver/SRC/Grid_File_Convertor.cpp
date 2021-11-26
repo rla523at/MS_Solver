@@ -239,7 +239,7 @@ Figure Gmsh_Convertor::figure_type_index_to_element_figure(const ushort element_
 	case GmshFigureType::PYRA_P4:		return Figure::pyramid;
 	default:
 		EXCEPTION("invalid element type index");
-		return Figure::not_in_list;
+		return Figure::point;
 	}
 }
 

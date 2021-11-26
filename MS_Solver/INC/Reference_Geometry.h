@@ -10,11 +10,11 @@ using uint = unsigned int;
 
 enum class Figure
 {
-	point,
-	line,
-	triangle, quadrilateral,
-	tetrahedral, hexahedral, prism, pyramid,
-	not_in_list
+	point		= 0,
+	line		= 1,
+	triangle	= 2,	quadrilateral	= 3,
+	tetrahedral = 4,	hexahedral		= 5,	prism = 6,	pyramid = 7,
+	num_figures	= 8
 };
 
 struct Quadrature_Rule
@@ -37,15 +37,17 @@ public://Query
 	bool operator==(const Reference_Geometry& other) const;
 	bool operator!=(const Reference_Geometry& other) const;
 
-	virtual Euclidean_Vector center_node(void) const abstract;
+	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const;
+	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const;
+	const Matrix& get_inverse_mapping_monomial_matrix(void) const;
+	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const;
+	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const;
+	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const;
+	std::vector<ushort> vertex_node_index_sequneces(void) const;
+
+	virtual Euclidean_Vector center_point(const ushort space_dimension) const abstract;
 	virtual std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const abstract;
 	virtual Figure figure(void) const abstract;
-	virtual const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const abstract;
-	virtual const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const abstract;
-	virtual const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const abstract;
-	virtual const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const abstract;
-	virtual const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const abstract;
-	virtual const Matrix& get_inverse_mapping_monomial_matrix(void) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
 	virtual ushort num_vertex(void) const abstract;
@@ -56,11 +58,14 @@ public://Query
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
 	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual ushort scale_function_order(void) const abstract;	
-	virtual std::vector<ushort> vertex_node_index_sequneces(void) const abstract;
 
 protected:
+	void initialize(void);
+
 	Matrix make_inverse_mapping_monomial_matrix(void) const;
 	std::vector<std::vector<uint>> quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const;
+	//std::vector<std::vector<uint>> sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const;
+	//std::vector<std::vector<uint>> hexahedral_connectivities(const std::array<uint, 8>& node_indexes) const;
 
 	virtual Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const abstract;
 	virtual std::vector<Euclidean_Vector> make_mapping_nodes(void) const abstract;
@@ -68,11 +73,27 @@ protected:
 	virtual std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const abstract;
 	virtual Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const abstract;
 
-	std::vector<std::vector<uint>> sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const;
-	std::vector<std::vector<uint>> hexahedral_connectivities(const std::array<uint, 8>& node_indexes) const;
-
 protected:
 	ushort order_ = 0;
+
+	static constexpr int num_figures_ = static_cast<int>(Figure::num_figures);
+	
+	//array give incomprehensible error on test get_quadrature_rule_2,4,6
+	// 
+	//static inline std::array<std::vector<std::vector<Euclidean_Vector>>, num_figures_> set_of_mapping_nodes_; //[figure_index][figure_order]
+	//static inline std::array<std::vector<Vector_Function<Polynomial>>, num_figures_> set_of_mapping_monomial_vector_function_; //[figure_index][figure_order]
+	//static inline std::array<std::vector<Matrix>, num_figures_> set_of_inverse_mapping_monomial_matrix_; //[figure_index][figure_order]
+	//static inline std::array<std::vector<std::vector<Euclidean_Vector>>, num_figures_> set_of_post_nodes_; //figure_index][post_order]
+	//static inline std::array<std::vector<std::vector<std::vector<uint>>>, num_figures_> set_of_connectivities_; //[figure_index][post_order]
+	//static inline std::array<std::vector<Quadrature_Rule>, num_figures_> quadrature_rules_; //[figure_index][integrand_order]
+
+	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> set_of_mapping_nodes_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //[figure_index][figure_order]
+	static inline std::vector<std::vector<Vector_Function<Polynomial>>> set_of_mapping_monomial_vector_function_ = std::vector<std::vector<Vector_Function<Polynomial>>>(num_figures_);; //[figure_index][figure_order]
+	static inline std::vector<std::vector<Matrix>> set_of_inverse_mapping_monomial_matrix_ = std::vector<std::vector<Matrix>>(num_figures_); //[figure_index][figure_order]
+	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> set_of_post_nodes_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //figure_index][post_order]
+	static inline std::vector<std::vector<std::vector<std::vector<uint>>>> set_of_connectivities_ = std::vector<std::vector<std::vector<std::vector<uint>>>>(num_figures_); //[figure_index][post_order]
+	static inline std::vector<std::vector<Quadrature_Rule>> quadrature_rules_ = std::vector<std::vector<Quadrature_Rule>>(num_figures_); //[figure_index][integrand_order]
+
 
 	//virtual std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const abstract;
 	//virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const abstract;
@@ -84,7 +105,7 @@ public:
 	Reference_Line(const ushort order);
 
 public://Query
-	Euclidean_Vector center_node(void) const override;
+	Euclidean_Vector center_point(const ushort space_dimension) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
@@ -93,32 +114,17 @@ public://Query
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
-	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	ushort scale_function_order(void) const override;
-	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
-	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
-	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
-	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
-	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
-	const Matrix& get_inverse_mapping_monomial_matrix(void) const override;
 
-private:
+protected:
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
-
-private:
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
-	static inline std::vector<Quadrature_Rule> quadrature_rules_;
-	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
-	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;
-	static inline std::vector<std::vector<std::vector<uint>>> set_of_connectivities_;
 };
 
 class Reference_Triangle : public Reference_Geometry
@@ -127,7 +133,7 @@ public:
 	Reference_Triangle(const ushort order);
 
 public://Query
-	Euclidean_Vector center_node(void) const override;
+	Euclidean_Vector center_point(const ushort space_dimension) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
@@ -136,41 +142,26 @@ public://Query
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
-	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
-	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
-	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
-	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
-	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
-	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
-	const Matrix& get_inverse_mapping_monomial_matrix(void) const override;
 
-private:
+protected:
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
-
-private:
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
-	static inline std::vector<Quadrature_Rule> quadrature_rules_;
-	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
-	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;
-	static inline std::vector<std::vector<std::vector<uint>>> set_of_connectivities_;
 };
 
 class Reference_Quadrilateral : public Reference_Geometry
 {
 public:
-	Reference_Quadrilateral(ushort order);
+	Reference_Quadrilateral(const ushort order);
 
 public://Query
-	Euclidean_Vector center_node(void) const override;
+	Euclidean_Vector center_point(const ushort space_dimension) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertex(void) const override;
@@ -179,32 +170,17 @@ public://Query
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
-	std::vector<ushort> vertex_node_index_sequneces(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
-	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const override;
-	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const override;
-	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const override;
-	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const override;
-	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const override;
-	const Matrix& get_inverse_mapping_monomial_matrix(void) const override;
 
-private:
+protected:
 	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
 	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
-
-private:
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_mapping_nodes_;
-	static inline std::vector<Quadrature_Rule> quadrature_rules_;
-	static inline std::vector<Vector_Function<Polynomial>> set_of_mapping_monomial_vector_function_;
-	static inline std::vector<Matrix> set_of_inverse_mapping_monomial_matrix_;
-	static inline std::vector<std::vector<Euclidean_Vector>> set_of_post_nodes_;
-	static inline std::vector<std::vector<std::vector<uint>>> set_of_connectivities_;
 };
 
 class Reference_Geometry_Factory
@@ -250,146 +226,18 @@ public:
 
 
 
-
-
-
-
-
-
-//
-//
-//template definition part
-//template <ushort space_dimension>
-//ReferenceGeometry<space_dimension>::ReferenceGeometry(const Figure figure, const ushort figure_order) : figure_(figure), figure_order_(figure_order)
-//
-//
-//template <ushort space_dimension>
-//bool ReferenceGeometry<space_dimension>::operator==(const ReferenceGeometry& other) const {
-//	return this->figure_ == other.figure_ && this->figure_order_ == other.figure_order_;
-//}
-//
-//template <ushort space_dimension>
-//bool ReferenceGeometry<space_dimension>::operator != (const ReferenceGeometry& other) const {
-//	return !((*this) == other);
-//}
-//
-//template <ushort space_dimension>
 //Euclidean_Vector<space_dimension> ReferenceGeometry<space_dimension>::center_node(void) const {
-//	if constexpr (space_dimension == 2) {
-//		switch (this->figure_) {
-//		case Figure::line:			return { 0, 0 };
-//		case Figure::triangle:		return { -1.0 / 3.0, -1.0 / 3.0 };
-//		case Figure::quadrilateral:	return { 0, 0 };
-//		default:
-//			throw std::runtime_error("wrong figure");
-//			return {};
-//		}
-//	}
-//	else if constexpr (space_dimension == 3) {
-//		switch (this->figure_) {
-//		case Figure::triangle:		return { -1.0 / 3.0, -1.0 / 3.0, 0.0 };
-//		case Figure::quadrilateral:	return { 0, 0, 0 };
 //		case Figure::tetrahedral:	return { -0.5, -0.5, -0.5 };
 //		case Figure::hexahedral:	return { 0, 0, 0 };
-//		default:
-//			throw std::runtime_error("wrong figure");
-//			return {};
-//		}
-//	}
-//	else {
-//		throw std::runtime_error("unsupported space dimension");
-//		return {};
-//	}
-//}
-//
-//template <ushort space_dimension>
-//Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<space_dimension>::normal_vector_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const {
-//	if constexpr (space_dimension == 2) {
-//		dynamic_require(this->figure_ == Figure::line, "In 2D case, normal vector must be determined only for line");
-
-		//constexpr ushort r = 0;
-		//const auto T_r = mapping_function.differentiate(r);
-
-		//std::array<Polynomial<space_dimension>, space_dimension> normal_vector_function = { 0 };
-		//normal_vector_function[0] = -1 * T_r.at(1);
-		//normal_vector_function[1] = T_r.at(0);
-
-		//return normal_vector_function;
-//	}
-//	else if constexpr (space_dimension == 3) {
-//		dynamic_require(this->figure_ == Figure::triangle || this->figure_ == Figure::quadrilateral, "In 3D case, normal vector must be determined only for triangle or quadrilateral");
-//
-		//constexpr ushort r = 0;
-		//constexpr ushort s = 1;
-		//const auto T_r = mapping_function.differentiate(r);
-		//const auto T_s = mapping_function.differentiate(s);
-
-		//return T_r.cross_product(T_s);
-//	}
-//	else {
-//		throw std::runtime_error("not supported figure");
-//		return {};
-//	}
 //}
 
-//template <ushort space_dimension>
 //ushort ReferenceGeometry<space_dimension>::num_vertex(void) const {
-//	switch (this->figure_) {
-//	case Figure::line:			return 2;
-//	case Figure::triangle:		return 3;
-//	case Figure::quadrilateral:	return 4;
 //	case Figure::tetrahedral:	return 4;
 //	case Figure::hexahedral:	return 8;
-//	default:
-//		throw std::runtime_error("wrong element figure");
-//		return NULL;
-//	}
 //}
-//
-//template <ushort space_dimension>
-//std::vector<ushort> ReferenceGeometry<space_dimension>::vertex_node_index_orders(void) const {
-//	const auto num_vertex = this->num_vertex();	
-//	std::vector<ushort> vnode_index_orders(num_vertex);
-//
-//	for (ushort i = 0; i < num_vertex; ++i)
-//		vnode_index_orders[i] = i;
-//
-//	return vnode_index_orders;
-//}
-//
-//template <ushort space_dimension>
+
 //std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face_vertex_node_index_orders(void) const {
-//	switch (this->figure_) {
-//	case Figure::line: {
-		//// 0 ──── 1
-		//const std::vector<ushort> face0_node_index = { 0 };
-		//const std::vector<ushort> face1_node_index = { 1 };
-		//return { face0_node_index,face1_node_index };
-//	}
-//	case Figure::triangle: {
-		////      2
-		////  2  / \  1
-		////	  /   \
-		////   0─────1
-		////      0
-		//const std::vector<ushort> face0_node_index = { 0,1 };
-		//const std::vector<ushort> face1_node_index = { 1,2 };
-		//const std::vector<ushort> face2_node_index = { 2,0 };
-		//return { face0_node_index,face1_node_index, face2_node_index };
-//	}
-//	case Figure::quadrilateral: {
-		////      2
-		////   3─────2
-		////3  │     │   1
-		////   0─────1
-		////      0
-		//std::vector<ushort> face0_node_index = { 0,1 };
-		//std::vector<ushort> face1_node_index = { 1,2 };
-		//std::vector<ushort> face2_node_index = { 2,3 };
-		//std::vector<ushort> face3_node_index = { 3,0 };
-		//return { face0_node_index,face1_node_index, face2_node_index,face3_node_index };
-//	}
-//	case Figure::tetrahedral: {
+///	case Figure::tetrahedral: {
 //		//   3
 //		//   │    
 //		//   0────2
@@ -424,63 +272,9 @@ public:
 //		return std::vector<std::vector<ushort>>();
 //	}
 //}
-//
-//template <ushort space_dimension>
+
+
 //std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_face_node_index_orders(void) const {
-//	switch (this->figure_) {
-//	case Figure::line: {
-//		// 0 ──── 1
-//		const std::vector<ushort> face0_node_index = { 0 };
-//		const std::vector<ushort> face1_node_index = { 1 };
-//		return { face0_node_index,face1_node_index };
-//	}
-//	case Figure::triangle: {
-		////      2
-		////  2  / \  1
-		////    /   \
-		////   0─────1
-		////      0
-		//constexpr ushort num_face = 3;
-		//std::vector<std::vector<ushort>> set_of_face_node_index_orders(num_face);
-		//set_of_face_node_index_orders[0] = { 0,1 };
-		//set_of_face_node_index_orders[1] = { 1,2 };
-		//set_of_face_node_index_orders[2] = { 2,0 };
-
-		//if (this->figure_order_ > 1) {
-		//	const auto num_additional_point = this->figure_order_ - 1;
-
-		//	ushort index = num_face;
-		//	for (ushort iface = 0; iface < num_face; ++iface)
-		//		for (ushort ipoint = 0; ipoint < num_additional_point; ++ipoint)
-		//			set_of_face_node_index_orders[iface].push_back(index++);
-		//}
-
-		//return set_of_face_node_index_orders;
-//	}
-//	case Figure::quadrilateral: {
-		////      2
-		////   3─────2
-		////3  │     │   1
-		////   0─────1
-		////      0
-		//constexpr ushort num_face = 4;
-		//std::vector<std::vector<ushort>> set_of_face_node_index_orders(num_face);
-		//set_of_face_node_index_orders[0] = { 0,1 };
-		//set_of_face_node_index_orders[1] = { 1,2 };
-		//set_of_face_node_index_orders[2] = { 2,3 };
-		//set_of_face_node_index_orders[3] = { 3,0 };
-
-		//if (this->figure_order_ > 1) {
-		//	const ushort num_additional_point = this->figure_order_ - 1;
-
-		//	ushort index = num_face;
-		//	for (ushort iface = 0; iface < num_face; ++iface)
-		//		for (ushort ipoint = 0; ipoint < num_additional_point; ++ipoint)
-		//			set_of_face_node_index_orders[iface].push_back(index++);
-		//}
-
-		//return set_of_face_node_index_orders;
-//	}
 //	case Figure::tetrahedral: {
 //		//   3
 //		//   │    
@@ -514,44 +308,10 @@ public:
 //
 //		return { face0_node_index, face1_node_index, face2_node_index, face3_node_index, face4_node_index, face5_node_index };
 //	}
-//	default:
-//		throw std::runtime_error("not supported element figure");
-//		return std::vector<std::vector<ushort>>();
-//	}
 //}
-//
-//template <ushort space_dimension>
+
+
 //std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimension>::face_reference_geometries(void) const {
-//	switch (this->figure_) {
-//	case Figure::line: {
-//		// 0 ──── 1
-//		const ReferenceGeometry face0_reference_geometry = { Figure::point,this->figure_order_ };
-//		const ReferenceGeometry face1_reference_geometry = { Figure::point,this->figure_order_ };
-//		return { face0_reference_geometry,face1_reference_geometry };
-//	}
-//	case Figure::triangle: {
-//		//      2
-//		//  2  / \  1
-//		//	  /   \
-//		//   0─────1
-//		//      0
-//		const ReferenceGeometry face0_refrence_geometry = { Figure::line,this->figure_order_ };
-//		const ReferenceGeometry face1_refrence_geometry = { Figure::line,this->figure_order_ };
-//		const ReferenceGeometry face2_refrence_geometry = { Figure::line,this->figure_order_ };
-//		return { face0_refrence_geometry,face1_refrence_geometry, face2_refrence_geometry };
-//	}
-//	case Figure::quadrilateral: {
-//		//      2
-//		//   3─────2
-//		//3  │     │   1
-//		//   0─────1
-//		//      0
-//		const ReferenceGeometry face0_refrence_geometry = { Figure::line, this->figure_order_ };
-//		const ReferenceGeometry face1_refrence_geometry = { Figure::line, this->figure_order_ };
-//		const ReferenceGeometry face2_refrence_geometry = { Figure::line, this->figure_order_ };
-//		const ReferenceGeometry face3_refrence_geometry = { Figure::line, this->figure_order_ };
-//		return { face0_refrence_geometry,face1_refrence_geometry, face2_refrence_geometry,face3_refrence_geometry };
-//	}
 //	case Figure::tetrahedral: {
 //		//   3
 //		//   │    
@@ -580,74 +340,10 @@ public:
 //
 //		return { face0_reference_geometry, face1_reference_geometry, face2_reference_geometry, face3_reference_geometry, face4_reference_geometry, face5_reference_geometry };
 //	}
-//	default:
-//		throw std::runtime_error("not supported figure");
-//		return std::vector<ReferenceGeometry>();
-//	}
 //}
-//
-//template <ushort space_dimension>
-//Vector_Function<Polynomial<space_dimension>, space_dimension> ReferenceGeometry<space_dimension>::mapping_function(const std::vector<Space_Vector_>& mapped_nodes) const {
-	//const auto key = std::make_pair(this->figure_, this->figure_order_);
-	//const auto& mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
 
-	//const auto num_mapping_node = mapping_nodes.size();
-	//const auto num_mapped_node = mapped_nodes.size();
-	//dynamic_require(num_mapping_node == num_mapped_node, "number of mapping node should be same with mapped node");
 
-	////	X = CM
-	////	X : mapped node matrix			
-	////	C : mapping coefficient matrix	
-	////	M : mapping monomial matrix
-	//Matrix X(space_dimension, num_mapped_node);
-	//for (size_t j = 0; j < num_mapped_node; ++j)
-	//	X.change_column(j, mapped_nodes[j]);
-
-	//const auto& inv_M = ReferenceGeometry::key_to_inverse_mapping_monomial_matrix_.at(key);
-	//const auto C = X * inv_M;
-
-	//const auto& monomial_vector_function = ReferenceGeometry::key_to_mapping_monomial_vector_function_.at(key);
-
-	//Vector_Function<Polynomial<space_dimension>, space_dimension> mapping_function;
-	//ms::gemv(C, monomial_vector_function, mapping_function.data());
-
-	//return mapping_function;
-//}
-//
-//template <ushort space_dimension>
 //Irrational_Function<space_dimension> ReferenceGeometry<space_dimension>::scale_function(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function) const {
-//	if constexpr (space_dimension == 2) {
-//		switch (this->figure_) {
-//			case Figure::line: {
-//				constexpr ushort r = 0;
-//				const auto mf_r = mapping_function.differentiate(r);
-//				return mf_r.L2_norm();
-//			}
-//			case Figure::triangle:
-//			case Figure::quadrilateral: {
-//				constexpr ushort r = 0;
-//				constexpr ushort s = 1;
-//				const auto mf_r = mapping_function.differentiate(r);
-//				const auto mf_s = mapping_function.differentiate(s);
-//				const auto cross_product = mf_r.cross_product(mf_s);
-//				return cross_product.L2_norm();
-//			}
-//			default:
-//				throw std::runtime_error("not supported figure");
-//				return Irrational_Function<space_dimension>();
-//		}
-//	}
-//	else if constexpr (space_dimension == 3) {
-//		switch (this->figure_) {
-//			case Figure::triangle:
-//			case Figure::quadrilateral: {
-//				constexpr ushort r = 0;
-//				constexpr ushort s = 1;
-//				const auto mf_r = mapping_function.differentiate(r);
-//				const auto mf_s = mapping_function.differentiate(s);
-//				const auto cross_product = mf_r.cross_product(mf_s);
-//				return cross_product.L2_norm();
-//			}
 //			case Figure::tetrahedral:
 //			case Figure::hexahedral: {
 //				constexpr ushort r = 0;
@@ -658,15 +354,10 @@ public:
 //				const auto mf_t = mapping_function.differentiate(t);
 //
 //				return ms::scalar_triple_product(mf_r, mf_s, mf_t).be_absolute();
-//			}
-//		default:
-//			throw std::runtime_error("not supported figure");
-//			return Irrational_Function<space_dimension>();
-//		}
-//	}
 //}
-//
-//template <ushort space_dimension>
+
+
+
 //Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::quadrature_rule(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort physical_integrand_order) const {
 	//const auto scale_function = this->scale_function(mapping_function);
 
@@ -695,7 +386,6 @@ public:
 //}
 //
 //
-//template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::post_nodes(const Vector_Function<Polynomial<space_dimension>, space_dimension>& mapping_function, const ushort post_order) const {
 //	const auto key = std::make_pair(this->figure_, post_order);
 //	if (ReferenceGeometry::key_to_reference_post_nodes_.find(key) == ReferenceGeometry::key_to_reference_post_nodes_.end())
@@ -705,7 +395,6 @@ public:
 //	return mapping_function(reference_post_nodes);
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<size_t>> ReferenceGeometry<space_dimension>::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const {
 //	const auto key = std::make_pair(this->figure_, post_order);
 //	if (ReferenceGeometry::key_to_reference_connectivity_.find(key) == ReferenceGeometry::key_to_reference_connectivity_.end())
@@ -731,7 +420,6 @@ public:
 //	return connectivities;
 //}
 //
-//template <ushort space_dimension>
 //bool ReferenceGeometry<space_dimension>::is_simplex(void) const {
 //	switch (this->figure_)
 //	{
@@ -742,12 +430,10 @@ public:
 //	}
 //}
 //
-//template <ushort space_dimension>
 //bool ReferenceGeometry<space_dimension>::is_line(void) const {
 //	return this->figure_ == Figure::line;
 //}
 //
-//template <ushort space_dimension>
 //std::vector<ReferenceGeometry<space_dimension>> ReferenceGeometry<space_dimension>::sub_simplex_reference_geometries(void) const {
 //	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
 //	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
@@ -789,7 +475,6 @@ public:
 //
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<ushort>> ReferenceGeometry<space_dimension>::set_of_sub_simplex_vertex_node_index_orders(void) const {
 //	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
 //	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
@@ -834,7 +519,6 @@ public:
 //}
 //
 //
-//template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::mapping_nodes(void) const {
 //	if constexpr (space_dimension == 2) {
 //		switch (this->figure_) {
@@ -941,7 +625,6 @@ public:
 //	}
 //}
 //
-//template <ushort space_dimension>
 //Dynamic_Vector_Function<Polynomial<space_dimension>> ReferenceGeometry<space_dimension>::mapping_monomial_vector_function(void) const {
 //	if constexpr (space_dimension == 2) {
 //		Polynomial<space_dimension> r("x0");
@@ -1080,7 +763,6 @@ public:
 //	}
 //}
 //
-//template <ushort space_dimension>
 //Matrix ReferenceGeometry<space_dimension>::inverse_mapping_monomial_matrix(void) const {
 	//const auto key = std::make_pair(this->figure_, this->figure_order_);
 	//const auto mapping_nodes = ReferenceGeometry::key_to_mapping_nodes_.at(key);
@@ -1094,7 +776,6 @@ public:
 	//return transformation_monomial_matrix.be_inverse();
 //}
 //
-//template <ushort space_dimension>
 //Quadrature_Rule<space_dimension> ReferenceGeometry<space_dimension>::reference_quadrature_rule(const ushort integrand_order) const {
 //	if constexpr (space_dimension == 1) {		
 //		switch (this->figure_) {
@@ -1332,7 +1013,6 @@ public:
 //		throw std::runtime_error("not supported space dimension");
 //}
 //
-//template <ushort space_dimension>
 //std::vector<Euclidean_Vector<space_dimension>> ReferenceGeometry<space_dimension>::reference_post_nodes(const ushort post_order) const {
 //	const auto n = post_order;
 //	
@@ -1436,7 +1116,6 @@ public:
 //	return reference_post_nodes;
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::reference_connectivity(const ushort post_order) const {
 //	const auto n = post_order;
 //	
@@ -1563,7 +1242,6 @@ public:
 //	}
 //}
 //
-//template <ushort space_dimension>
 //ushort ReferenceGeometry<space_dimension>::scale_function_order(void) const {
 //	dynamic_require(this->figure_order_ == 1, "high order mesh is not supported yet");
 //
@@ -1579,7 +1257,6 @@ public:
 //	}
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const {
 	////   2─────3
 	////   │     │   
@@ -1588,7 +1265,6 @@ public:
 	//		 { node_indexes[1],node_indexes[3],node_indexes[2] } };
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::sliced_hexahedral_connectivities(const std::array<uint, 7>& node_indexes) const {
 //	//	     4─────6
 //	//      /│     │
@@ -1603,7 +1279,6 @@ public:
 //      		 { node_indexes[3], node_indexes[2], node_indexes[5], node_indexes[6] } };
 //}
 //
-//template <ushort space_dimension>
 //std::vector<std::vector<uint>> ReferenceGeometry<space_dimension>::hexahedral_connectivities(const std::array<uint, 8>& node_indexes) const {
 //	//	     4─────6
 //	//      /│    /│

@@ -29,9 +29,9 @@ bool Geometry::operator==(const Geometry& other) const
 		*this->reference_geometry_ == *other.reference_geometry_;
 }
 
-Euclidean_Vector Geometry::center_node(void) const 
+Euclidean_Vector Geometry::center_point(void) const 
 {
-	return this->mapping_function_(this->reference_geometry_->center_node());
+	return this->mapping_function_(this->reference_geometry_->center_point(this->space_dimension_));
 }
 
 std::vector<Geometry> Geometry::face_geometries(void) const
@@ -136,14 +136,16 @@ std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_or
 	const auto num_connectivity = ref_connectivities.size();
 	std::vector<std::vector<int>> connectivities(num_connectivity);
 
-	for (ushort i = 0; i < num_connectivity; ++i) {
+	for (ushort i = 0; i < num_connectivity; ++i) 
+{
 		auto& connectivity = connectivities[i];
 		const auto& ref_connecitivity = ref_connectivities[i];
 
 		const auto num_index = ref_connecitivity.size();
 		connectivity.resize(num_index);
 
-		for (ushort j = 0; j < num_index; ++j) {
+		for (ushort j = 0; j < num_index; ++j) 
+{
 			const auto new_index = static_cast<int>(ref_connecitivity[j] + connectivity_start_index);
 			connectivity[j] = new_index;
 		}
@@ -168,7 +170,8 @@ std::vector<double> Geometry::projected_volume(void) const
 		double y_projected_volume = 0.0;
 
 		const auto set_of_face_nodes = this->set_of_face_nodes();
-		for (const auto& face_nodes : set_of_face_nodes) {
+		for (const auto& face_nodes : set_of_face_nodes) 
+{
 			const auto& start_node = face_nodes[0];
 			const auto& end_node = face_nodes[1];
 			const auto node_to_node = end_node - start_node;
@@ -186,8 +189,9 @@ std::vector<double> Geometry::projected_volume(void) const
 		double xy_projected_volume = 0.0;
 
 		const auto face_geometries = this->face_geometries();
-		for (const auto& geometry : face_geometries) {
-			const auto normal_vector = geometry.normalized_normal_vector(geometry.center_node());
+		for (const auto& geometry : face_geometries) 
+{
+			const auto normal_vector = geometry.normalized_normal_vector(geometry.center_point());
 
 			Euclidean_Vector yz_plane_normalized_normal_vector = { 1,0,0 };
 			Euclidean_Vector xz_plane_normalized_normal_vector = { 0,1,0 };
@@ -241,7 +245,7 @@ bool Geometry::is_line(void) const
 
 const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_order) const 
 {
-	if (this->integrand_order_to_quadrature_rule_.find(integrand_order) == this->integrand_order_to_quadrature_rule_.end())
+	if (!this->integrand_order_to_quadrature_rule_.contains(integrand_order))
 		this->integrand_order_to_quadrature_rule_.emplace(integrand_order, this->make_quadrature_rule(integrand_order));
 
 	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
@@ -265,28 +269,30 @@ Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort
 	std::vector<Polynomial> initial_basis_functions(num_basis);
 
 	ushort index = 0;
-	if (this->space_dimension_ == 2) {
+	if (this->space_dimension_ == 2) 
+	{
 		Polynomial x("x0");
 		Polynomial y("x1");
 
-		const auto center_node = this->center_node();
-		const auto x_c = center_node.at(0);
-		const auto y_c = center_node.at(1);
+		const auto center_point = this->center_point();
+		const auto x_c = center_point.at(0);
+		const auto y_c = center_point.at(1);
 
 		//1 (x - x_c) (y - y_c)  ...
 		for (ushort a = 0; a <= solution_order; ++a)
 			for (ushort b = 0; b <= a; ++b)
 				initial_basis_functions[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
 	}
-	else if (this->space_dimension_ == 3) {
+	else if (this->space_dimension_ == 3) 
+	{
 		Polynomial x("x0");
 		Polynomial y("x1");
 		Polynomial z("x2");
 
-		const auto center_node = this->center_node();
-		const auto x_c = center_node.at(0);
-		const auto y_c = center_node.at(1);
-		const auto z_c = center_node.at(2);
+		const auto center_point = this->center_point();
+		const auto x_c = center_point.at(0);
+		const auto y_c = center_point.at(1);
+		const auto z_c = center_point.at(2);
 
 		//1 (x - x_c) (y - y_c) (z - z_c) ...
 		for (ushort a = 0; a <= solution_order; ++a)
@@ -406,7 +412,8 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 
 	std::vector<double> transformed_QW(num_QP);
 
-	for (size_t i = 0; i < num_QP; ++i) {
+	for (size_t i = 0; i < num_QP; ++i) 
+	{
 		const auto& point = ref_quadrature_rule.points[i];
 		const auto& weight = ref_quadrature_rule.weights[i];
 
@@ -418,7 +425,8 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 
 namespace ms
 {
-	double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule) {
+	double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule) 
+	{
 		const auto& QP_set = quadrature_rule.points;
 		const auto& QW_set = quadrature_rule.weights;
 
@@ -429,12 +437,14 @@ namespace ms
 		return result;
 	}
 
-	double integrate(const Polynomial& integrand, const Geometry& geometry) {
+	double integrate(const Polynomial& integrand, const Geometry& geometry) 
+	{
 		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.degree());
 		return ms::integrate(integrand, quadrature_rule);
 	}
 
-	double inner_product(const Polynomial& f1, const Polynomial& f2, const Geometry& geometry) {
+	double inner_product(const Polynomial& f1, const Polynomial& f2, const Geometry& geometry) 
+	{
 		const auto integrand_degree = f1.degree() + f2.degree();
 
 		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_degree);
@@ -448,16 +458,19 @@ namespace ms
 		return result;
 	}
 
-	double L2_Norm(const Polynomial& function, const Geometry& geometry) {
+	double L2_Norm(const Polynomial& function, const Geometry& geometry) 
+	{
 		return std::sqrt(ms::inner_product(function, function, geometry));
 	}
 
-	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry) {
+	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry) 
+	{
 		const auto range_dimension = functions.size();
 
 		std::vector<Polynomial> normalized_functions(range_dimension);
 
-		for (ushort i = 0; i < range_dimension; ++i) {
+		for (ushort i = 0; i < range_dimension; ++i) 
+		{
 			normalized_functions[i] = functions[i];
 
 			for (ushort j = 0; j < i; ++j)
