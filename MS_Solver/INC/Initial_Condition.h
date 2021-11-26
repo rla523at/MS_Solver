@@ -1,7 +1,9 @@
 #pragma once
-//#include <numbers>
 #include "Euclidean_Vector.h"
 #include "Configuration.h"
+
+#include <numbers>
+
 
 class Initial_Condition
 {
@@ -9,1526 +11,255 @@ public:
 	virtual Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const abstract;
 };
 
+class Constant1 : public Initial_Condition
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Sine_Wave : public Initial_Condition
+{
+public:
+	Sine_Wave(const std::vector<double>& wave_lengths);
+
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	Euclidean_Vector calculate_exact_solution(const Euclidean_Vector& space_vector, const double end_time) const;
+
+private:
+	ushort space_dimension_ = 0;
+	std::vector<double> wave_numbers_;// sin(kx)sin(ky)sin(kz)
+};
+
+class Sine_Wave_2D : public Sine_Wave 
+{
+public:
+	Sine_Wave_2D(const double x_wave_length, const double y_wave_length)
+		: Sine_Wave({ x_wave_length,y_wave_length }) {};
+};
+
+class Sine_Wave_3D : public Sine_Wave
+{
+public:
+	Sine_Wave_3D(const double x_wave_length, const double y_wave_length, const double z_wave_length)
+	: Sine_Wave({ x_wave_length,y_wave_length,z_wave_length }) {};
+};
+
+class Square_Wave : public Initial_Condition
+{
+public:
+	Square_Wave(const ushort space_dimension)
+		:space_dimension_(space_dimension) {};
+
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+
+protected:
+	ushort space_dimension_ = 0;
+};
+
+class Square_Wave_2D : public Square_Wave 
+{
+public:
+	Square_Wave_2D(void)
+		:Square_Wave(2) {};
+};
+
+class Square_Wave_3D : public Square_Wave
+{
+public:
+	Square_Wave_3D(void)
+		:Square_Wave(3) {};
+};
+
+class Circle_Wave : public Initial_Condition 
+{
+public:
+	Circle_Wave(const ushort space_dimension);
+
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+
+private:	
+	ushort space_dimension_ = 0;
+	Euclidean_Vector center_;
+};
+
+class Circle_Wave_2D : public Circle_Wave
+{
+public:
+	Circle_Wave_2D(void)
+		:Circle_Wave(2) {};
+};
+
+class Circle_Wave_3D : public Circle_Wave
+{
+public:
+	Circle_Wave_3D(void)
+		:Circle_Wave(3) {};
+};
+
+class Gaussian_Wave : public Initial_Condition
+{
+public:
+	Gaussian_Wave(const ushort space_dimension);
+
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+
+private:
+	ushort space_dimension_ = 0;
+	Euclidean_Vector center_;
+};
+
+class Gaussian_Wave_2D : public Gaussian_Wave
+{
+public:
+	Gaussian_Wave_2D(void)
+		:Gaussian_Wave(2) {};
+};
+
+class Gaussian_Wave_3D : public Gaussian_Wave
+{
+public:
+	Gaussian_Wave_3D(void)
+		:Gaussian_Wave(3) {};
+};
+
+class Euler_Shocktube_2D
+{
+protected:
+	Euclidean_Vector primitive_to_conservative(const Euclidean_Vector& primitive_variable) const;
+};
+
+class Euler_Shocktube_3D
+{
+protected:
+	Euclidean_Vector primitive_to_conservative(const Euclidean_Vector& primitive_variable) const;
+};
+
+class SOD_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class SOD_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Modified_SOD_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Modified_SOD_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Supersonic_Expansion_2D : public Initial_Condition 
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Supersonic_Expansion_3D : public Initial_Condition
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Left_Half_Blast_Wave_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Left_Half_Blast_Wave_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Double_Strong_Shock_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Double_Strong_Shock_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Slowly_Moving_Contact_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Slowly_Moving_Contact_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Harten_Lax_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Harten_Lax_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Shu_Osher_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Shu_Osher_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Blast_Wave_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Blast_Wave_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Explosion_2D : public Initial_Condition, Euler_Shocktube_2D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
+class Explosion_3D : public Initial_Condition, Euler_Shocktube_3D
+{
+public:
+	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+};
+
 class Initial_Condition_Factory//static class
 {
 public:
 	static std::unique_ptr<Initial_Condition> make_unique(const Configuration& configuration);
 };
-
-//
-//class IC {}; //Initial Condition
-//
-//
-//template <ushort space_dimension_>
-//class Constant1 : public IC 
-//{
-//private:
-//    Constant1(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 1;
-//
-//    using This_         = Constant1<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& space_vectors);
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template<ushort space_dimension_>
-//class Sine_Wave : public IC 
-//{
-//// sin(kx)sin(ky)sin(kz)
-//private:
-//    Sine_Wave(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 1;
-//
-//    using This_             = Sine_Wave<space_dimension_>;
-//    using Space_Vector_     = Euclidean_Vector<space_dimension_>;
-//
-//private:
-//    inline static std::array<double, space_dimension_> wave_numbers_;
-//
-//public:
-//    static void initialize(const std::array<double, space_dimension_>& wave_lengths);
-//
-//public:
-//    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& space_vectors);
-//    static std::vector<Euclidean_Vector<1>> calculate_exact_solutions(const std::vector<Space_Vector_>& space_vectors, const double end_time);
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Square_Wave : public IC 
-//{
-//private:
-//    Square_Wave(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 1;
-//
-//    using This_         = Square_Wave<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Circle_Wave : public IC 
-//{
-//private:
-//    Circle_Wave(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 1;
-//
-//    using This_         = Circle_Wave<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Gaussian_Wave : public IC 
-//{
-//private:
-//    Gaussian_Wave(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 1;
-//
-//    using This_         = Gaussian_Wave<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Euclidean_Vector<1> calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Euclidean_Vector<1>> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class SOD : public IC 
-//{
-//private:
-//    SOD(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = SOD;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//    
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Modified_SOD : public IC 
-//{
-//private:
-//    Modified_SOD(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 2 + space_dimension_;
-//
-//    using This_         = Modified_SOD<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_     = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//template <ushort space_dimension_>
-//class Double_Rarefaction_Wave : public IC
-//{
-//private:
-//    Double_Rarefaction_Wave(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Double_Rarefaction_Wave<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//template <ushort space_dimension_>
-//class Supersonic_Expansion : public IC
-//{
-//private:
-//    Supersonic_Expansion(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Supersonic_Expansion<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//template <ushort space_dimension_>
-//class Blast_Wave_Problem : public IC
-//{
-//private:
-//    Blast_Wave_Problem(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Blast_Wave_Problem<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//template <ushort space_dimension_>
-//class Double_Strong_Shock_Problem : public IC
-//{
-//private:
-//    Double_Strong_Shock_Problem(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Double_Strong_Shock_Problem<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//template <ushort space_dimension_>
-//class Slowly_Moving_Contact_Problem : public IC
-//{
-//private:
-//    Slowly_Moving_Contact_Problem(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Slowly_Moving_Contact_Problem<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//namespace ms {
-//    template <typename T>
-//    inline constexpr bool is_initial_condition = std::is_base_of_v<IC, T>;
-//
-//    template <typename T>
-//    inline constexpr bool is_sine_wave = std::is_same_v<T, Sine_Wave<T::space_dimension()>>;
-//}
-//
-//
-//template <ushort space_dimension_>
-//class Harten_Lax_Problem : public IC
-//{
-//private:
-//    Harten_Lax_Problem(void) = delete;
-//
-//private:
-//    static constexpr ushort num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Harten_Lax_Problem<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Shu_Osher : public IC
-//{
-//private:
-//    Shu_Osher(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Shu_Osher<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Explosion_Problem : public IC
-//{
-//private:
-//    Explosion_Problem(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Explosion_Problem<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//template <ushort space_dimension_>
-//class Blast_Wave_Interaction : public IC
-//{
-//private:
-//    Blast_Wave_Interaction(void) = delete;
-//
-//private:
-//    static constexpr size_t num_eqation_ = 2 + space_dimension_;
-//
-//    using This_ = Blast_Wave_Interaction<space_dimension_>;
-//    using Space_Vector_ = Euclidean_Vector<space_dimension_>;
-//    using Solution_ = Euclidean_Vector<num_eqation_>;
-//
-//public:
-//    static Solution_ calculate_solution(const Space_Vector_& space_vector);
-//    static std::vector<Solution_> calculate_solutions(const std::vector<Space_Vector_>& cell_centers);//for FVM
-//
-//public:
-//    static std::string name(void);
-//    static constexpr ushort space_dimension(void);
-//};
-//
-//
-//
-////Template Definition Part
-////Constant1
-//template <ushort space_dimension_>
-//Euclidean_Vector<1> Constant1<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    return { 1 };
-//};
-//
-//template <ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Constant1<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
-//    std::vector<Euclidean_Vector<1>> result(space_vectors.size(), { 1 });
-//    return result;
-//};
-//
-//template <ushort space_dimension_>
-//std::string Constant1<space_dimension_>::name(void) {
-//    return "Constant1";
-//}
-//
-//template <ushort space_dimension_>
-//constexpr ushort Constant1<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Sine wave
-//template <ushort space_dimension_>
-//void Sine_Wave<space_dimension_>::initialize(const std::array<double, space_dimension_>& wave_lengths) {
-//    for (ushort i = 0; i < space_dimension_; ++i)
-//        This_::wave_numbers_[i] = 2 * std::numbers::pi / wave_lengths[i];
-//}
-//
-//template <ushort space_dimension_>
-//Euclidean_Vector<1> Sine_Wave<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    double solution = 1.0;
-//
-//    for (ushort i = 0; i < space_dimension_; ++i) 
-//        solution *= std::sin(This_::wave_numbers_[i] * space_vector[i]);
-//
-//    return { solution };
-//}
-//
-//template<ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Sine_Wave<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& space_vectors) {
-//    const auto num_cell = space_vectors.size();
-//
-//    std::vector<Euclidean_Vector<1>> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(space_vectors[i]);
-//
-//    return solutions;
-//}
-//
-//template<ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Sine_Wave<space_dimension_>::calculate_exact_solutions(const std::vector<Space_Vector_>& space_vectors, const double end_time) {
-//    const auto advection_speed = Linear_Advection<space_dimension_>::advection_speed();
-//
-//    const auto num_cell = space_vectors.size();
-//    std::vector<Euclidean_Vector<1>> exact_solutions(num_cell);
-//
-//    for (size_t i = 0; i < num_cell; ++i) {
-//        const auto& cell_center = space_vectors[i];
-//        
-//        double exact_solution = 1.0;
-//
-//        for (ushort j = 0; j < space_dimension_; ++j)
-//            exact_solution *= std::sin(This_::wave_numbers_[j] * (cell_center[j] - advection_speed[j] * end_time));
-//
-//        exact_solutions[i] = exact_solution;
-//    }
-//
-//    return exact_solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Sine_Wave<space_dimension_>::name(void) {
-//    return "Sine_Wave";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Sine_Wave<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Square wave
-//template <ushort space_dimension_>
-//Euclidean_Vector<1> Square_Wave<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    for (ushort i = 0; i < space_dimension_; ++i) {
-//        if (space_vector[i] < 0.25 || 0.75 < space_vector[i])
-//            return { 0 };
-//    }
-//    return { 1 };    
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Square_Wave<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//    std::vector<Solution_> solutions(num_cell);
-//
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Square_Wave<space_dimension_>::name(void) {
-//    return "Square_Wave";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Square_Wave<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Circle wave
-//template <ushort space_dimension_>
-//Euclidean_Vector<1> Circle_Wave<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    double temp = 0.0;
-//    for (ushort i = 0; i < space_dimension_; ++i) 
-//        temp += (space_vector[i] - 0.5) * (space_vector[i] - 0.5);
-//
-//    if (temp <= 0.25 * 0.25)
-//        return { 1 };
-//    else
-//        return { 0 };
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Circle_Wave<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//    std::vector<Solution_> solutions(num_cell);
-//
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Circle_Wave<space_dimension_>::name(void) {
-//    return "Circle_Wave";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Circle_Wave<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Gaussian wave
-//template <ushort space_dimension_>
-//Euclidean_Vector<1> Gaussian_Wave<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr double beta = 20.0;
-//
-//    double temp = 0.0;
-//    for (ushort i = 0; i < space_dimension_; ++i)
-//        temp += (space_vector[i] - 0.5) * (space_vector[i] - 0.5);
-//
-//    return { std::exp(-beta * temp) };
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<Euclidean_Vector<1>> Gaussian_Wave<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//    std::vector<Solution_> solutions(num_cell);
-//
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Gaussian_Wave<space_dimension_>::name(void) {
-//    return "Gaussian_Wave";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Gaussian_Wave<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////SOD
-//template <ushort space_dimension_>
-//SOD<space_dimension_>::Solution_ SOD<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1 / (gamma - 1);
-//    constexpr auto discontinuity_location = 0.5;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ ==3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename SOD<space_dimension_>::Solution_> SOD<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string SOD<space_dimension_>::name(void) {
-//    return "SOD";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort SOD<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Modified SOD
-//template <ushort space_dimension_>
-//Modified_SOD<space_dimension_>::Solution_ Modified_SOD<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.3;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.75;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.75;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Modified_SOD<space_dimension_>::Solution_> Modified_SOD<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Modified_SOD<space_dimension_>::name(void) {
-//    return "Modified_SOD";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Modified_SOD<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Supersonic expansion
-//template <ushort space_dimension_>
-//Supersonic_Expansion<space_dimension_>::Solution_ Supersonic_Expansion<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.5;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -2.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto rhoE = 3.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 2.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto rhoE = 3.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -2.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto rhoE = 3.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 2.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto rhoE = 3.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Supersonic_Expansion<space_dimension_>::Solution_> Supersonic_Expansion<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Supersonic_Expansion<space_dimension_>::name(void) {
-//    return "Supersonic_Expansion";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Supersonic_Expansion<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Blast wave problem
-//template <ushort space_dimension_>
-//Blast_Wave_Problem<space_dimension_>::Solution_ Blast_Wave_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.5;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Blast_Wave_Problem<space_dimension_>::Solution_> Blast_Wave_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Blast_Wave_Problem<space_dimension_>::name(void) {
-//    return "Blast_Wave_Problem";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Blast_Wave_Problem<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Double strong shock problem
-//template <ushort space_dimension_>
-//Double_Strong_Shock_Problem<space_dimension_>::Solution_ Double_Strong_Shock_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.4;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 5.99924;
-//            constexpr auto u = 19.5975;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 460.894;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 5.99242;
-//            constexpr auto u = -6.19633;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 46.0950;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 5.99924;
-//            constexpr auto u = 19.5975;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 460.894;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 5.99242;
-//            constexpr auto u = -6.19633;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 46.0950;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Double_Strong_Shock_Problem<space_dimension_>::Solution_> Double_Strong_Shock_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Double_Strong_Shock_Problem<space_dimension_>::name(void) {
-//    return "Double_Strong_Shock_Problem";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Double_Strong_Shock_Problem<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Slowly-moving contact problem
-//template <ushort space_dimension_>
-//Slowly_Moving_Contact_Problem<space_dimension_>::Solution_ Slowly_Moving_Contact_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.8;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -19.59745;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -19.59745;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -19.59745;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = -19.59745;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Slowly_Moving_Contact_Problem<space_dimension_>::Solution_> Slowly_Moving_Contact_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Slowly_Moving_Contact_Problem<space_dimension_>::name(void) {
-//    return "Slowly_Moving_Contact_Problem";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Slowly_Moving_Contact_Problem<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Harten-Lax
-//template <ushort space_dimension_>
-//Harten_Lax_Problem<space_dimension_>::Solution_ Harten_Lax_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1.0 / (gamma - 1.0);
-//    constexpr auto discontinuity_location = 0.5;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 0.445;
-//            constexpr auto u = 0.698;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 3.528;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.5;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.571;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 0.445;
-//            constexpr auto u = 0.698;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 3.528;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.5;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.571;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Harten_Lax_Problem<space_dimension_>::Solution_> Harten_Lax_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Harten_Lax_Problem<space_dimension_>::name(void) {
-//    return "Harten_Lax_Problem";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Harten_Lax_Problem<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Shu-Osher
-//template <ushort space_dimension_>
-//Shu_Osher<space_dimension_>::Solution_ Shu_Osher<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1 / (gamma - 1);
-//    constexpr auto pi = std::numbers::pi;
-//    constexpr auto discontinuity_location = 0.125;
-//
-//    const auto x_coordinate = space_vector.at(0);
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 3.857143;
-//            constexpr auto u = 2.629369;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 10.333333;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            const auto rho = 1 + 0.2 * std::sin(16 * pi * x_coordinate);
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            const auto rhou = rho * u;
-//            const auto rhov = rho * v;
-//            const auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate <= discontinuity_location) {
-//            constexpr auto rho = 3.857143;
-//            constexpr auto u = 2.629369;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 10.333333;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            const auto rho = 1 + 0.2 * std::sin(16 * pi * x_coordinate);
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            const auto rhou = rho * u;
-//            const auto rhov = rho * v;
-//            const auto rhow = rho * w;
-//            const auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Shu_Osher<space_dimension_>::Solution_> Shu_Osher<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Shu_Osher<space_dimension_>::name(void) {
-//    return "Shu_Osher";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Shu_Osher<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Explosion
-//template <ushort space_dimension_>
-//Explosion_Problem<space_dimension_>::Solution_ Explosion_Problem<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1 / (gamma - 1);
-//    constexpr auto discontinuity_radius = 0.4;
-//
-//    if constexpr (space_dimension_ == 2) {
-//        const auto x_coordinate = space_vector.at(0);
-//        const auto y_coordinate = space_vector.at(1);
-//        const auto radius = std::sqrt(x_coordinate * x_coordinate + y_coordinate * y_coordinate);
-//
-//        if (radius < discontinuity_radius) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            const auto rhou = rho * u;
-//            const auto rhov = rho * v;
-//            const auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        const auto x_coordinate = space_vector.at(0);
-//        const auto y_coordinate = space_vector.at(1);
-//        const auto z_coordinate = space_vector.at(2);
-//
-//        const auto radius = std::sqrt(x_coordinate * x_coordinate + y_coordinate * y_coordinate + z_coordinate * z_coordinate);
-//
-//
-//        //if (radius < discontinuity_radius) {
-//        if (radius < 0.1) { // for test minibox
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 0.125;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.1;
-//
-//            const auto rhou = rho * u;
-//            const auto rhov = rho * v;
-//            const auto rhow = rho * w;
-//            const auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhow, rhoE };
-//        }
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Explosion_Problem<space_dimension_>::Solution_> Explosion_Problem<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Explosion_Problem<space_dimension_>::name(void) {
-//    return "Explosion_Problem";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Explosion_Problem<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}
-//
-////Blast Wave Interaction
-//template <ushort space_dimension_>
-//Blast_Wave_Interaction<space_dimension_>::Solution_ Blast_Wave_Interaction<space_dimension_>::calculate_solution(const Space_Vector_& space_vector) {
-//    constexpr auto gamma = 1.4;
-//    constexpr auto c = 1 / (gamma - 1);
-//    constexpr auto discontinuity_location1 = 0.1;
-//    constexpr auto discontinuity_location2 = 0.9;
-//
-//    const auto x_coordinate = space_vector[0];
-//
-//    if constexpr (space_dimension_ == 2) {
-//        if (x_coordinate < discontinuity_location1) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else if (discontinuity_location1 <= x_coordinate && x_coordinate < discontinuity_location2) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto p = 100.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//    }
-//    else if constexpr (space_dimension_ == 3) {
-//        if (x_coordinate < discontinuity_location1) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 1000.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else if (discontinuity_location1 <= x_coordinate < discontinuity_location2) {
-//            constexpr auto rho = 1.0;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 0.01;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        }
-//        else {
-//            constexpr auto rho = 1;
-//            constexpr auto u = 0.0;
-//            constexpr auto v = 0.0;
-//            constexpr auto w = 0.0;
-//            constexpr auto p = 100.0;
-//
-//            constexpr auto rhou = rho * u;
-//            constexpr auto rhov = rho * v;
-//            constexpr auto rhow = rho * w;
-//            constexpr auto rhoE = p * c + 0.5 * (rhou * u + rhov * v + rhow * w);
-//
-//            return { rho, rhou, rhov, rhoE };
-//        } 
-//
-//    }
-//    else {
-//        throw std::runtime_error("not supported space dimension");
-//        return {};
-//    }
-//}
-//
-//template <ushort space_dimension_>
-//std::vector<typename Blast_Wave_Interaction<space_dimension_>::Solution_> Blast_Wave_Interaction<space_dimension_>::calculate_solutions(const std::vector<Space_Vector_>& cell_centers) {
-//    const auto num_cell = cell_centers.size();
-//
-//    std::vector<Solution_> solutions(num_cell);
-//    for (size_t i = 0; i < num_cell; ++i)
-//        solutions[i] = This_::calculate_solution(cell_centers[i]);
-//
-//    return solutions;
-//}
-//
-//template <ushort space_dimension_>
-//std::string Blast_Wave_Interaction<space_dimension_>::name(void) {
-//    return "Blast_Wave_Interaction";
-//};
-//
-//template <ushort space_dimension_>
-//constexpr ushort Blast_Wave_Interaction<space_dimension_>::space_dimension(void) {
-//    return space_dimension_;
-//}

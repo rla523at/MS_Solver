@@ -8,6 +8,8 @@ solution_degree				= 3
 spatial_discrete_scheme		= DG
 numerical_flux				= LLF
 
+Initial_condition			=
+
 solve_end_controller_type	= Time
 solve_end_time				= 0.2
 solve_end_iter				= 100
@@ -25,5 +27,11 @@ post_order					= 1
 post_file_format			= ASCII
 post_point_location			= Center
 
+//linear advection option
 x_advection_speed			= 1.0
 y_advection_speed			= 0.5
+
+//sine wave option
+x_wave_length				= 1.0
+y_wave_length				= 1.0
+z_wave_length				= 1.0
