@@ -79,7 +79,7 @@ public:
 	Vector_Function(const std::initializer_list<Function> list) : functions_(list) {};
 
 public://Query
-	template <typename V>	std::vector<double> operator()(const V& point_v) const
+	template <typename V>	V operator()(const V& point_v) const
 	{
 		const auto range_dimension = this->size();
 

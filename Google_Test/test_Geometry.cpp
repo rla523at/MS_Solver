@@ -17,7 +17,8 @@ TEST(Geometry, center_1) {
 	const Euclidean_Vector ref = { 1.5,1 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, center_2) {
+TEST(Geometry, center_2) 
+{
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
 
@@ -48,6 +49,23 @@ TEST(Geometry, center_3) {
 	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 2,1.5 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Geometry, center_4) 
+{
+	const Figure fig = Figure::triangle;
+	const ushort fig_order = 1;
+
+	const Euclidean_Vector n1 = { 1,1,2 };
+	const Euclidean_Vector n2 = { 2,1,3 };
+	const Euclidean_Vector n3 = { 4,2,4 };
+	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
+
+	Geometry geometry(fig, fig_order, std::move(nodes));
+
+	const auto result = geometry.center_point();
+
+	const Euclidean_Vector ref = { 7.0 / 3.0, 4.0 / 3.0, 3.0 };
 	EXPECT_EQ(result, ref);
 }
 TEST(Geometry, volume_1) {

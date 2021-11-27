@@ -22,7 +22,7 @@ public://Query
 	Euclidean_Vector normalized_normal_vector(const Euclidean_Vector& node) const;
 	std::vector<Euclidean_Vector> normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const;
 	Vector_Function<Polynomial> orthonormal_basis_vector_function(const ushort solution_order) const;
-	std::vector<Euclidean_Vector> post_nodes(const ushort post_order) const;
+	std::vector<Euclidean_Vector> post_points(const ushort post_order) const;
 	std::vector<Euclidean_Vector> post_element_centers(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	std::vector<double> projected_volume(void) const;
@@ -68,7 +68,8 @@ Vector_Function<Function> operator*(const Matrix& matrix, const Vector_Function<
 
 namespace ms
 {	
-	template <typename T, typename Container>	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) {
+	template <typename T, typename Container>	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) 
+	{
 		const auto num_extracted_value = indexes.size();
 
 		std::vector<T> extracted_values;

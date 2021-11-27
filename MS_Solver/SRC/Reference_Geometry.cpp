@@ -115,15 +115,18 @@ void Reference_Geometry::initialize(void)
 
 Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const 
 {
-	const auto& mapping_nodes = this->get_mapping_nodes();
-	const auto& mapping_monomial_vector_function = this->get_mapping_monomial_vector_function();
+	const auto& mapping_points = this->get_mapping_nodes();
+	const auto& mapping_monomial_vf = this->get_mapping_monomial_vector_function();
 
-	const auto matrix_order = mapping_monomial_vector_function.size();
-	Matrix transformation_monomial_matrix(matrix_order);
-	for (size_t i = 0; i < matrix_order; ++i)
-		transformation_monomial_matrix.change_column(i, mapping_monomial_vector_function(mapping_nodes[i]));
+	const auto num_mapping_monomials = mapping_monomial_vf.size();
+	Matrix mapping_monomial_matrix(num_mapping_monomials);
 
-	return transformation_monomial_matrix.get_inverse();
+	for (size_t i = 0; i < num_mapping_monomials; ++i)
+	{
+		mapping_monomial_matrix.change_column(i, mapping_monomial_vf(mapping_points[i]));
+	}
+
+	return mapping_monomial_matrix.inverse();
 }
 
 std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const 
@@ -135,33 +138,15 @@ std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(
 			 { node_indexes[1],node_indexes[3],node_indexes[2] } };
 };
 
-//Reference_Line::Reference_Line(const ushort order) {
-//	this->order_ = order;
-//
-//	if (this->set_of_mapping_nodes_.size() < this->order_) 
-//	{
-//		const auto new_size = this->order_ + 1;
-//		this->set_of_mapping_nodes_.resize(new_size);
-//		this->set_of_mapping_monomial_vector_function_.resize(new_size);
-//		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
-//	}
-//
-//	if (this->set_of_mapping_nodes_[this->order_].empty()) {
-//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-//	}
-//};
-
 Reference_Line::Reference_Line(const ushort order)
 {
 	this->order_ = order;
 	this->initialize();
 }
 
-Euclidean_Vector Reference_Line::center_point(const ushort space_dimension) const
+Euclidean_Vector Reference_Line::center_point(void) const
 {
-	return std::vector<double>(space_dimension);
+	return { 0.0 };
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Line::face_reference_geometries(void) const
@@ -272,46 +257,6 @@ ushort Reference_Line::scale_function_order(void) const
 	return 0;
 }
 
-//const std::vector<Euclidean_Vector>& Reference_Line::get_mapping_nodes(void) const 
-//{
-//	return this->set_of_mapping_nodes_[this->order_];
-//}
-//
-//
-//const Vector_Function<Polynomial>& Reference_Line::get_mapping_monomial_vector_function(void) const 
-//{
-//	return this->set_of_mapping_monomial_vector_function_[this->order_];
-//}
-//
-//const Matrix& Reference_Line::get_inverse_mapping_monomial_matrix(void) const 
-//{
-//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-//}
-
-//const std::vector<Euclidean_Vector>& Reference_Line::get_post_nodes(const ushort post_order) const 
-//{
-//	if (this->set_of_post_nodes_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_post_nodes_.resize(new_size);
-//	}
-//
-//	if (this->set_of_post_nodes_[post_order].empty())
-//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-//
-//	return this->set_of_post_nodes_[post_order];
-//}
-//const std::vector<std::vector<uint>>& Reference_Line::get_connectivities(const ushort post_order) const 
-//{
-//	if (this->set_of_connectivities_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_connectivities_.resize(new_size);
-//	}
-//
-//	if (this->set_of_connectivities_[post_order].empty())
-//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
-//
-//	return this->set_of_connectivities_[post_order];
-//}
 std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const 
 {
 	// 0 式式式式 1 		
@@ -322,13 +267,14 @@ std::vector<Euclidean_Vector> Reference_Line::make_mapping_nodes(void) const
 	default:	EXCEPTION("unsuported figure order"); return {};
 	}
 }
+
 std::vector<Euclidean_Vector> Reference_Line::make_post_nodes(const ushort post_order) const 
 {
 	const auto n = post_order;
 	const auto num_post_nodes = n + 2;
 
-	std::vector<Euclidean_Vector> post_nodes;
-	post_nodes.reserve(num_post_nodes);
+	std::vector<Euclidean_Vector> post_points;
+	post_points.reserve(num_post_nodes);
 
 	const auto num_division = n + 1;
 	const auto delta = 2.0 / num_division;
@@ -337,11 +283,12 @@ std::vector<Euclidean_Vector> Reference_Line::make_post_nodes(const ushort post_
 
 	for (ushort i = 0; i <= n + 1; ++i) {
 		const auto X0_coord = X0_start_coord + delta * i;
-		post_nodes.push_back({ X0_coord });
+		post_points.push_back({ X0_coord });
 	}
 
-	return post_nodes;
+	return post_points;
 }
+
 std::vector<std::vector<uint>> Reference_Line::make_connectivities(const ushort post_order) const 
 {
 	const auto n = post_order;
@@ -370,36 +317,15 @@ Vector_Function<Polynomial> Reference_Line::make_mapping_monomial_vector_functio
 	return mapping_monomial_vector;	// 1 r r^2 ...		
 }
 
-//Reference_Triangle::Reference_Triangle(const ushort order) 
-//{
-//	this->order_ = order;
-//
-//	if (this->set_of_mapping_nodes_.size() < this->order_) 
-//	{
-//		this->set_of_mapping_nodes_.resize(this->order_ + 1);
-//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-//
-//		this->set_of_mapping_monomial_vector_function_.resize(this->order_ + 1);
-//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-//
-//		this->set_of_inverse_mapping_monomial_matrix_.resize(this->order_ + 1);
-//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-//	}
-//};
-
 Reference_Triangle::Reference_Triangle(const ushort order)
 {
 	this->order_ = order;
 	this->initialize();
 }
 
-Euclidean_Vector Reference_Triangle::center_point(const ushort space_dimension) const
+Euclidean_Vector Reference_Triangle::center_point(void) const
 {
-	std::vector<double> coordinate_values(space_dimension);
-	coordinate_values[0] = -1.0 / 3.0;
-	coordinate_values[1] = -1.0 / 3.0;
-
-	return coordinate_values;
+	return { -1.0 / 3.0, -1.0 / 3.0 };
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::face_reference_geometries(void) const
@@ -538,46 +464,6 @@ ushort Reference_Triangle::scale_function_order(void) const
 	return 0;
 }
 
-//const std::vector<Euclidean_Vector>& Reference_Triangle::get_mapping_nodes(void) const 
-//{
-//	return this->set_of_mapping_nodes_[this->order_];
-//}
-//
-//const Vector_Function<Polynomial>& Reference_Triangle::get_mapping_monomial_vector_function(void) const 
-//{
-//	return this->set_of_mapping_monomial_vector_function_[this->order_];
-//}
-//
-//const Matrix& Reference_Triangle::get_inverse_mapping_monomial_matrix(void) const 
-//{
-//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-//}
-//
-//const std::vector<Euclidean_Vector>& Reference_Triangle::get_post_nodes(const ushort post_order) const 
-//{
-//	if (this->set_of_post_nodes_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_post_nodes_.resize(new_size);
-//	}
-//
-//	if (this->set_of_post_nodes_[post_order].empty())
-//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-//
-//	return this->set_of_post_nodes_[post_order];
-//}
-//const std::vector<std::vector<uint>>& Reference_Triangle::get_connectivities(const ushort post_order) const 
-//{
-//	if (this->set_of_connectivities_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_connectivities_.resize(new_size);
-//	}
-//	
-//	if (this->set_of_connectivities_[post_order].empty())
-//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);	
-//
-//	return this->set_of_connectivities_[post_order];
-//}
-
 std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_nodes(void) const 
 {
 	//	  2
@@ -597,8 +483,8 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort p
 	const auto n = post_order;
 	const auto num_post_point = static_cast<ushort>((n + 2) * (n + 3) * 0.5);
 
-	std::vector<Euclidean_Vector> post_nodes;
-	post_nodes.reserve(num_post_point);
+	std::vector<Euclidean_Vector> post_points;
+	post_points.reserve(num_post_point);
 
 	const auto num_division = n + 1;
 	const auto delta = 2.0 / num_division;
@@ -606,15 +492,17 @@ std::vector<Euclidean_Vector> Reference_Triangle::make_post_nodes(const ushort p
 	const auto X0_start_coord = -1.0;
 	const auto X1_start_coord = -1.0;
 
-	for (ushort j = 0; j <= n + 1; ++j) {
-		for (ushort i = 0; i <= n + 1 - j; ++i) {
+	for (ushort j = 0; j <= n + 1; ++j) 
+	{
+		for (ushort i = 0; i <= n + 1 - j; ++i) 
+		{
 			const auto X0_coord = X0_start_coord + delta * i;
 			const auto X1_coord = X1_start_coord + delta * j;
-			post_nodes.push_back({ X0_coord, X1_coord });
+			post_points.push_back({ X0_coord, X1_coord });
 		}
 	}
 
-	return post_nodes;
+	return post_points;
 }
 
 std::vector<std::vector<uint>> Reference_Triangle::make_connectivities(const ushort post_order) const 
@@ -662,34 +550,15 @@ Vector_Function<Polynomial> Reference_Triangle::make_mapping_monomial_vector_fun
 	return mapping_monomial_vector;	// 1 r s r^2 rs s^2 ...	
 }
 
-//Reference_Quadrilateral::Reference_Quadrilateral(ushort order)
-//{
-//	this->order_ = order;
-//
-//	if (this->set_of_mapping_nodes_.size() < this->order_) {
-//		const auto new_size = this->order_ + 1;
-//
-//		this->set_of_mapping_nodes_.resize(new_size);
-//		this->set_of_mapping_nodes_[this->order_] = this->make_mapping_nodes();
-//
-//		this->set_of_mapping_monomial_vector_function_.resize(new_size);
-//		this->set_of_mapping_monomial_vector_function_[this->order_] = this->make_mapping_monomial_vector_function();
-//
-//		this->set_of_inverse_mapping_monomial_matrix_.resize(new_size);
-//		this->set_of_inverse_mapping_monomial_matrix_[this->order_] = this->make_inverse_mapping_monomial_matrix();
-//	}
-//};
-
-
 Reference_Quadrilateral::Reference_Quadrilateral(const ushort order)
 {
 	this->order_ = order;
 	this->initialize();
 }
 
-Euclidean_Vector Reference_Quadrilateral::center_point(const ushort space_dimension) const
+Euclidean_Vector Reference_Quadrilateral::center_point(void) const
 {
-	return std::vector<double>(space_dimension);		
+	return { 0.0, 0.0 };
 };
 
 std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::face_reference_geometries(void) const
@@ -830,47 +699,6 @@ ushort Reference_Quadrilateral::scale_function_order(void) const
 	return 1;
 }
 
-//const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_mapping_nodes(void) const 
-//{
-//	return this->set_of_mapping_nodes_[this->order_];
-//}
-//
-//const Vector_Function<Polynomial>& Reference_Quadrilateral::get_mapping_monomial_vector_function(void) const 
-//{
-//	return this->set_of_mapping_monomial_vector_function_[this->order_];
-//}
-//
-//const Matrix& Reference_Quadrilateral::get_inverse_mapping_monomial_matrix(void) const 
-//{
-//	return this->set_of_inverse_mapping_monomial_matrix_[this->order_];
-//}
-
-//const std::vector<Euclidean_Vector>& Reference_Quadrilateral::get_post_nodes(const ushort post_order) const 
-//{
-//	if (this->set_of_post_nodes_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_post_nodes_.resize(new_size);
-//	}
-//
-//	if (this->set_of_post_nodes_[post_order].empty())
-//		this->set_of_post_nodes_[post_order] = this->make_post_nodes(post_order);
-//
-//	return this->set_of_post_nodes_[post_order];
-//}
-//
-//const std::vector<std::vector<uint>>& Reference_Quadrilateral::get_connectivities(const ushort post_order) const 
-//{
-//	if (this->set_of_connectivities_.size() <= post_order) {
-//		const auto new_size = post_order + 1;
-//		this->set_of_connectivities_.resize(new_size);
-//	}
-//
-//	if (this->set_of_connectivities_[post_order].empty())
-//		this->set_of_connectivities_[post_order] = this->make_connectivities(post_order);
-//
-//	return this->set_of_connectivities_[post_order];
-//}
-
 std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_nodes(void) const 
 {
 	//   3式式式式式2
@@ -888,8 +716,8 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ush
 	const auto n = post_order;
 	const auto num_post_nodes = (n + 2) * (n + 2);
 
-	std::vector<Euclidean_Vector> post_nodes;
-	post_nodes.reserve(num_post_nodes);
+	std::vector<Euclidean_Vector> post_points;
+	post_points.reserve(num_post_nodes);
 
 	const auto num_division = n + 1;
 	const auto delta = 2.0 / num_division;
@@ -901,11 +729,11 @@ std::vector<Euclidean_Vector> Reference_Quadrilateral::make_post_nodes(const ush
 		for (ushort i = 0; i <= n + 1; ++i) {
 			const double X0_coord = X0_start_coord + delta * i;
 			const double X1_coord = X1_start_coord + delta * j;
-			post_nodes.push_back({ X0_coord, X1_coord });
+			post_points.push_back({ X0_coord, X1_coord });
 		}
 	}
 
-	return post_nodes;
+	return post_points;
 }
 
 std::vector<std::vector<uint>> Reference_Quadrilateral::make_connectivities(const ushort post_order) const 
@@ -944,16 +772,24 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vecto
 	const auto num_monomial = (n + 1) * (n + 1);
 	std::vector<Polynomial> mapping_monomial_vector(num_monomial);
 
-	for (ushort a = 0, index = 0; a <= n; ++a) {
+	for (ushort a = 0, index = 0; a <= n; ++a) 
+	{
 		for (ushort b = 0; b <= a; ++b)
+		{
 			mapping_monomial_vector[index++] = (r ^ a) * (s ^ b);
+		}
 
 		if (a == 0)
+		{
 			continue;
+		}
 
 		for (int c = static_cast<int>(a - 1); 0 <= c; --c)
+		{
 			mapping_monomial_vector[index++] = (r ^ c) * (s ^ a);
+		}
 	}
+
 	return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
 }
 

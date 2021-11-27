@@ -163,7 +163,7 @@ std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_points(const u
 
 	for (uint i = 0; i < num_cell; ++i)
 	{
-		set_of_post_nodes[i] = this->cell_elements_[i].post_nodes(post_order);
+		set_of_post_nodes[i] = this->cell_elements_[i].post_points(post_order);
 	}
 
 	return set_of_post_nodes;
