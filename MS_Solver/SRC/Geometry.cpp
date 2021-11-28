@@ -1,51 +1,56 @@
 #include "../INC/Geometry.h"
 
-Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_nodes)
+Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_points)
 {
-	this->reference_geometry_ = Reference_Geometry_Factory::make(figure, order);
-	this->nodes_ = std::move(consisting_nodes);
+	this->reference_geometry_ = Reference_Geometry_Factory::make_unique(figure, order);
+	this->points_ = std::move(consisting_points);
 	this->space_dimension_ = this->check_space_dimension();
-	this->mapping_function_ = this->make_mapping_function();
-	this->scale_function_ = this->reference_geometry_->scale_function(mapping_function_);
+	this->mapping_vf_ = this->make_mapping_function();
+	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
+	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
 }
 
-Geometry::Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes)
+Geometry::Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_points)
 	: reference_geometry_(std::move(reference_goemetry)),
-	nodes_(std::move(consisting_nodes))
+	  points_(std::move(consisting_points))
 {
 	this->space_dimension_ = this->check_space_dimension();
-	this->mapping_function_ = this->make_mapping_function();
-	this->scale_function_ = this->reference_geometry_->scale_function(mapping_function_);
+	this->mapping_vf_ = this->make_mapping_function();
+	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
+	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
 };
 
-void Geometry::change_nodes(std::vector<Euclidean_Vector>&& nodes)
+void Geometry::change_points(std::vector<Euclidean_Vector>&& points)
 {
-	*this = Geometry(std::move(this->reference_geometry_), std::move(nodes));
+	this->points_ = std::move(points);
+	this->mapping_vf_ = this->make_mapping_function();
+	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
+	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
 }
 
 bool Geometry::operator==(const Geometry& other) const
 {
-	return this->nodes_ == other.nodes_ &&
-		*this->reference_geometry_ == *other.reference_geometry_;
+	return this->points_ == other.points_ 
+		&& *this->reference_geometry_ == *other.reference_geometry_;
 }
 
 Euclidean_Vector Geometry::center_point(void) const
 {
-	return this->mapping_function_(this->reference_geometry_->center_point());
+	return this->mapping_vf_(this->reference_geometry_->center_point());
 }
 
 std::vector<Geometry> Geometry::face_geometries(void) const
 {
-	auto set_of_face_nodes = this->set_of_face_nodes();
+	auto set_of_face_points = this->set_of_face_points();
 	auto face_reference_geometries = this->reference_geometry_->face_reference_geometries();
 	const auto num_face = face_reference_geometries.size();
 
 	std::vector<Geometry> face_geometries;
 	face_geometries.reserve(num_face);
 
-	for (size_t i = 0; i < num_face; ++i)
+	for (ushort i = 0; i < num_face; ++i)
 	{
-		face_geometries.push_back({ std::move(face_reference_geometries[i]), std::move(set_of_face_nodes[i]) });
+		face_geometries.push_back({ std::move(face_reference_geometries[i]), std::move(set_of_face_points[i]) });
 	}
 
 	return face_geometries;
@@ -61,27 +66,21 @@ ushort Geometry::num_post_elements(const ushort post_order) const
 	return this->reference_geometry_->num_post_elements(post_order);
 }
 
-Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& node) const
+Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& point) const
 {
-	const auto normal_vector_function = this->reference_geometry_->normal_vector_function(this->mapping_function_);
-	auto normal_vector = Euclidean_Vector(normal_vector_function(node));
-
-	return normal_vector.normalize();
+	return this->normal_vf_(point).normalize();
 }
 
 std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const
 {
-	const auto normal_vector_function = this->reference_geometry_->normal_vector_function(this->mapping_function_);
-
 	const auto num_points = points.size();
 
 	std::vector<Euclidean_Vector> normalized_normal_vectors;
 	normalized_normal_vectors.reserve(num_points);
 
-	for (int i = 0; i < num_points; ++i)
+	for (ushort i = 0; i < num_points; ++i)
 	{
-		auto normal_vector = Euclidean_Vector(normal_vector_function(points[i]));
-		normalized_normal_vectors[i] = normal_vector.normalize();
+		normalized_normal_vectors[i] = this->normalized_normal_vector(points[i]);
 	}
 
 	return normalized_normal_vectors;
@@ -89,15 +88,15 @@ std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vec
 
 std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const
 {
-	const auto& ref_post_nodes = this->reference_geometry_->get_post_nodes(post_order);
-	const auto num_post_nodes = ref_post_nodes.size();
+	const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
+	const auto num_post_points = ref_post_points.size();
 
 	std::vector<Euclidean_Vector> post_points;
-	post_points.reserve(num_post_nodes);
+	post_points.reserve(num_post_points);
 
-	for (const auto& ref_post_node : ref_post_nodes)
+	for (const auto& point : ref_post_points)
 	{
-		post_points.push_back(this->mapping_function_(ref_post_node));
+		post_points.push_back(this->mapping_vf_(point));
 	}
 
 	return post_points;
@@ -160,24 +159,24 @@ Vector_Function<Polynomial> Geometry::orthonormal_basis_vector_function(const us
 	return ms::Gram_Schmidt_process(initial_basis_vector_function, *this);
 }
 
-std::vector<double> Geometry::projected_volume(void) const
+std::vector<double> Geometry::projected_volumes(void) const
 {
-	//This only work for linear mesh and convex geometry.
+	//This only work for linear mesh and convex geometry and cell
 
 	if (this->space_dimension_ == 2)
 	{
 		double x_projected_volume = 0.0;
 		double y_projected_volume = 0.0;
 
-		const auto set_of_face_nodes = this->set_of_face_nodes();
-		for (const auto& face_nodes : set_of_face_nodes)
+		const auto set_of_face_points = this->set_of_face_points();
+		for (const auto& points : set_of_face_points)
 		{
-			const auto& start_node = face_nodes[0];
-			const auto& end_node = face_nodes[1];
-			const auto node_to_node = end_node - start_node;
+			const auto& start_point_v = points[0];
+			const auto& end_point_v = points[1];
+			const auto distance_v = end_point_v - start_point_v;
 
-			x_projected_volume += std::abs(node_to_node.at(0));
-			y_projected_volume += std::abs(node_to_node.at(1));
+			x_projected_volume += std::abs(distance_v.at(0));
+			y_projected_volume += std::abs(distance_v.at(1));
 		}
 
 		return { 0.5 * y_projected_volume, 0.5 * x_projected_volume };
@@ -191,7 +190,7 @@ std::vector<double> Geometry::projected_volume(void) const
 		const auto face_geometries = this->face_geometries();
 		for (const auto& geometry : face_geometries)
 		{
-			const auto normal_vector = geometry.normalized_normal_vector(geometry.center_point());
+			const auto normal_v = geometry.normalized_normal_vector(geometry.center_point());
 
 			Euclidean_Vector yz_plane_normalized_normal_vector = { 1,0,0 };
 			Euclidean_Vector xz_plane_normalized_normal_vector = { 0,1,0 };
@@ -199,9 +198,9 @@ std::vector<double> Geometry::projected_volume(void) const
 
 			const auto volume = geometry.volume();
 
-			yz_projected_volume += volume * std::abs(normal_vector.inner_product(yz_plane_normalized_normal_vector));
-			xz_projected_volume += volume * std::abs(normal_vector.inner_product(xz_plane_normalized_normal_vector));
-			xy_projected_volume += volume * std::abs(normal_vector.inner_product(xy_plane_normalized_normal_vector));
+			yz_projected_volume += volume * std::abs(normal_v.inner_product(yz_plane_normalized_normal_vector));
+			xz_projected_volume += volume * std::abs(normal_v.inner_product(xz_plane_normalized_normal_vector));
+			xy_projected_volume += volume * std::abs(normal_v.inner_product(xy_plane_normalized_normal_vector));
 		}
 
 		return { 0.5 * yz_projected_volume, 0.5 * xz_projected_volume, 0.5 * xy_projected_volume };
@@ -213,18 +212,20 @@ std::vector<double> Geometry::projected_volume(void) const
 	}
 }
 
-std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_face_nodes(void) const
+std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_face_points(void) const
 {
-	const auto set_of_face_node_index_sequences = this->reference_geometry_->set_of_face_node_index_sequences();
-	const auto num_face = set_of_face_node_index_sequences.size();
+	const auto set_of_face_point_index_sequences = this->reference_geometry_->set_of_face_node_index_sequences();
+	const auto num_face = set_of_face_point_index_sequences.size();
 
-	std::vector<std::vector<Euclidean_Vector>> set_of_face_nodes;
-	set_of_face_nodes.reserve(num_face);
+	std::vector<std::vector<Euclidean_Vector>> set_of_face_points;
+	set_of_face_points.reserve(num_face);
 
 	for (size_t i = 0; i < num_face; ++i)
-		set_of_face_nodes.push_back(ms::extract_by_index(this->nodes_, set_of_face_node_index_sequences[i]));
+	{
+		set_of_face_points.push_back(ms::extract_by_index(this->points_, set_of_face_point_index_sequences[i]));
+	}
 
-	return set_of_face_nodes;
+	return set_of_face_points;
 }
 
 double Geometry::volume(void) const
@@ -233,7 +234,9 @@ double Geometry::volume(void) const
 
 	auto volume = 0.0;
 	for (const auto weight : quadrature_rule.weights)
+	{
 		volume += weight;
+	}
 
 	return volume;
 }
@@ -253,11 +256,13 @@ const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_orde
 
 ushort Geometry::check_space_dimension(void) const
 {
-	const auto expect_dimension = static_cast<ushort>(this->nodes_.front().size());
+	const auto expect_dimension = static_cast<ushort>(this->points_.front().size());
 
-	const auto num_nodes = this->nodes_.size();
+	const auto num_nodes = this->points_.size();
 	for (ushort i = 1; i < num_nodes; ++i)
-		REQUIRE(expect_dimension == this->nodes_[i].size(), "every node should have same space dimension");
+	{
+		REQUIRE(expect_dimension == this->points_[i].size(), "every point should have same space dimension");
+	}
 
 	return expect_dimension;
 }
@@ -280,8 +285,12 @@ Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort
 
 		//1 (x - x_c) (y - y_c)  ...
 		for (ushort a = 0; a <= solution_order; ++a)
+		{
 			for (ushort b = 0; b <= a; ++b)
+			{
 				initial_basis_functions[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ b);
+			}
+		}
 	}
 	else if (this->space_dimension_ == 3)
 	{
@@ -296,20 +305,25 @@ Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort
 
 		//1 (x - x_c) (y - y_c) (z - z_c) ...
 		for (ushort a = 0; a <= solution_order; ++a)
+		{
 			for (ushort b = 0; b <= a; ++b)
+			{
 				for (ushort c = 0; c <= b; ++c)
+				{
 					initial_basis_functions[index++] = ((x - x_c) ^ (a - b)) * ((y - y_c) ^ (b - c)) * ((z - z_c) ^ c);
+				}
+			}
+		}
 	}
 	else
-		throw std::runtime_error("not supported space dimension");
-
+		EXCEPTION("not supported space dimension");
 
 	return initial_basis_functions;
 }
 
 bool Geometry::is_axis_parallel_node(const Euclidean_Vector& node) const
 {
-	for (const auto& my_node : this->nodes_)
+	for (const auto& my_node : this->points_)
 	{
 		if (my_node.is_axis_translation(node))
 		{
@@ -326,12 +340,12 @@ bool Geometry::is_on_axis_plane(const ushort axis_tag) const
 		return false;
 	}
 
-	const auto& ref_node = this->nodes_.front();
+	const auto& ref_node = this->points_.front();
 
 	constexpr auto epsilon = 1.0E-10;
-	for (ushort j = 1; j < this->nodes_.size(); ++j)
+	for (ushort j = 1; j < this->points_.size(); ++j)
 	{
-		if (std::abs(this->nodes_[j][axis_tag] - ref_node[axis_tag]) > epsilon)
+		if (std::abs(this->points_[j][axis_tag] - ref_node[axis_tag]) > epsilon)
 		{
 			return false;
 		}
@@ -347,7 +361,7 @@ bool Geometry::is_on_this_axis_plane(const ushort axis_tag, const double referen
 	}
 
 	constexpr auto epsilon = 1.0E-10;
-	for (const auto& node : this->nodes_)
+	for (const auto& node : this->points_)
 	{
 		if (std::abs(node[axis_tag] - reference_value) > epsilon)
 		{
@@ -365,7 +379,7 @@ bool Geometry::is_on_same_axis_plane(const Geometry& other) const
 	{
 		if (this->is_on_axis_plane(i))
 		{
-			const auto reference_value = this->nodes_.front()[i];
+			const auto reference_value = this->points_.front()[i];
 
 			if (other.is_on_this_axis_plane(i, reference_value))
 			{
@@ -384,18 +398,20 @@ Vector_Function<Polynomial> Geometry::make_mapping_function(void) const
 	//	C : mapping coefficient matrix	
 	//	M : mapping monomial matrix
 
-	const auto num_nodes = this->nodes_.size();
+	const auto num_nodes = this->points_.size();
 	Matrix X(this->space_dimension_, num_nodes);
 	for (size_t j = 0; j < num_nodes; ++j)
-		X.change_column(j, this->nodes_[j]);
+	{
+		X.change_column(j, this->points_[j]);
+	}
 
 	const auto& inv_M = this->reference_geometry_->get_inverse_mapping_monomial_matrix();
 
 	const auto C = X * inv_M;
 
-	const auto& monomial_vector_function = this->reference_geometry_->get_mapping_monomial_vector_function();
+	const auto& monomial_vf = this->reference_geometry_->get_mapping_monomial_vector_function();
 
-	return C * monomial_vector_function;
+	return C * monomial_vf;
 }
 
 Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) const
@@ -409,7 +425,7 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 
 	for (const auto& ref_point_v : ref_quadrature_rule.points)
 	{
-		transformed_QPs.push_back(this->mapping_function_(ref_point_v));
+		transformed_QPs.push_back(this->mapping_vf_(ref_point_v));
 	}
 
 	std::vector<double> transformed_QW(num_QP);
@@ -419,7 +435,7 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 		const auto& point_v = ref_quadrature_rule.points[i];
 		const auto& weight = ref_quadrature_rule.weights[i];
 
-		transformed_QW[i] = this->scale_function_(point_v) * weight;
+		transformed_QW[i] = this->scale_f_(point_v) * weight;
 	}
 
 	return { transformed_QPs, transformed_QW };
@@ -465,15 +481,15 @@ namespace ms
 		return std::sqrt(ms::inner_product(function, function, geometry));
 	}
 
-	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry)
+	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& vf, const Geometry& geometry)
 	{
-		const auto range_dimension = functions.size();
+		const auto range_dimension = vf.size();
 
 		std::vector<Polynomial> normalized_functions(range_dimension);
 
 		for (ushort i = 0; i < range_dimension; ++i)
 		{
-			normalized_functions[i] = functions[i];
+			normalized_functions[i] = vf[i];
 
 			for (ushort j = 0; j < i; ++j)
 				normalized_functions[i] -= ms::inner_product(normalized_functions[i], normalized_functions[j], geometry) * normalized_functions[j];

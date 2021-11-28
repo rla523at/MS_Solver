@@ -40,7 +40,7 @@ public://Query
 	const std::vector<Euclidean_Vector>& get_mapping_nodes(void) const;
 	const Vector_Function<Polynomial>& get_mapping_monomial_vector_function(void) const;
 	const Matrix& get_inverse_mapping_monomial_matrix(void) const;
-	const std::vector<Euclidean_Vector>& get_post_nodes(const ushort post_order) const;
+	const std::vector<Euclidean_Vector>& get_post_points(const ushort post_order) const;
 	const std::vector<std::vector<uint>>& get_connectivities(const ushort post_order) const;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const;
 	std::vector<ushort> vertex_node_index_sequneces(void) const;
@@ -186,7 +186,7 @@ protected:
 class Reference_Geometry_Factory
 {
 public:
-	static std::unique_ptr<Reference_Geometry> make(const Figure figure, const ushort order);
+	static std::unique_ptr<Reference_Geometry> make_unique(const Figure figure, const ushort order);
 };
 
 

@@ -6,7 +6,7 @@ TEST(Reference_Geometry, mapping_monomial_vector_function_1)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_monomial_vector_function();
 
 	const Polynomial r("x0");
@@ -17,7 +17,7 @@ TEST(Reference_Geometry, mapping_monomial_vector_function_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_monomial_vector_function();
 
 	const Polynomial r("x0");
@@ -30,7 +30,7 @@ TEST(Reference_Geometry, mapping_monomial_vector_function_3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_monomial_vector_function();
 
 	const Polynomial r("x0");
@@ -86,7 +86,7 @@ TEST(Reference_Geometry, is_simplex1)
 {
 	const auto fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	EXPECT_TRUE(ref_geo->is_simplex());
 }
@@ -94,7 +94,7 @@ TEST(Reference_Geometry, is_simplex2)
 {
 	const auto fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	EXPECT_FALSE(ref_geo->is_simplex());
 }
@@ -119,7 +119,7 @@ TEST(Reference_Geometry, get_mapping_nodes1)
 {
 	const auto fig = Figure::line;
 	const auto fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_nodes();
 
 	const std::vector<Euclidean_Vector> ref = { { -1,0 }, { 1,0 } };
@@ -129,7 +129,7 @@ TEST(Reference_Geometry, get_mapping_nodes2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_nodes();
 
 	const std::vector<Euclidean_Vector> ref = { { -1, -1 }, { 1, -1 }, { -1, 1 } };
@@ -139,7 +139,7 @@ TEST(Reference_Geometry, get_mapping_nodes3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_mapping_nodes();
 
 	const std::vector<Euclidean_Vector> ref = { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
@@ -149,7 +149,7 @@ TEST(Reference_Geometry, inverse_mapping_monomial_matrix_1)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_inverse_mapping_monomial_matrix();
 
 	const Matrix ref(2, 2, { 0.5,-0.5,0.5,0.5 });
@@ -159,7 +159,7 @@ TEST(Reference_Geometry, inverse_mapping_monomial_matrix_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_inverse_mapping_monomial_matrix();
 
 	const Matrix ref(3, 3, { 0, -0.5, -0.5,0.5,  0.5,    0,0.5,    0,  0.5 });
@@ -169,7 +169,7 @@ TEST(Reference_Geometry, inverse_mapping_monomial_matrix_3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 	const auto& result = ref_geo->get_inverse_mapping_monomial_matrix();
 
 	const Matrix ref(4, 4, { 0.25, -0.25,  0.25, -0.25,  0.25,  0.25, -0.25, -0.25,  0.25,  0.25,  0.25,  0.25,  0.25, -0.25, -0.25,  0.25 });
@@ -179,7 +179,7 @@ TEST(Reference_Geometry, get_quadrature_rule_1)
 {
 	const auto fig = Figure::line;
 	const auto fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr size_t integrand_order = 0;
 	const auto result = ref_geo->get_quadrature_rule(integrand_order);
@@ -191,7 +191,7 @@ TEST(Reference_Geometry, get_quadrature_rule_2)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	for (ushort i = 0; i < 22; ++i)
 	{
@@ -210,7 +210,7 @@ TEST(Reference_Geometry, get_quadrature_rule_3)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr size_t integrand_order = 11;
 	const auto result = ref_geo->get_quadrature_rule(integrand_order);
@@ -222,7 +222,7 @@ TEST(Reference_Geometry, get_quadrature_rule_4)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	for (ushort i = 0; i < 21; ++i) 
 {
@@ -241,7 +241,7 @@ TEST(Reference_Geometry, get_quadrature_rule_5)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr size_t integrand_order = 11;
 	const auto result = ref_geo->get_quadrature_rule(integrand_order);
@@ -253,7 +253,7 @@ TEST(Reference_Geometry, get_quadrature_rule_6)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	for (ushort i = 0; i < 21; ++i) 
 {
@@ -313,7 +313,7 @@ TEST(Reference_Geometry, get_connectivities1)
 {
 	const auto fig = Figure::triangle;
 	const auto fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr ushort post_order = 0;
 	const auto& result = ref_geo->get_connectivities(post_order);
@@ -325,7 +325,7 @@ TEST(Reference_Geometry, get_connectivities2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr ushort post_order = 1;
 	const auto& result = ref_geo->get_connectivities(post_order);
@@ -337,7 +337,7 @@ TEST(Reference_Geometry, get_connectivities3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr ushort post_order = 0;
 	const auto& result = ref_geo->get_connectivities(post_order);
@@ -349,7 +349,7 @@ TEST(Reference_Geometry, get_connectivities4)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
+	const auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
 
 	constexpr ushort post_order = 1;
 	const auto& result = ref_geo->get_connectivities(post_order);
@@ -383,11 +383,11 @@ TEST(Reference_Geometry, face_reference_geometry_1)
 {
 	const auto figure = Figure::triangle;
 	const auto figure_order = 1;
-	const auto reference_geometry = Reference_Geometry_Factory::make(figure, figure_order);
+	const auto reference_geometry = Reference_Geometry_Factory::make_unique(figure, figure_order);
 
 	const auto result = reference_geometry->face_reference_geometries();
 
-	const auto line = Reference_Geometry_Factory::make(Figure::line, figure_order);
+	const auto line = Reference_Geometry_Factory::make_unique(Figure::line, figure_order);
 	for (ushort i = 0; i < 3; ++i) 
 {
 		EXPECT_EQ(typeid(*result[i]), typeid(*line));

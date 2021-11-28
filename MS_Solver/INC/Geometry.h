@@ -8,7 +8,7 @@ public:
 	Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
 
 public://Command
-	void change_nodes(std::vector<Euclidean_Vector>&& nodes);
+	void change_points(std::vector<Euclidean_Vector>&& nodes);
 
 public://Query
 	bool operator==(const Geometry& other) const;
@@ -25,8 +25,8 @@ public://Query
 	std::vector<Euclidean_Vector> post_points(const ushort post_order) const;
 	std::vector<Euclidean_Vector> post_element_centers(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
-	std::vector<double> projected_volume(void) const;
-	std::vector<std::vector<Euclidean_Vector>> set_of_face_nodes(void) const;
+	std::vector<double> projected_volumes(void) const;
+	std::vector<std::vector<Euclidean_Vector>> set_of_face_points(void) const;
 	double volume(void) const;
 
 protected:	
@@ -42,9 +42,10 @@ protected:
 protected:
 	ushort space_dimension_ = 0;
 	std::unique_ptr<Reference_Geometry> reference_geometry_;
-	std::vector<Euclidean_Vector> nodes_;
-	Vector_Function<Polynomial> mapping_function_;
-	Irrational_Function scale_function_;
+	std::vector<Euclidean_Vector> points_;
+	Vector_Function<Polynomial> mapping_vf_;
+	Vector_Function<Polynomial> normal_vf_;
+	Irrational_Function scale_f_;
 	mutable std::map<size_t, Quadrature_Rule> integrand_order_to_quadrature_rule_;
 
 //public:

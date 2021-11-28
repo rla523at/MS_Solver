@@ -28,7 +28,7 @@ const Matrix& Reference_Geometry::get_inverse_mapping_monomial_matrix(void) cons
 	return this->set_of_inverse_mapping_monomial_matrix_[figure_index][this->order_];
 }
 
-const std::vector<Euclidean_Vector>& Reference_Geometry::get_post_nodes(const ushort post_order) const
+const std::vector<Euclidean_Vector>& Reference_Geometry::get_post_points(const ushort post_order) const
 {
 	const auto figure_index = static_cast<int>(this->figure());
 
@@ -335,7 +335,7 @@ std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::face_refere
 	face_reference_geometries.reserve(num_face);
 	
 	for (ushort i = 0; i < num_face; ++i)
-		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
+		face_reference_geometries.push_back(Reference_Geometry_Factory::make_unique(Figure::line, this->order_));
 
 	return face_reference_geometries;
 }
@@ -568,7 +568,7 @@ std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::face_r
 	face_reference_geometries.reserve(num_face);
 
 	for (ushort i = 0; i < num_face; ++i)
-		face_reference_geometries.push_back(Reference_Geometry_Factory::make(Figure::line, this->order_));
+		face_reference_geometries.push_back(Reference_Geometry_Factory::make_unique(Figure::line, this->order_));
 
 	return face_reference_geometries;
 }
@@ -794,7 +794,7 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vecto
 }
 
 
-std::unique_ptr<Reference_Geometry> Reference_Geometry_Factory::make(const Figure figure, const ushort order)
+std::unique_ptr<Reference_Geometry> Reference_Geometry_Factory::make_unique(const Figure figure, const ushort order)
 {
 	switch (figure)
 	{

@@ -26,7 +26,7 @@ class Element : public Geometry
 public:
 	Element(const ElementType element_type, std::vector<uint>&& node_indexes, Geometry&& geometry)
 		: element_type_(element_type), 
-		node_indexes_(std::move(node_indexes)),
+		point_indexes_(std::move(node_indexes)),
 		Geometry(std::move(geometry)) {};
 
 public://Command
@@ -36,13 +36,13 @@ public://Query
 	bool operator==(const Element& other) const;
 
 	std::vector<uint> find_periodic_matched_node_indexes(const Element& other) const;
-	bool is_periodic_pair(const Element& other) const;
+	//bool is_periodic_pair(const Element& other) const;
 	std::vector<Element> make_face_elements(void) const;
-	std::vector<Euclidean_Vector> nodes_at_indexes(const std::vector<uint>& indexes) const;
+	std::vector<Euclidean_Vector> points_at_indexes(const std::vector<uint>& indexes) const;
 	Euclidean_Vector outward_normalized_normal_vector(const Element& owner_cell_element, const Euclidean_Vector& point) const;
 	std::vector<Euclidean_Vector> outward_normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector>& points) const;
 	ElementType type(void) const;
-	std::vector<uint> vertex_node_indexes(void) const;
+	std::vector<uint> vertex_point_indexes(void) const;
 
 private:
 	bool can_be_periodic_pair(const Element& other) const;
@@ -53,7 +53,7 @@ private:
 
 private:
 	ElementType element_type_;
-	std::vector<uint> node_indexes_;
+	std::vector<uint> point_indexes_;
 };
 
 namespace ms

@@ -43,7 +43,7 @@ Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_vie
 
 	for (uint i = 0; i < num_cell; ++i) 
 	{
-		const auto vnode_indexes = this->cell_elements_[i].vertex_node_indexes();
+		const auto vnode_indexes = this->cell_elements_[i].vertex_point_indexes();
 		for (const auto vnode_index : vnode_indexes) 
 		{
 			if (!this->vnode_index_to_share_cell_index_set_ignore_pbdry_.contains(vnode_index))
@@ -204,7 +204,7 @@ std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
 	std::vector<std::vector<double>> projected_volumes(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
-		projected_volumes[i] = cell_elements[i].projected_volume();
+		projected_volumes[i] = cell_elements[i].projected_volumes();
 
 	return projected_volumes;
 
@@ -231,7 +231,7 @@ size_t Grid::num_boundaries(void) const
 
 uint Grid::boundary_owner_cell_index(const uint bdry_index) const
 {
-	const auto vnode_indexes = this->boundary_elements_[bdry_index].vertex_node_indexes();
+	const auto vnode_indexes = this->boundary_elements_[bdry_index].vertex_point_indexes();
 	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(vnode_indexes);
 	REQUIRE(cell_indexes.size() == 1, "boundary should have unique owner cell");
 
@@ -288,7 +288,7 @@ size_t Grid::num_inner_faces(void) const
 
 std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_index) const
 {
-	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inner_face_elements_[inner_face_index].vertex_node_indexes());
+	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inner_face_elements_[inner_face_index].vertex_point_indexes());
 	REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
 
 	//set first index as oc index
@@ -319,8 +319,8 @@ std::pair<uint, uint> Grid::periodic_boundary_oc_nc_index_pair(const uint pbdry_
 {
 	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
 
-	const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_node_indexes());
-	const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_node_indexes());
+	const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_point_indexes());
+	const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_point_indexes());
 	REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
 	REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
 
@@ -356,15 +356,15 @@ std::vector<Element> Grid::make_inner_face_elements(void) const
 
 	for (const auto& boundray_element : this->boundary_elements_)
 	{
-		auto vnode_indexes = boundray_element.vertex_node_indexes();
+		auto vnode_indexes = boundray_element.vertex_point_indexes();
 		std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
 		constructed_face_vnode_index_set.insert(std::move(vnode_indexes));
 	}
 
 	for (const auto& [pbdry_elem1, pbdry_elem2] : this->periodic_boundary_element_pairs_)
 	{
-		auto vnode_indexes1 = pbdry_elem1.vertex_node_indexes();
-		auto vnode_indexes2 = pbdry_elem2.vertex_node_indexes();
+		auto vnode_indexes1 = pbdry_elem1.vertex_point_indexes();
+		auto vnode_indexes2 = pbdry_elem2.vertex_point_indexes();
 
 		std::sort(vnode_indexes1.begin(), vnode_indexes1.end());	//to ignore index order
 		std::sort(vnode_indexes2.begin(), vnode_indexes2.end());	//to ignore index order
@@ -381,7 +381,7 @@ std::vector<Element> Grid::make_inner_face_elements(void) const
 		auto face_elements = cell_element.make_face_elements();
 		for (auto& face_element : face_elements)
 		{
-			auto vnode_indexes = face_element.vertex_node_indexes();
+			auto vnode_indexes = face_element.vertex_point_indexes();
 			std::sort(vnode_indexes.begin(), vnode_indexes.end());	//to ignore index order
 
 			if (constructed_face_vnode_index_set.contains(vnode_indexes))
@@ -452,8 +452,8 @@ std::unordered_map<uint, std::set<uint>> Grid::calculate_vnode_index_to_peridoic
 
 	for (const auto& [oc_side_element, nc_side_element] : this->periodic_boundary_element_pairs_) 
 	{
-		const auto oc_side_vnode_indexes = oc_side_element.vertex_node_indexes();
-		const auto nc_side_vnode_indexes = nc_side_element.vertex_node_indexes();
+		const auto oc_side_vnode_indexes = oc_side_element.vertex_point_indexes();
+		const auto nc_side_vnode_indexes = nc_side_element.vertex_point_indexes();
 
 		const auto num_vnode = oc_side_vnode_indexes.size();
 		for (ushort i = 0; i < num_vnode; ++i) 
