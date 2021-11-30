@@ -6,7 +6,7 @@
 class Discrete_Solution
 {
 public:
-	Discrete_Solution(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation);
+	Discrete_Solution(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid);
 
 public://Command
 	virtual void precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points) abstract;
@@ -16,8 +16,9 @@ public://Command
 public://Query
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const abstract;
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const abstract;
-	const Euclidean_Vector& get_solution_vector(void) const;
 	const std::vector<std::string>& get_solution_names(void) const;
+	Euclidean_Vector solution_vector(void) const;
+	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const;
 	ushort num_equations(void) const;
 	ushort num_solutions(void) const;
 	size_t num_values(void) const;
@@ -26,24 +27,24 @@ protected:
 	ushort space_dimension_;
 	ushort num_equations_;	
 	size_t num_cells_;
-	Euclidean_Vector value_v_;
+	std::vector<double> values_;
 	std::shared_ptr<Governing_Equation> governing_equation_;
 };
 
 class Discrete_Solution_DG : public Discrete_Solution
 {
 public:	
-	Discrete_Solution_DG(const Grid& grid, const std::shared_ptr<Governing_Equation>& governing_equation, const Initial_Condition& initial_condition, const ushort solution_degree);
+	Discrete_Solution_DG(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_degree);
 
 public://Command
 	void precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points) override;
 	void precalculate_post_points(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) override;
 
-	void precalculate_basis_bdry_QPs(const std::vector<uint>& oc_indexes, const std::vector<Quadrature_Rule>& quadrature_rules);
-	void precalcualte_cell_QPs(const std::vector<Quadrature_Rule>& quadrature_rules);
+	void precalculate_basis_bdry_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<Quadrature_Rule>& quadrature_rules);
+	void precalcualte_cell_QPs_basis_values(const std::vector<Quadrature_Rule>& quadrature_rules);
 	void precalculate_cell_P0_basis_values(void);
-	void precalculate_infs_ocs_QPs(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
-	void precalculate_infs_ncs_QPs(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
+	void precalculate_infs_ocs_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
+	void precalculate_infs_ncs_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
 
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
@@ -55,30 +56,32 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
 
-
-
-	double calculate_P0_basis_value(const uint cell_index) const;
-	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
 
-	Euclidean_Vector calculate_P0_solution(const uint cell_index, const double P0_basis_value) const;
+	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
+	ushort solution_degree(const uint cell_index) const;
+	ushort num_basis(const uint cell_index) const;
+
+
+private:
+	std::vector<double> calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
+
+	double calculate_P0_basis_value(const uint cell_index) const;
+	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+
+	Euclidean_Vector calculate_P0_solution_precalculated(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Matrix& basis_points_m) const;
 
 	size_t coefficient_start_index(const uint cell_index) const;
-	ushort num_basis(const uint cell_index) const;
-	ushort solution_degree(const uint cell_index) const;
+	size_t num_total_basis(void) const;
 
-	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
 	const std::vector<ushort>& get_solution_degrees(void) const;
 	const std::vector<ushort>& get_set_of_num_basis(void) const;
 
-private:
-	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;
 	const double* coefficient_pointer(const uint cell_index) const;
-	Matrix_Wrapper coefficient_m(const uint cell_index) const;
-	size_t num_total_basis(void) const;
-	Euclidean_Vector calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
+	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
+	Matrix_Constant_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index) const;
 	
 private:
 	std::vector<ushort> solution_degrees_;

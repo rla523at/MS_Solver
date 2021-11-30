@@ -57,17 +57,18 @@ public://Command
 	Euclidean_Vector& operator*=(const double constant);
 	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
 
+	std::vector<double>&& move_values(void);
 	Euclidean_Vector& normalize(void);
 
 private:
 	std::vector<double> values_;
 };
 
-class Euclidean_Vector_Wrapper : public Euclidean_Vector_Base
+class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Base
 {
 public:
-	Euclidean_Vector_Wrapper(const size_t num_value, const double* ptr);
-	Euclidean_Vector_Wrapper(const std::vector<double>& values);
+	Euclidean_Vector_Constant_Wrapper(const size_t num_value, const double* ptr);
+	Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values);
 };
 
 template <typename Function>

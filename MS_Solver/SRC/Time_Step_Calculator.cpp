@@ -7,11 +7,11 @@ CFL::CFL(const double cfl, const Grid& grid)
     this->cell_projected_volumes_ = grid.cell_projected_volumes();
 }
 
-double CFL::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation & governing_equation) const
+double CFL::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation& governing_equation) const
 {
     const auto space_dimension = governing_equation.space_dimension();
 
-    const auto coordinate_projected_maximum_lambdas = governing_equation.calculate_coordinate_projected_maximum_lambda(P0_solutions);
+    const auto coordinate_projected_maximum_lambdas = governing_equation.calculate_coordinate_projected_maximum_lambdas(P0_solutions);
 
     const auto num_cell = P0_solutions.size();
     std::vector<double> local_time_step(num_cell);
@@ -47,5 +47,10 @@ std::unique_ptr<Time_Step_Calculator> Time_Step_Calculator_Factory::make_unique(
     {
         const auto constant_dt = configuration.get<double>("constant_dt");
         return std::make_unique<Constant_Dt>(constant_dt);
+    }
+    else
+    {
+        EXCEPTION("time step calculator type in configuration file is not supported");
+        return nullptr;
     }
 }

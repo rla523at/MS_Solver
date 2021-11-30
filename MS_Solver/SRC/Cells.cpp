@@ -43,7 +43,7 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
     }
 
     discrete_solution.precalculate_cell_P0_basis_values();
-    discrete_solution.precalcualte_cell_QPs(quadrature_rules);
+    discrete_solution.precalcualte_cell_QPs_basis_values(quadrature_rules);
 }
 
 double Cells_DG::calculate_time_step(const Discrete_Solution_DG& discrete_solution) const

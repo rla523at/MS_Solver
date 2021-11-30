@@ -243,7 +243,7 @@ Figure Gmsh_Convertor::figure_type_index_to_element_figure(const ushort element_
 	}
 }
 
-std::unique_ptr<Grid_File_Convertor> Grid_File_Convertor_Factory::make(const Configuration& configuration)
+std::unique_ptr<Grid_File_Convertor> Grid_File_Convertor_Factory::make_unique(const Configuration& configuration)
 {
 	const auto space_dimension = configuration.get<ushort>("space_dimension");
 	const auto grid_file_type = configuration.get("grid_file_type");

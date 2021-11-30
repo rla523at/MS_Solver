@@ -1,15 +1,15 @@
 #include "../INC/Inner_Faces.h"
 
-Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function)
+Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function, const Grid& grid, Discrete_Solution_DG& discrete_solution)
     : numerical_flux_function_(numerical_flux_function)
 {
-    SET_TIME_POINT;
+    Profiler::set_time_point();
 
     this->num_equations_ = discrete_solution.num_equations();
 
     const auto num_inner_faces = grid.num_inner_faces();
     const auto num_pbdry_pairs = grid.num_periodic_boundary_pairs();    
-    this->num_inner_faces_ = num_inner_faces + num_pbdry_pairs; //periodic boundary can be seen as inner face
+    this->num_inner_faces_ = static_cast<uint>(num_inner_faces + num_pbdry_pairs); //periodic boundary can be seen as inner face
 
     this->oc_nc_index_pairs_.reserve(this->num_inner_faces_);
     this->oc_nc_side_QWs_basis_m_pairs_.reserve(this->num_inner_faces_);
@@ -27,7 +27,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
     set_of_ncs_QPs.reserve(this->num_inner_faces_);
 
     // consider inner face 
-    for (int infc_index = 0; infc_index < num_inner_faces; ++infc_index)
+    for (uint infc_index = 0; infc_index < num_inner_faces; ++infc_index)
     {
         //set oc nc index pair
         const auto [oc_index, nc_index] = grid.inner_face_oc_nc_index_pair(infc_index);
@@ -49,7 +49,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
         Matrix oc_side_QWs_basis(num_QPs, oc_num_basis);
         Matrix nc_side_QWs_basis(num_QPs, nc_num_basis);
 
-        for (int q = 0; q < num_QPs; ++q)
+        for (uint q = 0; q < num_QPs; ++q)
         {
             oc_side_QWs_basis.change_row(q, discrete_solution.calculate_basis_point_v(oc_index, QPs[q]) * QWs[q]);
             nc_side_QWs_basis.change_row(q, discrete_solution.calculate_basis_point_v(nc_index, QPs[q]) * QWs[q]);
@@ -69,7 +69,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
     }
 
     // consider periodic boundary
-    for (int pbdry_pair_index = 0; pbdry_pair_index < num_pbdry_pairs; ++pbdry_pair_index)
+    for (uint pbdry_pair_index = 0; pbdry_pair_index < num_pbdry_pairs; ++pbdry_pair_index)
     {
         //set oc nc index pair
         const auto [oc_index, nc_index] = grid.periodic_boundary_oc_nc_index_pair(pbdry_pair_index);
@@ -93,7 +93,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
         Matrix oc_side_QWs_basis(num_QPs, oc_num_basis);
         Matrix nc_side_QWs_basis(num_QPs, nc_num_basis);
 
-        for (int q = 0; q < num_QPs; ++q)
+        for (uint q = 0; q < num_QPs; ++q)
         {
             oc_side_QWs_basis.change_row(q, discrete_solution.calculate_basis_point_v(oc_index, oc_QPs[q]) * oc_QWs[q]);
             nc_side_QWs_basis.change_row(q, discrete_solution.calculate_basis_point_v(nc_index, nc_QPs[q]) * nc_QWs[q]);
@@ -103,7 +103,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
         this->oc_nc_side_QWs_basis_m_pairs_.push_back({ std::move(oc_side_QWs_basis), std::move(nc_side_QWs_basis) });
 
         //set normals
-        this->set_of_normals_.push_back(grid.inner_face_normals(pbdry_pair_index, oc_index, oc_QPs));
+        this->set_of_normals_.push_back(grid.periodic_boundary_normals(pbdry_pair_index, oc_index, oc_QPs));
 
         //for precalculation
         oc_indexes.push_back(oc_index);
@@ -113,15 +113,15 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
     }
 
     //precaclulation
-    discrete_solution.precalculate_infs_ocs_QPs(oc_indexes, set_of_ocs_QPs);
-    discrete_solution.precalculate_infs_ncs_QPs(nc_indexes, set_of_ncs_QPs);
+    discrete_solution.precalculate_infs_ocs_QPs_basis_values(oc_indexes, set_of_ocs_QPs);
+    discrete_solution.precalculate_infs_ncs_QPs_basis_values(nc_indexes, set_of_ncs_QPs);
 
-    LOG << std::left << std::setw(50) << "@ Inner faces DG precalculation" << " ----------- " << GET_TIME_DURATION << "s\n\n" << LOG.print_;
+    LOG << std::left << std::setw(50) << "@ Inner faces DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
 void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const
 {
-    for (int infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
+    for (uint infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
     {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[infc_index];
         const auto solution_at_ocs_QPs = discrete_soltuion.calculate_solution_at_infc_ocs_QPs(infc_index, oc_index);

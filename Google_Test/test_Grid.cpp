@@ -58,10 +58,46 @@ TEST(Grid, pbdry_oc_nc_index_pair_3)
 	const std::pair<uint, uint> ref = { 2,8 };
 	EXPECT_EQ(ref, result);
 }
+TEST(Grid, cell_volumes_1)
+{
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad10.msh";
+
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
+
+	const auto result = grid.cell_volumes();
+
+	const auto ref = 0.01;
+	for (const auto& volume : result)
+	{
+		EXPECT_NEAR(volume, ref, 1.0E-16);
+		//EXPECT_DOUBLE_EQ(volume, ref);	//suffer by round off error
+	}
+}
+TEST(Grid, coordinate_projected_volumes_1)
+{
+	constexpr auto space_dimension = 2;
+	constexpr auto grid_file_path = "RSC/Grid/2D/Quad10.msh";
+
+	Gmsh_Convertor convertor(space_dimension);
+	Grid grid(convertor, grid_file_path);
+
+	const auto result = grid.cell_projected_volumes();
+
+	const auto ref = 0.1;
+	for (const auto& projected_volumes : result)
+	{
+		EXPECT_NEAR(projected_volumes[0], ref, 9.0E-16);
+		EXPECT_NEAR(projected_volumes[1], ref, 9.0E-16);	//suffer by round off error
+	}
+}
 TEST(Grid, turn_on_log_print)
 {
 	LOG << Log::print_on;
 }
+
+
 
 //
 //TEST(Grid, vnode_index_to_matched_vnode_index_set_1) 
@@ -85,31 +121,4 @@ TEST(Grid, turn_on_log_print)
 //
 //	const std::set<uint> ref = { 0,2,6,8 };
 //	EXPECT_EQ(ref, result);
-//}
-
-//
-//GTEST_TEST(Grid_Info_Extractor, volume) {
-//	auto grid_data = Grid_File_Convertor<Gmsh, 2>::convert("RSC/Grid/Quad_10.msh");
-//	const auto grid_info = Grid_Info_Extractor<2>::convert(std::move(grid_data));
-//
-//	const auto& cell_volumes = grid_info.cell_grid_information.volumes;
-//	
-//	const auto ref = 0.01;
-//	for (const auto& volume : cell_volumes)
-//		EXPECT_NEAR(volume, ref, 1.0E-16);
-//		//EXPECT_DOUBLE_EQ(volume, ref);	//suffer by round off error
-//}
-//
-//GTEST_TEST(Grid_Info_Extractor, coordinate_projected_volumes) {
-//	auto grid_data = Grid_File_Convertor<Gmsh, 2>::convert("RSC/Grid/Quad_10.msh");
-//	const auto grid_info = Grid_Info_Extractor<2>::convert(std::move(grid_data));
-//
-//	const auto& coordinate_projected_volumes = grid_info.cell_grid_information.coordinate_projected_volumes;
-//
-//	const auto ref = 0.1;
-//	for (const auto& coordinate_projected_volumes : coordinate_projected_volumes) {
-//		const auto [x_projected, y_projected] = coordinate_projected_volumes;
-//		EXPECT_NEAR(x_projected, ref, 9.0E-16);
-//		EXPECT_NEAR(y_projected, ref, 9.0E-16);	//suffer by round off error
-//	}
 //}

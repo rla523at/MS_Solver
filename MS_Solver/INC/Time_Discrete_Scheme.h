@@ -21,7 +21,7 @@ private:
 class Time_Discrete_Scheme_Factory
 {
 public:
-    static std::unique_ptr<Time_Discrete_Scheme> make(const Configuration& configuration);
+    static std::unique_ptr<Time_Discrete_Scheme> make_unique(const Configuration& configuration);
 
 private:
     Time_Discrete_Scheme_Factory(void) = delete;

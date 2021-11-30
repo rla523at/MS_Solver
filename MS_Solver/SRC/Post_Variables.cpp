@@ -103,12 +103,12 @@ std::string Post_Variables::grid_variable_str(void) const
 	}
 }
 
-size_t Post_Variables::num_post_node(void) const 
+size_t Post_Variables::num_post_points(void) const 
 {
 	return this->num_post_points_;
 }
 
-size_t Post_Variables::num_post_element(void) const 
+size_t Post_Variables::num_post_elements(void) const 
 {
 	return this->num_post_elements_;
 }
@@ -120,7 +120,7 @@ ushort Post_Variables::num_grid_variable(void) const
 
 ushort Post_Variables::num_post_variables(void) const 
 {
-	return this->post_variable_names_.size();
+	return static_cast<ushort>(this->post_variable_names_.size());
 }
 
 double Post_Variables::solution_time(void) const 

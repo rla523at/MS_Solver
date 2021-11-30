@@ -10,7 +10,7 @@ void Discrete_Equation::solve(void)
     LOG << "\t\t\t\t Solving\n";
     LOG << "================================================================================\n" << LOG.print_;
 
-    SET_TIME_POINT;
+    Profiler::set_time_point();
     while (true)
     {
         if (this->end_controller_->is_time_to_end(current_iter, current_time))
@@ -24,7 +24,7 @@ void Discrete_Equation::solve(void)
             Post_Processor::post_solution();//post
         }
 
-        SET_TIME_POINT;
+        Profiler::set_time_point();
         auto time_step = this->semi_discrete_equation_->calculate_time_step();
         this->controll_time_step(current_time, time_step);
 
@@ -35,11 +35,11 @@ void Discrete_Equation::solve(void)
         LOG << std::left << std::setw(5);
         LOG << "Iter:" << current_iter << "\t";
         LOG << "Time:" << current_time << "(" << this->end_controller_->progress_percentage_str(current_iter, current_time) << ")";
-        LOG << "Computation cost:" << std::to_string(GET_TIME_DURATION) << "s \n" << LOG.print_;
+        LOG << "Computation cost:" << std::to_string(Profiler::get_time_duration()) << "s \n" << LOG.print_;
     }
 
     LOG << "\n================================================================================\n";
-    LOG << "\t\t\t Total ellapsed time: " << GET_TIME_DURATION << "s\n";
+    LOG << "\t\t\t Total ellapsed time: " << Profiler::get_time_duration() << "s\n";
     LOG << "================================================================================\n\n" << LOG.print_;
     
 }

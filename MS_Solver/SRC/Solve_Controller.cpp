@@ -113,7 +113,7 @@ void Solve_Post_Controller_By_Iter::update_post_iter(void)
     this->post_iter_ = (this->num_post_ + 1) * this->post_iter_unit_;
 }
 
-std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make(const Configuration& configuration)
+std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(const Configuration& configuration)
 {
     const auto type_name = configuration.get("solve_end_controller_type");
     if (ms::contains_icase(type_name, "Time"))
@@ -127,10 +127,13 @@ std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make(const C
         return std::make_unique<Solve_End_Controller_By_Iter>(solve_end_iter);
     }
     else
+    {
         EXCEPTION("solve_end_controller_type in configuration file does not supported");
+        return nullptr;
+    }
 }
 
-std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make(const Configuration& configuration)
+std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make_unique(const Configuration& configuration)
 {
     const auto type_name = configuration.get("solve_post_controller_type");
     if (ms::contains_icase(type_name, "Time"))
@@ -144,5 +147,8 @@ std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make(const
         return std::make_unique<Solve_Post_Controller_By_Iter>(post_iter_unit);
     }
     else
+    {
         EXCEPTION("solve_end_controller_type in configuration file does not supported");
+        return nullptr;
+    }
 }

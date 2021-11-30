@@ -13,7 +13,8 @@ public:
 	ushort space_dimension(void) const;
 
 	size_t num_cells(void) const;
-	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const;
+	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
+	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const; //unnecessary
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
 	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
@@ -40,6 +41,7 @@ public:
 	size_t num_periodic_boundary_pairs(void) const;
 	std::pair<uint, uint> periodic_boundary_oc_nc_index_pair(const uint pbdry_pair_index) const;
 	std::pair<Quadrature_Rule, Quadrature_Rule> periodic_boundary_quadrature_rule_pair(const uint pbdry_pair_index, const ushort solution_degree) const;
+	std::vector<Euclidean_Vector> periodic_boundary_normals(const uint pbdry_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;
 
 
 private:	

@@ -1,10 +1,25 @@
-int main(void) {
-	//Profiler::set_time_point();
-	//LOG << "================================================================================\n";
-	//LOG << "\t\t\t\t PreProcessing \n";
-	//LOG << "================================================================================\n" << Log::print_;
+#include "../INC/Configuration.h"
+#include "../INC/Discrete_Equation.h"
 
+int main(void) 
+{
+	Profiler::set_time_point();
+	
+	LOG << "================================================================================\n";
+	LOG << "\t\t\t\t PreProcessing \n";
+	LOG << "================================================================================\n" << Log::print_;
 
+	const auto configuration_file_path = "RSC/configuration.dat";
+	Configuration configuration(configuration_file_path);
+
+	const auto grid_file_path = configuration.get("grid_file_path");
+	auto grid_file_convertor = Grid_File_Convertor_Factory::make_unique(configuration);
+	Grid grid(*grid_file_convertor, grid_file_path);
+
+	auto semi_discrete_equation = Semi_Discrete_Equation_Factory::make_unique(configuration, grid);
+	auto solve_end_controller = Solve_End_Controller_Factory::make_unique(configuration);
+	auto solve_post_controller = Solve_Post_Controller_Factory::make_unique(configuration);
+	auto time_discrete_scheme = Time_Discrete_Scheme_Factory::make_unique(configuration);
 }
 
 //#include "../INC/Initial_Condition.h"

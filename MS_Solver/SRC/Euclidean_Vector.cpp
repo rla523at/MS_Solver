@@ -213,18 +213,25 @@ Euclidean_Vector& Euclidean_Vector::operator+=(const Euclidean_Vector& other)
 	return *this;
 }
 
+std::vector<double>&& Euclidean_Vector::move_values(void)
+{
+	this->num_values_ = 0;
+	this->const_data_ptr_ = nullptr;
+	return std::move(this->values_);
+}
+
 Euclidean_Vector& Euclidean_Vector::normalize(void)
 {
 	return *this *= 1.0 / this->L2_norm();
 }
 
-Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(const size_t num_value, const double* ptr)
+Euclidean_Vector_Constant_Wrapper::Euclidean_Vector_Constant_Wrapper(const size_t num_value, const double* ptr)
 {
 	this->num_values_ = static_cast<int>(num_value);
 	this->const_data_ptr_ = ptr;
 }
 
-Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(const std::vector<double>& values)
+Euclidean_Vector_Constant_Wrapper::Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values)
 {
 	this->num_values_ = static_cast<int>(values.size());
 	this->const_data_ptr_ = values.data();

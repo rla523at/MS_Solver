@@ -65,7 +65,7 @@ namespace ms
 	};
 	template <typename T>	bool contains(const std::vector<T>& vec, const T& val)
 	{
-		return ms::find(val) != vec.end();
+		return ms::find(vec, val) != vec.end();
 	}
 
 }

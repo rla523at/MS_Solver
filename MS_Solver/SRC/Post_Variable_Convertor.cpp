@@ -160,5 +160,6 @@ std::unique_ptr<Post_Variable_Convertor> Post_Variable_Converter_Factory::make_u
 	else
 	{
 		EXCEPTION("post point loacation in configuration file does not supported");
+		return nullptr;
 	}
 }

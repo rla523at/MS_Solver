@@ -75,9 +75,7 @@ std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vec
 {
 	const auto num_points = points.size();
 
-	std::vector<Euclidean_Vector> normalized_normal_vectors;
-	normalized_normal_vectors.reserve(num_points);
-
+	std::vector<Euclidean_Vector> normalized_normal_vectors(num_points);
 	for (ushort i = 0; i < num_points; ++i)
 	{
 		normalized_normal_vectors[i] = this->normalized_normal_vector(points[i]);

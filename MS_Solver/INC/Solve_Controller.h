@@ -38,7 +38,7 @@ public://Query
     std::string progress_percentage_str(const size_t current_iter, const double current_time) const override;
 
 private:
-    size_t end_iter_ = 0.0;
+    size_t end_iter_ = 0;
 };
 
 class Solve_Post_Controller
@@ -100,7 +100,7 @@ private:
 class Solve_End_Controller_Factory//static class
 {
 public:
-    static std::unique_ptr<Solve_End_Controller> make(const Configuration& configuration);
+    static std::unique_ptr<Solve_End_Controller> make_unique(const Configuration& configuration);
 
 private:
     Solve_End_Controller_Factory(void) = delete;
@@ -109,7 +109,7 @@ private:
 class Solve_Post_Controller_Factory//static class
 {
 public:
-    static std::unique_ptr<Solve_Post_Controller> make(const Configuration& configuration);
+    static std::unique_ptr<Solve_Post_Controller> make_unique(const Configuration& configuration);
 
 private:
     Solve_Post_Controller_Factory(void) = delete;

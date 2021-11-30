@@ -21,6 +21,10 @@
   <ItemGroup>
     <ClCompile Include="SRC\Boundaries.cpp" />
     <ClCompile Include="SRC\Boundary_Flux_Function.cpp" />
+    <ClCompile Include="SRC\Cells.cpp" />
+    <ClCompile Include="SRC\Configuration.cpp" />
+    <ClCompile Include="SRC\Discrete_Equation.cpp" />
+    <ClCompile Include="SRC\Discrete_Solution.cpp" />
     <ClCompile Include="SRC\Elements.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
     <ClCompile Include="SRC\Geometry.cpp" />
@@ -31,19 +35,31 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SRC\Initial_Condition.cpp" />
+    <ClCompile Include="SRC\Inner_Faces.cpp" />
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
     <ClCompile Include="SRC\Numerical_Flux_Function.cpp" />
     <ClCompile Include="SRC\Polynomial.cpp" />
+    <ClCompile Include="SRC\Post_Processor.cpp" />
+    <ClCompile Include="SRC\Post_Variables.cpp" />
+    <ClCompile Include="SRC\Post_Variable_Convertor.cpp" />
     <ClCompile Include="SRC\Profiler.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />
+    <ClCompile Include="SRC\Residual.cpp" />
+    <ClCompile Include="SRC\Semi_Discrete_Equation.cpp" />
+    <ClCompile Include="SRC\Solve_Controller.cpp" />
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
+    <ClCompile Include="SRC\Time_Discrete_Scheme.cpp" />
+    <ClCompile Include="SRC\Time_Step_Calculator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Boundaries.h" />
     <ClInclude Include="INC\Boundary_Flux_Function.h" />
+    <ClInclude Include="INC\Cells.h" />
     <ClInclude Include="INC\Configuration.h" />
+    <ClInclude Include="INC\Discrete_Equation.h" />
+    <ClInclude Include="INC\Discrete_Solution.h" />
     <ClInclude Include="INC\Element.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exception.h" />
@@ -55,14 +71,24 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Initial_Condition.h" />
+    <ClInclude Include="INC\Inner_Faces.h" />
     <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\Numerical_Flux_Function.h" />
     <ClInclude Include="INC\Polynomial.h" />
+    <ClInclude Include="INC\Post_Processor.h" />
+    <ClInclude Include="INC\Post_Variables.h" />
+    <ClInclude Include="INC\Post_Variable_Convertor.h" />
     <ClInclude Include="INC\Profiler.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
+    <ClInclude Include="INC\Residual.h" />
+    <ClInclude Include="INC\Semi_Discrete_Equation.h" />
+    <ClInclude Include="INC\Solve_Controller.h" />
+    <ClInclude Include="INC\Spatial_Discrete_Method.h" />
     <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />
+    <ClInclude Include="INC\Time_Discrete_Scheme.h" />
+    <ClInclude Include="INC\Time_Step_Calculator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RSC\configuration.dat" />

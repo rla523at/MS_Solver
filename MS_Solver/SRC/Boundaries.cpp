@@ -50,7 +50,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
         quadrature_rules[bdry_index] = std::move(quadrature_rule);
     }
 
-    discrete_solution.precalculate_basis_bdry_QPs(this->oc_indexes_, quadrature_rules);
+    discrete_solution.precalculate_basis_bdry_QPs_basis_values(this->oc_indexes_, quadrature_rules);
 
     LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }

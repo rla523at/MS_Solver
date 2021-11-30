@@ -49,7 +49,7 @@ private:
 class Grid_File_Convertor_Factory//static class
 {
 public:
-	static std::unique_ptr<Grid_File_Convertor> make(const Configuration& configuration);
+	static std::unique_ptr<Grid_File_Convertor> make_unique(const Configuration& configuration);
 
 private:
 	Grid_File_Convertor_Factory(void) = delete;

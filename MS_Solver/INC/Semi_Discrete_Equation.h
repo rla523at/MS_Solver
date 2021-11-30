@@ -12,13 +12,19 @@ public://Command
 public://Query
 	virtual double calculate_time_step(void) const abstract;
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
-	virtual const Euclidean_Vector& get_solution_vector(void) const abstract;
+	virtual Euclidean_Vector solution_vector(void) const abstract;
+	virtual Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const abstract;
 };
 
 class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
 {
 public:
-	Semi_Discrete_Equation_DG(const Configuration& configuration, const Grid& grid);
+	Semi_Discrete_Equation_DG(std::unique_ptr<Discrete_Solution_DG>&& discrete_solution, std::unique_ptr<Cells_DG>&& cells
+		, std::unique_ptr<Boundaries_DG>&& boundaries, std::unique_ptr<Inner_Faces_DG>&& inner_faces)
+		: discrete_solution_(std::move(discrete_solution))
+		, cells_(std::move(cells))
+		, boundaries_(std::move(boundaries))
+		, inner_faces_(std::move(inner_faces)) {};
 
 public://Command
 	void update_solution(Euclidean_Vector&& updated_soltuion) override;
@@ -26,8 +32,9 @@ public://Command
 public://Query
 	double calculate_time_step(void) const override;
 	Euclidean_Vector calculate_RHS(void) const override;
-	const Euclidean_Vector& get_solution_vector(void) const override;
-	
+	Euclidean_Vector solution_vector(void) const override;
+	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const override;
+
 private:
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;
 	std::unique_ptr<Cells_DG> cells_;	
@@ -38,7 +45,7 @@ private:
 class Semi_Discrete_Equation_Factory
 {
 public:
-	static std::unique_ptr<Semi_Discrete_Equation> make(const Configuration& configuration, const Grid& grid);
+	static std::unique_ptr<Semi_Discrete_Equation> make_unique(const Configuration& configuration, const Grid& grid);
 };
 
 

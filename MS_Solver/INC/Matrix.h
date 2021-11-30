@@ -119,10 +119,10 @@ private:
 	std::vector<double> values_;
 };
 
-class Matrix_Wrapper : public Matrix_Base
+class Matrix_Constant_Wrapper : public Matrix_Base
 {
 public:
-	Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr);
+	Matrix_Constant_Wrapper(const size_t num_row, const size_t num_column, const double* ptr);
 };
 
 template <typename Function>

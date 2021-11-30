@@ -87,6 +87,11 @@ size_t Grid::num_cells(void) const
 	return this->cell_elements_.size();
 }
 
+Vector_Function<Polynomial> Grid::cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const
+{
+	return this->cell_elements_[cell_index].orthonormal_basis_vector_function(solution_degree);
+}
+
 std::vector<Vector_Function<Polynomial>> Grid::cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const 
 {
 	const auto& cell_elements = this->cell_elements_;
@@ -334,6 +339,15 @@ std::pair<Quadrature_Rule, Quadrature_Rule> Grid::periodic_boundary_quadrature_r
 	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
 	return { oc_side_element.get_quadrature_rule(solution_degree), nc_side_element.get_quadrature_rule(solution_degree) };
 }
+
+std::vector<Euclidean_Vector> Grid::periodic_boundary_normals(const uint pbdry_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const
+{
+	const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[pbdry_index];
+	const auto& oc_element = this->cell_elements_[oc_index];
+
+	return ocs_element.outward_normalized_normal_vectors(oc_element, points);
+}
+
 
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const
 {

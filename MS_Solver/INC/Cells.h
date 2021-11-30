@@ -10,8 +10,8 @@ public:
 
 protected:
     size_t num_cells_;
-    std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
     std::shared_ptr<Governing_Equation> governing_equation_;
+    std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
 };
 
 class Cells_DG : public Cells

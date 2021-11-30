@@ -361,7 +361,7 @@ std::vector<int> Matrix::PLU_decomposition(void)
 	return ipiv;
 }
 
-Matrix_Wrapper::Matrix_Wrapper(const size_t num_row, const size_t num_column, const double* ptr)
+Matrix_Constant_Wrapper::Matrix_Constant_Wrapper(const size_t num_row, const size_t num_column, const double* ptr)
 {
 	this->num_rows_ = num_row;
 	this->num_columns_ = num_column;
