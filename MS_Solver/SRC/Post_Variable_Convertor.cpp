@@ -26,7 +26,7 @@ Node_Base_Convertor::Node_Base_Convertor(const Grid& grid, const ushort post_ord
 
 std::vector<double> Node_Base_Convertor::convert_values(const std::vector<double>& values) const
 {
-	REQUIRE(values.size() == this->num_cells_, "number of values should be same with number of cells");
+	REQUIRE(values.size() == this->num_cells_, "number of copy_values should be same with number of cells");
 
 	std::vector<double> post_variable_values(this->num_post_points_);
 
@@ -93,7 +93,7 @@ Center_Base_Convertor::Center_Base_Convertor(const Grid& grid, const ushort post
 
 std::vector<double> Center_Base_Convertor::convert_values(const std::vector<double>& values) const
 {
-	REQUIRE(values.size() == this->num_cells_, "number of values should be same with number of cells");
+	REQUIRE(values.size() == this->num_cells_, "number of copy_values should be same with number of cells");
 
 	std::vector<double> post_variable_values(this->num_post_elements_);
 

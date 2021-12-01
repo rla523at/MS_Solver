@@ -1293,6 +1293,18 @@ TEST(Polynomial, gradient_4)
 	const std::vector<Polynomial> ref = { Y * Z,  X * Z, X * Y };
 	EXPECT_EQ(result, ref);
 }
+TEST(Polynomial, gradient_5)
+{
+	const Polynomial X("x0");
+	const Polynomial Y("x1");
+	const Polynomial Z("x2");
+
+	const auto p = X * Y * Z;
+	const auto result = p.gradient();
+
+	const std::vector<Polynomial> ref = { Y * Z,  X * Z, X * Y };
+	EXPECT_EQ(result, ref);
+}
 TEST(Polynomial, to_constant_1)
 {
 	Polynomial x("x0");

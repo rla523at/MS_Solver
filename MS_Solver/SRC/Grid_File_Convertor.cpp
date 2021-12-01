@@ -30,7 +30,6 @@ std::vector<Element> Gmsh_Convertor::convert_to_elements(const std::string_view 
 	//const auto elements = this->make_elements(element_text, physical_group_index_to_element_type, nodes);
 	//return elements;
 	//LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
-
 }
 
 Text Gmsh_Convertor::read_about(std::ifstream& grid_file_stream, const std::string& target) const

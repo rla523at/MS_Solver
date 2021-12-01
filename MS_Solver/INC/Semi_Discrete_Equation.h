@@ -8,6 +8,7 @@
 class Semi_Discrete_Equation
 {
 public://Command
+	virtual void update_solution(const Euclidean_Vector& updated_soltuion) abstract;
 	virtual void update_solution(Euclidean_Vector&& updated_soltuion) abstract;
 
 public://Query
@@ -21,6 +22,7 @@ public://Query
 class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
 {
 public:
+	Semi_Discrete_Equation_DG(const Configuration& configuration, const Grid& grid);
 	Semi_Discrete_Equation_DG(std::unique_ptr<Discrete_Solution_DG>&& discrete_solution, std::unique_ptr<Cells_DG>&& cells
 		, std::unique_ptr<Boundaries_DG>&& boundaries, std::unique_ptr<Inner_Faces_DG>&& inner_faces)
 		: discrete_solution_(std::move(discrete_solution))
@@ -29,6 +31,7 @@ public:
 		, inner_faces_(std::move(inner_faces)) {};
 
 public://Command
+	void update_solution(const Euclidean_Vector& updated_soltuion) override;
 	void update_solution(Euclidean_Vector&& updated_soltuion) override;
 
 public://Query

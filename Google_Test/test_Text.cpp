@@ -1,12 +1,24 @@
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Text.h"
 
-TEST(Sentence, constructor_1) {
+TEST(Sentence, constructor_1) 
+{
 	Sentence s = "abc";
 }
-TEST(Sentence, constructor_2) {
+TEST(Sentence, constructor_2) 
+{
 	std::string str = "abc";
 	Sentence s = str;
+}
+TEST(Sentence, constructor_3) 
+{
+	std::string str = "abc";
+	Sentence s = str + "qwer";
+}
+TEST(Sentence, constructor_4)
+{
+	Sentence s = "qwer";
+	Sentence s2 = s;
 }
 TEST(Sentence, constain_icase_1) 
 {
@@ -48,8 +60,14 @@ TEST(Sentence, remove_1) {
 	EXPECT_EQ(s, ref);
 }
 
-TEST(Text, constructor_1) {
+TEST(Text, constructor_1) 
+{
 	Text txt = { "abc", "def", "ghi" };
+}
+TEST(Text, constructor_2)
+{
+	Sentence s = "qwer";
+	Text txt = { s };
 }
 TEST(Text, merge_1) {
 	Text txt = { "abc"};
@@ -90,7 +108,6 @@ TEST(ms, contain_icase_1)
 	std::string target_str = "abc";
 	EXPECT_TRUE(ms::contains_icase(str, target_str));
 }
-
 TEST(ms, replace_1) {
 	std::string str = "abc_qwer,wer__,,";
 	ms::replace(str, ",", "_");

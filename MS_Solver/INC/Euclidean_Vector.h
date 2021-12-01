@@ -61,6 +61,9 @@ public://Command
 	std::vector<double>&& move_values(void);
 	Euclidean_Vector& normalize(void);
 
+public://Query
+	std::vector<double> copy_values(void) const;
+
 private:
 	std::vector<double> values_;
 };

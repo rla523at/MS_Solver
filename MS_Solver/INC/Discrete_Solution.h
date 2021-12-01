@@ -11,7 +11,8 @@ public:
 public://Command
 	virtual void precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points) abstract;
 	virtual void precalculate_post_points(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) abstract;
-	void update_solution(Euclidean_Vector&& updated_solution);
+	void update_solution(const Euclidean_Vector& updated_solution_v);
+	void update_solution(Euclidean_Vector&& updated_solution_v);
 
 public://Query
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const abstract;

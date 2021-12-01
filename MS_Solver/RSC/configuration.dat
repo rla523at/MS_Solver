@@ -3,30 +3,32 @@ grid_file_path				= RSC/Grid/2D/RQ10.msh
 space_dimension				= 2
 grid_file_type				= Gmsh
 
-governing_equation			= Euler
-solution_degree				= 3
+governing_equation			= Linear_Advection			//Linear_Advection, Burgers, Euler
+solution_degree				= 0
 
 spatial_discrete_scheme		= DG
 numerical_flux				= LLF
 
-Initial_condition			=
+Initial_condition			= Constant1					//Constant1, Sine_Wave
 
-solve_end_controller_type	= Time
-solve_end_time				= 0.2
-solve_end_iter				= 100
+Time_Discrete_scheme		= SSPRK33					//SSPRK33, SSPRK54
 
-solve_post_controller_type	= Time
-solve_post_time_step		= 0.02
-solve_post_iter_unit		= 10
-
-time_step_calculator_type	= CFL
+Time_step_calculator_type	= CFL						//CFL, constant_dt
 CFL_number					= 0.9
 constant_dt					= 0.0001
 
-post_file_path				= 
+solve_end_controller_type	= Time						//Time, Iter
+solve_end_time				= 1.0
+solve_end_iter				= 100
+
+solve_post_controller_type	= Iter						//Time, Iter
+solve_post_time_step		= 0.1
+solve_post_iter_unit		= 1
+
+post_base_path				= E:/CodeData/Result/MS_Solver/RDD/Debug/
 post_order					= 1
-post_file_format			= ASCII
-post_point_location			= Center
+post_file_format			= Binary 					//ASCII, Binary
+post_point_location			= Node						//Center, Node
 
 //linear advection option
 x_advection_speed			= 1.0

@@ -14,13 +14,26 @@
 class Sentence
 {
 public:
-	template <typename ... Vals>
-	Sentence(Vals&&... values) : contents_(std::forward<Vals>(values)...) {}; //explicit 없으면 = 연산자 사용가능
+	Sentence(void) = default;
+	Sentence(const char* cp)
+		:contents_(cp) {};
+	Sentence(const std::string& str)
+		:contents_(str) {};
 	
-public://command
+public://command	
 	Sentence& operator<<(const std::string& str);
 	
-	template<typename T>	Sentence& insert_with_space(const T value) {
+	template<typename T>	Sentence& insert_with_space(const std::vector<T>& values)
+	{
+		for (const auto value : values)
+		{
+			this->insert_with_space(value);
+		}
+
+		return *this;
+	}
+	template<typename T>	Sentence& insert_with_space(const T value) 
+	{
 		this->contents_ += " " + std::to_string(value);
 		return *this;
 	}
@@ -51,7 +64,7 @@ class Text
 {
 public:
 	Text(void) = default;
-	Text(std::initializer_list<std::string> list);
+	Text(std::initializer_list<Sentence> list);
 
 public://command
 	Sentence& operator[](const size_t index);

@@ -208,6 +208,7 @@ public://Query
 	ushort domain_dimension(void) const;
 	Polynomial get_differentiate(const ushort variable_index) const;
 	std::vector<Polynomial> gradient(void) const;
+	std::vector<Polynomial> gradient(const ushort space_dimension) const;
 	size_t num_term(void) const;
 	double to_constant(void) const;
 	std::string to_string(void) const;

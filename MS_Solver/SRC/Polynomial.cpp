@@ -791,7 +791,21 @@ std::vector<Polynomial> Polynomial::gradient(void) const
 	std::vector<Polynomial> gradient(domain_dimension);
 
 	for (ushort i = 0; i < domain_dimension; ++i)
+	{
 		gradient[i] = this->get_differentiate(i);
+	}
+
+	return gradient;
+}
+
+std::vector<Polynomial> Polynomial::gradient(const ushort space_dimension) const
+{
+	std::vector<Polynomial> gradient(space_dimension);
+
+	for (ushort i = 0; i < space_dimension; ++i)
+	{
+		gradient[i] = this->get_differentiate(i);
+	}
 
 	return gradient;
 }

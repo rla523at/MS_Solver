@@ -9,11 +9,16 @@ void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, 
 
 void Tecplot_File_Writer::write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path)
 {
+	post_variables.record_solution();
 	this->set_solution_header_variable(post_variables);
 	this->write_header(post_file_path);
-	post_variables.record_solution();
 	this->write_solution_data(post_variables, post_file_path);
 	post_variables.clear_variables();
+}
+
+size_t Tecplot_File_Writer::strand_id(void) const
+{
+	return this->strand_id_;
 }
 
 void Tecplot_File_Writer::set_common_header_variable(const Post_Variables& post_variables)
@@ -137,17 +142,13 @@ void Tecplot_Binary_File_Writer::set_solution_header_variable(const Post_Variabl
 	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Solution_at_" + std::to_string(this->solution_time_));
 
 	const auto post_variable_location_str = post_variables.variable_location_str();
-	if (ms::contains_icase(post_variable_location_str, "Node"))
+	if (ms::contains_icase(post_variable_location_str, "()"))
 	{
 		this->specify_variable_location_ = 0;
 	}
-	else if (ms::contains_icase(post_variable_location_str,"Center"))
+	else 
 	{
 		this->specify_variable_location_ = 1;
-	}
-	else
-	{
-		EXCEPTION("Binary writer does not allow mixed variable location");
 	}
 }
 
@@ -268,6 +269,10 @@ std::unique_ptr<Tecplot_File_Writer> Tecplot_File_Writer_Factory::make_unique(co
 	if (ms::contains_icase(format, "ASCII"))
 	{
 		return std::make_unique<Tecplot_ASCII_File_Writer>();
+	}
+	else if (ms::contains_icase(format, "Binary"))
+	{
+		return std::make_unique<Tecplot_Binary_File_Writer>();
 	}
 	else
 	{

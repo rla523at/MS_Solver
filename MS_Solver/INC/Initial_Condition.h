@@ -35,8 +35,6 @@ class Sine_Wave_2D : public Sine_Wave
 public:
 	Sine_Wave_2D(const double x_wave_length, const double y_wave_length)
 		: Sine_Wave({ x_wave_length,y_wave_length }) {};
-
-	Euclidean_Vector calculate_exact_solutions(const std::vector<Euclidean_Vector>& points, const double end_time) const override;
 };
 
 class Sine_Wave_3D : public Sine_Wave
@@ -44,9 +42,6 @@ class Sine_Wave_3D : public Sine_Wave
 public:
 	Sine_Wave_3D(const double x_wave_length, const double y_wave_length, const double z_wave_length)
 	: Sine_Wave({ x_wave_length,y_wave_length,z_wave_length }) {};
-
-public:
-	Euclidean_Vector calculate_exact_solutions(const std::vector<Euclidean_Vector>& points, const double end_time) const override;
 };
 
 class Square_Wave : public Initial_Condition

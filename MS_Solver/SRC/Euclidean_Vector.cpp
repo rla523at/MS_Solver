@@ -234,6 +234,11 @@ Euclidean_Vector& Euclidean_Vector::normalize(void)
 	return *this *= 1.0 / this->L2_norm();
 }
 
+std::vector<double> Euclidean_Vector::copy_values(void) const
+{
+	return this->values_;
+}
+
 Euclidean_Vector_Constant_Wrapper::Euclidean_Vector_Constant_Wrapper(const size_t num_value, const double* ptr)
 {
 	this->num_values_ = static_cast<int>(num_value);

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <stdexcept>
+#include <sstream>
 
 #define DEVELOPE
 
@@ -20,7 +21,8 @@
 
 namespace ms
 {
-	inline std::string location_str(const std::string& file_name, const std::string& function_name, const int num_line) {
+	inline std::string location_str(const std::string& file_name, const std::string& function_name, const int num_line)
+	{
 		std::string location_str = file_name;
 
 		location_str.erase(location_str.begin(), location_str.begin() + location_str.rfind("\\") + 1);
@@ -31,13 +33,25 @@ namespace ms
 
 		return location_str;
 	}
-	inline void require(const bool requirement, const std::string_view message, const std::string& location_str) {
-		if (!requirement) {
-			std::string exception_str = "\n\n============================EXCEPTION============================\n";
-			exception_str += location_str;
-			exception_str = exception_str + "Message\t\t: " + message.data();
-			exception_str += "\n============================EXCEPTION============================\n\n";
-			throw std::runtime_error(exception_str);
+	inline void require(const bool requirement, const std::string_view message, const std::string& location_str)
+	{
+		if (!requirement)
+		{
+			std::ostringstream os;
+
+			os << "==============================EXCEPTION========================================\n";
+			os << location_str;
+			os << "Message\t\t: " << message.data() << "\n";
+			os << "==============================EXCEPTION========================================\n\n";
+
+			throw std::runtime_error(os.str());
+
+			//std::string exception_str = "\n\n============================EXCEPTION============================\n";
+			//exception_str += location_str;
+			//exception_str = exception_str + "Message\t\t: " + message.data();
+			//exception_str += "\n============================EXCEPTION============================\n\n";
+
+			//throw std::runtime_error(exception_str);
 		}
 	}
 }

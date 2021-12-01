@@ -4,18 +4,21 @@ void Discrete_Equation::solve(void)
 {
     size_t current_iter = 0;
     Post_Processor::syncronize_solution_time(this->current_time_);
+    Post_Processor::post_grid();
+    Post_Processor::post_solution("initial");//post
 
     while (true)
     {
         if (this->end_controller_->is_time_to_end(current_iter, this->current_time_))
         {
-            Post_Processor::post_solution();//post
+            Post_Processor::post_solution("final");//post
             break;
         }
 
         if (this->post_controller_->is_time_to_post(current_iter, this->current_time_))
         {
             Post_Processor::post_solution();//post
+            this->post_controller_->increase_num_post(); 
         }
 
         Profiler::set_time_point();
@@ -27,10 +30,10 @@ void Discrete_Equation::solve(void)
         this->current_time_ += time_step;
         current_iter++;
 
-        LOG << std::left << std::setw(5);
-        LOG << "Iter:" << current_iter << "\t";
-        LOG << "Time:" << this->current_time_ << "(" << this->end_controller_->progress_percentage_str(current_iter, this->current_time_) << ")";
-        LOG << "Computation cost:" << std::to_string(Profiler::get_time_duration()) << "s \n" << LOG.print_;
+        LOG << std::left;
+        LOG << std::setw(10) << "Iter:" + std::to_string(current_iter);
+        LOG << std::setw(25) << "Time:" + std::to_string(this->current_time_) + "(" + this->end_controller_->progress_percentage_str(current_iter, this->current_time_) + ")";
+        LOG << std::setw(25) << "Computation cost:" + std::to_string(Profiler::get_time_duration()) + "s \n" << LOG.print_;
     }    
 }
 

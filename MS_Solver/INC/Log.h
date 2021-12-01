@@ -69,14 +69,18 @@ public://Query
 		const auto file_path = this->path_ + "_log.txt";
 		this->log_txt_.write(file_path);
 	}
-	void write_error_text(const std::string& error_string) const
+	void write_error_text(const std::vector<double>& error_values) const
 	{
+		//calculate grid file name from my path
 		const auto pos = ms::rfind_nth(this->path_, "/", 2);
 		const auto sub_str = this->path_.substr(pos + 1);
 		const auto parsed_str = ms::parse(sub_str, '_');
 		const auto grid_file_name = parsed_str[0];
 
-		Text txt = { grid_file_name + "    \t" + error_string };
+		Sentence error_sentence = grid_file_name + "      \t";
+		error_sentence.insert_with_space(error_values);
+
+		Text txt = { error_sentence };
 
 		auto error_text_path = this->path_;
 		error_text_path.erase(pos + 1);

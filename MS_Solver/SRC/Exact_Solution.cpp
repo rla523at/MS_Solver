@@ -34,24 +34,24 @@ std::unique_ptr<Exact_Solution> Exact_Solution_Factory::make_unique(const Config
 		ms::contains_icase(initial_condition_name, "sine", "wave"))
 	{
 		const auto space_dimension = configuration.get<ushort>("space_dimension");
-		const auto initial_condition = Initial_Condition_Factory::make_unique(configuration);
+		auto initial_condition = Initial_Condition_Factory::make_unique(configuration);
 
 		std::vector<double> periodic_lengths(space_dimension);
 		std::vector<double> advection_speeds(space_dimension);
 
 		if (space_dimension == 2)
 		{
-			periodic_lengths[0] = configuration.get<double>("x_periodic_lenght");
-			periodic_lengths[1] = configuration.get<double>("y_periodic_lenght");
+			periodic_lengths[0] = configuration.get<double>("x_periodic_length");
+			periodic_lengths[1] = configuration.get<double>("y_periodic_length");
 
 			advection_speeds[0] = configuration.get<double>("x_advection_speed");
 			advection_speeds[1] = configuration.get<double>("y_advection_speed");
 		}
 		else if (space_dimension == 3)
 		{
-			periodic_lengths[0] = configuration.get<double>("x_periodic_lenght");
-			periodic_lengths[1] = configuration.get<double>("y_periodic_lenght");
-			periodic_lengths[2] = configuration.get<double>("z_periodic_lenght");
+			periodic_lengths[0] = configuration.get<double>("x_periodic_length");
+			periodic_lengths[1] = configuration.get<double>("y_periodic_length");
+			periodic_lengths[2] = configuration.get<double>("z_periodic_length");
 
 			advection_speeds[0] = configuration.get<double>("x_advection_speed");
 			advection_speeds[1] = configuration.get<double>("y_advection_speed");

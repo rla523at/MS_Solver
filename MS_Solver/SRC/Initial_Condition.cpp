@@ -1,12 +1,5 @@
 #include "../INC/Initial_Condition.h"
 
-Euclidean_Vector Initial_Condition::calculate_exact_solution(const std::vector<Euclidean_Vector>& points, const double end_time) const
-{
-	EXCEPTION("This initialcondition does not suppor exact solution calculation");
-	return {};
-}
-
-
 Euclidean_Vector Constant1::calculate_solution(const Euclidean_Vector& space_vector) const
 {
 	return { 1 };

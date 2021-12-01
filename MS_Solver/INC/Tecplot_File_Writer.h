@@ -8,6 +8,7 @@ class Tecplot_File_Writer
 public://Command
 	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
 	void write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path);
+	size_t strand_id(void) const;
 
 protected:
 	void set_common_header_variable(const Post_Variables& post_variables);

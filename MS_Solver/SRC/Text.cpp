@@ -1,5 +1,17 @@
 #include "../INC/Text.h"
 
+//Sentence& Sentence::operator=(const Sentence& other)
+//{
+//	this->contents_ = other.contents_;
+//	return *this;
+//}
+//
+//Sentence& Sentence::operator=(Sentence&& other) noexcept
+//{
+//	this->contents_ = std::move(other.contents_);
+//	return *this;
+//}
+
 Sentence& Sentence::operator<<(const std::string& str) 
 {
 	this->contents_ += str;
@@ -87,7 +99,7 @@ Sentence Sentence::get_upper_case(void) const
 	return ms::get_upper_case(this->contents_);
 }
 
-Text::Text(std::initializer_list<std::string> list) 
+Text::Text(std::initializer_list<Sentence> list)
 {
 	this->senteces_.reserve(list.size());
 
@@ -169,6 +181,7 @@ void Text::remove_empty_line(void)
 {
 	this->senteces_.erase(std::remove(this->senteces_.begin(), this->senteces_.end(), ""), this->senteces_.end());
 }
+
 bool Text::operator==(const Text& other) const 
 {
 	return this->senteces_ == other.senteces_;
@@ -180,7 +193,9 @@ void Text::add_write(const std::string_view file_path) const
 	REQUIRE(output_file.is_open(), "output file stream should be opend before write");
 
 	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
+	{
 		output_file << *i << "\n";
+	}
 	output_file << this->senteces_.back();
 
 	output_file.close();

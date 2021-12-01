@@ -8,9 +8,14 @@ Discrete_Solution::Discrete_Solution(const std::shared_ptr<Governing_Equation>& 
 	this->num_equations_ = this->governing_equation_->num_equations();
 }
 
-void Discrete_Solution::update_solution(Euclidean_Vector&& updated_solution)
+void Discrete_Solution::update_solution(const Euclidean_Vector& updated_solution_v)
 {
-	this->values_ = std::move(updated_solution.move_values());
+	this->values_ = updated_solution_v.copy_values();
+}
+
+void Discrete_Solution::update_solution(Euclidean_Vector&& updated_solution_v)
+{
+	this->values_ = std::move(updated_solution_v.move_values());
 }
 
 Euclidean_Vector Discrete_Solution::solution_vector(void) const
@@ -285,7 +290,7 @@ Matrix_Function<Polynomial> Discrete_Solution_DG::calculate_tranposed_gradient_b
 	Matrix_Function<Polynomial> transposed_gradient_basis(this->space_dimension_, num_basis);
 	for (ushort i = 0; i < num_basis; ++i)
 	{
-		transposed_gradient_basis.change_column(i, basis_function[i].gradient());
+		transposed_gradient_basis.change_column(i, basis_function[i].gradient(this->space_dimension_));
 	}
 
 	return transposed_gradient_basis;

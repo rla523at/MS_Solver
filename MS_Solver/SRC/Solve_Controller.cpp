@@ -118,12 +118,12 @@ std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(
     const auto type_name = configuration.get("solve_end_controller_type");
     if (ms::contains_icase(type_name, "Time"))
     {
-        const auto solve_end_time = configuration.get<double>("post_time_step");
+        const auto solve_end_time = configuration.get<double>("solve_end_time");
         return std::make_unique<Solve_End_Controller_By_Time>(solve_end_time);
     }
     else if (ms::contains_icase(type_name, "Iter"))
     {
-        const auto solve_end_iter = configuration.get<size_t>("post_iter_unit");
+        const auto solve_end_iter = configuration.get<size_t>("solve_end_iter");
         return std::make_unique<Solve_End_Controller_By_Iter>(solve_end_iter);
     }
     else

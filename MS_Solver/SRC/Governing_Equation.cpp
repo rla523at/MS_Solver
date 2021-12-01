@@ -303,7 +303,7 @@ std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(cons
 	const auto governing_equation = config.get("Governing_Equation");
 	const auto space_dimension = config.get<ushort>("space_dimension");
 
-	if (ms::contains_icase(governing_equation, "Linear_Advection"))
+	if (ms::contains_icase(governing_equation, "Linear", "Advection"))
 	{
 		if (space_dimension == 2)
 		{
@@ -311,9 +311,32 @@ std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(cons
 			const auto y_advection_speed = config.get<double>("y_advection_speed");
 			return std::make_shared<Linear_Advection_2D>(x_advection_speed, y_advection_speed);
 		}
+		else if (space_dimension == 3)
+		{
+			const auto x_advection_speed = config.get<double>("x_advection_speed");
+			const auto y_advection_speed = config.get<double>("y_advection_speed");
+			const auto z_advection_speed = config.get<double>("z_advection_speed");
+			return std::make_shared<Linear_Advection_3D>(x_advection_speed, y_advection_speed, z_advection_speed);
+		}
 		else
 		{
 			EXCEPTION("Linear advection does not support space dimension in configuration file");
+			return nullptr;
+		}
+	}
+	else if (ms::contains_icase(governing_equation, "Burgers"))
+	{
+		if (space_dimension == 2)
+		{
+			return std::make_shared<Burgers_2D>();
+		}
+		else if (space_dimension == 3)
+		{
+			return std::make_shared<Burgers_3D>();
+		}
+		else
+		{
+			EXCEPTION("Burgers does not support space dimension in configuration file");
 			return nullptr;
 		}
 	}
@@ -322,6 +345,10 @@ std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(cons
 		if (space_dimension == 2)
 		{
 			return std::make_shared<Euler_2D>();
+		}
+		else if (space_dimension == 3)
+		{
+			return std::make_shared<Euler_3D>();
 		}
 		else
 		{

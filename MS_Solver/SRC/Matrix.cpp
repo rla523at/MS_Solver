@@ -52,9 +52,13 @@ double Matrix_Base::at(const size_t row, const size_t column) const
 {
 	REQUIRE(this->is_in_range(row, column), "matrix indexes should not exceed given range");
 	if (this->is_transposed())
+	{
 		return this->const_data_ptr_[column * this->num_rows_ + row];
+	}
 	else
+	{
 		return this->const_data_ptr_[row * this->num_columns_ + column];
+	}
 }
 
 std::vector<double> Matrix_Base::column(const size_t column_index) const
