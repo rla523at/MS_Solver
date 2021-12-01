@@ -2,12 +2,12 @@
 #include "../INC/Discrete_Equation.h"
 
 int main(void) 
-{
-	Profiler::set_time_point();
-	
+{	
 	LOG << "================================================================================\n";
-	LOG << "\t\t\t\t PreProcessing \n";
+	LOG << "\t\t\t\t Start Pre-Processing \n";
 	LOG << "================================================================================\n" << Log::print_;
+
+	Profiler::set_time_point();
 
 	const auto configuration_file_path = "RSC/configuration.dat";
 	Configuration configuration(configuration_file_path);
@@ -17,10 +17,56 @@ int main(void)
 	Grid grid(*grid_file_convertor, grid_file_path);
 
 	auto semi_discrete_equation = Semi_Discrete_Equation_Factory::make_unique(configuration, grid);
+	auto time_discrete_scheme = Time_Discrete_Scheme_Factory::make_unique(configuration);
 	auto solve_end_controller = Solve_End_Controller_Factory::make_unique(configuration);
 	auto solve_post_controller = Solve_Post_Controller_Factory::make_unique(configuration);
-	auto time_discrete_scheme = Time_Discrete_Scheme_Factory::make_unique(configuration);
+
+	Discrete_Equation discrete_equation(std::move(semi_discrete_equation), std::move(time_discrete_scheme), std::move(solve_end_controller), std::move(solve_post_controller));
+
+	LOG << "\n================================================================================\n";
+	LOG << "\t\t\t\t End Pre-Processing(" << Profiler::get_time_duration() << "s)\n";
+	LOG << "================================================================================\n\n" << LOG.print_;
+
+	LOG << "================================================================================\n";
+	LOG << "\t\t\t\t Start Solving\n";
+	LOG << "================================================================================\n" << LOG.print_;
+
+	Profiler::set_time_point();
+
+	discrete_equation.solve();
+
+	LOG << "\n================================================================================\n";
+	LOG << "\t\t\t\t End Solving(" << Profiler::get_time_duration() << "s)\n";
+	LOG << "================================================================================\n\n" << LOG.print_;
+
+	try
+	{
+		const auto exact_solution = Exact_Solution_Factory::make_unique(configuration);
+
+		LOG << "================================================================================\n";
+		LOG << "\t\t\t\t Start Error Analysis\n";
+		LOG << "================================================================================\n";
+
+		Profiler::set_time_point();
+
+		const auto error_value = discrete_equation.calculate_error_values(*exact_solution, grid);
+
+		LOG << std::left << std::setprecision(16);
+		LOG << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
+		LOG << std::setw(25) << error_value[0] << std::setw(25) << error_value[1] << error_value[2] << "\n";
+
+		LOG << "\n================================================================================\n";
+		LOG << "\t\t\t\t End Error Analysis(" << Profiler::get_time_duration() << "s)\n";
+		LOG << "================================================================================\n\n" << LOG.print_;
+	}
+	catch (const std::exception& except)
+	{
+		LOG << "\n================================================================================\n";
+		LOG << except.what() << "\n";
+		LOG << "================================================================================\n\n";
+	}
 }
+
 
 //#include "../INC/Initial_Condition.h"
 //#include "../INC/Discrete_Equation.h"

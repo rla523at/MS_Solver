@@ -154,12 +154,12 @@ void Discrete_Solution_DG::precalculate_basis_bdry_QPs_basis_values(const std::v
 
 void Discrete_Solution_DG::precalcualte_cell_QPs_basis_values(const std::vector<Quadrature_Rule>& quadrature_rules)
 {
-	this->set_of_cell_basis_QPs_m_.reserve(this->num_cells_);
+	this->set_of_cell_basis_QPs_m_.resize(this->num_cells_);
 
 	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto& QPs = quadrature_rules[cell_index].points;
-		this->set_of_cell_basis_QPs_m_.push_back(this->calculate_basis_points_m(cell_index, QPs));
+		this->set_of_cell_basis_QPs_m_[cell_index] = this->calculate_basis_points_m(cell_index, QPs);
 	}
 }
 

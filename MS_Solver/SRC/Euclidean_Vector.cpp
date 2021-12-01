@@ -153,6 +153,15 @@ double Euclidean_Vector_Base::L2_norm(void) const
 	return std::sqrt(this->inner_product(*this));
 }
 
+double Euclidean_Vector_Base::Linf_norm(void) const
+{
+	const auto n = this->num_values_;
+	const auto incx = 1;
+	const auto pos = cblas_idamax(n, this->const_data_ptr_, incx);
+
+	return this->const_data_ptr_[pos];
+}
+
 double Euclidean_Vector_Base::inner_product(const Euclidean_Vector_Base& other) const
 {
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");

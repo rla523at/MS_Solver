@@ -105,6 +105,8 @@ void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& dis
 
 
 
+
+
 //Cells::Cells(const Configuration& configuration, const Grid& grid)
 //{    
 //    this->governing_equation_ = Governing_Equation_Factory::make(configuration);

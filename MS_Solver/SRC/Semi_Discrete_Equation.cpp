@@ -57,3 +57,52 @@ std::unique_ptr<Semi_Discrete_Equation> Semi_Discrete_Equation_Factory::make_uni
 		return nullptr;
 	}
 }
+
+double Semi_Discrete_Equation_DG::calculate_cell_error_value(const uint cell_index, const std::vector<Euclidean_Vector>& exact_solution_v_at_QPs, const std::vector<double>& QWs) const
+{
+	const auto computed_solution_v_at_QPs = this->discrete_solution_->calculate_solution_at_cell_QPs(cell_index);
+	const auto num_QPs = QWs.size();
+
+	double volume = 0.0;
+	double integral_result = 0.0;
+	for (ushort q = 0; q < num_QPs; ++q)
+	{
+		integral_result += (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q]).L1_norm() * QWs[q];
+		//integral_result += (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q])[0] * QWs[q];
+		volume += QWs[q];
+	}
+		
+	return integral_result / volume;
+}
+
+std::vector<double> Semi_Discrete_Equation_DG::calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
+{
+	const auto num_cells = grid.num_cells();
+
+	std::vector<double> cell_error_values(num_cells);
+
+	for (uint cell_index = 0; cell_index < num_cells; ++cell_index)
+	{
+		const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
+		const auto quadrature_rule = grid.cell_quadrature_rule(cell_index, solution_degree);
+		
+		const auto& QPs = quadrature_rule.points;
+		const auto& QWs = quadrature_rule.weights;
+		const auto num_QPs = QPs.size();
+
+		std::vector<Euclidean_Vector> exact_soluion_v_at_QPs(num_QPs);		
+		for (ushort q = 0; q < num_QPs; ++q)
+		{
+			exact_soluion_v_at_QPs[q] = exact_solution.calculate_exact_solution_vector(QPs[q], end_time);
+		}
+
+		cell_error_values[cell_index] = this->calculate_cell_error_value(cell_index, exact_soluion_v_at_QPs, QWs);
+	}
+
+	Euclidean_Vector cell_error_v = std::move(cell_error_values);
+	const auto arithmetic_mean_L1_error = cell_error_v.L1_norm() / num_cells;
+	const auto arithmetic_mean_L2_error = cell_error_v.L2_norm() / num_cells;
+	const auto Linf_error = cell_error_v.Linf_norm();
+
+	return { arithmetic_mean_L1_error, arithmetic_mean_L2_error, Linf_error };
+}

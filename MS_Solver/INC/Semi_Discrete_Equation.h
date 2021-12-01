@@ -1,6 +1,7 @@
 #pragma once
 #include "Boundaries.h"
 #include "Cells.h"
+#include "Exact_Solution.h"
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
 
@@ -14,6 +15,7 @@ public://Query
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
 	virtual Euclidean_Vector solution_vector(void) const abstract;
 	virtual Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const abstract;
+	virtual std::vector<double> calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const abstract;
 };
 
 class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
@@ -34,6 +36,10 @@ public://Query
 	Euclidean_Vector calculate_RHS(void) const override;
 	Euclidean_Vector solution_vector(void) const override;
 	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const override;
+	std::vector<double> calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
+
+private:
+	double calculate_cell_error_value(const uint cell_index, const std::vector<Euclidean_Vector>& exact_solution_v_at_QPs, const std::vector<double>& QWs) const;
 
 private:
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;

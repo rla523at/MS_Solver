@@ -58,6 +58,11 @@ Matrix Linear_Advection::calculate_physical_flux(const Euclidean_Vector& solutio
 	return { this->num_equations_, this->space_dimension_, std::move(values) };
 }
 
+const Euclidean_Vector& Linear_Advection::get_advection_speed_vector(void) const
+{
+	return this->advection_speeds_;
+}
+
 Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed)
 {
 	this->space_dimension_ = 2;

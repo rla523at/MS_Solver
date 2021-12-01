@@ -22,11 +22,13 @@ struct Quadrature_Rule
 	std::vector<Euclidean_Vector> points;
 	std::vector<double> weights;
 
-	bool operator==(const Quadrature_Rule& other) const {
+	bool operator==(const Quadrature_Rule& other) const 
+	{
 		return this->points == other.points && this->weights == other.weights;
 	}
 
-	bool is_empty(void) const {
+	bool is_empty(void) const 
+	{
 		return this->points.empty();
 	}
 };

@@ -1,5 +1,12 @@
 #include "../INC/Initial_Condition.h"
 
+Euclidean_Vector Initial_Condition::calculate_exact_solution(const std::vector<Euclidean_Vector>& points, const double end_time) const
+{
+	EXCEPTION("This initialcondition does not suppor exact solution calculation");
+	return {};
+}
+
+
 Euclidean_Vector Constant1::calculate_solution(const Euclidean_Vector& space_vector) const
 {
 	return { 1 };
@@ -29,27 +36,6 @@ Euclidean_Vector Sine_Wave::calculate_solution(const Euclidean_Vector& space_vec
 
 	return { solution };
 }
-
-//Euclidean_Vector Sine_Wave::calculate_exact_solution(const Euclidean_Vector& space_vector, const double end_time) const
-//{
-//	const auto advection_speed = Linear_Advection_2D::advection_speed();
-//
-//	const auto num_cell = space_vectors.size();
-//	std::vector<Euclidean_Vector> exact_solutions(num_cell);
-//
-//	for (size_t i = 0; i < num_cell; ++i) {
-//		const auto& cell_center = space_vectors[i];
-//
-//		double exact_solution = 1.0;
-//
-//		for (ushort j = 0; j < space_dimension_; ++j)
-//			exact_solution *= std::sin(This_::wave_numbers_[j] * (cell_center[j] - advection_speed[j] * end_time));
-//
-//		exact_solutions[i] = exact_solution;
-//	}
-//
-//	return exact_solutions;
-//}
 
 Euclidean_Vector Square_Wave::calculate_solution(const Euclidean_Vector& space_vector) const
 {

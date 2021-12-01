@@ -25,6 +25,7 @@ public://Query
 	const double* end(void) const;
 	double L1_norm(void) const;
 	double L2_norm(void) const;
+	double Linf_norm(void) const;
 	double inner_product(const Euclidean_Vector_Base& other) const;
 	bool is_axis_translation(const Euclidean_Vector_Base& other) const;
 	size_t size(void) const;

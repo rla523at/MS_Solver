@@ -36,3 +36,8 @@ y_advection_speed			= 0.5
 x_wave_length				= 1.0
 y_wave_length				= 1.0
 z_wave_length				= 1.0
+
+//exact solution option
+x_periodic_length			= 1.0
+y_periodic_length			= 1.0
+z_periodic_length			= 1.0

@@ -27,6 +27,7 @@
     <ClCompile Include="SRC\Discrete_Solution.cpp" />
     <ClCompile Include="SRC\Elements.cpp" />
     <ClCompile Include="SRC\Euclidean_Vector.cpp" />
+    <ClCompile Include="SRC\Exact_Solution.cpp" />
     <ClCompile Include="SRC\Geometry.cpp" />
     <ClCompile Include="SRC\Governing_Equation.cpp" />
     <ClCompile Include="SRC\Grid.cpp" />
@@ -62,6 +63,7 @@
     <ClInclude Include="INC\Discrete_Solution.h" />
     <ClInclude Include="INC\Element.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
+    <ClInclude Include="INC\Exact_Solution.h" />
     <ClInclude Include="INC\Exception.h" />
     <ClInclude Include="INC\Geometry.h" />
     <ClInclude Include="INC\Governing_Equation.h" />
