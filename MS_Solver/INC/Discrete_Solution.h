@@ -20,6 +20,7 @@ public://Query
 	const std::vector<std::string>& get_solution_names(void) const;
 	Euclidean_Vector solution_vector(void) const;
 	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const;
+	Euclidean_Vector_Wrapper solution_vector_wrapper(void);
 	ushort num_equations(void) const;
 	ushort num_solutions(void) const;
 	size_t num_values(void) const;

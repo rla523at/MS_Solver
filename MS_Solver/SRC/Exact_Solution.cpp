@@ -30,8 +30,7 @@ std::unique_ptr<Exact_Solution> Exact_Solution_Factory::make_unique(const Config
 	const auto governing_equation_name = configuration.get("governing_equation");
 	const auto initial_condition_name = configuration.get("initial_condition");
 
-	if (ms::contains_icase(governing_equation_name, "Linear", "Advection") &&
-		ms::contains_icase(initial_condition_name, "sine", "wave"))
+	if (ms::contains_icase(governing_equation_name, "Linear", "Advection"))
 	{
 		const auto space_dimension = configuration.get<ushort>("space_dimension");
 		auto initial_condition = Initial_Condition_Factory::make_unique(configuration);

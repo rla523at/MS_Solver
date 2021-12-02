@@ -1,40 +1,23 @@
 #include "../INC/Time_Discrete_Scheme.h"
 
 void SSPRK33::update(Semi_Discrete_Equation& semi_discrete_equation, const double time_step) const
-{    
-    const auto current_solution_vcw = semi_discrete_equation.solution_vector_constant_wrapper(); //update하면서 쓰레기가 되버리는구나 move를 하니까 ^^
+{  
+    auto solution_vw = semi_discrete_equation.solution_vector_wrapper(); //solution vector가 memory reallocation이 될 경우, vetor wrapper의 data ptr들이 dangling pointer가 될 수 있음.
     const auto initial_solution_v = semi_discrete_equation.solution_vector();
     const auto initial_RHS = semi_discrete_equation.calculate_RHS();
 
-    //debug
-    std::cout << "current_solution_vcw " << current_solution_vcw.to_string() << "\n";
-    std::cout << "initial_solution_v " << initial_solution_v.to_string() << "\n";
-    std::cout << "initial_RHS " << initial_RHS.to_string() << "\n";
-    //debug
-
     //stage 1
-    auto stage1_solution_v = initial_solution_v + time_step * initial_RHS;
-
-    semi_discrete_equation.update_solution(std::move(stage1_solution_v));
+    solution_vw = initial_solution_v + time_step * initial_RHS;
+    
     const auto stage1_RHS = semi_discrete_equation.calculate_RHS();
 
-    //debug
-    std::cout << "current_solution_vcw " << current_solution_vcw.to_string() << "\n";
-    std::cout << "initial_solution_v " << initial_solution_v.to_string() << "\n";
-    std::cout << "stage1_RHS " << stage1_RHS.to_string() << "\n";
-    std::exit(523);
-    //debug
-
     //stage 2    
-    auto stage2_solution_v = 0.25 * (3 * initial_solution_v + current_solution_vcw + time_step * stage1_RHS);
+    solution_vw = 0.25 * (3 * initial_solution_v + solution_vw + time_step * stage1_RHS);
     
-    semi_discrete_equation.update_solution(std::move(stage2_solution_v));
     const auto stage2_RHS = semi_discrete_equation.calculate_RHS();
 
     //stage 3
-    auto stage3_solution_v = this->c1_3 * (initial_solution_v + 2 * current_solution_vcw + 2 * time_step * stage2_RHS);
-
-    semi_discrete_equation.update_solution(std::move(stage3_solution_v));
+    solution_vw = this->c1_3 * (initial_solution_v + 2 * solution_vw + 2 * time_step * stage2_RHS);
 }
 
 void SSPRK54::update(Semi_Discrete_Equation& semi_discrete_equation, const double time_step) const

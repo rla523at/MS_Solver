@@ -18,6 +18,11 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	Post_Processor::initialize(configuration, grid, *this->discrete_solution_);
 }
 
+Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::solution_vector_wrapper(void)
+{
+	return this->discrete_solution_->solution_vector_wrapper();
+}
+
 
 void Semi_Discrete_Equation_DG::update_solution(const Euclidean_Vector& updated_soltuion_v)
 {

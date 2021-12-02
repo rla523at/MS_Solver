@@ -28,6 +28,12 @@ Euclidean_Vector_Constant_Wrapper Discrete_Solution::solution_vector_constant_wr
 	return this->values_;
 }
 
+Euclidean_Vector_Wrapper Discrete_Solution::solution_vector_wrapper(void)
+{
+	return this->values_;
+}
+
+
 const std::vector<std::string>& Discrete_Solution::get_solution_names(void) const
 {
 	return this->governing_equation_->get_solution_names();

@@ -75,6 +75,10 @@ private:
 	std::vector<double> values_;
 };
 
+//Wrapper class 안전하게 사용 하는 방법
+//1. 매번 새로 생성해서 사용하기
+//2. 상속 말고 합성으로 만들고 매번 검사하기 또는 반영하기
+
 class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base
 {
 public:

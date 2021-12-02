@@ -25,7 +25,7 @@ solve_post_controller_type	= Iter						//Time, Iter
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1
 
-post_base_path				= E:/CodeData/Result/MS_Solver/RDD/Debug/
+post_base_path				= C:/Users/KimMinseok/Desktop/»õ Æú´õ
 post_order					= 1
 post_file_format			= Binary 					//ASCII, Binary
 post_point_location			= Node						//Center, Node

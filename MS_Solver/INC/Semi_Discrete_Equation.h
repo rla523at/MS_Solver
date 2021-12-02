@@ -8,6 +8,7 @@
 class Semi_Discrete_Equation
 {
 public://Command
+	virtual Euclidean_Vector_Wrapper solution_vector_wrapper(void) abstract;
 	virtual void update_solution(const Euclidean_Vector& updated_soltuion) abstract;
 	virtual void update_solution(Euclidean_Vector&& updated_soltuion) abstract;
 
@@ -31,6 +32,8 @@ public:
 		, inner_faces_(std::move(inner_faces)) {};
 
 public://Command
+	Euclidean_Vector_Wrapper solution_vector_wrapper(void) override;
+
 	void update_solution(const Euclidean_Vector& updated_soltuion) override;
 	void update_solution(Euclidean_Vector&& updated_soltuion) override;
 
