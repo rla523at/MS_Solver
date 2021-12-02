@@ -10,30 +10,43 @@ using ushort = unsigned short;
 
 
 class Euclidean_Vector;
-class Euclidean_Vector_Base
+class Euclidean_Vector_Constant_Base
 {
 public://Query
-	Euclidean_Vector operator-(const Euclidean_Vector_Base& other) const;
-	Euclidean_Vector operator+(const Euclidean_Vector_Base& other) const;
+	Euclidean_Vector operator-(const Euclidean_Vector_Constant_Base& other) const;
+	Euclidean_Vector operator+(const Euclidean_Vector_Constant_Base& other) const;
 	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
-	bool operator==(const Euclidean_Vector_Base& other) const;
+	bool operator==(const Euclidean_Vector_Constant_Base& other) const;
 
 	double at(const size_t position) const;
 	const double* begin(void) const;
+	std::vector<double> copy_values(void) const;
 	const double* data(void) const;
 	const double* end(void) const;
 	double L1_norm(void) const;
 	double L2_norm(void) const;
 	double Linf_norm(void) const;
-	double inner_product(const Euclidean_Vector_Base& other) const;
-	bool is_axis_translation(const Euclidean_Vector_Base& other) const;
+	double inner_product(const Euclidean_Vector_Constant_Base& other) const;
+	bool is_axis_translation(const Euclidean_Vector_Constant_Base& other) const;
 	size_t size(void) const;
 	std::string to_string(void) const;
 
 protected:
 	int num_values_ = 0;
 	const double* const_data_ptr_ = nullptr;
+};
+
+class Euclidean_Vector_Base : public Euclidean_Vector_Constant_Base
+{
+public://Command
+	void operator*=(const double constant);
+	void operator+=(const Euclidean_Vector_Base& other);
+
+	void normalize(void);
+
+protected:
+	double* data_ptr_ = nullptr;
 };
 
 class Euclidean_Vector : public Euclidean_Vector_Base
@@ -55,24 +68,32 @@ public:
 public://Command	
 	void operator=(const Euclidean_Vector& other);
 	void operator=(Euclidean_Vector&& other) noexcept;
-	Euclidean_Vector& operator*=(const double constant);
-	Euclidean_Vector& operator+=(const Euclidean_Vector& other);
 
 	std::vector<double>&& move_values(void);
-	Euclidean_Vector& normalize(void);
-
-public://Query
-	std::vector<double> copy_values(void) const;
 
 private:
 	std::vector<double> values_;
 };
 
-class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Base
+class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base
 {
 public:
-	Euclidean_Vector_Constant_Wrapper(const size_t num_value, const double* ptr);
 	Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values);
+
+private:
+	const std::vector<double>& values_constant_wrapper_;
+};
+
+class Euclidean_Vector_Wrapper : public Euclidean_Vector_Base
+{
+public:
+	Euclidean_Vector_Wrapper(std::vector<double>& values);
+
+public://Command
+	void operator=(Euclidean_Vector&& other) noexcept;
+
+private:
+	std::vector<double>& values_wrapper_;
 };
 
 template <typename Function>
@@ -172,8 +193,8 @@ private:
 	std::vector<Function> functions_;
 };
 
-Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Base& x);
-std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x);
+Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constant_Base& x);
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Constant_Base& x);
 template <typename Function>	std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf)
 {
 	return os << vf.to_string();

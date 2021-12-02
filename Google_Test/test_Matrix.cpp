@@ -456,7 +456,11 @@ TEST(Matrix, operator_mm_18)
 	const auto result = m1 * m2;
 
 	Matrix ref(3, 3, { 18.470224531309999,  16.712738084116999,  10.418514118810000,  22.167911283120002,  21.030398669553001,  14.150019875622000,  27.174477241769999,  26.434492089979003,  18.454029295989997 });
-	EXPECT_EQ(result, ref);
+	const auto [rows, cols] = ref.size();
+	for (size_t i = 0; i < rows; ++i)
+		for (size_t j = 0; j < cols; ++j)
+			EXPECT_DOUBLE_EQ(result.at(i, j), ref.at(i, j));
+	//EXPECT_EQ(result, ref);
 }
 TEST(Matrix, operator_mm_19) 
 {

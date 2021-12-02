@@ -68,7 +68,9 @@ ushort Geometry::num_post_elements(const ushort post_order) const
 
 Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& point) const
 {
-	return this->normal_vf_(point).normalize();
+	auto normal_v = this->normal_vf_(point);
+	normal_v.normalize();
+	return normal_v;
 }
 
 std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const

@@ -3,95 +3,17 @@
 #include "../MS_Solver/INC/Euclidean_Vector.h"
 #include "../MS_Solver/INC/Polynomial.h"
 
-TEST(Euclidean_Vector_Constant_Wrapper, operator_addition_1)
+//for google test cout message
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector& x)
 {
-	const std::vector<double> vec = { 1,2,3 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-	const Euclidean_Vector v2 = { 4,5,6 };
-	const auto result = v1 + v2;
-
-	const Euclidean_Vector ref = { 5,7,9 };
-	EXPECT_EQ(result, ref);
+	return os << x.to_string();
 }
-TEST(Euclidean_Vector_Constant_Wrapper, operator_addition_2)
+std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Wrapper& x)
 {
-	std::vector<double> vec = { 1,2,3 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-	vec = { 4,3,2 };
-	const Euclidean_Vector v2 = { 4,5,6 };
-	const auto result = v1 + v2;
-
-	const Euclidean_Vector ref = { 8,8,8 };
-	EXPECT_EQ(result, ref);
+	return os << x.to_string();
 }
-TEST(Euclidean_Vector_Constant_Wrapper, operator_scalar_multiplication_1)
-{
-	const std::vector<double> vec = { 1,2,3 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-	const auto result = 2 * v1;
+//for google test cout message
 
-	const Euclidean_Vector ref = { 2,4,6 };
-	EXPECT_EQ(result, ref);
-}
-TEST(Euclidean_Vector_Constant_Wrapper, inner_product_1)
-{
-	const std::vector<double> vec = { 1,2,3 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-	const Euclidean_Vector v2 = { 4,5,6 };
-	const auto result = v1.inner_product(v2);
-
-	const double ref = 32;
-	EXPECT_EQ(result, ref);
-}
-TEST(Euclidean_Vector_Constant_Wrapper, inner_product_2)
-{
-	std::vector<double> vec = { 3,4 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-	const auto result = v1.inner_product(v1);
-
-	const auto ref = 25;
-	EXPECT_EQ(result, ref);
-}
-TEST(Euclidean_Vector_Constant_Wrapper, is_axis_translation_1)
-{
-	std::vector<double> p1 = { 1, 0 };
-	std::vector<double> p2 = { 0, 1.0 / 3.0 };
-
-	Euclidean_Vector_Constant_Wrapper v1 = p1;
-	Euclidean_Vector_Constant_Wrapper v2 = p2;
-
-	EXPECT_FALSE(v1.is_axis_translation(v2));
-}
-TEST(Euclidean_Vector_Constant_Wrapper, is_axis_translation_2)
-{
-	std::vector<double> p1 = { 1, 0, 0 };
-	std::vector<double> p2 = { 3, 0, 0 };
-
-	Euclidean_Vector_Constant_Wrapper v1 = p1;
-	Euclidean_Vector_Constant_Wrapper v2 = p2;
-
-	EXPECT_TRUE(v1.is_axis_translation(v2));
-}
-TEST(Euclidean_Vector_Constant_Wrapper, L1_norm_1)
-{
-	std::vector<double> vec = { -3,4 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-
-	const auto result = v1.L1_norm();
-
-	const auto ref = 7;
-	EXPECT_EQ(result, ref);
-}
-TEST(Euclidean_Vector_Constant_Wrapper, L2_norm_1)
-{
-	std::vector<double> vec = { 3,4 };
-	const Euclidean_Vector_Constant_Wrapper v1 = vec;
-
-	const auto result = v1.L2_norm();
-
-	const auto ref = 5;
-	EXPECT_EQ(result, ref);
-}
 
 TEST(Euclidean_Vector, constructor_1)
 {
@@ -281,6 +203,131 @@ TEST(Euclidean_Vector, normalize_1)
 //	const Euclidean_Vector ref = { 3,3,3 };
 //	EXPECT_EQ(result, ref);
 //}
+
+TEST(Euclidean_Vector_Constant_Wrapper, operator_addition_1)
+{
+	const std::vector<double> vec = { 1,2,3 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 4,5,6 };
+	const auto result = v1 + v2;
+
+	const Euclidean_Vector ref = { 5,7,9 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, operator_addition_2)
+{
+	std::vector<double> vec = { 1,2,3 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+	vec = { 4,3,2 };
+	const Euclidean_Vector v2 = { 4,5,6 };
+	const auto result = v1 + v2;
+
+	const Euclidean_Vector ref = { 8,8,8 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, operator_scalar_multiplication_1)
+{
+	const std::vector<double> vec = { 1,2,3 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+	const auto result = 2 * v1;
+
+	const Euclidean_Vector ref = { 2,4,6 };
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, inner_product_1)
+{
+	const std::vector<double> vec = { 1,2,3 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 4,5,6 };
+	const auto result = v1.inner_product(v2);
+
+	const double ref = 32;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, inner_product_2)
+{
+	std::vector<double> vec = { 3,4 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+	const auto result = v1.inner_product(v1);
+
+	const auto ref = 25;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, is_axis_translation_1)
+{
+	std::vector<double> p1 = { 1, 0 };
+	std::vector<double> p2 = { 0, 1.0 / 3.0 };
+
+	Euclidean_Vector_Constant_Wrapper v1 = p1;
+	Euclidean_Vector_Constant_Wrapper v2 = p2;
+
+	EXPECT_FALSE(v1.is_axis_translation(v2));
+}
+TEST(Euclidean_Vector_Constant_Wrapper, is_axis_translation_2)
+{
+	std::vector<double> p1 = { 1, 0, 0 };
+	std::vector<double> p2 = { 3, 0, 0 };
+
+	Euclidean_Vector_Constant_Wrapper v1 = p1;
+	Euclidean_Vector_Constant_Wrapper v2 = p2;
+
+	EXPECT_TRUE(v1.is_axis_translation(v2));
+}
+TEST(Euclidean_Vector_Constant_Wrapper, L1_norm_1)
+{
+	std::vector<double> vec = { -3,4 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+
+	const auto result = v1.L1_norm();
+
+	const auto ref = 7;
+	EXPECT_EQ(result, ref);
+}
+TEST(Euclidean_Vector_Constant_Wrapper, L2_norm_1)
+{
+	std::vector<double> vec = { 3,4 };
+	const Euclidean_Vector_Constant_Wrapper v1 = vec;
+
+	const auto result = v1.L2_norm();
+
+	const auto ref = 5;
+	EXPECT_EQ(result, ref);
+}
+
+TEST(Euclidean_Vector_Wrapper, operator_assign_1)
+{
+	std::vector<double> vec = { 1,2,3 };
+	Euclidean_Vector_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 6,5,4 };
+	const Euclidean_Vector v3 = { 4,5,6 };
+	v1 = v2 + v3;
+
+	const Euclidean_Vector ref = { 10,10,10 };
+	EXPECT_EQ(v1, ref);
+}
+TEST(Euclidean_Vector_Wrapper, operator_addition_assign_1)
+{
+	std::vector<double> vec = { 1,2,3 };
+	Euclidean_Vector_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 6,5,4 };
+	v1 += v2;
+
+	const Euclidean_Vector ref = { 7,7,7 };
+	EXPECT_EQ(v1, ref);
+}
+TEST(Euclidean_Vector_Wrapper, operator_addition_assign_2)
+{
+	std::vector<double> vec = { 1,2,3 };
+	Euclidean_Vector_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 6,5,4 };
+	const Euclidean_Vector v3 = { 4,5,6 };
+	v1 = v2 + v3;
+	v1 += v1;
+
+
+	const Euclidean_Vector ref = { 20,20,20 };
+	EXPECT_EQ(v1, ref);
+}
 
 TEST(Vector_Function, constructor) 
 {
