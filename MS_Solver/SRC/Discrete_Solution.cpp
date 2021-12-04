@@ -322,7 +322,7 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_precal
 	{
 		Euclidean_Vector GE_solution = GE_solution_points_m.column(i);							
 		this->governing_equation_->extend_to_solution(GE_solution); 
-		solution_at_points[i] = GE_solution;
+		solution_at_points[i] = std::move(GE_solution);
 	}
 
 	return solution_at_points;

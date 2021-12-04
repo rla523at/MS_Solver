@@ -394,6 +394,11 @@ namespace ms
 	}
 }
 
+Matrix operator*(const double constant, const Matrix_Base& M)
+{
+	return M * constant;
+}
+
 std::ostream& operator<<(std::ostream& os, const Matrix_Base& m) 
 {
 	return os << m.to_string();

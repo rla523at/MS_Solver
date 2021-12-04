@@ -1,4 +1,4 @@
-grid_file_path				= RSC/Grid/2D/RQ15.msh
+grid_file_path				= RSC/Grid/2D/RQ20.msh
 
 space_dimension				= 2
 grid_file_type				= Gmsh
@@ -23,9 +23,9 @@ solve_end_iter				= 100
 
 solve_post_controller_type	= Iter						//Time, Iter
 solve_post_time_step		= 0.1
-solve_post_iter_unit		= 1
+solve_post_iter_unit		= 100
 
-post_base_path				= E:/CodeData/Result/RDD/
+post_base_path				= C:/Users/KimMinseok/Desktop/»õÆú´õ/
 post_order					= 1
 post_file_format			= Binary 					//ASCII, Binary
 post_point_location			= Node						//Center, Node

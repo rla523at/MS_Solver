@@ -200,7 +200,7 @@ namespace ms
 	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr);
 }
 
-
+Matrix operator*(const double constant, const Matrix_Base& M);
 std::ostream& operator<<(std::ostream& os, const Matrix_Base& m);
 std::ostream& operator<<(std::ostream& os, const Matrix& m);
 
