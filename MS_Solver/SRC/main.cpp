@@ -29,7 +29,7 @@ int main(void)
 		Discrete_Equation discrete_equation(std::move(semi_discrete_equation), std::move(time_discrete_scheme), std::move(solve_end_controller), std::move(solve_post_controller));
 
 		LOG << "\n================================================================================\n";
-		LOG << "\t\t\t\t End Pre-Processing(" << Profiler::get_time_duration() << "s)\n";
+		LOG << "\t\t\t End Pre-Processing(" << Profiler::get_time_duration() << "s)\n";
 		LOG << "================================================================================\n\n" << LOG.print_;
 
 		LOG << "================================================================================\n";
@@ -41,7 +41,7 @@ int main(void)
 		discrete_equation.solve();
 
 		LOG << "\n================================================================================\n";
-		LOG << "\t\t\t\t End Solving(" << Profiler::get_time_duration() << "s)\n";
+		LOG << "\t\t\t End Solving(" << Profiler::get_time_duration() << "s)\n";
 		LOG << "================================================================================\n\n" << LOG.print_;
 
 		LOG << "================================================================================\n";
@@ -59,10 +59,11 @@ int main(void)
 		LOG << std::setw(25) << error_values[0] << std::setw(25) << error_values[1] << error_values[2] << "\n";
 
 		LOG << "\n================================================================================\n";
-		LOG << "\t\t\t\t End Error Analysis(" << Profiler::get_time_duration() << "s)\n";
+		LOG << "\t\t\t End Error Analysis(" << Profiler::get_time_duration() << "s)\n";
 		LOG << "================================================================================\n\n" << LOG.print_;
 
 		LOG.write_error_text(error_values);
+		LOG.write();
 	}
 	catch (const std::exception& except)
 	{

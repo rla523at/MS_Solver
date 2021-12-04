@@ -195,7 +195,7 @@ std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post
 	return set_of_connectivities;
 }
 
-Quadrature_Rule Grid::cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const
+const Quadrature_Rule& Grid::get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const
 {
 	const auto& cell_element = this->cell_elements_[cell_index];
 	return cell_element.get_quadrature_rule(solution_degree);

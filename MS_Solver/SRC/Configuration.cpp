@@ -2,6 +2,7 @@
 
 Configuration::Configuration(const std::string_view file_path)
 {
+	this->date_time_str_ = ms::date_time_string();
 	const auto config_text = this->read_file(file_path);
 	this->set_value(config_text);
 };
@@ -15,17 +16,17 @@ std::string Configuration::get(const std::string_view config_name) const
 std::string Configuration::post_folder_path_str(void) const
 {
 	const auto post_base_path = this->get("Post_base_path");
+	REQUIRE(post_base_path.back() == '/', "post base path should be end with /");
+
 	const auto governing_equation_name = this->get("governing_equation");
 	const auto initial_condition_name = this->get("initial_condition");
 	const auto grid_file_name = this->grid_file_name();
-	const auto date = ms::date_string();
 
-	return post_base_path + "/" + governing_equation_name + "/" + initial_condition_name + "/" + grid_file_name + "_" + date + "/";
+	return post_base_path + governing_equation_name + "/" + initial_condition_name + "/" + grid_file_name + "_" + this->date_time_str_ + "/";
 }
 
 std::string Configuration::configuration_str(void) const
 {
-	const auto date = ms::date_string();
 	const auto space_dimension = this->get("space_dimension");
 	const auto governing_equation_str = this->governing_equation_str();
 	const auto initial_condition_str = this->initial_condition_str();
@@ -37,7 +38,7 @@ std::string Configuration::configuration_str(void) const
 
 	std::ostringstream os;
 
-	os << "current date : " << date << "\n\n";
+	os << "current date : " << this->date_time_str_ << "\n\n";
 	os << "================================================================================\n";
 	os << "\t\t\t\t SETTING \n";
 	os << "================================================================================\n";
@@ -219,7 +220,7 @@ std::string Configuration::time_step_str(void) const
 
 namespace ms
 {
-	std::string date_string(void)
+	std::string date_time_string(void)
 	{
 		time_t date_calculator = time(nullptr);
 		tm date;

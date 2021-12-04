@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#define DEVELOPE
+//#define DEVELOPE
 
 #ifdef DEVELOPE
 #define LOCATION ms::location_str(__FILE__,__FUNCTION__,__LINE__)

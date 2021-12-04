@@ -1,5 +1,12 @@
 #include "../INC/Euclidean_Vector.h"
 
+Euclidean_Vector_Constant_Base::Euclidean_Vector_Constant_Base(const size_t num_values, const double* const_data_ptr)
+{
+	REQUIRE((0 < num_values) && (num_values <= std::numeric_limits<int>::max()), "number of values should be in range");
+	REQUIRE(const_data_ptr != nullptr, "data ptr should not be nullptr");
+	this->num_values_ = static_cast<int>(num_values);
+	this->const_data_ptr_ = const_data_ptr;
+}
 
 Euclidean_Vector Euclidean_Vector_Constant_Base::operator*(const double constant) const
 {
@@ -160,16 +167,16 @@ void Euclidean_Vector_Base::operator*=(const double constant)
 	cblas_dscal(n, constant, this->data_ptr_, incx);
 }
 
-void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Base& other)
+void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& other)
 {
-	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
+	REQUIRE(this->size() == other.size(), "other vector should be same size");
 
 	const auto n = this->num_values_;
 	const auto a = 1.0;
 	const auto incx = 1;
 	const auto incy = 1;
-
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, this->data_ptr_, incy);
+	
+	cblas_daxpy(n, a, other.data(), incx, this->data_ptr_, incy);
 }
 
 void Euclidean_Vector_Base::normalize(void)
@@ -249,28 +256,263 @@ std::vector<double>&& Euclidean_Vector::move_values(void)
 	return std::move(this->values_);
 }
 
-Euclidean_Vector_Constant_Wrapper::Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values)
-	:values_constant_wrapper_(values)
+//Euclidean_Vector_Constant_Wrapper::Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values)
+//	: values_constant_wrapper_(values)
+//	, base_(this->values_constant_wrapper_.size(), this->values_constant_wrapper_.data())
+//{
+//	
+//}
+
+Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator-(const Euclidean_Vector_Constant_Base& other) const
 {
-	this->num_values_ = static_cast<int>(values.size());
-	this->const_data_ptr_ = values.data();
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ - other;
+}
+Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator+(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ + other;
+}
+Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator*(const double constant) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ * constant;
+}
+double Euclidean_Vector_Constant_Wrapper::operator[](const size_t position) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_[position];
+}
+bool Euclidean_Vector_Constant_Wrapper::operator==(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ == other;
 }
 
-Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(std::vector<double>& values)
-	:values_wrapper_(values)
+double Euclidean_Vector_Constant_Wrapper::at(const size_t position) const
 {
-	this->num_values_ = static_cast<int>(this->values_wrapper_.size());
-	this->const_data_ptr_ = this->values_wrapper_.data();
-	this->data_ptr_ = this->values_wrapper_.data();
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.at(position);
+}
+
+const double* Euclidean_Vector_Constant_Wrapper::begin(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.begin();
+}
+
+std::vector<double> Euclidean_Vector_Constant_Wrapper::copy_values(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.copy_values();
+}
+
+const double* Euclidean_Vector_Constant_Wrapper::data(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.data();
+}
+
+const double* Euclidean_Vector_Constant_Wrapper::end(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.data();
+}
+
+double Euclidean_Vector_Constant_Wrapper::L1_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.L1_norm();
+}
+
+double Euclidean_Vector_Constant_Wrapper::L2_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.L2_norm();
+}
+
+double Euclidean_Vector_Constant_Wrapper::Linf_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.Linf_norm();
+}
+
+double Euclidean_Vector_Constant_Wrapper::inner_product(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.inner_product(other);
+}
+
+bool Euclidean_Vector_Constant_Wrapper::is_axis_translation(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.is_axis_translation(other);
+}
+
+size_t Euclidean_Vector_Constant_Wrapper::size(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.size();
+}
+
+std::string Euclidean_Vector_Constant_Wrapper::to_string(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.to_string();
+}
+
+bool Euclidean_Vector_Constant_Wrapper::is_sync(void) const
+{
+	return this->base_.data() == this->values_wrapper_.data() && this->base_.size() == this->values_wrapper_.size();
+}
+
+
+//Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(std::vector<double>& values)
+//	:values_wrapper_(values)
+//{
+//	this->num_values_ = static_cast<int>(this->values_wrapper_.size());
+//	this->const_data_ptr_ = this->values_wrapper_.data();
+//	this->data_ptr_ = this->values_wrapper_.data();
+//}
+
+void Euclidean_Vector_Wrapper::operator*=(const double constant)
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	this->base_ *= constant;
+}
+
+void Euclidean_Vector_Wrapper::operator+=(const Euclidean_Vector_Constant_Base& other)
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	this->base_ += other;
 }
 
 void Euclidean_Vector_Wrapper::operator=(Euclidean_Vector&& other) noexcept
 {
 	this->values_wrapper_ = std::move(other.move_values());
+	this->base_ = Euclidean_Vector_Base(this->values_wrapper_.size(), this->values_wrapper_.data());
+
 	this->num_values_ = static_cast<int>(this->values_wrapper_.size());
 	this->const_data_ptr_ = this->values_wrapper_.data();
 	this->data_ptr_ = this->values_wrapper_.data();
 }
+
+void Euclidean_Vector_Wrapper::normalize(void)
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	this->base_.normalize();
+}
+
+Euclidean_Vector Euclidean_Vector_Wrapper::operator-(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ - other;
+}
+Euclidean_Vector Euclidean_Vector_Wrapper::operator+(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ + other;
+}
+Euclidean_Vector Euclidean_Vector_Wrapper::operator*(const double constant) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ * constant;
+}
+double Euclidean_Vector_Wrapper::operator[](const size_t position) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_[position];
+}
+bool Euclidean_Vector_Wrapper::operator==(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_ == other;
+}
+
+double Euclidean_Vector_Wrapper::at(const size_t position) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.at(position);
+}
+
+const double* Euclidean_Vector_Wrapper::begin(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.begin();
+}
+
+std::vector<double> Euclidean_Vector_Wrapper::copy_values(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.copy_values();
+}
+
+const double* Euclidean_Vector_Wrapper::data(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.data();
+}
+
+const double* Euclidean_Vector_Wrapper::end(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.data();
+}
+
+double Euclidean_Vector_Wrapper::L1_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.L1_norm();
+}
+
+double Euclidean_Vector_Wrapper::L2_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.L2_norm();
+}
+
+double Euclidean_Vector_Wrapper::Linf_norm(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.Linf_norm();
+}
+
+double Euclidean_Vector_Wrapper::inner_product(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.inner_product(other);
+}
+
+bool Euclidean_Vector_Wrapper::is_axis_translation(const Euclidean_Vector_Constant_Base& other) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.is_axis_translation(other);
+}
+
+size_t Euclidean_Vector_Wrapper::size(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.size();
+}
+
+std::string Euclidean_Vector_Wrapper::to_string(void) const
+{
+	REQUIRE(this->is_sync(), "wrapper should be sync");
+	return this->base_.to_string();
+}
+
+bool Euclidean_Vector_Wrapper::is_sync(void) const
+{
+	return this->base_.data() == this->values_wrapper_.data() && this->base_.size() == this->values_wrapper_.size();
+}
+
+
+
+
+
+
+
+
 
 Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constant_Base& x)
 {

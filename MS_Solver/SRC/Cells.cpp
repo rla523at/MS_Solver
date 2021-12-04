@@ -21,7 +21,7 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
     {
         const auto solution_degree = discrete_solution.solution_degree(cell_index);
         const auto integrand_degree = solution_degree * 2;
-        auto quadrature_rule = grid.cell_quadrature_rule(cell_index, solution_degree);
+        const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, integrand_degree);
 
         const auto& QPs = quadrature_rule.points;
         const auto& QWs = quadrature_rule.weights;
@@ -39,7 +39,7 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
         }
 
         this->set_of_QWs_gradient_basis_m_[cell_index] = std::move(QWs_gradient_basis_m);
-        quadrature_rules[cell_index] = std::move(quadrature_rule);
+        quadrature_rules[cell_index] = quadrature_rule;
     }
 
     discrete_solution.precalculate_cell_P0_basis_values();
@@ -49,7 +49,12 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
 double Cells_DG::calculate_time_step(const Discrete_Solution_DG& discrete_solution) const
 {
     const auto P0_solutions = discrete_solution.calculate_P0_solutions();
-    return this->time_step_calculator_->calculate(P0_solutions, *this->governing_equation_);
+    const auto time_step = this->time_step_calculator_->calculate(P0_solutions, *this->governing_equation_);
+
+    const auto maximum_solution_degree = static_cast<double>(discrete_solution.maximum_solution_degree());
+    const auto relaxation_factor = 1.0 / (2 * maximum_solution_degree + 1);
+
+    return time_step * relaxation_factor;
 }
 
 void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const

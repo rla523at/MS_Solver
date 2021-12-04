@@ -37,8 +37,9 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
         const auto oc_solution_degree = discrete_solution.solution_degree(oc_index);
         const auto nc_solution_degree = discrete_solution.solution_degree(nc_index);
         const auto max_solution_degree = (std::max)(oc_solution_degree, nc_solution_degree);
+        const auto integrand_degree = 2 * max_solution_degree + 1;
 
-        auto quadrature_rule = grid.inner_face_quadrature_rule(infc_index, max_solution_degree);
+        auto quadrature_rule = grid.inner_face_quadrature_rule(infc_index, integrand_degree);
         const auto& QPs = quadrature_rule.points;
         const auto& QWs = quadrature_rule.weights;
         const auto num_QPs = QPs.size();
@@ -79,8 +80,9 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
         const auto oc_solution_degree = discrete_solution.solution_degree(oc_index);
         const auto nc_solution_degree = discrete_solution.solution_degree(nc_index);
         const auto max_solution_degree = (std::max)(oc_solution_degree, nc_solution_degree);
+        const auto integrand_degree = 2 * max_solution_degree + 1;
 
-        auto [oc_quadrature_rule, nc_quadrature_rule] = grid.periodic_boundary_quadrature_rule_pair(pbdry_pair_index, max_solution_degree);
+        auto [oc_quadrature_rule, nc_quadrature_rule] = grid.periodic_boundary_quadrature_rule_pair(pbdry_pair_index, integrand_degree);
         const auto& oc_QPs = oc_quadrature_rule.points;
         const auto& oc_QWs = oc_quadrature_rule.weights;
         const auto& nc_QPs = nc_quadrature_rule.points;

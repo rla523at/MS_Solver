@@ -64,6 +64,7 @@ public://Query
 	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
 	ushort solution_degree(const uint cell_index) const;
 	ushort num_basis(const uint cell_index) const;
+	ushort maximum_solution_degree(void) const;
 
 
 private:

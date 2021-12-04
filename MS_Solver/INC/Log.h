@@ -69,6 +69,7 @@ public://Query
 		const auto file_path = this->path_ + "_log.txt";
 		this->log_txt_.write(file_path);
 	}
+
 	void write_error_text(const std::vector<double>& error_values) const
 	{
 		//calculate grid file name from my path

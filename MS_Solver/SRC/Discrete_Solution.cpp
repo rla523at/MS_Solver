@@ -339,6 +339,10 @@ ushort Discrete_Solution_DG::num_basis(const uint cell_index) const
 	return this->set_of_num_basis_[cell_index];
 }
 
+ushort Discrete_Solution_DG::maximum_solution_degree(void) const
+{
+	return *std::max_element(this->solution_degrees_.begin(), this->solution_degrees_.end());
+}
 
 ushort Discrete_Solution_DG::solution_degree(const uint cell_index) const
 {
@@ -395,7 +399,9 @@ std::vector<double> Discrete_Solution_DG::calculate_initial_values(const Grid& g
 
 	for (uint i = 0; i < this->num_cells_; ++i)
 	{
-		const auto quadrature_rule = grid.cell_quadrature_rule(i, this->solution_degrees_[i] * 2);
+		const auto integrand_degree = this->solution_degrees_[i] * 2;
+
+		const auto quadrature_rule = grid.get_cell_quadrature_rule(i, integrand_degree);
 		const auto& qnodes = quadrature_rule.points;
 		const auto& qweights = quadrature_rule.weights;
 

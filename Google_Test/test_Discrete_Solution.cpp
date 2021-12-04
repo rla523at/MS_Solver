@@ -26,7 +26,7 @@ TEST(Discrete_Solution_DG, calculate_solution_at_cell_QPs_1)
 
 		for (int cell_index = 0; cell_index < num_cells; ++cell_index)
 		{
-			cell_quadrature_rules[cell_index] = grid.cell_quadrature_rule(cell_index, solution_degree);
+			cell_quadrature_rules[cell_index] = grid.get_cell_quadrature_rule(cell_index, solution_degree);
 		}
 
 		discrete_solution_DG->precalcualte_cell_QPs_basis_values(cell_quadrature_rules);

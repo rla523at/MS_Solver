@@ -14,7 +14,6 @@ public:
     void update(Semi_Discrete_Equation& semi_discrete_equation, const double time_step) const override;
 
 private:
-    static constexpr double c1_3 = 1.0 / 3.0;
 };
 
 class SSPRK54 : public Time_Discrete_Scheme

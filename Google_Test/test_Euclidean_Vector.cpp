@@ -324,9 +324,19 @@ TEST(Euclidean_Vector_Wrapper, operator_addition_assign_2)
 	v1 = v2 + v3;
 	v1 += v1;
 
+	const std::vector<double> ref = { 20,20,20 };
+	EXPECT_EQ(vec, ref);
+}
+TEST(Euclidean_Vector_Wrapper, async_issue_1)
+{
+	std::vector<double> vec = { 1,2,3 };
+	Euclidean_Vector_Wrapper v1 = vec;
 
-	const Euclidean_Vector ref = { 20,20,20 };
-	EXPECT_EQ(v1, ref);
+	std::vector<double> new_vec = { 4,5,6 };
+	vec = std::move(new_vec);
+
+	const Euclidean_Vector v2 = { 6,5,4 };
+	EXPECT_ANY_THROW(v1 += v2);
 }
 
 TEST(Vector_Function, constructor) 

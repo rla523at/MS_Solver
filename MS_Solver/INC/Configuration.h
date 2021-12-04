@@ -30,9 +30,10 @@ private:
 
 private:
 	std::map<std::string, std::string> name_to_value_str_;
+	std::string date_time_str_;
 };
 
 namespace ms
 {
-	std::string date_string(void);
+	std::string date_time_string(void);
 }

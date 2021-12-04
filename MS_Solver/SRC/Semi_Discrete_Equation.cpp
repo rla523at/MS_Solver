@@ -59,8 +59,22 @@ Euclidean_Vector_Constant_Wrapper Semi_Discrete_Equation_DG::solution_vector_con
 	return this->discrete_solution_->solution_vector_constant_wrapper();
 }
 
-double Semi_Discrete_Equation_DG::calculate_cell_error_value(const uint cell_index, const std::vector<Euclidean_Vector>& exact_solution_v_at_QPs, const std::vector<double>& QWs) const
-{
+double Semi_Discrete_Equation_DG::calculate_cell_L1_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
+{	
+	const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
+	const auto integrand_degree = 2 * solution_degree;
+	const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, integrand_degree);
+
+	const auto& QPs = quadrature_rule.points;
+	const auto& QWs = quadrature_rule.weights;
+	const auto num_QPs = QPs.size();
+
+	std::vector<Euclidean_Vector> exact_solution_v_at_QPs(num_QPs);
+	for (ushort q = 0; q < num_QPs; ++q)
+	{
+		exact_solution_v_at_QPs[q] = exact_solution.calculate_exact_solution_vector(QPs[q], end_time);
+	}
+
 	const auto computed_solution_v_at_QPs = this->discrete_solution_->calculate_solution_at_cell_QPs(cell_index);
 	const auto num_QPs = QWs.size();
 
@@ -69,7 +83,6 @@ double Semi_Discrete_Equation_DG::calculate_cell_error_value(const uint cell_ind
 	for (ushort q = 0; q < num_QPs; ++q)
 	{
 		integral_result += (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q]).L1_norm() * QWs[q];
-		//integral_result += (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q])[0] * QWs[q];
 		volume += QWs[q];
 	}
 		
@@ -84,19 +97,6 @@ std::vector<double> Semi_Discrete_Equation_DG::calculate_error_values(const Exac
 
 	for (uint cell_index = 0; cell_index < num_cells; ++cell_index)
 	{
-		const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
-		const auto quadrature_rule = grid.cell_quadrature_rule(cell_index, solution_degree);
-		
-		const auto& QPs = quadrature_rule.points;
-		const auto& QWs = quadrature_rule.weights;
-		const auto num_QPs = QPs.size();
-
-		std::vector<Euclidean_Vector> exact_soluion_v_at_QPs(num_QPs);		
-		for (ushort q = 0; q < num_QPs; ++q)
-		{
-			exact_soluion_v_at_QPs[q] = exact_solution.calculate_exact_solution_vector(QPs[q], end_time);
-		}
-
 		cell_error_values[cell_index] = this->calculate_cell_error_value(cell_index, exact_soluion_v_at_QPs, QWs);
 	}
 
