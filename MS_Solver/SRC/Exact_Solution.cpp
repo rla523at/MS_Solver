@@ -10,6 +10,20 @@ Euclidean_Vector Linear_Advection_Exact_Soltuion::calculate_exact_solution_vecto
 	return this->initial_condition_->calculate_solution(initial_point_consider_pbdry);
 }
 
+std::vector<Euclidean_Vector> Linear_Advection_Exact_Soltuion::calculate_exact_solution_vectors(const std::vector<Euclidean_Vector>& points, const double time) const
+{
+	const auto num_points = points.size();
+	std::vector<Euclidean_Vector> exact_solution_vs(num_points);
+
+	for (ushort i = 0; i < num_points; ++i)
+	{
+		exact_solution_vs[i] = this->calculate_exact_solution_vector(points[i], time);
+	}
+
+	return exact_solution_vs;
+}
+
+
 Euclidean_Vector Linear_Advection_Exact_Soltuion::consider_pbdry(const Euclidean_Vector& point) const
 {
 	// Requirement : domain should be [0, this->periodic_length[0]] x [0, this->periodic_length[1]] x [0, this->periodic_length[2]]

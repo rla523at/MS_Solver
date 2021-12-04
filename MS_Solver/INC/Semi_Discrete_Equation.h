@@ -46,8 +46,8 @@ public://Query
 
 private:
 	double calculate_cell_L1_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_cell_L2_error(const uint cell_index, const std::vector<Euclidean_Vector>& exact_solution_v_at_QPs, const std::vector<double>& QWs) const;
-	double calculate_cell_Linf_error(const uint cell_index, const std::vector<Euclidean_Vector>& exact_solution_v_at_QPs, const std::vector<double>& QWs) const;
+	double calculate_cell_L2_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
+	double calculate_cell_Linf_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
 
 private:
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;

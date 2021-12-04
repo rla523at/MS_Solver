@@ -5,6 +5,7 @@ class Exact_Solution
 {
 public:
 	virtual Euclidean_Vector calculate_exact_solution_vector(const Euclidean_Vector& point, const double time) const abstract;
+	virtual std::vector<Euclidean_Vector> calculate_exact_solution_vectors(const std::vector<Euclidean_Vector>& points, const double time) const abstract;
 };
 
 class Linear_Advection_Exact_Soltuion : public Exact_Solution
@@ -17,6 +18,7 @@ public:
 
 public:
 	Euclidean_Vector calculate_exact_solution_vector(const Euclidean_Vector& point, const double time) const override;
+	std::vector<Euclidean_Vector> calculate_exact_solution_vectors(const std::vector<Euclidean_Vector>& points, const double time) const override;
 
 private:
 	Euclidean_Vector consider_pbdry(const Euclidean_Vector& point) const;

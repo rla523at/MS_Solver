@@ -59,8 +59,30 @@ Euclidean_Vector_Constant_Wrapper Semi_Discrete_Equation_DG::solution_vector_con
 	return this->discrete_solution_->solution_vector_constant_wrapper();
 }
 
+std::vector<double> Semi_Discrete_Equation_DG::calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
+{
+	const auto num_cells = grid.num_cells();
+
+	auto arithmetic_mean_L1_error = 0.0;
+	auto arithmetic_mean_L2_error = 0.0;
+	auto arithmetic_mean_Linf_error = 0.0;
+
+	for (uint cell_index = 0; cell_index < num_cells; ++cell_index)
+	{
+		arithmetic_mean_L1_error += this->calculate_cell_L1_error(cell_index, exact_solution, grid, end_time);
+		arithmetic_mean_L2_error += this->calculate_cell_L2_error(cell_index, exact_solution, grid, end_time);
+		arithmetic_mean_Linf_error += this->calculate_cell_Linf_error(cell_index, exact_solution, grid, end_time);
+	}
+
+	arithmetic_mean_L1_error /= num_cells;
+	arithmetic_mean_L2_error /= num_cells;
+	arithmetic_mean_Linf_error /= num_cells;
+
+	return { arithmetic_mean_L1_error, arithmetic_mean_L2_error, arithmetic_mean_Linf_error };
+}
+
 double Semi_Discrete_Equation_DG::calculate_cell_L1_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
-{	
+{
 	const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
 	const auto integrand_degree = 2 * solution_degree;
 	const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, integrand_degree);
@@ -69,43 +91,67 @@ double Semi_Discrete_Equation_DG::calculate_cell_L1_error(const uint cell_index,
 	const auto& QWs = quadrature_rule.weights;
 	const auto num_QPs = QPs.size();
 
-	std::vector<Euclidean_Vector> exact_solution_v_at_QPs(num_QPs);
-	for (ushort q = 0; q < num_QPs; ++q)
-	{
-		exact_solution_v_at_QPs[q] = exact_solution.calculate_exact_solution_vector(QPs[q], end_time);
-	}
-
+	const auto exact_solution_v_at_QPs = exact_solution.calculate_exact_solution_vectors(QPs, end_time);
 	const auto computed_solution_v_at_QPs = this->discrete_solution_->calculate_solution_at_cell_QPs(cell_index);
-	const auto num_QPs = QWs.size();
 
 	double volume = 0.0;
 	double integral_result = 0.0;
 	for (ushort q = 0; q < num_QPs; ++q)
 	{
-		integral_result += (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q]).L1_norm() * QWs[q];
+		const auto error_value = (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q])[0];
+		integral_result += std::abs(error_value) * QWs[q];
 		volume += QWs[q];
 	}
-		
+
 	return integral_result / volume;
 }
 
-std::vector<double> Semi_Discrete_Equation_DG::calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
+double Semi_Discrete_Equation_DG::calculate_cell_L2_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
 {
-	const auto num_cells = grid.num_cells();
+	const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
+	const auto integrand_degree = 2 * solution_degree;
+	const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, integrand_degree);
 
-	std::vector<double> cell_error_values(num_cells);
+	const auto& QPs = quadrature_rule.points;
+	const auto& QWs = quadrature_rule.weights;
+	const auto num_QPs = QPs.size();
 
-	for (uint cell_index = 0; cell_index < num_cells; ++cell_index)
+	const auto exact_solution_v_at_QPs = exact_solution.calculate_exact_solution_vectors(QPs, end_time);
+	const auto computed_solution_v_at_QPs = this->discrete_solution_->calculate_solution_at_cell_QPs(cell_index);
+
+	double volume = 0.0;
+	double integral_result = 0.0;
+	for (ushort q = 0; q < num_QPs; ++q)
 	{
-		cell_error_values[cell_index] = this->calculate_cell_error_value(cell_index, exact_soluion_v_at_QPs, QWs);
+		const auto error_value = (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q])[0];
+		integral_result += error_value * error_value * QWs[q];
+		volume += QWs[q];
 	}
 
-	Euclidean_Vector cell_error_v = std::move(cell_error_values);
-	const auto arithmetic_mean_L1_error = cell_error_v.L1_norm() / num_cells;
-	const auto arithmetic_mean_L2_error = cell_error_v.L2_norm() / num_cells;
-	const auto Linf_error = cell_error_v.Linf_norm();
+	return std::sqrt(integral_result / volume);
+}
 
-	return { arithmetic_mean_L1_error, arithmetic_mean_L2_error, Linf_error };
+double Semi_Discrete_Equation_DG::calculate_cell_Linf_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const
+{
+	const auto solution_degree = this->discrete_solution_->solution_degree(cell_index);
+	const auto integrand_degree = 2 * solution_degree;
+	const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, integrand_degree);
+
+	const auto& QPs = quadrature_rule.points;
+	const auto& QWs = quadrature_rule.weights;
+	const auto num_QPs = QPs.size();
+
+	const auto exact_solution_v_at_QPs = exact_solution.calculate_exact_solution_vectors(QPs, end_time);
+	const auto computed_solution_v_at_QPs = this->discrete_solution_->calculate_solution_at_cell_QPs(cell_index);
+
+	double max_error = 0.0;
+	for (ushort q = 0; q < num_QPs; ++q)
+	{
+		const auto error_value = (exact_solution_v_at_QPs[q] - computed_solution_v_at_QPs[q])[0];
+		max_error = (std::max)(max_error, error_value);
+	}
+
+	return max_error;
 }
 
 std::unique_ptr<Semi_Discrete_Equation> Semi_Discrete_Equation_Factory::make_unique(const Configuration& configuration, const Grid& grid)
