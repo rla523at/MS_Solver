@@ -45,13 +45,6 @@ namespace ms
 			os << "==============================EXCEPTION========================================\n\n";
 
 			throw std::runtime_error(os.str());
-
-			//std::string exception_str = "\n\n============================EXCEPTION============================\n";
-			//exception_str += location_str;
-			//exception_str = exception_str + "Message\t\t: " + message.data();
-			//exception_str += "\n============================EXCEPTION============================\n\n";
-
-			//throw std::runtime_error(exception_str);
 		}
 	}
 }

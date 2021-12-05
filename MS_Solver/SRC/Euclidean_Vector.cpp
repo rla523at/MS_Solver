@@ -10,44 +10,44 @@ Euclidean_Vector_Constant_Base::Euclidean_Vector_Constant_Base(const size_t num_
 
 Euclidean_Vector Euclidean_Vector_Constant_Base::operator*(const double constant) const
 {
-	std::vector<double> values = { this->const_data_ptr_, this->const_data_ptr_ + this->num_values_ };
-
+	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
+	
 	const auto n = this->num_values_;
 	const auto incx = 1;
-	cblas_dscal(n, constant, values.data(), incx);
-	return values;
+	cblas_dscal(n, constant, result.data_ptr_, incx);
+	return result;
 }
 
 Euclidean_Vector Euclidean_Vector_Constant_Base::operator+(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
-
-	std::vector<double> values = { this->const_data_ptr_, this->const_data_ptr_ + this->num_values_ };
+	
+	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 
 	const auto n = this->num_values_;
 	const auto a = 1.0;
 	const auto incx = 1;
 	const auto incy = 1;
 
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, values.data(), incy);
+	cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
 
-	return values;
+	return result;
 }
 
 Euclidean_Vector Euclidean_Vector_Constant_Base::operator-(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
 
-	std::vector<double> values = { this->const_data_ptr_, this->const_data_ptr_ + this->num_values_ };
+	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 
 	const auto n = this->num_values_;
 	const auto a = -1.0;
 	const auto incx = 1;
 	const auto incy = 1;
 
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, values.data(), incy);
+	cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
 
-	return values;
+	return result;
 }
 
 double Euclidean_Vector_Constant_Base::operator[](const size_t position) const
@@ -194,6 +194,7 @@ Euclidean_Vector::Euclidean_Vector(const size_t size)
 	}
 	else
 	{
+		this->values_.resize(num_values_);
 		this->const_data_ptr_ = this->values_.data();
 		this->data_ptr_ = this->values_.data();
 	}
@@ -334,13 +335,15 @@ std::vector<double>&& Euclidean_Vector::move_values(void)
 	this->num_values_ = 0;
 	this->const_data_ptr_ = nullptr;
 	this->data_ptr_ = nullptr;
+
+	//if (this->num_values_ <= )
 	return std::move(this->values_);
 }
 
-//bool Euclidean_Vector::is_small(void) const
-//{
-//	return this->values_.empty();
-//}
+bool Euclidean_Vector::is_small(void) const
+{
+	return this->values_.empty();
+}
 
 
 
@@ -470,10 +473,19 @@ void Euclidean_Vector_Wrapper::operator+=(const Euclidean_Vector_Constant_Base& 
 
 void Euclidean_Vector_Wrapper::operator=(Euclidean_Vector&& other) noexcept
 {
-	this->values_wrapper_ = std::move(other.move_values());
+	this->num_values_ = static_cast<int>(other.size());
+
+	if (other.is_small())
+	{
+		std::copy(other.begin(), other.end(), this->values_wrapper_.begin());
+	}
+	else
+	{
+		this->values_wrapper_ = std::move(other.move_values());
+	}
+
 	this->base_ = Euclidean_Vector_Base(this->values_wrapper_.size(), this->values_wrapper_.data());
 
-	this->num_values_ = static_cast<int>(this->values_wrapper_.size());
 	this->const_data_ptr_ = this->values_wrapper_.data();
 	this->data_ptr_ = this->values_wrapper_.data();
 }

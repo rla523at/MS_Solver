@@ -23,6 +23,15 @@ TEST(Euclidean_Vector, constructor_1)
 	Euclidean_Vector ref = { 1,2,3 };
 	EXPECT_EQ(result, ref);
 }
+TEST(Euclidean_Vector, constructor_2)
+{
+	Euclidean_Vector val = { 1,2,3 };
+	Euclidean_Vector result = { val.data(), val.data() + val.size() };
+
+	Euclidean_Vector ref = { 1,2,3 };
+	EXPECT_EQ(result, ref);
+}
+
 TEST(Euclidean_Vector, operator_addition_1) 
 {
 	const Euclidean_Vector v1 = { 1,2,3 };
@@ -305,6 +314,18 @@ TEST(Euclidean_Vector_Wrapper, operator_assign_1)
 	const Euclidean_Vector ref = { 10,10,10 };
 	EXPECT_EQ(v1, ref);
 }
+TEST(Euclidean_Vector_Wrapper, operator_assign_2)
+{
+	std::vector<double> vec = { 1,2,3,4 };
+	Euclidean_Vector_Wrapper v1 = vec;
+	const Euclidean_Vector v2 = { 6,5,4,6,5,4,6,5,4,6,5,4 };
+	const Euclidean_Vector v3 = { 4,5,6,4,5,6,4,5,6,4,5,6 };
+	v1 = v2 + v3;
+
+	const Euclidean_Vector ref = { 10,10,10,10,10,10,10,10,10,10,10,10 };
+	EXPECT_EQ(v1, ref);
+}
+
 TEST(Euclidean_Vector_Wrapper, operator_addition_assign_1)
 {
 	std::vector<double> vec = { 1,2,3 };

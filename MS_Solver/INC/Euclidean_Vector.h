@@ -62,6 +62,8 @@ protected:
 
 class Euclidean_Vector : public Euclidean_Vector_Base
 {
+	friend class Euclidean_Vector_Constant_Base;
+
 public:
 	Euclidean_Vector(void) = default;
 	explicit Euclidean_Vector(const size_t size);
@@ -80,6 +82,8 @@ public:
 		}
 		else
 		{
+			this->values_.resize(this->num_values_);
+
 			std::copy(first, last, this->values_.begin());
 			this->const_data_ptr_ = this->values_.data();
 			this->data_ptr_ = this->values_.data();
@@ -93,9 +97,7 @@ public://Command
 	void operator=(Euclidean_Vector&& other) noexcept;
 
 	std::vector<double>&& move_values(void);
-
-private:
-	//bool is_small(void) const;
+	bool is_small(void) const;
 
 private:
 	static constexpr ushort small_criterion_ = 10;
