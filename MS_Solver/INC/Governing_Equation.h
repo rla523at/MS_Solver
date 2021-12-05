@@ -39,7 +39,7 @@ class Linear_Advection : public Scalar_Equation
 public://Query
     std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
-    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+    //Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     const Euclidean_Vector& get_advection_speed_vector(void) const;
 
 protected:
@@ -50,12 +50,14 @@ class Linear_Advection_2D : public Linear_Advection
 {
 public:
     Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed);
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
 };
 
 class Linear_Advection_3D : public Linear_Advection
 {
 public:
     Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed);
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
 };
 
 class Burgers : public Scalar_Equation

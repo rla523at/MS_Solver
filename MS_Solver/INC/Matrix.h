@@ -1,51 +1,27 @@
 #pragma once
-#include "Exception.h"
-
-#include <mkl.h>
-#include <sstream>
-#include <iomanip>
-#include <vector>
+#include "Euclidean_Vector.h"
 
 using ushort = unsigned short;
+
+namespace ms
+{
+	inline constexpr ushort blas_mv_criteria = 50;
+}
 
 class Matrix;
 class Matrix_Base
 {
-	template <typename T>
-	using is_not_matrix = std::enable_if_t<!std::is_base_of_v<Matrix_Base, T>, bool>;
-
-	template <typename T>
-	using is_class = std::enable_if_t<std::is_class_v<T>, bool>;
-
 public: //Command
 	void transpose(void);
 
 public: //Query
 	Matrix operator*(const double constant) const;	
-	template <typename V, is_class<V> = true, is_not_matrix<V> = true>	V operator*(const V& vec) const
-	{
-		REQUIRE(this->num_columns_ == vec.size(), "size should be mathced");
-
-		const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
-		const auto trans = this->transpose_type_;
-		const auto m = static_cast<MKL_INT>(this->num_rows_);
-		const auto n = static_cast<MKL_INT>(this->num_columns_);
-		const auto alpha = 1.0;
-		const auto lda = static_cast<MKL_INT>(this->leading_dimension());
-		const auto incx = 1;
-		const auto beta = 0;
-		const auto incy = 1;
-
-		std::vector<double> values(this->num_rows_);
-		cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, values.data(), incy);
-
-		return values;
-	}
+	Euclidean_Vector operator*(const Euclidean_Vector& vec) const;
 	Matrix operator*(const Matrix_Base& other) const;
 	Matrix operator+(const Matrix_Base& other) const;
 
 	double at(const size_t row, const size_t column) const;
-	std::vector<double> column(const size_t column_index) const;
+	Euclidean_Vector column(const size_t column_index) const;
 	const double* data(void) const;
 	bool is_finite(void) const;
 	size_t leading_dimension(void) const;
@@ -76,7 +52,8 @@ public:
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
-	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
+	//Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
+	Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values);
 	Matrix(const Matrix& other);
 	Matrix(Matrix&& other) noexcept;
 
@@ -99,7 +76,7 @@ public://Command
 		REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
 
 		const auto jump_index = start_row_index * this->num_columns_;
-		std::copy(vec.begin(), vec.end(), this->values_.begin() + jump_index);
+		std::copy(vec.begin(), vec.end(), this->values_.data_ptr_ + jump_index);
 
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
@@ -116,7 +93,7 @@ private:
 	std::vector<int> PLU_decomposition(void);
 
 private:
-	std::vector<double> values_;
+	Euclidean_Vector values_;
 };
 
 class Matrix_Constant_Wrapper : public Matrix_Base

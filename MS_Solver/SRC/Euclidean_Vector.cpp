@@ -12,9 +12,20 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator*(const double constant
 {
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 	
-	const auto n = this->num_values_;
-	const auto incx = 1;
-	cblas_dscal(n, constant, result.data_ptr_, incx);
+	if (this->num_values_ <= ms::blas_dscal_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			result.data_ptr_[i] *= constant;
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto incx = 1;
+		cblas_dscal(n, constant, result.data_ptr_, incx);
+	}
+
 	return result;
 }
 
@@ -24,12 +35,22 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator+(const Euclidean_Vecto
 	
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 
-	const auto n = this->num_values_;
-	const auto a = 1.0;
-	const auto incx = 1;
-	const auto incy = 1;
+	if (this->num_values_ <= ms::blas_axpy_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			result.data_ptr_[i] += other.const_data_ptr_[i];
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto a = 1.0;
+		const auto incx = 1;
+		const auto incy = 1;
 
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+	}
 
 	return result;
 }
@@ -40,12 +61,22 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator-(const Euclidean_Vecto
 
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 
-	const auto n = this->num_values_;
-	const auto a = -1.0;
-	const auto incx = 1;
-	const auto incy = 1;
+	if (this->num_values_ <= ms::blas_axpy_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			result.data_ptr_[i] -= other.const_data_ptr_[i];
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto a = -1.0;
+		const auto incx = 1;
+		const auto incy = 1;
 
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+	}
 
 	return result;
 }
@@ -99,10 +130,24 @@ const double* Euclidean_Vector_Constant_Base::end(void) const
 
 double Euclidean_Vector_Constant_Base::L1_norm(void) const
 {
-	const auto n = this->num_values_;
-	const auto incx = 1;
+	double result = 0.0;
 
-	return cblas_dasum(n, this->const_data_ptr_, incx);
+	if (this->num_values_ <= ms::blas_dasum_criteria) 
+	{
+		for (size_t i = 0; i < this->num_values_; ++i)
+		{
+			result += std::abs(this->const_data_ptr_[i]);
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto incx = 1;
+
+		result = cblas_dasum(n, this->const_data_ptr_, incx);
+	}
+
+	return result;
 }
 
 double Euclidean_Vector_Constant_Base::L2_norm(void) const
@@ -122,12 +167,26 @@ double Euclidean_Vector_Constant_Base::Linf_norm(void) const
 double Euclidean_Vector_Constant_Base::inner_product(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
+	
+	double result = 0.0;
 
-	const auto n = this->num_values_;
-	const auto incx = 1;
-	const auto incy = 1;
+	if (this->num_values_ <= ms::blas_dot_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			result += this->const_data_ptr_[i] * other.const_data_ptr_[i];
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto incx = 1;
+		const auto incy = 1;
 
-	return cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
+		result = cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
+	}
+
+	return result;
 }
 
 bool Euclidean_Vector_Constant_Base::is_axis_translation(const Euclidean_Vector_Constant_Base& other) const
@@ -161,22 +220,43 @@ std::string Euclidean_Vector_Constant_Base::to_string(void) const
 
 void Euclidean_Vector_Base::operator*=(const double constant)
 {
-	const auto n = this->num_values_;
-	const auto incx = 1;
+	if (this->num_values_ <= ms::blas_dscal_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			this->data_ptr_[i] *= constant;
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto incx = 1;
 
-	cblas_dscal(n, constant, this->data_ptr_, incx);
+		cblas_dscal(n, constant, this->data_ptr_, incx);
+	}
 }
 
 void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& other)
 {
-	REQUIRE(this->size() == other.size(), "other vector should be same size");
+	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
 
-	const auto n = this->num_values_;
-	const auto a = 1.0;
-	const auto incx = 1;
-	const auto incy = 1;
-	
-	cblas_daxpy(n, a, other.data(), incx, this->data_ptr_, incy);
+	const double* other_data_ptr = other.data();
+	if (this->num_values_ <= ms::blas_axpy_criteria)
+	{
+		for (int i = 0; i < this->num_values_; ++i)
+		{
+			this->data_ptr_[i] += other_data_ptr[i];
+		}
+	}
+	else
+	{
+		const auto n = this->num_values_;
+		const auto a = 1.0;
+		const auto incx = 1;
+		const auto incy = 1;
+
+		cblas_daxpy(n, a, other_data_ptr, incx, this->data_ptr_, incy);
+	}
 }
 
 void Euclidean_Vector_Base::normalize(void)

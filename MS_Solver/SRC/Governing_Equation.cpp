@@ -46,17 +46,17 @@ double Linear_Advection::calculate_inner_face_maximum_lambda(const Euclidean_Vec
 	return std::abs(this->advection_speeds_.inner_product(normal_vector));
 }
 
-Matrix Linear_Advection::calculate_physical_flux(const Euclidean_Vector& solution) const
-{
-	std::vector<double> values(this->space_dimension_);
-
-	for (int i = 0; i < this->space_dimension_; ++i)
-	{
-		values[i] = this->advection_speeds_[i] * solution[0];
-	}
-
-	return { this->num_equations_, this->space_dimension_, std::move(values) };
-}
+//Matrix Linear_Advection::calculate_physical_flux(const Euclidean_Vector& solution) const
+//{
+//	std::vector<double> values(this->space_dimension_);
+//
+//	for (int i = 0; i < this->space_dimension_; ++i)
+//	{
+//		values[i] = this->advection_speeds_[i] * solution[0];
+//	}
+//
+//	return { this->num_equations_, this->space_dimension_, std::move(values) };
+//}
 
 const Euclidean_Vector& Linear_Advection::get_advection_speed_vector(void) const
 {
@@ -69,10 +69,24 @@ Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const d
 	this->advection_speeds_ = { x_advection_speed, y_advection_speed };
 }
 
+Matrix Linear_Advection_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
+{
+	return { this->num_equations_, this->space_dimension_
+		, {this->advection_speeds_[0] * solution[0], this->advection_speeds_[1] * solution[0]}
+	};
+}
+
 Linear_Advection_3D::Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed)
 {
 	this->space_dimension_ = 3;
 	this->advection_speeds_ = { x_advection_speed, y_advection_speed, z_advection_speed };
+}
+
+Matrix Linear_Advection_3D::calculate_physical_flux(const Euclidean_Vector& solution) const
+{
+	return { this->num_equations_, this->space_dimension_
+		, {this->advection_speeds_[0] * solution[0], this->advection_speeds_[1] * solution[0], this->advection_speeds_[2] * solution[0] }
+	};
 }
 
 std::vector<std::vector<double>> Burgers::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const

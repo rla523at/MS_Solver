@@ -9,6 +9,13 @@
 
 using ushort = unsigned short;
 
+namespace ms
+{
+	inline constexpr ushort blas_dscal_criteria = 10;
+	inline constexpr ushort blas_dasum_criteria = 10;
+	inline constexpr ushort blas_axpy_criteria = 20;
+	inline constexpr ushort blas_dot_criteria = 15;
+}
 
 class Euclidean_Vector;
 class Euclidean_Vector_Constant_Base
@@ -60,9 +67,13 @@ protected:
 	double* data_ptr_ = nullptr;
 };
 
+class Matrix_Base;
+class Matrix;
 class Euclidean_Vector : public Euclidean_Vector_Base
 {
 	friend class Euclidean_Vector_Constant_Base;
+	friend class Matrix_Base;
+	friend class Matrix;
 
 public:
 	Euclidean_Vector(void) = default;

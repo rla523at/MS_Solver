@@ -10,14 +10,44 @@ void Matrix_Base::transpose(void)
 		this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
 }
 
+Euclidean_Vector Matrix_Base::operator*(const Euclidean_Vector& vec) const
+{
+	REQUIRE(this->num_columns_ == vec.size(), "size should be mathced");
+	Euclidean_Vector result(this->num_rows_);
+	
+	if (this->num_values() <= ms::blas_mv_criteria)
+	{
+		for (size_t i = 0; i < this->num_rows_; ++i) 
+		{
+			for (size_t j = 0; j < this->num_columns_; ++j)
+			{
+				result.data_ptr_[i] += this->at(i,j) * vec.at(j);
+			}
+		}
+	}
+	else
+	{
+		const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+		const auto trans = this->transpose_type_;
+		const auto m = static_cast<MKL_INT>(this->num_rows_);
+		const auto n = static_cast<MKL_INT>(this->num_columns_);
+		const auto alpha = 1.0;
+		const auto lda = static_cast<MKL_INT>(this->leading_dimension());
+		const auto incx = 1;
+		const auto beta = 0;
+		const auto incy = 1;
+
+		cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, result.data_ptr_, incy);
+	}
+
+	return result;
+}
+
 Matrix Matrix_Base::operator*(const double constant) const
 {
 	const auto num_values = this->num_values();
-	std::vector<double> values(this->const_data_ptr_, this->const_data_ptr_ + num_values);
-
-	const auto n = static_cast<int>(num_values);
-	const auto incx = 1;
-	cblas_dscal(n, constant, values.data(), incx);
+	Euclidean_Vector values(this->const_data_ptr_, this->const_data_ptr_ + num_values);
+	values *= constant;
 
 	return { this->num_rows_, this->num_columns_, std::move(values) };
 }
@@ -28,23 +58,21 @@ Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 	REQUIRE(!this->is_transposed() && !other.is_transposed(), "both matrixes should not be transposed");
 
 	const auto n = static_cast<MKL_INT>(this->num_values());
-	const auto a = 1.0;
-	const auto incx = 1;
-	const auto incy = 1;
 
-	std::vector<double> values(this->const_data_ptr_, this->const_data_ptr_ + n);
-	cblas_daxpy(n, a, other.const_data_ptr_, incx, values.data(), incy);
+	Euclidean_Vector_Constant_Base evcb1(n, this->const_data_ptr_);
+	Euclidean_Vector_Constant_Base evcb2(n, other.const_data_ptr_);
+
+	auto values = evcb1 + evcb2;
 
 	return { this->num_rows_,this->num_columns_,std::move(values) };
 }
-
 
 Matrix Matrix_Base::operator*(const Matrix_Base& other) const 
 {
 	const auto [num_row, num_column] = other.size();
 
-	std::vector<double> values(this->num_rows_ * num_column);
-	ms::gemm(*this, other, values.data());
+	Euclidean_Vector values(this->num_rows_ * num_column);
+	ms::gemm(*this, other, values.data_ptr_);
 	return { this->num_rows_, num_column, std::move(values) };
 }
 
@@ -61,14 +89,16 @@ double Matrix_Base::at(const size_t row, const size_t column) const
 	}
 }
 
-std::vector<double> Matrix_Base::column(const size_t column_index) const
+Euclidean_Vector Matrix_Base::column(const size_t column_index) const
 {
 	REQUIRE(column_index < this->num_columns_, "index can not exceed given range");
 
-	std::vector<double> column_values(this->num_rows_);
+	Euclidean_Vector column_values(this->num_rows_);
 
 	for (size_t i = 0; i < this->num_rows_; ++i)
-		column_values[i] = this->at(i, column_index);
+	{
+		column_values.data_ptr_[i] = this->at(i, column_index);
+	}
 
 	return column_values;
 }
@@ -133,7 +163,8 @@ std::string Matrix_Base::to_string(void) const
 {
 	std::ostringstream oss;
 	oss << std::setprecision(16) << std::showpoint << std::left;
-	for (size_t i = 0; i < this->num_rows_; ++i) {
+	for (size_t i = 0; i < this->num_rows_; ++i) 
+{
 		for (size_t j = 0; j < this->num_columns_; ++j)
 			oss << std::setw(25) << this->at(i, j);
 		oss << "\n";
@@ -161,51 +192,67 @@ bool Matrix_Base::is_in_range(const size_t irow, const size_t jcolumn) const
 	return irow < this->num_rows_&& jcolumn < this->num_columns_;
 }
 
-
-
-Matrix::Matrix(const size_t matrix_order) {
+Matrix::Matrix(const size_t matrix_order) 
+{
 	REQUIRE(matrix_order != 0, "matrix order can not be 0");
 
 	this->num_rows_ = matrix_order;
 	this->num_columns_ = matrix_order;
-	this->values_.resize(this->num_values());
+
+	this->values_ = Euclidean_Vector(this->num_values());
 	this->const_data_ptr_ = this->values_.data();
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = 1.0;
+
 }
 
-Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value) {
+Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value) 
+{
 	REQUIRE(matrix_order != 0, "matrix order can not be 0");
 	REQUIRE(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
 
 	this->num_rows_ = matrix_order;
 	this->num_columns_ = matrix_order;
-	this->values_.resize(this->num_values());
+	this->values_ = Euclidean_Vector(this->num_values());
 	this->const_data_ptr_ = this->values_.data();
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = value[i];
 }
 
-Matrix::Matrix(const size_t num_row, const size_t num_column) {
+Matrix::Matrix(const size_t num_row, const size_t num_column) 
+{
 	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
 
 	this->num_rows_ = num_row;
 	this->num_columns_ = num_column;
-	this->values_.resize(this->num_values());
+	this->values_ = Euclidean_Vector(this->num_values());
 	this->const_data_ptr_ = this->values_.data();
 }
+//
+//Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) 
+//{
+//	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
+//	REQUIRE(num_row * num_column == value.size(), "num value should be same with matrix size");
+//
+//	this->num_rows_ = num_row;
+//	this->num_columns_ = num_column;
+//	this->values_ = std::move(value);
+//	this->const_data_ptr_ = this->values_.data();
+//}
 
-Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) {
+Matrix::Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values)
+{
 	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
 	REQUIRE(num_row * num_column == value.size(), "num value should be same with matrix size");
 
 	this->num_rows_ = num_row;
 	this->num_columns_ = num_column;
-	this->values_ = std::move(value);
+	this->values_ = std::move(values);
 	this->const_data_ptr_ = this->values_.data();
 }
+
 
 Matrix::Matrix(const Matrix& other) 
 {
@@ -247,9 +294,7 @@ void Matrix::operator=(Matrix&& other) noexcept
 
 void Matrix::operator*=(const double constant)
 {
-	const auto n = static_cast<int>(this->num_values());
-	const auto incx = 1;
-	cblas_dscal(n, constant, this->values_.data(), incx);	
+	this->values_ *= constant;
 }
 
 Matrix& Matrix::inverse(void) 
@@ -261,7 +306,7 @@ Matrix& Matrix::inverse(void)
 	const int matrix_layout = LAPACK_ROW_MAJOR;
 	const lapack_int n = static_cast<int>(this->num_rows_);
 	const lapack_int lda = n;
-	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data(), lda, ipiv.data());
+	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data_ptr_, lda, ipiv.data());
 
 	REQUIRE(info == 0, "info should be 0 when success matrix get_inverse");
 	//info > 0 "U is singular matrix in L-U decomposition"
@@ -291,7 +336,7 @@ void Matrix::change_rows(const size_t start_row_index, const Matrix& A)
 	REQUIRE(!this->is_transposed() && !A.is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_columns_;
-	std::copy(A.values_.begin(), A.values_.end(), this->values_.begin() + jump_index);
+	std::copy(A.values_.begin(), A.values_.end(), this->values_.data_ptr_ + jump_index);
 }
 
 //Matrix Matrix::operator*(const Matrix& other) const 
@@ -345,9 +390,13 @@ Matrix Matrix::get_inverse(void) const
 double& Matrix::value_at(const size_t row, const size_t column) 
 {
 	if (this->is_transposed())
-		return this->values_[column * this->num_rows_ + row];
+	{
+		return this->values_.data_ptr_[column * this->num_rows_ + row];
+	}
 	else
-		return this->values_[row * this->num_columns_ + column];
+	{
+		return this->values_.data_ptr_[row * this->num_columns_ + column];
+	}
 }
 
 std::vector<int> Matrix::PLU_decomposition(void) 
@@ -359,7 +408,7 @@ std::vector<int> Matrix::PLU_decomposition(void)
 	const lapack_int n = static_cast<int>(this->num_columns_);
 	const lapack_int lda = n;
 	std::vector<int> ipiv(std::min(m, n));
-	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->values_.data(), lda, ipiv.data());
+	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->values_.data_ptr_, lda, ipiv.data());
 
 	REQUIRE(0 <= info, "info should be greater than 0 when sucess PLU decomposition");
 	return ipiv;
