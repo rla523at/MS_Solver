@@ -27,10 +27,10 @@ TEST(Linear_Advection_2D, calculate_inner_face_maximum_lambdas_1)
 
 	Linear_Advection_2D gov_eq({ 1.0,0.5 });
 
-	Euclidean_Vector solution_o = 1;
-	Euclidean_Vector solution_n = 0;
+	Euclidean_Vector solution_o = { 1 };
+	Euclidean_Vector solution_n = { 0 };
 
-	for (int i = 0; i < num; ++i) 
+	for (int i = 0; i < num; ++i)
 	{
 		Euclidean_Vector normal = { 1.0 * i, 1.0 * i };
 		const auto result = gov_eq.calculate_inner_face_maximum_lambda(solution_o, solution_n, normal);
@@ -45,10 +45,10 @@ TEST(Linear_Advection_2D, calculate_inner_face_maximum_lambdas_2)
 
 	Linear_Advection_2D gov_eq({ 1.0,0.5 });
 
-	Euclidean_Vector solution_o = 1;
-	Euclidean_Vector solution_n = 0;
+	Euclidean_Vector solution_o = { 1 };
+	Euclidean_Vector solution_n = { 0 };
 
-	for (int i = 0; i < num; ++i) 
+	for (int i = 0; i < num; ++i)
 	{
 		Euclidean_Vector normal = { -1.0 * i, -1.0 * i };
 		const auto result = gov_eq.calculate_inner_face_maximum_lambda(solution_o, solution_n, normal);
@@ -94,10 +94,10 @@ TEST(Linear_Advection_3D, calculate_inner_face_maximum_lambdas_1)
 
 	Linear_Advection_3D gov_eq({ 1.0, 0.5, 2.0 });
 
-	Euclidean_Vector solution_o = 1;
-	Euclidean_Vector solution_n = 0;
+	Euclidean_Vector solution_o = { 1 };
+	Euclidean_Vector solution_n = { 0 };
 
-	for (int i = 0; i < num; ++i) 
+	for (int i = 0; i < num; ++i)
 	{
 		Euclidean_Vector normal = { 1.0 * i, 1.0 * i, 1.0 * i };
 		const auto result = gov_eq.calculate_inner_face_maximum_lambda(solution_o, solution_n, normal);
@@ -112,8 +112,8 @@ TEST(Linear_Advection_3D, calculate_inner_face_maximum_lambdas_2)
 
 	Linear_Advection_3D gov_eq({ 1.0, 0.5, 2.0 });
 
-	Euclidean_Vector solution_o = 1;
-	Euclidean_Vector solution_n = 0;
+	Euclidean_Vector solution_o = { 1 };
+	Euclidean_Vector solution_n = { 0 };
 
 	for (int i = 0; i < num; ++i)
 	{
@@ -237,7 +237,7 @@ TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_1) {
 	}
 	EXPECT_EQ(result, ref);
 }
-TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_2) 
+TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_2)
 {
 	constexpr size_t num = 5;
 	const Burgers_3D gov_eq;
@@ -254,7 +254,7 @@ TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_2)
 	}
 	EXPECT_EQ(result, ref);
 }
-TEST(Burgers_3D, calculate_inner_face_maximum_lambdas_1) 
+TEST(Burgers_3D, calculate_inner_face_maximum_lambdas_1)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -263,7 +263,7 @@ TEST(Burgers_3D, calculate_inner_face_maximum_lambdas_1)
 
 	Burgers_3D gov_eq;
 	constexpr size_t num = 5;
-	for (size_t i = 0; i < num; ++i) 
+	for (size_t i = 0; i < num; ++i)
 	{
 		Euclidean_Vector solution_o = { dis1(gen) };
 		Euclidean_Vector solution_n = { dis1(gen) };
@@ -295,7 +295,7 @@ TEST(Burgers_3D, calculate_physical_flux_1) {
 }
 
 
-TEST(Euler_2D, extend_to_solution_1) 
+TEST(Euler_2D, extend_to_solution_1)
 {
 	Euler_2D gov_eq;
 	Euclidean_Vector gov_sol = { 1,1,1,1 };
@@ -341,7 +341,7 @@ TEST(Euler_2D, calculate_physical_flux_1)
 	EXPECT_EQ(result, ref);
 }
 
-TEST(Euler_3D, extend_to_solution_1) 
+TEST(Euler_3D, extend_to_solution_1)
 {
 	Euler_3D gov_eq;
 
@@ -377,7 +377,7 @@ TEST(Euler_3D, calculate_inner_face_maximum_lambda_1)
 	const auto ref = 1.0;
 	EXPECT_EQ(result, ref);
 }
-TEST(Euler_3D, calculate_physical_flux_1) 
+TEST(Euler_3D, calculate_physical_flux_1)
 {
 	Euler_3D gov_eq;
 

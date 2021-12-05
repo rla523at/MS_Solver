@@ -1,6 +1,7 @@
 #pragma once
 #include "Exception.h"
 
+#include <array>
 #include <iomanip>
 #include <mkl.h>
 #include <sstream>
@@ -68,11 +69,21 @@ public:
 	Euclidean_Vector(std::vector<double>&& values);
 	Euclidean_Vector(const std::vector<double>& values);
 	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) 
-		: values_(first, last) 
 	{
-		this->num_values_ = static_cast<int>(this->values_.size());
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
+		this->num_values_ = static_cast<int>(last - first);
+
+		if (this->num_values_ <= this->small_criterion_)
+		{
+			std::copy(first, last, this->small_buffer_.begin());
+			this->const_data_ptr_ = this->small_buffer_.data();
+			this->data_ptr_ = this->small_buffer_.data();
+		}
+		else
+		{
+			std::copy(first, last, this->values_.begin());
+			this->const_data_ptr_ = this->values_.data();
+			this->data_ptr_ = this->values_.data();
+		}
 	};
 	Euclidean_Vector(const Euclidean_Vector& other);
 	Euclidean_Vector(Euclidean_Vector&& other) noexcept;
@@ -84,6 +95,11 @@ public://Command
 	std::vector<double>&& move_values(void);
 
 private:
+	//bool is_small(void) const;
+
+private:
+	static constexpr ushort small_criterion_ = 10;
+	std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> values_;
 };
 
