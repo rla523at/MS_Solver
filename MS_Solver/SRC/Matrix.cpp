@@ -68,12 +68,11 @@ Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 }
 
 Matrix Matrix_Base::operator*(const Matrix_Base& other) const 
-{
-	const auto [num_row, num_column] = other.size();
-
-	Euclidean_Vector values(this->num_rows_ * num_column);
-	ms::gemm(*this, other, values.data_ptr_);
-	return { this->num_rows_, num_column, std::move(values) };
+{	
+	Matrix result(this->num_rows_, other.num_columns_);
+	ms::gemm(*this, other, result.values_.data_ptr_);
+	
+	return result;
 }
 
 double Matrix_Base::at(const size_t row, const size_t column) const 
@@ -215,20 +214,20 @@ Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value)
 	this->num_rows_ = matrix_order;
 	this->num_columns_ = matrix_order;
 	this->values_ = Euclidean_Vector(this->num_values());
-	this->const_data_ptr_ = this->values_.data();
+	this->const_data_ptr_ = this->values_.const_data_ptr_;
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = value[i];
 }
 
-Matrix::Matrix(const size_t num_row, const size_t num_column) 
+Matrix::Matrix(const size_t num_row, const size_t num_column)
+	:values_(num_row * num_column)
 {
 	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
 
 	this->num_rows_ = num_row;
 	this->num_columns_ = num_column;
-	this->values_ = Euclidean_Vector(this->num_values());
-	this->const_data_ptr_ = this->values_.data();
+	this->const_data_ptr_ = this->values_.const_data_ptr_;
 }
 //
 //Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) 

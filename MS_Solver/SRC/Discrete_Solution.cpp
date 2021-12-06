@@ -316,23 +316,13 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_precal
 	const auto num_points = basis_points_m.num_column();
 	const auto GE_solution_points_m = this->coefficient_matrix_contant_wrapper(cell_index) * basis_points_m;
 
-	std::vector<Euclidean_Vector> solution_at_points;
-	solution_at_points.reserve(num_points);
+	std::vector<Euclidean_Vector> solution_at_points(num_points);
 
 	for (int i = 0; i < num_points; ++i)
 	{
-		Euclidean_Vector GE_solution = GE_solution_points_m.column(i);
-		this->governing_equation_->extend_to_solution(GE_solution);
-		solution_at_points.push_back(std::move(GE_solution));
+		solution_at_points[i] = GE_solution_points_m.column(i);
+		this->governing_equation_->extend_to_solution(solution_at_points[i]);
 	}
-	//std::vector<Euclidean_Vector> solution_at_points(num_points);
-	//
-	//for (int i = 0; i < num_points; ++i)
-	//{
-	//	Euclidean_Vector GE_solution = GE_solution_points_m.column(i);							
-	//	this->governing_equation_->extend_to_solution(GE_solution); 
-	//	solution_at_points[i] = std::move(GE_solution);
-	//}
 
 	return solution_at_points;
 }

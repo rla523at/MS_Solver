@@ -1,4 +1,4 @@
-grid_file_path				= RSC/Grid/2D/RQ20.msh
+grid_file_path				= RSC/Grid/2D/RQ40.msh
 
 space_dimension				= 2
 grid_file_type				= Gmsh

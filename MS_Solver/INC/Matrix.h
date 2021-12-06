@@ -47,6 +47,8 @@ protected:
 
 class Matrix : public Matrix_Base
 {
+	friend class Matrix_Base;
+
 public:
 	Matrix(void) = default;
 	Matrix(const size_t matrix_order);
@@ -81,6 +83,7 @@ public://Command
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
 	void change_columns(const size_t start_column_index, const Matrix& A);	
+	double& value_at(const size_t row, const size_t column);//test
 
 public://Query
 	bool operator==(const Matrix& other) const;
@@ -89,7 +92,7 @@ public://Query
 	Matrix get_inverse(void) const;
 	
 private:
-	double& value_at(const size_t row, const size_t column);
+	//double& value_at(const size_t row, const size_t column);
 	std::vector<int> PLU_decomposition(void);
 
 private:

@@ -186,6 +186,14 @@ double Euclidean_Vector_Constant_Base::inner_product(const Euclidean_Vector_Cons
 		result = cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
 	}
 
+	//opt 1
+	//double result = 0.0;
+
+	//for (int i = 0; i < this->num_values_; ++i)
+	//{
+	//	result += this->const_data_ptr_[i] * other.const_data_ptr_[i];
+	//}
+
 	return result;
 }
 
@@ -380,7 +388,8 @@ void Euclidean_Vector::operator=(const Euclidean_Vector& other)
 
 	if (this->num_values_ <= this->small_criterion_)
 	{
-		this->small_buffer_ = other.small_buffer_;
+		std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
+
 		this->const_data_ptr_ = this->small_buffer_.data();
 		this->data_ptr_ = this->small_buffer_.data();
 	}
@@ -398,7 +407,8 @@ void Euclidean_Vector::operator=(Euclidean_Vector&& other) noexcept
 
 	if (this->num_values_ <= this->small_criterion_)
 	{
-		this->small_buffer_ = other.small_buffer_;
+		std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
+
 		this->const_data_ptr_ = this->small_buffer_.data();
 		this->data_ptr_ = this->small_buffer_.data();
 	}
