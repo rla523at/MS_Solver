@@ -71,15 +71,15 @@ Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const d
 
 Matrix Linear_Advection_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 {
-	Matrix physical_flux(this->num_equations_, this->space_dimension_);
-	physical_flux.value_at(0, 0) = this->advection_speeds_[0] * solution[0];
-	physical_flux.value_at(0, 1) = this->advection_speeds_[1] * solution[0];
+	//Matrix physical_flux(this->num_equations_, this->space_dimension_);
+	//physical_flux.value_at(0, 0) = this->advection_speeds_[0] * solution[0];
+	//physical_flux.value_at(0, 1) = this->advection_speeds_[1] * solution[0];
 
-	return physical_flux;
+	//return physical_flux;
 
-	//return { this->num_equations_, this->space_dimension_
-	//	, {this->advection_speeds_[0] * solution[0], this->advection_speeds_[1] * solution[0]}
-	//};
+	return { this->num_equations_, this->space_dimension_
+		, {this->advection_speeds_[0] * solution[0], this->advection_speeds_[1] * solution[0]}
+	};
 }
 
 Linear_Advection_3D::Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed)

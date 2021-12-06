@@ -186,14 +186,6 @@ double Euclidean_Vector_Constant_Base::inner_product(const Euclidean_Vector_Cons
 		result = cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
 	}
 
-	//opt 1
-	//double result = 0.0;
-
-	//for (int i = 0; i < this->num_values_; ++i)
-	//{
-	//	result += this->const_data_ptr_[i] * other.const_data_ptr_[i];
-	//}
-
 	return result;
 }
 
@@ -539,15 +531,6 @@ bool Euclidean_Vector_Constant_Wrapper::is_sync(void) const
 {
 	return this->base_.data() == this->values_wrapper_.data() && this->base_.size() == this->values_wrapper_.size();
 }
-
-
-//Euclidean_Vector_Wrapper::Euclidean_Vector_Wrapper(std::vector<double>& values)
-//	:values_wrapper_(values)
-//{
-//	this->num_values_ = static_cast<int>(this->values_wrapper_.size());
-//	this->const_data_ptr_ = this->values_wrapper_.data();
-//	this->data_ptr_ = this->values_wrapper_.data();
-//}
 
 void Euclidean_Vector_Wrapper::operator*=(const double constant)
 {

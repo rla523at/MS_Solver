@@ -111,7 +111,7 @@ public://Command
 	bool is_small(void) const;
 
 private:
-	static constexpr ushort small_criterion_ = 10;
+	static constexpr ushort small_criterion_ = 5;
 	std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> values_;
 };

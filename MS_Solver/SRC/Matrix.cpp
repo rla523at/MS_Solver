@@ -229,17 +229,6 @@ Matrix::Matrix(const size_t num_row, const size_t num_column)
 	this->num_columns_ = num_column;
 	this->const_data_ptr_ = this->values_.const_data_ptr_;
 }
-//
-//Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value) 
-//{
-//	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
-//	REQUIRE(num_row * num_column == value.size(), "num value should be same with matrix size");
-//
-//	this->num_rows_ = num_row;
-//	this->num_columns_ = num_column;
-//	this->values_ = std::move(value);
-//	this->const_data_ptr_ = this->values_.data();
-//}
 
 Matrix::Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values)
 {
@@ -338,15 +327,6 @@ void Matrix::change_rows(const size_t start_row_index, const Matrix& A)
 	std::copy(A.values_.begin(), A.values_.end(), this->values_.data_ptr_ + jump_index);
 }
 
-//Matrix Matrix::operator*(const Matrix& other) const 
-//{
-//	REQUIRE(this->num_column_ == other.num_row_, "size should be matched to operate *");
-//
-//	Matrix result(this->num_row_, other.num_column_);
-//	ms::gemm(*this, other, result.values_.data());
-//	return result;
-//}
-
 bool  Matrix::operator==(const Matrix& other) const 
 {
 	if (this->num_rows_ != other.num_rows_)
@@ -424,21 +404,38 @@ namespace ms
 {
 	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr)
 	{
-		REQUIRE(A.num_column() == B.num_row(), "size should be matched for matrix multiplication");
-
-		const auto layout = CBLAS_LAYOUT::CblasRowMajor;
-		const auto transA = A.transpose_type();
-		const auto transB = B.transpose_type();
 		const auto m = static_cast<MKL_INT>(A.num_row());
 		const auto n = static_cast<MKL_INT>(B.num_column());
 		const auto k = static_cast<MKL_INT>(A.num_column());
-		const auto alpha = 1.0;
-		const auto lda = static_cast<MKL_INT>(A.leading_dimension());
-		const auto ldb = static_cast<MKL_INT>(B.leading_dimension());
-		const auto beta = 0.0;
-		const auto ldc = n;
 
-		cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.data(), lda, B.data(), ldb, beta, output_ptr, ldc);
+		REQUIRE(A.num_column() == B.num_row(), "size should be matched for matrix multiplication");
+
+		if (std::max(A.num_values(), B.num_values()) <= ms::blas_mm_criteria)
+		{
+			for (int i = 0; i < m; ++i)
+			{
+				for (int j = 0; j < n; ++j)
+				{
+					for (int l = 0; l < k; ++l)
+					{
+						output_ptr[i * n + j] += A.at(i, l) * B.at(l, j);
+					}
+				}
+			}
+		}
+		else
+		{
+			const auto layout = CBLAS_LAYOUT::CblasRowMajor;
+			const auto transA = A.transpose_type();
+			const auto transB = B.transpose_type();
+			const auto alpha = 1.0;
+			const auto lda = static_cast<MKL_INT>(A.leading_dimension());
+			const auto ldb = static_cast<MKL_INT>(B.leading_dimension());
+			const auto beta = 0.0;
+			const auto ldc = n;
+
+			cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.data(), lda, B.data(), ldb, beta, output_ptr, ldc);
+		}
 	}
 }
 

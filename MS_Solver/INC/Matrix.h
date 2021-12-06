@@ -6,6 +6,7 @@ using ushort = unsigned short;
 namespace ms
 {
 	inline constexpr ushort blas_mv_criteria = 50;
+	inline constexpr ushort blas_mm_criteria = 25;
 }
 
 class Matrix;
@@ -54,7 +55,6 @@ public:
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
-	//Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& value);
 	Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values);
 	Matrix(const Matrix& other);
 	Matrix(Matrix&& other) noexcept;
@@ -83,7 +83,6 @@ public://Command
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
 	void change_columns(const size_t start_column_index, const Matrix& A);	
-	double& value_at(const size_t row, const size_t column);//test
 
 public://Query
 	bool operator==(const Matrix& other) const;
@@ -92,7 +91,7 @@ public://Query
 	Matrix get_inverse(void) const;
 	
 private:
-	//double& value_at(const size_t row, const size_t column);
+	double& value_at(const size_t row, const size_t column);
 	std::vector<int> PLU_decomposition(void);
 
 private:
