@@ -25,4 +25,10 @@ public://Query
 
 private:
     std::vector<Matrix> set_of_QWs_gradient_basis_m_;
+
+    //for construction optimization
+    static constexpr ushort max_num_equation = 5;
+    static constexpr ushort max_num_basis = 200;
+
+    mutable std::array<double, max_num_equation* max_num_basis> residual_values_ = { 0 };
 };

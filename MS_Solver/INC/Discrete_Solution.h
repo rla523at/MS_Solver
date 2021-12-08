@@ -23,7 +23,7 @@ public://Query
 	Euclidean_Vector_Wrapper solution_vector_wrapper(void);
 	ushort num_equations(void) const;
 	ushort num_solutions(void) const;
-	size_t num_values(void) const;
+	size_t num_total_values(void) const;
 
 protected:
 	ushort space_dimension_;
@@ -64,8 +64,8 @@ public://Query
 	const std::vector<size_t>& get_coefficient_start_indexes(void) const;
 	ushort solution_degree(const uint cell_index) const;
 	ushort num_basis(const uint cell_index) const;
+	ushort num_values(const uint cell_index) const;
 	ushort maximum_solution_degree(void) const;
-
 
 private:
 	std::vector<double> calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
@@ -87,6 +87,7 @@ private:
 	Matrix_Constant_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index) const;
 	
 private:
+	std::vector<ushort> set_of_num_values_;
 	std::vector<ushort> solution_degrees_;
 	std::vector<Vector_Function<Polynomial>> basis_vector_functions_;
 	std::vector<ushort> set_of_num_basis_;

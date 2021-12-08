@@ -77,8 +77,12 @@ void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& dis
             flux_QPs_m.change_columns(start_column_index, physical_flux);
         }
 
-        const auto delta_rhs = flux_QPs_m * this->set_of_QWs_gradient_basis_m_[cell_index];
-        residual.update_rhs(cell_index, delta_rhs);
+        //const auto delta_rhs = flux_QPs_m * this->set_of_QWs_gradient_basis_m_[cell_index];
+        //residual.update_rhs(cell_index, delta_rhs);
+
+        std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(cell_index), 0.0);
+        ms::gemm(flux_QPs_m, this->set_of_QWs_gradient_basis_m_[cell_index], this->residual_values_.data());
+        residual.update_rhs(cell_index, this->residual_values_.data());
     }
 }
 

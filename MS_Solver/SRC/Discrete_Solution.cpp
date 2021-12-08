@@ -49,7 +49,7 @@ ushort Discrete_Solution::num_solutions(void) const
 	return this->governing_equation_->num_solutions();
 }
 
-size_t Discrete_Solution::num_values(void) const
+size_t Discrete_Solution::num_total_values(void) const
 {
 	return this->values_.size();
 }
@@ -110,16 +110,18 @@ Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equat
 	
 	this->basis_vector_functions_.resize(this->num_cells_);
 	this->set_of_num_basis_.resize(this->num_cells_);
+	this->set_of_num_values_.resize(this->num_cells_);
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		this->basis_vector_functions_[cell_index] = grid.cell_basis_vector_function(cell_index, this->solution_degrees_[cell_index]);
-		this->set_of_num_basis_[cell_index] = static_cast<ushort>(this->basis_vector_functions_[cell_index].size());
+		this->set_of_num_basis_[cell_index] = static_cast<ushort>(this->basis_vector_functions_[cell_index].size());		
+		this->set_of_num_values_[cell_index] = this->num_equations_ * this->set_of_num_basis_[cell_index];
 	}
 
 	this->coefficieint_start_indexes_.resize(this->num_cells_);
 	for (size_t i = 0; i < this->num_cells_ - 1; ++i)
 	{
-		this->coefficieint_start_indexes_[i + 1] = this->coefficieint_start_indexes_[i] + this->num_equations_ * this->set_of_num_basis_[i];
+		this->coefficieint_start_indexes_[i + 1] = this->coefficieint_start_indexes_[i] + this->set_of_num_values_[i];
 	}
 
 	this->values_ = this->calculate_initial_values(grid, initial_condition);
@@ -337,6 +339,12 @@ ushort Discrete_Solution_DG::num_basis(const uint cell_index) const
 {
 	return this->set_of_num_basis_[cell_index];
 }
+
+ushort Discrete_Solution_DG::num_values(const uint cell_index) const
+{
+	return this->set_of_num_values_[cell_index];
+}
+
 
 ushort Discrete_Solution_DG::maximum_solution_degree(void) const
 {

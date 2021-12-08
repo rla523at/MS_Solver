@@ -121,22 +121,22 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
     LOG << std::left << std::setw(50) << "@ Inner faces DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
-void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const
+void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const
 {
     for (uint infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
     {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[infc_index];
-        const auto solution_at_ocs_QPs = discrete_soltuion.calculate_solution_at_infc_ocs_QPs(infc_index, oc_index);
-        const auto solution_at_ncs_QPs = discrete_soltuion.calculate_solution_at_infc_ncs_QPs(infc_index, nc_index);
+        const auto solution_at_ocs_QPs = discrete_solution.calculate_solution_at_infc_ocs_QPs(infc_index, oc_index);
+        const auto solution_at_ncs_QPs = discrete_solution.calculate_solution_at_infc_ncs_QPs(infc_index, nc_index);
         const auto num_QPs = solution_at_ocs_QPs.size();
 
         const auto& normals = this->set_of_normals_[infc_index];
 
-        Matrix numerical_flux_quadrature(this->num_equations_, num_QPs);
+        Matrix numerical_flux_quadrature_m(this->num_equations_, num_QPs);
 
         for (ushort q = 0; q < num_QPs; ++q)
         {
-            numerical_flux_quadrature.change_column(q, this->numerical_flux_function_->calculate(solution_at_ocs_QPs[q], solution_at_ncs_QPs[q], normals[q]));
+            numerical_flux_quadrature_m.change_column(q, this->numerical_flux_function_->calculate(solution_at_ocs_QPs[q], solution_at_ncs_QPs[q], normals[q]));
         }
 
         const auto& [oc_side_QWs_basis_m, nc_side_QWs_basis_m] = this->oc_nc_side_QWs_basis_m_pairs_[infc_index];
@@ -146,7 +146,12 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_D
         //residual.update_rhs(oc_index, oc_side_delta_rhs);
         //residual.update_rhs(nc_index, nc_side_delta_rhs);
     
-        residual.update_rhs(oc_index, numerical_flux_quadrature * oc_side_QWs_basis_m);
-        residual.update_rhs(nc_index, numerical_flux_quadrature * nc_side_QWs_basis_m);
+        std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(oc_index), 0.0);
+        ms::gemm(numerical_flux_quadrature_m, oc_side_QWs_basis_m, this->residual_values_.data());
+        residual.update_rhs(oc_index, this->residual_values_.data());
+
+        std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(nc_index), 0.0);
+        ms::gemm(numerical_flux_quadrature_m, nc_side_QWs_basis_m, this->residual_values_.data());
+        residual.update_rhs(nc_index, this->residual_values_.data());
     }
 }

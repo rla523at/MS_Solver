@@ -41,7 +41,7 @@ double Semi_Discrete_Equation_DG::calculate_time_step(void) const
 
 Euclidean_Vector Semi_Discrete_Equation_DG::calculate_RHS(void) const
 {
-	Residual RHS(this->discrete_solution_->num_values(), this->discrete_solution_->get_coefficient_start_indexes());
+	Residual RHS(this->discrete_solution_->num_total_values(), this->discrete_solution_->get_coefficient_start_indexes());
 	this->cells_->calculate_RHS(RHS, *this->discrete_solution_);
 	this->boundaries_->calculate_RHS(RHS, *this->discrete_solution_);
 	this->inner_faces_->calculate_RHS(RHS, *this->discrete_solution_);

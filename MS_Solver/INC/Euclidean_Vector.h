@@ -320,6 +320,7 @@ namespace ms
 	void copy(const int n, const double* x_ptr, double* result_ptr);
 	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
 	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
+	void vpv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);
 	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);
 }
 

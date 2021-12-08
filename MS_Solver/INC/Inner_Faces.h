@@ -18,4 +18,11 @@ protected:
 	std::vector<std::pair<uint,uint>> oc_nc_index_pairs_;
 	std::vector<std::pair<Matrix, Matrix>> oc_nc_side_QWs_basis_m_pairs_;
 	std::vector<std::vector<Euclidean_Vector>> set_of_normals_;
+
+	//for construction optimization
+	static constexpr ushort max_num_equation = 5;
+	static constexpr ushort max_num_basis = 200;
+	
+	std::vector<size_t> num_coefficients_;
+	mutable std::array<double, max_num_equation* max_num_basis> residual_values_;
 };

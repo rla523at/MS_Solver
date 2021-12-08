@@ -73,7 +73,7 @@ void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG
             boundary_flux_quadrature.change_column(q, boundary_flux_function.calculate(solution_at_QPs[q], normals[q]));
         }
 
-        const auto delta_rhs = boundary_flux_quadrature * this->set_of_oc_side_QWs_basis_m_[bdry_index];
-        residual.update_rhs(oc_index, delta_rhs);
+        //const auto delta_rhs = boundary_flux_quadrature * this->set_of_oc_side_QWs_basis_m_[bdry_index];
+        //residual.update_rhs(oc_index, delta_rhs);
     }
 }
