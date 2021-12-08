@@ -21,7 +21,7 @@ Euclidean_Vector Matrix_Base::operator*(const Euclidean_Vector& vec) const
 		{
 			for (size_t j = 0; j < this->num_columns_; ++j)
 			{
-				result.data_ptr_[i] += this->at(i,j) * vec.at(j);
+				result[i] += this->at(i,j) * vec.at(j);
 			}
 		}
 	}
@@ -37,7 +37,7 @@ Euclidean_Vector Matrix_Base::operator*(const Euclidean_Vector& vec) const
 		const auto beta = 0;
 		const auto incy = 1;
 
-		cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, result.data_ptr_, incy);
+		cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, result.data(), incy);
 	}
 
 	return result;
@@ -70,7 +70,7 @@ Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 Matrix Matrix_Base::operator*(const Matrix_Base& other) const 
 {	
 	Matrix result(this->num_rows_, other.num_columns_);
-	ms::gemm(*this, other, result.values_.data_ptr_);
+	ms::gemm(*this, other, result.data());
 	
 	return result;
 }
@@ -96,7 +96,7 @@ Euclidean_Vector Matrix_Base::column(const size_t column_index) const
 
 	for (size_t i = 0; i < this->num_rows_; ++i)
 	{
-		column_values.data_ptr_[i] = this->at(i, column_index);
+		column_values[i] = this->at(i, column_index);
 	}
 
 	return column_values;
@@ -214,7 +214,7 @@ Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value)
 	this->num_rows_ = matrix_order;
 	this->num_columns_ = matrix_order;
 	this->values_ = Euclidean_Vector(this->num_values());
-	this->const_data_ptr_ = this->values_.const_data_ptr_;
+	this->const_data_ptr_ = this->values_.data();
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = value[i];
@@ -227,7 +227,7 @@ Matrix::Matrix(const size_t num_row, const size_t num_column)
 
 	this->num_rows_ = num_row;
 	this->num_columns_ = num_column;
-	this->const_data_ptr_ = this->values_.const_data_ptr_;
+	this->const_data_ptr_ = this->values_.data();
 }
 
 Matrix::Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values)
@@ -299,7 +299,7 @@ Matrix& Matrix::inverse(void)
 	const int matrix_layout = LAPACK_ROW_MAJOR;
 	const lapack_int n = static_cast<int>(this->num_rows_);
 	const lapack_int lda = n;
-	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data_ptr_, lda, ipiv.data());
+	const lapack_int info = LAPACKE_dgetri(matrix_layout, n, this->values_.data(), lda, ipiv.data());
 
 	REQUIRE(info == 0, "info should be 0 when success matrix get_inverse");
 	//info > 0 "U is singular matrix in L-U decomposition"
@@ -329,7 +329,7 @@ void Matrix::change_rows(const size_t start_row_index, const Matrix& A)
 	REQUIRE(!this->is_transposed() && !A.is_transposed(), "it should be not transposed for this routine");
 
 	const auto jump_index = start_row_index * this->num_columns_;
-	std::copy(A.values_.begin(), A.values_.end(), this->values_.data_ptr_ + jump_index);
+	std::copy(A.values_.begin(), A.values_.end(), this->values_.data() + jump_index);
 }
 
 bool  Matrix::operator==(const Matrix& other) const 
@@ -380,17 +380,17 @@ double& Matrix::value_at(const size_t row, const size_t column)
 {
 	if (this->is_transposed())
 	{
-		return this->values_.data_ptr_[column * this->num_rows_ + row];
+		return this->values_[column * this->num_rows_ + row];
 	}
 	else
 	{
-		return this->values_.data_ptr_[row * this->num_columns_ + column];
+		return this->values_[row * this->num_columns_ + column];
 	}
 }
 
 double* Matrix::value_ptr(void)
 {
-	return this->values_.data_ptr_;
+	return this->values_.data();
 }
 
 std::vector<int> Matrix::PLU_decomposition(void) 
@@ -402,7 +402,7 @@ std::vector<int> Matrix::PLU_decomposition(void)
 	const lapack_int n = static_cast<int>(this->num_columns_);
 	const lapack_int lda = n;
 	std::vector<int> ipiv(std::min(m, n));
-	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->values_.data_ptr_, lda, ipiv.data());
+	lapack_int info = LAPACKE_dgetrf(matrix_layout, m, n, this->values_.data(), lda, ipiv.data());
 
 	REQUIRE(0 <= info, "info should be greater than 0 when sucess PLU decomposition");
 	return ipiv;

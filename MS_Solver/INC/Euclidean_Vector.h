@@ -9,9 +9,6 @@
 
 using ushort = unsigned short;
 
-class Euclidean_Vector_Base;
-class Euclidean_Vector;
-
 namespace ms
 {
 	inline constexpr ushort blas_dcopy_criteria = 50;
@@ -21,6 +18,7 @@ namespace ms
 	inline constexpr ushort blas_dot_criteria = 15;
 }
 
+class Euclidean_Vector;
 class Euclidean_Vector_Constant_Base
 {
 public:
@@ -63,23 +61,26 @@ public:
 public://Command
 	void operator*=(const double constant);
 	void operator+=(const Euclidean_Vector_Constant_Base& other);
+	double& operator[](const size_t position);
 
-	const double* data(void) const;
+	double& at(const size_t position);
 	double* data(void);
+	void initalize(void);
 	void normalize(void);
+
+public://Query
+	double operator[](const size_t position) const;
+
+	double at(const size_t position) const;
+	const double* data(void) const;
+
 
 protected:
 	double* data_ptr_ = nullptr;
 };
 
-class Matrix_Base;
-class Matrix;
 class Euclidean_Vector : public Euclidean_Vector_Base
 {
-	friend class Euclidean_Vector_Constant_Base;
-	friend class Matrix_Base;
-	friend class Matrix;
-
 public:
 	Euclidean_Vector(void) = default;
 	explicit Euclidean_Vector(const size_t size);
@@ -112,25 +113,14 @@ public://Command
 	void operator=(const Euclidean_Vector& other);
 	void operator=(Euclidean_Vector&& other) noexcept;
 
-	double* value_ptr(void)
-	{
-		return this->data_ptr_;
-	}
 	std::vector<double>&& move_values(void);
 	bool is_small(void) const;
-	void initalize(void);
 
 private:
 	static constexpr ushort small_criterion_ = 5;
 	std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> values_;
 };
-
-//Wrapper class 안전하게 사용 하는 방법
-//1. 매번 새로 생성해서 사용하기
-//2. 상속 말고 합성으로 만들고 매번 검사하기 또는 반영하기 (V)
-//3. 상속 안할시 upcasting이 안되서 인자로 Wrapper를 못 받는 상황이 발생
-//4. 상속과 합성을 동시에 사용
 
 class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base
 {

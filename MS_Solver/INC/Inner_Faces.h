@@ -23,6 +23,6 @@ protected:
 	static constexpr ushort max_num_equation = 5;
 	static constexpr ushort max_num_basis = 200;
 	
-	std::vector<size_t> num_coefficients_;
+	std::vector<ushort> set_of_num_QPs_;
 	mutable std::array<double, max_num_equation* max_num_basis> residual_values_;
 };

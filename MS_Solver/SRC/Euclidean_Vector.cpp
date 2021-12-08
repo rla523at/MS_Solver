@@ -16,14 +16,14 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator*(const double constant
 	{
 		for (int i = 0; i < this->num_values_; ++i)
 		{
-			result.data_ptr_[i] *= constant;
+			result[i] *= constant;
 		}
 	}
 	else
 	{
 		const auto n = this->num_values_;
 		const auto incx = 1;
-		cblas_dscal(n, constant, result.data_ptr_, incx);
+		cblas_dscal(n, constant, result.data(), incx);
 	}
 
 	return result;
@@ -39,7 +39,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator+(const Euclidean_Vecto
 	{
 		for (int i = 0; i < this->num_values_; ++i)
 		{
-			result.data_ptr_[i] += other.const_data_ptr_[i];
+			result[i] += other.const_data_ptr_[i];
 		}
 	}
 	else
@@ -49,7 +49,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator+(const Euclidean_Vecto
 		const auto incx = 1;
 		const auto incy = 1;
 
-		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data(), incy);
 	}
 
 	return result;
@@ -65,7 +65,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator-(const Euclidean_Vecto
 	{
 		for (int i = 0; i < this->num_values_; ++i)
 		{
-			result.data_ptr_[i] -= other.const_data_ptr_[i];
+			result[i] -= other.const_data_ptr_[i];
 		}
 	}
 	else
@@ -75,7 +75,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator-(const Euclidean_Vecto
 		const auto incx = 1;
 		const auto incy = 1;
 
-		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data_ptr_, incy);
+		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data(), incy);
 	}
 
 	return result;
@@ -259,9 +259,16 @@ void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& oth
 	}
 }
 
-const double* Euclidean_Vector_Base::data(void) const
+double& Euclidean_Vector_Base::operator[](const size_t position)
 {
-	return this->const_data_ptr_;
+	REQUIRE(position < this->num_values_, "position should be less then size");
+	return this->data_ptr_[position];
+}
+
+double& Euclidean_Vector_Base::at(const size_t position)
+{
+	REQUIRE(position < this->num_values_, "position should be less then size");
+	return this->data_ptr_[position];
 }
 
 double* Euclidean_Vector_Base::data(void)
@@ -269,9 +276,34 @@ double* Euclidean_Vector_Base::data(void)
 	return this->data_ptr_;
 }
 
+void Euclidean_Vector_Base::initalize(void)
+{
+	for (int i = 0; i < this->num_values_; ++i)
+	{
+		this->data_ptr_[i] = 0.0;
+	}
+}
+
 void Euclidean_Vector_Base::normalize(void)
 {
 	*this *= 1.0 / this->L2_norm();
+}
+
+double Euclidean_Vector_Base::operator[](const size_t position) const
+{
+	REQUIRE(position < this->num_values_, "position should be less then size");
+	return this->const_data_ptr_[position];
+}
+
+double Euclidean_Vector_Base::at(const size_t position) const
+{
+	REQUIRE(position < this->num_values_, "position should be less then size");
+	return this->const_data_ptr_[position];
+}
+
+const double* Euclidean_Vector_Base::data(void) const
+{
+	return this->const_data_ptr_;
 }
 
 Euclidean_Vector::Euclidean_Vector(const size_t size)
@@ -419,14 +451,6 @@ void Euclidean_Vector::operator=(Euclidean_Vector&& other) noexcept
 		this->values_ = std::move(other.values_);
 		this->const_data_ptr_ = this->values_.data();
 		this->data_ptr_ = this->values_.data();
-	}
-}
-
-void Euclidean_Vector::initalize(void)
-{
-	for (int i = 0; i < this->num_values_; ++i)
-	{
-		this->data_ptr_[i] = 0.0;
 	}
 }
 

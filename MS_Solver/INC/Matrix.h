@@ -79,7 +79,7 @@ public://Command
 		REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
 
 		const auto jump_index = start_row_index * this->num_columns_;
-		std::copy(vec.begin(), vec.end(), this->values_.data_ptr_ + jump_index);
+		std::copy(vec.begin(), vec.end(), this->values_.data() + jump_index);
 
 	}
 	void change_rows(const size_t start_row_index, const Matrix& A);
