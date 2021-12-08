@@ -20,8 +20,9 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
     const auto num_solutions = discrete_solution.num_solutions();
 
     this->set_of_num_QPs_.resize(this->num_cells_);
-    this->set_of_flux_QPs_m_.reserve(this->num_cells_);
-    this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    this->set_of_flux_QPs_m_.resize(this->num_cells_);
+    //this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    this->solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
     this->physical_flux_ = Matrix(num_equations, space_dimension);
     //
 
@@ -54,7 +55,7 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
 
         //for construct optimization
         this->set_of_num_QPs_[cell_index] = static_cast<ushort>(num_QPs);
-        this->set_of_flux_QPs_m_.push_back({ num_equations, space_dimension * num_QPs });
+        this->set_of_flux_QPs_m_[cell_index] = Matrix(num_equations, space_dimension * num_QPs);
         //
 
         //for precalculation
@@ -88,7 +89,7 @@ void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& dis
 
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {  
-        discrete_solution.calculate_solution_at_cell_QPs(this->solution_v_at_QPs_, cell_index);
+        discrete_solution.calculate_solution_at_cell_QPs(this->solution_v_at_QPs_.data(), cell_index);
 
         const auto num_QPs = this->set_of_num_QPs_[cell_index];
         auto& flux_QPs_m = this->set_of_flux_QPs_m_[cell_index];

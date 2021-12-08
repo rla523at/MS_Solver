@@ -58,9 +58,11 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
 	void calculate_solution_at_bdry_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint bdry_index, const uint oc_index) const;
-	void calculate_solution_at_cell_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint cell_index) const;
-	void calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
-	void calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
+	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
+	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+	//void calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
+	//void calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
@@ -80,6 +82,8 @@ private:
 	Euclidean_Vector calculate_P0_solution_precalculated(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Matrix& basis_points_m) const;
 	void calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const;
+	void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const;
+
 
 	size_t coefficient_start_index(const uint cell_index) const;
 	size_t num_total_basis(void) const;

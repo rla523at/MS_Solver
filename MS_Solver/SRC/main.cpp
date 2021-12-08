@@ -28,8 +28,6 @@ int main(void)
 
 		Discrete_Equation discrete_equation(std::move(semi_discrete_equation), std::move(time_discrete_scheme), std::move(solve_end_controller), std::move(solve_post_controller));
 
-		std::exit(523);
-
 		LOG << "\n================================================================================\n";
 		LOG << "\t\t\t End Pre-Processing(" << Profiler::get_time_duration() << "s)\n";
 		LOG << "================================================================================\n\n" << LOG.print_;

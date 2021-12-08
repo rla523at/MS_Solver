@@ -30,8 +30,10 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
     const auto num_solutions = discrete_solution.num_solutions();
 
     this->set_of_numerical_flux_QPs_m_.reserve(this->num_inner_faces_);    
-    this->ocs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
-    this->ncs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    this->ocs_solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
+    this->ncs_solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
+    //this->ocs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    //this->ncs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
     //
 
     // consider inner face 
@@ -134,8 +136,10 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_D
     for (uint infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
     {
         const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[infc_index];
-        discrete_solution.calculate_solution_at_infc_ocs_QPs(this->ocs_solution_v_at_QPs_, infc_index, oc_index);
-        discrete_solution.calculate_solution_at_infc_ncs_QPs(this->ncs_solution_v_at_QPs_, infc_index, nc_index);
+        discrete_solution.calculate_solution_at_infc_ocs_QPs(this->ocs_solution_v_at_QPs_.data(), infc_index, oc_index);
+        discrete_solution.calculate_solution_at_infc_ncs_QPs(this->ncs_solution_v_at_QPs_.data(), infc_index, nc_index);
+        //discrete_solution.calculate_solution_at_infc_ocs_QPs(this->ocs_solution_v_at_QPs_, infc_index, oc_index);
+        //discrete_solution.calculate_solution_at_infc_ncs_QPs(this->ncs_solution_v_at_QPs_, infc_index, nc_index);
 
         const auto& normals = this->set_of_normals_[infc_index];
         const auto num_QPs = normals.size();

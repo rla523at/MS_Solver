@@ -23,8 +23,11 @@ protected:
 	static constexpr ushort max_num_basis = 200;
 	static constexpr ushort max_num_QPs = 200;
 	
-	mutable std::vector<Euclidean_Vector> ocs_solution_v_at_QPs_;
-	mutable std::vector<Euclidean_Vector> ncs_solution_v_at_QPs_;
+	//mutable std::vector<Euclidean_Vector> ocs_solution_v_at_QPs_;
+	//mutable std::vector<Euclidean_Vector> ncs_solution_v_at_QPs_;
 	mutable std::vector<Matrix> set_of_numerical_flux_QPs_m_;
 	mutable std::array<double, max_num_equation* max_num_basis> residual_values_ = { 0 };
+	mutable std::array<Euclidean_Vector, max_num_QPs> ocs_solution_v_at_QPs_ = {};
+	mutable std::array<Euclidean_Vector, max_num_QPs> ncs_solution_v_at_QPs_ = {};
+
 };
