@@ -5,9 +5,13 @@ void Matrix_Base::transpose(void)
 	std::swap(this->num_rows_, this->num_columns_);
 
 	if (this->is_transposed())
+	{
 		this->transpose_type_ = CBLAS_TRANSPOSE::CblasNoTrans;
+	}
 	else
+	{
 		this->transpose_type_ = CBLAS_TRANSPOSE::CblasTrans;
+	}
 }
 
 Euclidean_Vector Matrix_Base::operator*(const Euclidean_Vector& vec) const

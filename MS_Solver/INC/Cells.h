@@ -24,6 +24,9 @@ public://Query
     void calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const;
 
 private:
+    void reset_residual_values(const uint oc_index) const;
+
+private:
     std::vector<Matrix> set_of_QWs_gradient_basis_m_;
 
     //for construction optimization
@@ -32,6 +35,7 @@ private:
     static constexpr ushort max_num_QPs = 200;
 
     std::vector<ushort> set_of_num_QPs_;
+    mutable Matrix physical_flux_;
     mutable std::vector<Euclidean_Vector> solution_v_at_QPs_;
     mutable std::vector<Matrix> set_of_flux_QPs_m_;
     mutable std::array<double, max_num_equation* max_num_basis> residual_values_ = { 0 };

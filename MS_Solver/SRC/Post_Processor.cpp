@@ -2,6 +2,8 @@
 
 void Post_Processor::initialize(const Configuration& configuration, const Grid& grid, Discrete_Solution& discrete_solution) 
 {	
+	Profiler::set_time_point();
+
 	This_::post_folder_path_ = configuration.post_folder_path_str();
 	This_::post_order_ = configuration.get<ushort>("post_order");
 
@@ -10,6 +12,8 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 	This_::file_writer_ = Tecplot_File_Writer_Factory::make_unique(configuration);
 
 	This_::is_initialized_ = true;
+
+	LOG << std::left << std::setw(50) << "@ Post Processor precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 };
 
 void Post_Processor::post_grid(void) 

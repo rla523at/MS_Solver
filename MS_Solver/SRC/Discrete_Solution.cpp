@@ -107,6 +107,8 @@ Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equat
 	: Discrete_Solution(governing_equation, grid)
 	, GE_soluion(this->governing_equation_->num_equations())
 {
+	Profiler::set_time_point();
+
 	this->solution_degrees_.resize(this->num_cells_, solution_degree);
 	
 	this->basis_vector_functions_.resize(this->num_cells_);
@@ -126,6 +128,8 @@ Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equat
 	}
 
 	this->values_ = this->calculate_initial_values(grid, initial_condition);	
+
+	LOG << std::left << std::setw(50) << "@ Discrete Solution DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
 void Discrete_Solution_DG::precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points)
@@ -260,6 +264,12 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_infc_n
 {
 	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "basis value should be precalculated");
 	return this->calculate_solution_at_precalulated_points(nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
+}
+
+void Discrete_Solution_DG::calculate_solution_at_bdry_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint bdry_index, const uint oc_index) const
+{
+	REQUIRE(!this->set_of_bdry_basis_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_QPs, oc_index, this->set_of_bdry_basis_QPs_m_[bdry_index]);
 }
 
 void Discrete_Solution_DG::calculate_solution_at_cell_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint cell_index) const

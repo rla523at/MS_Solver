@@ -203,6 +203,27 @@ Matrix Euler_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 		} };
 }
 
+void Euler_2D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const
+{
+	const auto rho = solution[0];
+	const auto rhou = solution[1];
+	const auto rhov = solution[2];
+	const auto rhoE = solution[3];
+	const auto u = solution[4];
+	const auto v = solution[5];
+	const auto p = solution[6];
+
+	const auto rhouv = rhou * v;
+
+	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
+
+	physical_flux.value_at(0, 0) = rhou;				physical_flux.value_at(0, 1) = rhov;
+	physical_flux.value_at(1, 0) = rhou*u + p;			physical_flux.value_at(1, 1) = rhouv;
+	physical_flux.value_at(2, 0) = rhouv;				physical_flux.value_at(2, 1) = rhov * v + p;
+	physical_flux.value_at(3, 0) = (rhoE + p) * u;		physical_flux.value_at(3, 1) = (rhoE + p) * v;
+}
+
+
 void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
 {
 	const auto rho = GE_solution.at(0);
@@ -220,6 +241,29 @@ void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	GE_solution = { rho, rhou, rhov, rhoE, u, v, p, a };
 }
 
+void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solution_values) const
+{
+	const auto rho = GE_solution_values[0];
+	const auto rhou = GE_solution_values[1];
+	const auto rhov = GE_solution_values[2];
+	const auto rhoE = GE_solution_values[3];
+
+	const auto one_over_rho = 1.0 / rho;
+
+	const auto u = rhou * one_over_rho;
+	const auto v = rhov * one_over_rho;
+	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
+	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	solution_values[0] = rho;
+	solution_values[1] = rhou;
+	solution_values[2] = rhov;
+	solution_values[3] = rhoE;
+	solution_values[4] = u;
+	solution_values[5] = v;
+	solution_values[6] = p;
+	solution_values[7] = a;
+}
 
 Euler_3D::Euler_3D(void)
 {
@@ -299,6 +343,32 @@ Matrix Euler_3D::calculate_physical_flux(const Euclidean_Vector& solution) const
 	} };
 }
 
+void Euler_3D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const
+{
+	const auto rho = solution[0];
+	const auto rhou = solution[1];
+	const auto rhov = solution[2];
+	const auto rhow = solution[3];
+	const auto rhoE = solution[4];
+	const auto u = solution[5];
+	const auto v = solution[6];
+	const auto w = solution[7];
+	const auto p = solution[8];
+	const auto a = solution[9];
+
+	const auto rhouv = rhou * v;
+	const auto rhouw = rhou * w;
+	const auto rhovw = rhov * w;
+
+	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
+
+	physical_flux.value_at(0, 0) = rhou;				physical_flux.value_at(0, 1) = rhov;				physical_flux.value_at(0, 2) = rhow;
+	physical_flux.value_at(1, 0) = rhou * u + p;		physical_flux.value_at(1, 1) = rhouv;				physical_flux.value_at(1, 2) = rhouw;
+	physical_flux.value_at(2, 0) = rhouv;				physical_flux.value_at(2, 1) = rhov * v + p;		physical_flux.value_at(2, 2) = rhovw;
+	physical_flux.value_at(3, 0) = rhouw;				physical_flux.value_at(3, 1) = rhovw;				physical_flux.value_at(3, 2) = rhow * w + p;
+	physical_flux.value_at(4, 0) = (rhoE + p) * u;		physical_flux.value_at(4, 1) = (rhoE + p) * v;		physical_flux.value_at(4, 2) = (rhoE + p) * w;
+}
+
 void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const
 {
 	const auto rho = GE_solution[0];
@@ -317,6 +387,35 @@ void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const
 
 	GE_solution = { rho, rhou, rhov, rhow, rhoE, u, v, w, p, a };
 }
+
+void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solution_values) const
+{
+	const auto rho = GE_solution_values[0];
+	const auto rhou = GE_solution_values[1];
+	const auto rhov = GE_solution_values[2];
+	const auto rhow = GE_solution_values[3];
+	const auto rhoE = GE_solution_values[4];
+
+	const auto one_over_rho = 1.0 / rho;
+
+	const auto u = rhou * one_over_rho;
+	const auto v = rhov * one_over_rho;
+	const auto w = rhow * one_over_rho;
+	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
+	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	solution_values[0] = rho;
+	solution_values[1] = rhou;
+	solution_values[2] = rhov;
+	solution_values[3] = rhow;
+	solution_values[4] = rhoE;
+	solution_values[5] = u;
+	solution_values[6] = v;
+	solution_values[7] = w;
+	solution_values[8] = p;
+	solution_values[9] = a;
+}
+
 
 std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(const Configuration& config)
 {

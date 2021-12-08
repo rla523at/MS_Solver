@@ -81,7 +81,7 @@ namespace ms
 	{
 		static_assert((... && std::is_same_v<Args, std::vector<T>>), "every arguments should be vector of same type");
 
-		vec1.reserve(vec1.size() + vec2.size());
+		//vec1.reserve(vec1.size() + vec2.size()); // too many reserve cause performance lose!!
 		vec1.insert(vec1.end(), std::make_move_iterator(vec2.begin()), std::make_move_iterator(vec2.end()));
 
 		if constexpr (sizeof...(Args) == 0)

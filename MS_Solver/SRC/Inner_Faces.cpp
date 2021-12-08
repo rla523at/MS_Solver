@@ -5,7 +5,6 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
 {
     Profiler::set_time_point();
 
-    const auto num_equations = discrete_solution.num_equations();
 
     const auto num_inner_faces = grid.num_inner_faces();
     const auto num_pbdry_pairs = grid.num_periodic_boundary_pairs();    
@@ -27,11 +26,13 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
     set_of_ncs_QPs.reserve(this->num_inner_faces_);
 
     //for construct optimization
-    this->set_of_numerical_flux_QPs_m_.reserve(this->num_inner_faces_);
-    
+    const auto num_equations = discrete_solution.num_equations();
     const auto num_solutions = discrete_solution.num_solutions();
+
+    this->set_of_numerical_flux_QPs_m_.reserve(this->num_inner_faces_);    
     this->ocs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
     this->ncs_solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    //
 
     // consider inner face 
     for (uint infc_index = 0; infc_index < num_inner_faces; ++infc_index)
