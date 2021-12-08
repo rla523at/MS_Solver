@@ -378,6 +378,11 @@ double& Matrix::value_at(const size_t row, const size_t column)
 	}
 }
 
+double* Matrix::value_ptr(void)
+{
+	return this->values_.data_ptr_;
+}
+
 std::vector<int> Matrix::PLU_decomposition(void) 
 {
 	REQUIRE(!this->is_transposed(), "matrix should not be transposed");
@@ -437,6 +442,51 @@ namespace ms
 			cblas_dgemm(layout, transA, transB, m, n, k, alpha, A.data(), lda, B.data(), ldb, beta, output_ptr, ldc);
 		}
 	}
+
+	void mpm(const Matrix_Base& M1, const Matrix_Base& M2, Matrix& result)
+	{
+		REQUIRE(M1.size() == M2.size(), "two matrix should be same size");
+		REQUIRE(!M1.is_transposed() && !M2.is_transposed(), "both matrixes should not be transposed");
+		
+		const auto n = static_cast<int>(M1.num_values());
+		ms::xpy(n, M1.data(), M2.data(), result.value_ptr());
+	}
+
+	void mv(const Matrix_Base& M, const Euclidean_Vector& v, Euclidean_Vector& result)
+	{
+		result.initalize();
+
+		const auto m = static_cast<int>(M.num_row());
+		const auto n = static_cast<int>(M.num_column());
+		const auto data_ptr = result.value_ptr();
+
+		REQUIRE(n == v.size(), "size should be mathced");
+
+		if (m * n <= ms::blas_mv_criteria)
+		{
+			for (size_t i = 0; i < m; ++i)
+			{
+				for (size_t j = 0; j < n; ++j)
+				{
+					data_ptr[i] += M.at(i, j) * v.at(j);
+				}
+			}
+		}
+		else
+		{
+			const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+			const auto trans = M.transpose_type();
+			const auto alpha = 1.0;
+			const auto lda = static_cast<MKL_INT>(M.leading_dimension());
+			const auto incx = 1;
+			const auto beta = 0;
+			const auto incy = 1;
+
+			cblas_dgemv(Layout, trans, m, n, alpha, M.data(), lda, v.data(), incx, beta, data_ptr, incy);
+		}
+
+	}
+
 }
 
 Matrix operator*(const double constant, const Matrix_Base& M)

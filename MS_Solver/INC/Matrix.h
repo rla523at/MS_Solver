@@ -9,6 +9,13 @@ namespace ms
 	inline constexpr ushort blas_mm_criteria = 25;
 }
 
+namespace ms
+{
+	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr);
+	void mpm(const Matrix_Base& M1, const Matrix_Base& M2, Matrix& result);
+	void mv(const Matrix_Base& M, const Euclidean_Vector& v, Euclidean_Vector& result);
+}
+
 class Matrix;
 class Matrix_Base
 {
@@ -49,6 +56,7 @@ protected:
 class Matrix : public Matrix_Base
 {
 	friend class Matrix_Base;
+	friend void ms::mpm(const Matrix_Base& M1, const Matrix_Base& M2, Matrix& result);
 
 public:
 	Matrix(void) = default;
@@ -89,9 +97,11 @@ public://Query
 
 	Matrix get_transpose(void) const;
 	Matrix get_inverse(void) const;
-	
+	double& value_at(const size_t row, const size_t column); // optimize
+	double* value_ptr(void);
+
 private:
-	double& value_at(const size_t row, const size_t column);
+	//double& value_at(const size_t row, const size_t column);
 	std::vector<int> PLU_decomposition(void);
 
 private:
@@ -174,10 +184,7 @@ private:
 };
 
 
-namespace ms 
-{
-	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr);
-}
+
 
 Matrix operator*(const double constant, const Matrix_Base& M);
 std::ostream& operator<<(std::ostream& os, const Matrix_Base& m);

@@ -140,10 +140,13 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_D
         }
 
         const auto& [oc_side_QWs_basis_m, nc_side_QWs_basis_m] = this->oc_nc_side_QWs_basis_m_pairs_[infc_index];
-        const auto oc_side_delta_rhs = numerical_flux_quadrature * oc_side_QWs_basis_m;
-        const auto nc_side_delta_rhs = numerical_flux_quadrature * nc_side_QWs_basis_m;
+        //const auto oc_side_delta_rhs = numerical_flux_quadrature * oc_side_QWs_basis_m;
+        //const auto nc_side_delta_rhs = numerical_flux_quadrature * nc_side_QWs_basis_m;
 
-        residual.update_rhs(oc_index, oc_side_delta_rhs);
-        residual.update_rhs(nc_index, nc_side_delta_rhs);
+        //residual.update_rhs(oc_index, oc_side_delta_rhs);
+        //residual.update_rhs(nc_index, nc_side_delta_rhs);
+    
+        residual.update_rhs(oc_index, numerical_flux_quadrature * oc_side_QWs_basis_m);
+        residual.update_rhs(nc_index, numerical_flux_quadrature * nc_side_QWs_basis_m);
     }
 }

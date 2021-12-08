@@ -9,15 +9,24 @@
 
 using ushort = unsigned short;
 
+class Euclidean_Vector_Base;
+class Euclidean_Vector;
+
 namespace ms
 {
+	inline constexpr ushort blas_dcopy_criteria = 50;
 	inline constexpr ushort blas_dscal_criteria = 10;
 	inline constexpr ushort blas_dasum_criteria = 10;
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_dot_criteria = 15;
+
+	void copy(const int n, const double* x_ptr, double* result_ptr);
+	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
+	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
+	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, Euclidean_Vector& result);
 }
 
-class Euclidean_Vector;
+
 class Euclidean_Vector_Constant_Base
 {
 public:
@@ -107,8 +116,13 @@ public://Command
 	void operator=(const Euclidean_Vector& other);
 	void operator=(Euclidean_Vector&& other) noexcept;
 
+	double* value_ptr(void)
+	{
+		return this->data_ptr_;
+	}
 	std::vector<double>&& move_values(void);
 	bool is_small(void) const;
+	void initalize(void);
 
 private:
 	static constexpr ushort small_criterion_ = 5;

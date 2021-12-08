@@ -18,6 +18,8 @@ public://Query
     virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
     virtual void extend_to_solution(Euclidean_Vector& governing_equation_solution) const abstract;
 		
+    virtual void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const abstract;
+
 protected:
 	ushort num_equations_;
     ushort num_solutions_;
@@ -51,6 +53,8 @@ class Linear_Advection_2D : public Linear_Advection
 public:
     Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed);
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
 };
 
 class Linear_Advection_3D : public Linear_Advection
@@ -58,6 +62,8 @@ class Linear_Advection_3D : public Linear_Advection
 public:
     Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed);
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 };
 
 class Burgers : public Scalar_Equation
@@ -66,6 +72,8 @@ public:
     std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 };
 
 class Burgers_2D : public Burgers
@@ -91,6 +99,8 @@ public://Query
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
 
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
+
 private:
     static constexpr auto gamma_ = 1.4;
 };
@@ -105,6 +115,8 @@ public://Query
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
+
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 
 private:
     static constexpr auto gamma_ = 1.4;

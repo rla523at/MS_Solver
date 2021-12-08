@@ -412,6 +412,14 @@ void Euclidean_Vector::operator=(Euclidean_Vector&& other) noexcept
 	}
 }
 
+void Euclidean_Vector::initalize(void)
+{
+	for (int i = 0; i < this->num_values_; ++i)
+	{
+		this->data_ptr_[i] = 0.0;
+	}
+}
+
 std::vector<double>&& Euclidean_Vector::move_values(void)
 {
 	this->num_values_ = 0;
@@ -688,4 +696,71 @@ Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constan
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Constant_Base& x)
 {
 	return os << x.to_string();
+}
+
+namespace ms
+{
+	void copy(const int n, const double* x_ptr, double* result_ptr)
+	{
+		if (n <= ms::blas_dcopy_criteria)
+		{
+			for (int i = 0; i < n; ++i)
+			{
+				result_ptr[i] = x_ptr[i];
+			}
+		}
+		else
+		{
+			const auto incx = 1;
+			const auto incy = 1;
+			cblas_dcopy(n, x_ptr, incx, result_ptr, incy);
+		}
+	}
+
+	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
+	{
+		ms::copy(n, x_ptr, result_ptr);
+
+		if (n <= ms::blas_axpy_criteria)
+		{
+			for (int i = 0; i < n; ++i)
+			{
+				result_ptr[i] += y_ptr[i];
+			}
+		}
+		else
+		{
+			const auto a = 1.0;
+			const auto incx = 1;
+			const auto incy = 1;
+			cblas_daxpy(n, a, y_ptr, incx, result_ptr, incy);
+		}
+	}
+
+	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
+	{
+		ms::copy(n, x_ptr, result_ptr);
+
+		if (n <= ms::blas_axpy_criteria)
+		{
+			for (int i = 0; i < n; ++i)
+			{
+				result_ptr[i] -= y_ptr[i];
+			}
+		}
+		else
+		{
+			const auto a = -1.0;
+			const auto incx = 1;
+			const auto incy = 1;
+			cblas_daxpy(n, a, y_ptr, incx, result_ptr, incy);
+		}
+	}
+
+	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, Euclidean_Vector& result)
+	{
+		const auto n = static_cast<int>(v1.size());
+		REQUIRE(n == v2.size(), "size should be same");
+		ms::xmy(n, v1.data(), v2.data(), result.value_ptr());
+	}
 }
