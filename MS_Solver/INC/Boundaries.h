@@ -26,6 +26,7 @@ private:
     static constexpr ushort max_num_basis = 200;
     static constexpr ushort max_num_QPs = 200;
 
+    mutable Euclidean_Vector boundary_flux_;
     mutable std::vector<Euclidean_Vector> solution_v_at_QPs_;
     mutable std::vector<Matrix> set_of_boundary_flux_QPs_m_;
     mutable std::array<double, max_num_equation * max_num_basis> residual_values_ = { 0 };

@@ -49,11 +49,9 @@ Euclidean_Vector Matrix_Base::operator*(const Euclidean_Vector& vec) const
 
 Matrix Matrix_Base::operator*(const double constant) const
 {
-	const auto num_values = this->num_values();
-	Euclidean_Vector values(this->const_data_ptr_, this->const_data_ptr_ + num_values);
-	values *= constant;
-
-	return { this->num_rows_, this->num_columns_, std::move(values) };
+	Matrix result(this->num_rows_, this->num_columns_, this->const_data_ptr_);
+	result *= constant;
+	return result;
 }
 
 Matrix Matrix_Base::operator+(const Matrix_Base& other) const
@@ -61,14 +59,11 @@ Matrix Matrix_Base::operator+(const Matrix_Base& other) const
 	REQUIRE(this->size() == other.size(), "two matrix should be same size");
 	REQUIRE(!this->is_transposed() && !other.is_transposed(), "both matrixes should not be transposed");
 
-	const auto n = static_cast<MKL_INT>(this->num_values());
+	Matrix result(this->num_rows_, this->num_columns_);
+	const auto n = static_cast<MKL_INT>(this->num_values());	
+	ms::xpy(n, this->const_data_ptr_, other.const_data_ptr_, result.data());
 
-	Euclidean_Vector_Constant_Base evcb1(n, this->const_data_ptr_);
-	Euclidean_Vector_Constant_Base evcb2(n, other.const_data_ptr_);
-
-	auto values = evcb1 + evcb2;
-
-	return { this->num_rows_,this->num_columns_,std::move(values) };
+	return result;
 }
 
 Matrix Matrix_Base::operator*(const Matrix_Base& other) const 
@@ -206,28 +201,28 @@ bool Matrix_Base::is_in_range(const size_t irow, const size_t jcolumn) const
 }
 
 Matrix::Matrix(const size_t matrix_order) 
+	:values_(matrix_order* matrix_order)
 {
 	REQUIRE(matrix_order != 0, "matrix order can not be 0");
 
 	this->num_rows_ = matrix_order;
 	this->num_columns_ = matrix_order;
 
-	this->values_ = Euclidean_Vector(this->num_values());
+	this->values_.resize(this->num_values());
 	this->const_data_ptr_ = this->values_.data();
 
 	for (size_t i = 0; i < matrix_order; ++i)
 		this->value_at(i, i) = 1.0;
-
 }
 
-Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value) 
+Matrix::Matrix(const size_t matrix_order, const std::vector<double>& value)
+	:values_(matrix_order * matrix_order)
 {
 	REQUIRE(matrix_order != 0, "matrix order can not be 0");
 	REQUIRE(matrix_order == value.size(), "num value of square matrix should be same with matrix order");
 
 	this->num_rows_ = matrix_order;
-	this->num_columns_ = matrix_order;
-	this->values_ = Euclidean_Vector(this->num_values());
+	this->num_columns_ = matrix_order;	
 	this->const_data_ptr_ = this->values_.data();
 
 	for (size_t i = 0; i < matrix_order; ++i)
@@ -244,17 +239,26 @@ Matrix::Matrix(const size_t num_row, const size_t num_column)
 	this->const_data_ptr_ = this->values_.data();
 }
 
-Matrix::Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values)
+Matrix::Matrix(const size_t num_row, const size_t num_column, const double* value_ptr)
+	:values_(value_ptr, value_ptr + num_row * num_column)
 {
 	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
-	REQUIRE(num_row * num_column == value.size(), "num value should be same with matrix size");
 
 	this->num_rows_ = num_row;
-	this->num_columns_ = num_column;
-	this->values_ = std::move(values);
+	this->num_columns_ = num_column;	
 	this->const_data_ptr_ = this->values_.data();
 }
 
+Matrix::Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& values)
+	:values_(std::move(values))
+{
+	REQUIRE(num_row * num_column == this->values_.size(), "num value should be same with matrix size");
+	REQUIRE(num_row * num_column != 0, "number of row or number of column can not be 0");
+
+	this->num_rows_ = num_row;
+	this->num_columns_ = num_column;
+	this->const_data_ptr_ = this->values_.data();
+}
 
 Matrix::Matrix(const Matrix& other) 
 {
@@ -296,7 +300,7 @@ void Matrix::operator=(Matrix&& other) noexcept
 
 void Matrix::operator*=(const double constant)
 {
-	this->values_ *= constant;
+	ms::cx(constant, static_cast<int>(this->num_values()), this->data());
 }
 
 double* Matrix::data(void)

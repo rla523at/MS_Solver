@@ -7,6 +7,8 @@ class Boundary_Flux_Function
 {
 public://Query
 	virtual Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) abstract;
+	virtual void calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) abstract;
+
 };
 
 class Initial_Constant_BC : public Boundary_Flux_Function
@@ -17,13 +19,15 @@ public:
 
 public://Query
 	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override;
+	void calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override;
 
 private:
-	Euclidean_Vector calculate_neighbor_solution(const Euclidean_Vector& oc_solution);
+	void calculate_neighbor_solution(const Euclidean_Vector& oc_solution);
+
 
 private:
 	bool is_initialized_ = false;
-	Euclidean_Vector initial_value_;
+	Euclidean_Vector neighbor_solution_;
 	std::shared_ptr<Numerical_Flux_Function> numerical_flux_function_;
 };
 

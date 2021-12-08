@@ -15,6 +15,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
     const auto num_equations = discrete_solution.num_equations();
     const auto num_solutions = discrete_solution.num_solutions();
 
+    this->boundary_flux_ = Euclidean_Vector(num_equations);
     this->set_of_boundary_flux_QPs_m_.resize(this->num_boundaries_);
     this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
     //
@@ -82,7 +83,8 @@ void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG
         auto& bdry_flux_QPs_m = this->set_of_boundary_flux_QPs_m_[bdry_index];
         for (ushort q = 0; q < num_QPs; ++q)
         {
-            bdry_flux_QPs_m.change_column(q, boundary_flux_function.calculate(this->solution_v_at_QPs_[q], normals[q]));
+            boundary_flux_function.calculate(this->boundary_flux_.data(), this->solution_v_at_QPs_[q], normals[q]);
+            bdry_flux_QPs_m.change_column(q, this->boundary_flux_);
         }
 
         const auto num_values = discrete_solution.num_values(oc_index);

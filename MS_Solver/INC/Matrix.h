@@ -56,7 +56,8 @@ public:
 	Matrix(const size_t matrix_order);
 	Matrix(const size_t matrix_order, const std::vector<double>& value);
 	Matrix(const size_t num_row, const size_t num_column);
-	Matrix(const size_t num_row, const size_t num_column, Euclidean_Vector&& values);
+	Matrix(const size_t num_row, const size_t num_column, const double* value_ptr);
+	Matrix(const size_t num_row, const size_t num_column, std::vector<double>&& values);
 	Matrix(const Matrix& other);
 	Matrix(Matrix&& other) noexcept;
 
@@ -100,7 +101,8 @@ private:
 	std::vector<int> PLU_decomposition(void);
 
 private:
-	Euclidean_Vector values_;
+	//Euclidean_Vector values_;
+	std::vector<double> values_;
 };
 
 class Matrix_Constant_Wrapper : public Matrix_Base

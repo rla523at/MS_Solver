@@ -309,107 +309,131 @@ const double* Euclidean_Vector_Base::data(void) const
 Euclidean_Vector::Euclidean_Vector(const size_t size)
 {
 	this->num_values_ = static_cast<int>(size);
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_.resize(num_values_);
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_.resize(num_values_);
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_.resize(num_values_);
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(const std::initializer_list<double> list)
 {
 	this->num_values_ = static_cast<int>(list.size());
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		std::copy(list.begin(), list.end(), this->small_buffer_.begin());
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = list;
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	std::copy(list.begin(), list.end(), this->small_buffer_.begin());
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = list;
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = list;
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(std::vector<double>&& values)
 {
 	this->num_values_ = static_cast<int>(values.size());
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		std::copy(values.begin(), values.end(), this->small_buffer_.begin());
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = std::move(values);
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	std::copy(values.begin(), values.end(), this->small_buffer_.begin());
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = std::move(values);
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = std::move(values);
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 };
 
 Euclidean_Vector::Euclidean_Vector(const std::vector<double>& values)
 {
 	this->num_values_ = static_cast<int>(values.size());
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		std::copy(values.begin(), values.end(), this->small_buffer_.begin());
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = values;
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	std::copy(values.begin(), values.end(), this->small_buffer_.begin());
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = values;
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = values;
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(const Euclidean_Vector& other)
 {
 	this->num_values_ = other.num_values_;
 	
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		this->small_buffer_ = other.small_buffer_;
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = other.values_;
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	this->small_buffer_ = other.small_buffer_;
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = other.values_;
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = other.values_;
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(Euclidean_Vector&& other) noexcept
 {
 	this->num_values_ = other.num_values_;
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		this->small_buffer_ = other.small_buffer_;
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = std::move(other.values_);
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	this->small_buffer_ = other.small_buffer_;
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = std::move(other.values_);
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = std::move(other.values_);
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 
 	other.num_values_ = 0;
 	other.const_data_ptr_ = nullptr;
@@ -420,38 +444,46 @@ void Euclidean_Vector::operator=(const Euclidean_Vector& other)
 {
 	this->num_values_ = other.num_values_;
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
 
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = other.values_;
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = other.values_;
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = other.values_;
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 void Euclidean_Vector::operator=(Euclidean_Vector&& other) noexcept
 {
 	this->num_values_ = other.num_values_;
 
-	if (this->num_values_ <= this->small_criterion_)
-	{
-		std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
+	//if (this->num_values_ <= this->small_criterion_)
+	//{
+	//	std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
 
-		this->const_data_ptr_ = this->small_buffer_.data();
-		this->data_ptr_ = this->small_buffer_.data();
-	}
-	else
-	{
-		this->values_ = std::move(other.values_);
-		this->const_data_ptr_ = this->values_.data();
-		this->data_ptr_ = this->values_.data();
-	}
+	//	this->const_data_ptr_ = this->small_buffer_.data();
+	//	this->data_ptr_ = this->small_buffer_.data();
+	//}
+	//else
+	//{
+	//	this->values_ = std::move(other.values_);
+	//	this->const_data_ptr_ = this->values_.data();
+	//	this->data_ptr_ = this->values_.data();
+	//}
+
+	this->values_ = std::move(other.values_);
+	this->const_data_ptr_ = this->values_.data();
+	this->data_ptr_ = this->values_.data();
 }
 
 std::vector<double>&& Euclidean_Vector::move_values(void)
@@ -464,10 +496,10 @@ std::vector<double>&& Euclidean_Vector::move_values(void)
 	return std::move(this->values_);
 }
 
-bool Euclidean_Vector::is_small(void) const
-{
-	return this->values_.empty();
-}
+//bool Euclidean_Vector::is_small(void) const
+//{
+//	return this->values_.empty();
+//}
 
 
 
@@ -590,14 +622,17 @@ void Euclidean_Vector_Wrapper::operator=(Euclidean_Vector&& other) noexcept
 {
 	this->num_values_ = static_cast<int>(other.size());
 
-	if (other.is_small())
-	{
-		std::copy(other.begin(), other.end(), this->values_wrapper_.begin());
-	}
-	else
-	{
-		this->values_wrapper_ = std::move(other.move_values());
-	}
+	//if (other.is_small())
+	//{
+	//	std::copy(other.begin(), other.end(), this->values_wrapper_.begin());
+	//}
+	//else
+	//{
+	//	this->values_wrapper_ = std::move(other.move_values());
+	//}
+
+	this->values_wrapper_ = std::move(other.move_values());
+
 
 	this->base_ = Euclidean_Vector_Base(this->values_wrapper_.size(), this->values_wrapper_.data());
 
@@ -751,6 +786,23 @@ namespace ms
 		}
 	}
 
+	void cx(const double c, const int n, double* x_ptr)
+	{
+		if (n <= ms::blas_dscal_criteria)
+		{
+			for (int i = 0; i < n; ++i)
+			{
+				x_ptr[i] *= c;
+			}
+		}
+		else
+		{
+			const auto incx = 1;
+			cblas_dscal(n, c, x_ptr, incx);
+		}
+
+	}
+
 	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
 	{
 		ms::copy(n, x_ptr, result_ptr);
@@ -789,6 +841,13 @@ namespace ms
 			const auto incy = 1;
 			cblas_daxpy(n, a, y_ptr, incx, result_ptr, incy);
 		}
+	}
+
+	void vpv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr)
+	{
+		const auto n = static_cast<int>(v1.size());
+		REQUIRE(n == v2.size(), "size should be same");
+		ms::xpy(n, v1.data(), v2.data(), result_ptr);
 	}
 
 	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr)

@@ -74,7 +74,6 @@ public://Query
 	double at(const size_t position) const;
 	const double* data(void) const;
 
-
 protected:
 	double* data_ptr_ = nullptr;
 };
@@ -91,20 +90,26 @@ public:
 	{
 		this->num_values_ = static_cast<int>(last - first);
 
-		if (this->num_values_ <= this->small_criterion_)
-		{
-			std::copy(first, last, this->small_buffer_.begin());
-			this->const_data_ptr_ = this->small_buffer_.data();
-			this->data_ptr_ = this->small_buffer_.data();
-		}
-		else
-		{
-			this->values_.resize(this->num_values_);
+		//if (this->num_values_ <= this->small_criterion_)
+		//{
+		//	std::copy(first, last, this->small_buffer_.begin());
+		//	this->const_data_ptr_ = this->small_buffer_.data();
+		//	this->data_ptr_ = this->small_buffer_.data();
+		//}
+		//else
+		//{
+		//	this->values_.resize(this->num_values_);
 
-			std::copy(first, last, this->values_.begin());
-			this->const_data_ptr_ = this->values_.data();
-			this->data_ptr_ = this->values_.data();
-		}
+		//	std::copy(first, last, this->values_.begin());
+		//	this->const_data_ptr_ = this->values_.data();
+		//	this->data_ptr_ = this->values_.data();
+		//}
+
+		this->values_.resize(this->num_values_);
+
+		std::copy(first, last, this->values_.begin());
+		this->const_data_ptr_ = this->values_.data();
+		this->data_ptr_ = this->values_.data();
 	};
 	Euclidean_Vector(const Euclidean_Vector& other);
 	Euclidean_Vector(Euclidean_Vector&& other) noexcept;
@@ -114,11 +119,11 @@ public://Command
 	void operator=(Euclidean_Vector&& other) noexcept;
 
 	std::vector<double>&& move_values(void);
-	bool is_small(void) const;
+	//bool is_small(void) const;
 
 private:
-	static constexpr ushort small_criterion_ = 5;
-	std::array<double, small_criterion_> small_buffer_ = { 0 };
+	//static constexpr ushort small_criterion_ = 5;
+	//std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> values_;
 };
 
@@ -308,6 +313,7 @@ private:
 namespace ms
 {
 	void copy(const int n, const double* x_ptr, double* result_ptr);
+	void cx(const double c, const int n, double* x_ptr);
 	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
 	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
 	void vpv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);

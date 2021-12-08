@@ -29,6 +29,7 @@ Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& n
     const auto num_equations = discrete_solution.num_equations();
     const auto num_solutions = discrete_solution.num_solutions();
 
+    this->numerical_flux_ = Euclidean_Vector(num_equations);
     this->set_of_numerical_flux_QPs_m_.reserve(this->num_inner_faces_);    
     this->ocs_solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
     this->ncs_solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
@@ -148,7 +149,9 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_D
 
         for (ushort q = 0; q < num_QPs; ++q)
         {            
-            numerical_flux_QPs_m.change_column(q, this->numerical_flux_function_->calculate(this->ocs_solution_v_at_QPs_[q], this->ncs_solution_v_at_QPs_[q], normals[q]));
+            this->numerical_flux_function_->calculate(this->numerical_flux_.data(), this->ocs_solution_v_at_QPs_[q], this->ncs_solution_v_at_QPs_[q], normals[q]);
+            numerical_flux_QPs_m.change_column(q, this->numerical_flux_);
+            //numerical_flux_QPs_m.change_column(q, this->numerical_flux_function_->calculate(this->ocs_solution_v_at_QPs_[q], this->ncs_solution_v_at_QPs_[q], normals[q]));
         }
 
         const auto& [oc_side_QWs_basis_m, nc_side_QWs_basis_m] = this->oc_nc_side_QWs_basis_m_pairs_[infc_index];

@@ -36,7 +36,6 @@ private:
 
     std::vector<ushort> set_of_num_QPs_;
     mutable Matrix physical_flux_;
-    //mutable std::vector<Euclidean_Vector> solution_v_at_QPs_;
     mutable std::vector<Matrix> set_of_flux_QPs_m_;
     mutable std::array<double, max_num_equation* max_num_basis> residual_values_ = { 0 };
     mutable std::array<Euclidean_Vector, max_num_QPs> solution_v_at_QPs_ = {};
