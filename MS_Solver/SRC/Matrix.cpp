@@ -102,6 +102,16 @@ Euclidean_Vector Matrix_Base::column(const size_t column_index) const
 	return column_values;
 }
 
+void Matrix_Base::column(const size_t column_index, double* value_ptr) const
+{
+	REQUIRE(column_index < this->num_columns_, "index can not exceed given range");
+
+	for (size_t i = 0; i < this->num_rows_; ++i)
+	{
+		value_ptr[i] = this->at(i, column_index);
+	}
+}
+
 const double* Matrix_Base::data(void) const
 {
 	return this->const_data_ptr_;

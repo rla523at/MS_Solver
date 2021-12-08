@@ -23,6 +23,7 @@ public: //Query
 
 	double at(const size_t row, const size_t column) const;
 	Euclidean_Vector column(const size_t column_index) const;
+	void column(const size_t column_index, double* value_ptr) const;
 	const double* data(void) const;
 	bool is_finite(void) const;
 	size_t leading_dimension(void) const;

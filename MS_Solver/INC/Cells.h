@@ -29,6 +29,10 @@ private:
     //for construction optimization
     static constexpr ushort max_num_equation = 5;
     static constexpr ushort max_num_basis = 200;
+    static constexpr ushort max_num_QPs = 200;
 
+    std::vector<ushort> set_of_num_QPs_;
+    mutable std::vector<Euclidean_Vector> solution_v_at_QPs_;
+    mutable std::vector<Matrix> set_of_flux_QPs_m_;
     mutable std::array<double, max_num_equation* max_num_basis> residual_values_ = { 0 };
 };

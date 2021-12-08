@@ -10,6 +10,14 @@ Cells::Cells(const std::shared_ptr<Governing_Equation>& governing_equation, std:
 Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid, Discrete_Solution_DG& discrete_solution)
     : Cells(governing_equation, std::move(time_step_calculator), grid)
 {
+    //for construct optimization
+    this->set_of_num_QPs_.resize(this->num_cells_);
+    this->set_of_flux_QPs_m_.reserve(this->num_cells_);
+
+    const auto num_solutions = discrete_solution.num_solutions();
+    this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
+    //
+
     const auto num_equations = this->governing_equation_->num_equations();
     const auto space_dimension = this->governing_equation_->space_dimension();
 
@@ -17,7 +25,7 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
 
     std::vector<Quadrature_Rule> quadrature_rules(this->num_cells_);
 
-    for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         const auto solution_degree = discrete_solution.solution_degree(cell_index);
         const auto integrand_degree = solution_degree * 2;
@@ -26,6 +34,11 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
         const auto& QPs = quadrature_rule.points;
         const auto& QWs = quadrature_rule.weights;
         const auto num_QPs = QPs.size();
+
+        //for construct optimization
+        this->set_of_num_QPs_[cell_index] = static_cast<ushort>(num_QPs);
+        this->set_of_flux_QPs_m_.push_back({ num_equations, space_dimension * num_QPs });
+        //
 
         const auto num_basis = discrete_solution.num_basis(cell_index);
         Matrix QWs_gradient_basis_m(num_QPs * space_dimension, num_basis);
@@ -65,20 +78,33 @@ void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& dis
     //this routine can be changed using sparse matrix
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
-        const auto solution_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
-        const auto num_QPs = solution_at_QPs.size();
+        //const auto solution_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+        //const auto num_QPs = solution_at_QPs.size();
 
-        Matrix flux_QPs_m(num_equations, space_dimension * num_QPs);
+        //Matrix flux_QPs_m(num_equations, space_dimension * num_QPs);
+
+        //for (int j = 0; j < num_QPs; ++j)
+        //{
+        //    const auto start_column_index = j * space_dimension;
+        //    const auto physical_flux = this->governing_equation_->calculate_physical_flux(solution_at_QPs[j]);
+        //    flux_QPs_m.change_columns(start_column_index, physical_flux);
+        //}
+
+        //const auto delta_rhs = flux_QPs_m * this->set_of_QWs_gradient_basis_m_[cell_index];
+        //residual.update_rhs(cell_index, delta_rhs);
+
+        
+        discrete_solution.calculate_solution_at_cell_QPs(this->solution_v_at_QPs_, cell_index);
+
+        const auto num_QPs = this->set_of_num_QPs_[cell_index];
+
+        auto& flux_QPs_m = this->set_of_flux_QPs_m_[cell_index];
 
         for (int j = 0; j < num_QPs; ++j)
         {
             const auto start_column_index = j * space_dimension;
-            const auto physical_flux = this->governing_equation_->calculate_physical_flux(solution_at_QPs[j]);
-            flux_QPs_m.change_columns(start_column_index, physical_flux);
+            flux_QPs_m.change_columns(start_column_index, this->governing_equation_->calculate_physical_flux(this->solution_v_at_QPs_[j]));
         }
-
-        //const auto delta_rhs = flux_QPs_m * this->set_of_QWs_gradient_basis_m_[cell_index];
-        //residual.update_rhs(cell_index, delta_rhs);
 
         std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(cell_index), 0.0);
         ms::gemm(flux_QPs_m, this->set_of_QWs_gradient_basis_m_[cell_index], this->residual_values_.data());

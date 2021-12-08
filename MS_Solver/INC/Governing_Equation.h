@@ -17,6 +17,7 @@ public://Query
     virtual double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const abstract;
     virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
     virtual void extend_to_solution(Euclidean_Vector& governing_equation_solution) const abstract;
+    virtual void extend_to_solution(const double* GE_solution_values, double* solution_values) const abstract;
 		
     virtual void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const abstract;
 
@@ -34,6 +35,10 @@ public:
 
 public:
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override {};
+    void extend_to_solution(const double* GE_solution_values, double* solution_values) const override 
+    {
+        solution_values[0] = GE_solution_values[0];
+    };
 };
 
 class Linear_Advection : public Scalar_Equation
@@ -98,6 +103,7 @@ public://Query
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
+    void extend_to_solution(const double* GE_solution_values, double* solution_values) const override {};
 
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 
@@ -115,6 +121,7 @@ public://Query
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
+    void extend_to_solution(const double* GE_solution_values, double* solution_values) const override {};
 
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 

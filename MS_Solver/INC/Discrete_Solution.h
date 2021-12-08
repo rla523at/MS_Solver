@@ -57,6 +57,9 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
+	void calculate_solution_at_cell_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint cell_index) const;
+	void calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
+	void calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
@@ -75,6 +78,7 @@ private:
 
 	Euclidean_Vector calculate_P0_solution_precalculated(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Matrix& basis_points_m) const;
+	void calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const;
 
 	size_t coefficient_start_index(const uint cell_index) const;
 	size_t num_total_basis(void) const;
@@ -102,6 +106,13 @@ private:
 	std::vector<Matrix> set_of_cell_basis_QPs_m_;		//cell quadrature point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ocs_QPs_m_;	//inner face owner cell side quadratue point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ncs_QPs_m_;	//inner face neighbor cell side quadratue point basis value matrix
+
+	//optimize construction
+	static constexpr ushort max_num_equation = 5;
+	static constexpr ushort max_num_precalculated_points = 200;
+	mutable Euclidean_Vector GE_soluion;
+	mutable std::array<double, max_num_equation * max_num_precalculated_points> solution_at_points_values_ = { 0 };
+
 };
 
 

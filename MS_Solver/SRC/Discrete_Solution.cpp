@@ -105,6 +105,7 @@ size_t Discrete_Solution::num_total_values(void) const
 
 Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_degree)
 	: Discrete_Solution(governing_equation, grid)
+	, GE_soluion(this->governing_equation_->num_equations())
 {
 	this->solution_degrees_.resize(this->num_cells_, solution_degree);
 	
@@ -124,7 +125,7 @@ Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equat
 		this->coefficieint_start_indexes_[i + 1] = this->coefficieint_start_indexes_[i] + this->set_of_num_values_[i];
 	}
 
-	this->values_ = this->calculate_initial_values(grid, initial_condition);
+	this->values_ = this->calculate_initial_values(grid, initial_condition);	
 }
 
 void Discrete_Solution_DG::precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points)
@@ -261,6 +262,24 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_infc_n
 	return this->calculate_solution_at_precalulated_points(nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
 }
 
+void Discrete_Solution_DG::calculate_solution_at_cell_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint cell_index) const
+{
+	REQUIRE(!this->set_of_cell_basis_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_QPs, cell_index, this->set_of_cell_basis_QPs_m_[cell_index]);
+}
+
+void Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const
+{
+	REQUIRE(!this->set_of_infc_basis_ocs_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_infc_ocs_QPs, oc_index, this->set_of_infc_basis_ocs_QPs_m_[infs_index]);
+}
+
+void Discrete_Solution_DG::calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const
+{
+	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_infc_ncs_QPs, nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
+}
+
 double Discrete_Solution_DG::calculate_P0_basis_value(const uint cell_index) const
 {
 	const auto& basis_vector_function = this->basis_vector_functions_[cell_index];
@@ -327,6 +346,21 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_precal
 	}
 
 	return solution_at_points;
+}
+
+void Discrete_Solution_DG::calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const
+{
+	const auto num_points = basis_points_m.num_column();
+	std::fill(this->solution_at_points_values_.begin(), this->solution_at_points_values_.begin() + this->num_equations_ * num_points, 0.0);
+
+	ms::gemm(this->coefficient_matrix_contant_wrapper(cell_index), basis_points_m, this->solution_at_points_values_.data());
+	Matrix_Constant_Wrapper GE_solution_points_mcw(this->num_equations_, num_points, this->solution_at_points_values_.data());
+
+	for (int i = 0; i < num_points; ++i)
+	{
+		GE_solution_points_mcw.column(i, this->GE_soluion.data());
+		this->governing_equation_->extend_to_solution(GE_soluion.data(), solution_v_at_points[i].data());
+	}
 }
 
 
