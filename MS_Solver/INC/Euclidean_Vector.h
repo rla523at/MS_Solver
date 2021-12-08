@@ -19,13 +19,7 @@ namespace ms
 	inline constexpr ushort blas_dasum_criteria = 10;
 	inline constexpr ushort blas_axpy_criteria = 20;
 	inline constexpr ushort blas_dot_criteria = 15;
-
-	void copy(const int n, const double* x_ptr, double* result_ptr);
-	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
-	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
-	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, Euclidean_Vector& result);
 }
-
 
 class Euclidean_Vector_Constant_Base
 {
@@ -70,6 +64,8 @@ public://Command
 	void operator*=(const double constant);
 	void operator+=(const Euclidean_Vector_Constant_Base& other);
 
+	const double* data(void) const;
+	double* data(void);
 	void normalize(void);
 
 protected:
@@ -318,6 +314,14 @@ public://Query
 private:
 	std::vector<Function> functions_;
 };
+
+namespace ms
+{
+	void copy(const int n, const double* x_ptr, double* result_ptr);
+	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
+	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
+	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);
+}
 
 Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constant_Base& x);
 std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Constant_Base& x);

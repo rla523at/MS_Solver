@@ -285,6 +285,11 @@ void Matrix::operator*=(const double constant)
 	this->values_ *= constant;
 }
 
+double* Matrix::data(void)
+{
+	return this->values_.data();
+}
+
 Matrix& Matrix::inverse(void) 
 {
 	REQUIRE(this->is_square_matrix(), "invertable matrix should be square matrix");
@@ -351,6 +356,11 @@ bool  Matrix::operator==(const Matrix& other) const
 		}
 		return true;
 	}
+}
+
+const double* Matrix::data(void) const
+{
+	return this->const_data_ptr_;
 }
 
 Matrix Matrix::get_transpose(void) const 
@@ -443,22 +453,19 @@ namespace ms
 		}
 	}
 
-	void mpm(const Matrix_Base& M1, const Matrix_Base& M2, Matrix& result)
+	void mpm(const Matrix_Base& M1, const Matrix_Base& M2, double* result_ptr)
 	{
 		REQUIRE(M1.size() == M2.size(), "two matrix should be same size");
 		REQUIRE(!M1.is_transposed() && !M2.is_transposed(), "both matrixes should not be transposed");
 		
 		const auto n = static_cast<int>(M1.num_values());
-		ms::xpy(n, M1.data(), M2.data(), result.value_ptr());
+		ms::xpy(n, M1.data(), M2.data(), result_ptr);
 	}
 
-	void mv(const Matrix_Base& M, const Euclidean_Vector& v, Euclidean_Vector& result)
+	void mv(const Matrix_Base& M, const Euclidean_Vector& v, double* result_ptr)
 	{
-		result.initalize();
-
 		const auto m = static_cast<int>(M.num_row());
 		const auto n = static_cast<int>(M.num_column());
-		const auto data_ptr = result.value_ptr();
 
 		REQUIRE(n == v.size(), "size should be mathced");
 
@@ -468,7 +475,7 @@ namespace ms
 			{
 				for (size_t j = 0; j < n; ++j)
 				{
-					data_ptr[i] += M.at(i, j) * v.at(j);
+					result_ptr[i] += M.at(i, j) * v.at(j);
 				}
 			}
 		}
@@ -482,11 +489,9 @@ namespace ms
 			const auto beta = 0;
 			const auto incy = 1;
 
-			cblas_dgemv(Layout, trans, m, n, alpha, M.data(), lda, v.data(), incx, beta, data_ptr, incy);
+			cblas_dgemv(Layout, trans, m, n, alpha, M.data(), lda, v.data(), incx, beta, result_ptr, incy);
 		}
-
 	}
-
 }
 
 Matrix operator*(const double constant, const Matrix_Base& M)

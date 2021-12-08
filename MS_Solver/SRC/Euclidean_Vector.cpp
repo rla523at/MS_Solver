@@ -259,6 +259,16 @@ void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& oth
 	}
 }
 
+const double* Euclidean_Vector_Base::data(void) const
+{
+	return this->const_data_ptr_;
+}
+
+double* Euclidean_Vector_Base::data(void)
+{
+	return this->data_ptr_;
+}
+
 void Euclidean_Vector_Base::normalize(void)
 {
 	*this *= 1.0 / this->L2_norm();
@@ -630,7 +640,7 @@ const double* Euclidean_Vector_Wrapper::data(void) const
 const double* Euclidean_Vector_Wrapper::end(void) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
-	return this->base_.data();
+	return this->base_.end();
 }
 
 double Euclidean_Vector_Wrapper::L1_norm(void) const
@@ -757,10 +767,10 @@ namespace ms
 		}
 	}
 
-	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, Euclidean_Vector& result)
+	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr)
 	{
 		const auto n = static_cast<int>(v1.size());
 		REQUIRE(n == v2.size(), "size should be same");
-		ms::xmy(n, v1.data(), v2.data(), result.value_ptr());
+		ms::xmy(n, v1.data(), v2.data(), result_ptr);
 	}
 }
