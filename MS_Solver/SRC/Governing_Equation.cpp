@@ -69,6 +69,12 @@ Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const d
 	this->advection_speeds_ = { x_advection_speed, y_advection_speed };
 }
 
+Linear_Advection_2D::Linear_Advection_2D(const double* advection_speeds_ptr)
+{
+	this->space_dimension_ = 2;
+	this->advection_speeds_ = Euclidean_Vector(advection_speeds_ptr, advection_speeds_ptr + space_dimension_);
+}
+
 Matrix Linear_Advection_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 {
 	return { this->num_equations_, this->space_dimension_
@@ -86,6 +92,12 @@ Linear_Advection_3D::Linear_Advection_3D(const double x_advection_speed, const d
 {
 	this->space_dimension_ = 3;
 	this->advection_speeds_ = { x_advection_speed, y_advection_speed, z_advection_speed };
+}
+
+Linear_Advection_3D::Linear_Advection_3D(const double* advection_speeds_ptr)
+{
+	this->space_dimension_ = 3;
+	this->advection_speeds_ = Euclidean_Vector(advection_speeds_ptr, advection_speeds_ptr + space_dimension_);
 }
 
 Matrix Linear_Advection_3D::calculate_physical_flux(const Euclidean_Vector& solution) const
@@ -108,14 +120,18 @@ std::vector<std::vector<double>> Burgers::calculate_coordinate_projected_maximum
 
 	return projected_maximum_lambdas;
 }
+
 double Burgers::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
 {
 	double normal_component_sum = 0.0;
 	for (ushort i = 0; i < this->space_dimension_; ++i)
+	{
 		normal_component_sum += normal_vector[i];
+	}
 
 	return (std::max)(std::abs(oc_solution[0] * normal_component_sum), std::abs(nc_solution[0] * normal_component_sum));
 }
+
 Matrix Burgers::calculate_physical_flux(const Euclidean_Vector& solution) const
 {
 	const double flux_value = 0.5 * std::pow(solution[0], 2.0);
@@ -419,23 +435,20 @@ void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solu
 
 std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(const Configuration& config)
 {
-	const auto governing_equation = config.get("Governing_Equation");
-	const auto space_dimension = config.get<ushort>("space_dimension");
+	const auto& governing_equation = config.get_governing_equation();
+	const auto space_dimension = config.space_dimension();
 
 	if (ms::contains_icase(governing_equation, "Linear", "Advection"))
 	{
+		const auto advection_speeds_ptr = config.advection_speeds_ptr();
+
 		if (space_dimension == 2)
 		{
-			const auto x_advection_speed = config.get<double>("x_advection_speed");
-			const auto y_advection_speed = config.get<double>("y_advection_speed");
-			return std::make_shared<Linear_Advection_2D>(x_advection_speed, y_advection_speed);
+			return std::make_shared<Linear_Advection_2D>(advection_speeds_ptr);
 		}
 		else if (space_dimension == 3)
 		{
-			const auto x_advection_speed = config.get<double>("x_advection_speed");
-			const auto y_advection_speed = config.get<double>("y_advection_speed");
-			const auto z_advection_speed = config.get<double>("z_advection_speed");
-			return std::make_shared<Linear_Advection_3D>(x_advection_speed, y_advection_speed, z_advection_speed);
+			return std::make_shared<Linear_Advection_2D>(advection_speeds_ptr);
 		}
 		else
 		{
@@ -468,44 +481,6 @@ std::shared_ptr<Governing_Equation> Governing_Equation_Factory::make_shared(cons
 		else if (space_dimension == 3)
 		{
 			return std::make_shared<Euler_3D>();
-		}
-		else
-		{
-			EXCEPTION("Euler does not support space dimension in configuration file");
-			return nullptr;
-		}
-	}
-	else
-	{
-		EXCEPTION("governing equation in configuration file is not supported");
-		return nullptr;
-	}
-}
-
-std::unique_ptr<Governing_Equation> Governing_Equation_Factory::make_unique(const Configuration& config)
-{
-	const auto governing_equation = config.get("Governing_Equation");
-	const auto space_dimension = config.get<ushort>("space_dimension");
-
-	if (ms::contains_icase(governing_equation, "Linear_Advection"))
-	{
-		if (space_dimension == 2)
-		{
-			const auto x_advection_speed = config.get<double>("x_advection_speed");
-			const auto y_advection_speed = config.get<double>("y_advection_speed");
-			return std::make_unique<Linear_Advection_2D>(x_advection_speed,y_advection_speed);
-		}
-		else
-		{
-			EXCEPTION("Linear advection does not support space dimension in configuration file");
-			return nullptr;
-		}
-	}
-	else if (ms::contains_icase(governing_equation, "Euler")) 
-	{
-		if (space_dimension == 2)
-		{
-			return std::make_unique<Euler_2D>();
 		}
 		else
 		{

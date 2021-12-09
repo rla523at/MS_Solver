@@ -1,9 +1,9 @@
 #pragma once
 #include "Exception.h"
+#include "MBLAS.h"
 
 #include <array>
 #include <iomanip>
-#include <mkl.h>
 #include <sstream>
 #include <vector>
 

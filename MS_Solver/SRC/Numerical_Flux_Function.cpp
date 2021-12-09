@@ -39,7 +39,7 @@ void LLF::calculate(double* numerical_flux_ptr, const Euclidean_Vector& oc_solut
 
 std::shared_ptr<Numerical_Flux_Function> Numerical_Flux_Function_Factory::make_shared(const Configuration& configuration, const std::shared_ptr<Governing_Equation>& governing_equation)
 {
-    const auto name = configuration.get("numerical_flux");
+    const auto name = configuration.get_numerical_flux();
 
     if (ms::contains_icase(name, "LLF"))
     {

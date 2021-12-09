@@ -37,15 +37,15 @@ double Constant_Dt::calculate(const std::vector<Euclidean_Vector>& P0_solutions,
 
 std::unique_ptr<Time_Step_Calculator> Time_Step_Calculator_Factory::make_unique(const Configuration& configuration, const Grid& grid)
 {
-    const auto type_name = configuration.get("time_step_calculator_type");
-    if (ms::contains_icase(type_name, "CFL"))
+    const auto time_step_method = configuration.get_time_step_method();
+    if (ms::contains_icase(time_step_method, "CFL"))
     {
-        const auto cfl_number = configuration.get<double>("CFL_number");
+        const auto cfl_number = configuration.CFL_number();
         return std::make_unique<CFL>(cfl_number, grid);
     }
-    else if (ms::contains_icase(type_name, "Constant", "dt"))
+    else if (ms::contains_icase(time_step_method, "Constant", "dt"))
     {
-        const auto constant_dt = configuration.get<double>("constant_dt");
+        const auto constant_dt = configuration.constant_dt();
         return std::make_unique<Constant_Dt>(constant_dt);
     }
     else

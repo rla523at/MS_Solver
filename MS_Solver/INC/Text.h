@@ -45,6 +45,7 @@ public://command
 	void upper_case(void);
 
 public://Query
+	bool operator<(const Sentence& other) const;
 	bool operator==(const Sentence& other) const;
 
 	bool contain_icase(const char* target) const;
@@ -52,7 +53,7 @@ public://Query
 	size_t find_position(const std::string_view target) const;
 	Sentence get_remove(const std::string_view target) const;
 	std::vector<Sentence> parse(const char delimiter) const;
-	std::string get_string(void) const;
+	std::string to_string(void) const;
 	template <typename T>	T to_value(void) const;
 	Sentence get_upper_case(void) const;
 

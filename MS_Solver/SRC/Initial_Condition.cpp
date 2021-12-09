@@ -691,8 +691,8 @@ Euclidean_Vector Explosion_3D::calculate_solution(const Euclidean_Vector& space_
 
 std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const Configuration& configuration)
 {
-	const auto name = configuration.get("initial_condition");
-	const auto space_dimension = configuration.get<ushort>("space_dimension");
+	const auto& name = configuration.get_initial_condition();
+	const auto space_dimension = configuration.space_dimension();
 
 	if (ms::contains_icase(name, "constant1"))
 	{
@@ -700,20 +700,15 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 	}
 	else if (ms::contains_icase(name, "sine"))
 	{
+		const auto wave_lengths_ptr = configuration.wave_lengths_ptr();
+
 		if (space_dimension == 2)
 		{
-			const auto x_wave_length = configuration.get<double>("x_wave_length");
-			const auto y_wave_length = configuration.get<double>("y_wave_length");
-
-			return std::make_unique<Sine_Wave_2D>(x_wave_length,y_wave_length);
+			return std::make_unique<Sine_Wave_2D>(wave_lengths_ptr);
 		}
 		else if (space_dimension == 3)
 		{
-			const auto x_wave_length = configuration.get<double>("x_wave_length");
-			const auto y_wave_length = configuration.get<double>("y_wave_length");
-			const auto z_wave_length = configuration.get<double>("z_wave_length");
-
-			return std::make_unique<Sine_Wave_3D>(x_wave_length, y_wave_length, z_wave_length);
+			return std::make_unique<Sine_Wave_3D>(wave_lengths_ptr);
 		}
 		else
 		{

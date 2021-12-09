@@ -56,7 +56,7 @@ void SSPRK54::update(Semi_Discrete_Equation& semi_discrete_equation, const doubl
 
 std::unique_ptr<Time_Discrete_Scheme> Time_Discrete_Scheme_Factory::make_unique(const Configuration& configuration)
 {
-    const auto time_discrete_scheme_name = configuration.get("time_discrete_scheme");
+    const auto& time_discrete_scheme_name = configuration.get_time_discrete_scheme();
 
     if (ms::contains_icase(time_discrete_scheme_name, "SSPRK", "33"))
     {

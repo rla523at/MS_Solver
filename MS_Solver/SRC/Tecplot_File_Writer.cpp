@@ -264,7 +264,7 @@ void Tecplot_Binary_File_Writer::write_data(const std::vector<std::vector<double
 
 std::unique_ptr<Tecplot_File_Writer> Tecplot_File_Writer_Factory::make_unique(const Configuration& configuration)
 {
-	const auto format = configuration.get("post_file_format");
+	const auto& format = configuration.get_post_file_format();
 
 	if (ms::contains_icase(format, "ASCII"))
 	{

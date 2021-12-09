@@ -238,7 +238,7 @@ void Euclidean_Vector_Base::operator*=(const double constant)
 
 void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& other)
 {
-	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
+	REQUIRE(this->num_values_ == other.size(), "other vector should be same size");
 
 	const double* other_data_ptr = other.data();
 	if (this->num_values_ <= ms::blas_axpy_criteria)

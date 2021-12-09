@@ -146,8 +146,8 @@ std::string Center_Base_Convertor::variable_location_str(void) const
 
 std::unique_ptr<Post_Variable_Convertor> Post_Variable_Converter_Factory::make_unique(const Configuration& configuration, const Grid& grid, Discrete_Solution& discrete_solution)
 {
-	const auto post_order = configuration.get<ushort>("post_order");
-	const auto post_point_location = configuration.get("post_point_location");
+	const auto post_order = configuration.post_order();
+	const auto& post_point_location = configuration.get_post_point_location();
 
 	if (ms::contains_icase(post_point_location, "Node"))
 	{

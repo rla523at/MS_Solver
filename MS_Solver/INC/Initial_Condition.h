@@ -35,6 +35,8 @@ class Sine_Wave_2D : public Sine_Wave
 public:
 	Sine_Wave_2D(const double x_wave_length, const double y_wave_length)
 		: Sine_Wave({ x_wave_length,y_wave_length }) {};
+	Sine_Wave_2D(const double* wave_lengths_ptr)
+		: Sine_Wave({ wave_lengths_ptr,wave_lengths_ptr + 2 }) {};
 };
 
 class Sine_Wave_3D : public Sine_Wave
@@ -42,6 +44,8 @@ class Sine_Wave_3D : public Sine_Wave
 public:
 	Sine_Wave_3D(const double x_wave_length, const double y_wave_length, const double z_wave_length)
 	: Sine_Wave({ x_wave_length,y_wave_length,z_wave_length }) {};
+	Sine_Wave_3D(const double* wave_lengths_ptr)
+		: Sine_Wave({ wave_lengths_ptr,wave_lengths_ptr + 3 }) {};
 };
 
 class Square_Wave : public Initial_Condition

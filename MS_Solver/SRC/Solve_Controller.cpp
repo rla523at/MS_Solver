@@ -115,15 +115,15 @@ void Solve_Post_Controller_By_Iter::update_post_iter(void)
 
 std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(const Configuration& configuration)
 {
-    const auto type_name = configuration.get("solve_end_controller_type");
+    const auto& type_name = configuration.get_solve_end_controller_type();
     if (ms::contains_icase(type_name, "Time"))
     {
-        const auto solve_end_time = configuration.get<double>("solve_end_time");
+        const auto solve_end_time = configuration.solve_end_time();
         return std::make_unique<Solve_End_Controller_By_Time>(solve_end_time);
     }
     else if (ms::contains_icase(type_name, "Iter"))
     {
-        const auto solve_end_iter = configuration.get<size_t>("solve_end_iter");
+        const auto solve_end_iter = configuration.solve_end_iter();
         return std::make_unique<Solve_End_Controller_By_Iter>(solve_end_iter);
     }
     else
@@ -135,15 +135,15 @@ std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(
 
 std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make_unique(const Configuration& configuration)
 {
-    const auto type_name = configuration.get("solve_post_controller_type");
+    const auto& type_name = configuration.get_solve_post_controller_type();
     if (ms::contains_icase(type_name, "Time"))
     {
-        const auto post_time_step = configuration.get<double>("solve_post_time_step");
+        const auto post_time_step = configuration.solve_post_time_step();
         return std::make_unique<Solve_Post_Controller_By_Time>(post_time_step);
     }
     else if (ms::contains_icase(type_name, "Iter"))
     {
-        const auto post_iter_unit = configuration.get<size_t>("solve_post_iter_unit");
+        const auto post_iter_unit = configuration.solve_post_iter_unit();
         return std::make_unique<Solve_Post_Controller_By_Iter>(post_iter_unit);
     }
     else

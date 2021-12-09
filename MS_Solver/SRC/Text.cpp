@@ -53,6 +53,11 @@ void Sentence::upper_case(void)
 	ms::upper_case(this->contents_);
 }
 
+bool Sentence::operator<(const Sentence& other) const
+{
+	return this->contents_ < other.contents_;
+}
+
 bool Sentence::operator==(const Sentence& other) const 
 {
 	return this->contents_ == other.contents_;
@@ -89,7 +94,7 @@ std::vector<Sentence> Sentence::parse(const char delimiter) const
 	return parsed_senteces;
 }
 
-std::string Sentence::get_string(void) const 
+std::string Sentence::to_string(void) const 
 {
 	return this->contents_;
 }
@@ -224,8 +229,8 @@ std::string Text::to_string(void) const
 {
 	std::string str;
 	for (auto i = this->senteces_.begin(); i != this->senteces_.end() - 1; ++i)
-		str += i->get_string() + "\n";
-	str += this->senteces_.back().get_string();
+		str += i->to_string() + "\n";
+	str += this->senteces_.back().to_string();
 
 	return str;
 }
@@ -485,7 +490,7 @@ namespace ms
 
 std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece) 
 {
-	return ostream << sentece.get_string();
+	return ostream << sentece.to_string();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Text& text) 

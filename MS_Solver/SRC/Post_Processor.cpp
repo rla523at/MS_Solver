@@ -5,7 +5,7 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 	Profiler::set_time_point();
 
 	This_::post_folder_path_ = configuration.post_folder_path_str();
-	This_::post_order_ = configuration.get<ushort>("post_order");
+	This_::post_order_ = configuration.post_order();
 
 	auto post_variable_convertor = Post_Variable_Converter_Factory::make_unique(configuration, grid, discrete_solution);
 	This_::post_variables_ = std::make_unique<Post_Variables>(grid, std::move(post_variable_convertor), This_::post_order_);

@@ -57,8 +57,10 @@ class Linear_Advection_2D : public Linear_Advection
 {
 public:
     Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed);
-    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+    Linear_Advection_2D(const double* advection_speeds);
 
+public:
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
 };
 
@@ -66,8 +68,10 @@ class Linear_Advection_3D : public Linear_Advection
 {
 public:
     Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed);
-    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+    Linear_Advection_3D(const double* advection_speeds);
 
+public:
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
 };
 
@@ -133,7 +137,6 @@ class Governing_Equation_Factory//static class
 {
 public:
     static std::shared_ptr<Governing_Equation> make_shared(const Configuration& config);
-    static std::unique_ptr<Governing_Equation> make_unique(const Configuration& config);
 
 private:
 	Governing_Equation_Factory(void) = delete;

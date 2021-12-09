@@ -1,19 +1,19 @@
-grid_file_path				= RSC/Grid/2D/RQ40.msh
-
 space_dimension				= 2
-grid_file_type				= Gmsh
 
 governing_equation			= Linear_Advection			//Linear_Advection, Burgers, Euler
-solution_degree				= 2
+Initial_condition			= Sine_Wave					//Constant1, Sine_Wave
+
+grid_file_path				= RSC/Grid/2D/RQ40.msh
+grid_file_type				= Gmsh
 
 spatial_discrete_scheme		= DG
-numerical_flux				= LLF
+solution_degree				= 2
 
-Initial_condition			= Sine_Wave					//Constant1, Sine_Wave
+numerical_flux				= LLF
 
 Time_Discrete_scheme		= SSPRK54					//SSPRK33, SSPRK54
 
-Time_step_calculator_type	= CFL						//CFL, constant_dt
+Time_step_method			= CFL						//CFL, constant_dt
 CFL_number					= 0.9
 constant_dt					= 0.0001
 
@@ -26,13 +26,14 @@ solve_post_time_step		= 0.1
 solve_post_iter_unit		= 100
 
 post_base_path				= C:/Users/KimMinseok/Desktop/»õÆú´õ/
-post_order					= 1
 post_file_format			= Binary 					//ASCII, Binary
 post_point_location			= Node						//Center, Node
+post_order					= 1
 
 //linear advection option
 x_advection_speed			= 1.0
 y_advection_speed			= 0.5
+z_advection_speed			= 1.0
 
 //sine wave option
 x_wave_length				= 1.0

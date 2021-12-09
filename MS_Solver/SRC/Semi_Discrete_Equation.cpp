@@ -5,7 +5,7 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	const auto governing_equation = Governing_Equation_Factory::make_shared(configuration);
 
 	const auto initial_condition = Initial_Condition_Factory::make_unique(configuration);
-	const auto solution_degree = configuration.get<ushort>("solution_degree");
+	const auto solution_degree = configuration.solution_degree();
 	this->discrete_solution_ = std::make_unique<Discrete_Solution_DG>(governing_equation, grid, *initial_condition, solution_degree);
 
 	auto time_step_calculator = Time_Step_Calculator_Factory::make_unique(configuration, grid);
@@ -156,7 +156,7 @@ double Semi_Discrete_Equation_DG::calculate_cell_Linf_error(const uint cell_inde
 
 std::unique_ptr<Semi_Discrete_Equation> Semi_Discrete_Equation_Factory::make_unique(const Configuration& configuration, const Grid& grid)
 {
-	const auto name = configuration.get("spatial_discrete_scheme");
+	const auto& name = configuration.get_spatial_discrete_scheme();
 
 	if (ms::contains_icase(name, "DG"))
 	{
