@@ -21,7 +21,6 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
 
     this->set_of_num_QPs_.resize(this->num_cells_);
     this->set_of_flux_QPs_m_.resize(this->num_cells_);
-    //this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
     this->solution_v_at_QPs_.fill(Euclidean_Vector(num_solutions));
     this->physical_flux_ = Matrix(num_equations, space_dimension);
     //
@@ -63,10 +62,10 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
         //
     }
 
-    //for precalculation
-    discrete_solution.precalculate_cell_P0_basis_values();
-    discrete_solution.precalcualte_cell_QPs_basis_values(quadrature_rules);
-    //
+    ////for precalculation
+    //discrete_solution.precalculate_cell_P0_basis_values();
+    //discrete_solution.precalcualte_cell_QPs_basis_values(quadrature_rules);
+    ////
 
     LOG << std::left << std::setw(50) << "@ Cells DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }

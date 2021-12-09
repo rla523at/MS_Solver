@@ -2,21 +2,9 @@
 #include "Exception.h"
 #include "MBLAS.h"
 
-#include <array>
 #include <iomanip>
 #include <sstream>
 #include <vector>
-
-using ushort = unsigned short;
-
-namespace ms
-{
-	inline constexpr ushort blas_dcopy_criteria = 50;
-	inline constexpr ushort blas_dscal_criteria = 10;
-	inline constexpr ushort blas_dasum_criteria = 10;
-	inline constexpr ushort blas_axpy_criteria = 20;
-	inline constexpr ushort blas_dot_criteria = 15;
-}
 
 class Euclidean_Vector;
 class Euclidean_Vector_Constant_Base
@@ -87,27 +75,9 @@ public:
 	Euclidean_Vector(std::vector<double>&& values);
 	Euclidean_Vector(const std::vector<double>& values);
 	template <typename Iter>	Euclidean_Vector(Iter first, Iter last) 
+		: values_(first,last)
 	{
-		this->num_values_ = static_cast<int>(last - first);
-
-		//if (this->num_values_ <= this->small_criterion_)
-		//{
-		//	std::copy(first, last, this->small_buffer_.begin());
-		//	this->const_data_ptr_ = this->small_buffer_.data();
-		//	this->data_ptr_ = this->small_buffer_.data();
-		//}
-		//else
-		//{
-		//	this->values_.resize(this->num_values_);
-
-		//	std::copy(first, last, this->values_.begin());
-		//	this->const_data_ptr_ = this->values_.data();
-		//	this->data_ptr_ = this->values_.data();
-		//}
-
-		this->values_.resize(this->num_values_);
-
-		std::copy(first, last, this->values_.begin());
+		this->num_values_ = static_cast<int>(this->values_.size());
 		this->const_data_ptr_ = this->values_.data();
 		this->data_ptr_ = this->values_.data();
 	};
@@ -119,15 +89,12 @@ public://Command
 	void operator=(Euclidean_Vector&& other) noexcept;
 
 	std::vector<double>&& move_values(void);
-	//bool is_small(void) const;
 
 private:
-	//static constexpr ushort small_criterion_ = 5;
-	//std::array<double, small_criterion_> small_buffer_ = { 0 };
 	std::vector<double> values_;
 };
 
-class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base
+class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base	//upcasting을 위한 상속
 {
 public:
 	Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values)
@@ -312,12 +279,8 @@ private:
 
 namespace ms
 {
-	void copy(const int n, const double* x_ptr, double* result_ptr);
-	void cx(const double c, const int n, double* x_ptr);
-	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
-	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
-	void vpv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);
-	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr);
+	void vpv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr);
+	void vmv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr);
 }
 
 Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constant_Base& x);

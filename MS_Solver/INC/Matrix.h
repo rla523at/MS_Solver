@@ -1,7 +1,11 @@
 #pragma once
-#include "Euclidean_Vector.h"
+#include "Exception.h"
+#include "MBLAS.h"
 
-using ushort = unsigned short;
+#include <iomanip>
+#include <sstream>
+#include <type_traits>
+#include <vector>
 
 namespace ms
 {
@@ -17,12 +21,44 @@ public: //Command
 
 public: //Query
 	Matrix operator*(const double constant) const;	
-	Euclidean_Vector operator*(const Euclidean_Vector& vec) const;
+	template <typename V, std::enable_if_t<!std::is_base_of_v<Matrix_Base,V> && std::is_class_v<V>, bool> = true>  
+	V operator*(const V& vec) const
+	{
+		REQUIRE(this->num_columns_ == vec.size(), "size should be mathced");
+		std::vector<double> result(this->num_rows_);
+
+		if (this->num_values() <= ms::blas_mv_criteria)
+		{
+			for (size_t i = 0; i < this->num_rows_; ++i)
+			{
+				for (size_t j = 0; j < this->num_columns_; ++j)
+				{
+					result[i] += this->at(i, j) * vec.at(j);
+				}
+			}
+		}
+		else
+		{
+			const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+			const auto trans = this->transpose_type_;
+			const auto m = static_cast<MKL_INT>(this->num_rows_);
+			const auto n = static_cast<MKL_INT>(this->num_columns_);
+			const auto alpha = 1.0;
+			const auto lda = static_cast<MKL_INT>(this->leading_dimension());
+			const auto incx = 1;
+			const auto beta = 0;
+			const auto incy = 1;
+
+			cblas_dgemv(Layout, trans, m, n, alpha, this->const_data_ptr_, lda, vec.data(), incx, beta, result.data(), incy);
+		}
+
+		return result;
+	}
 	Matrix operator*(const Matrix_Base& other) const;
 	Matrix operator+(const Matrix_Base& other) const;
 
 	double at(const size_t row, const size_t column) const;
-	Euclidean_Vector column(const size_t column_index) const;
+	std::vector<double> column(const size_t column_index) const;
 	void column(const size_t column_index, double* value_ptr) const;
 	const double* data(void) const;
 	bool is_finite(void) const;
@@ -182,7 +218,36 @@ namespace ms
 {
 	void gemm(const Matrix_Base& A, const Matrix_Base& B, double* output_ptr);
 	void mpm(const Matrix_Base& M1, const Matrix_Base& M2, double* result);
-	void mv(const Matrix_Base& M, const Euclidean_Vector& v, double* result);
+	template <typename V> void mv(const Matrix_Base& M, const V& v, double* result_ptr)
+	{
+		const auto m = static_cast<int>(M.num_row());
+		const auto n = static_cast<int>(M.num_column());
+
+		REQUIRE(n == v.size(), "size should be mathced");
+
+		if (m * n <= ms::blas_mv_criteria)
+		{
+			for (size_t i = 0; i < m; ++i)
+			{
+				for (size_t j = 0; j < n; ++j)
+				{
+					result_ptr[i] += M.at(i, j) * v.at(j);
+				}
+			}
+		}
+		else
+		{
+			const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+			const auto trans = M.transpose_type();
+			const auto alpha = 1.0;
+			const auto lda = static_cast<MKL_INT>(M.leading_dimension());
+			const auto incx = 1;
+			const auto beta = 0;
+			const auto incy = 1;
+
+			cblas_dgemv(Layout, trans, m, n, alpha, M.data(), lda, v.data(), incx, beta, result_ptr, incy);
+		}
+	}
 }
 
 Matrix operator*(const double constant, const Matrix_Base& M);

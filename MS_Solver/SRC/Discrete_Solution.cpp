@@ -272,10 +272,10 @@ void Discrete_Solution_DG::calculate_solution_at_bdry_QPs(std::vector<Euclidean_
 	this->calculate_solution_at_precalulated_points(solution_at_QPs, oc_index, this->set_of_bdry_basis_QPs_m_[bdry_index]);
 }
 
-void Discrete_Solution_DG::calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const
+void Discrete_Solution_DG::calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs_ptr, const uint cell_index) const
 {
 	REQUIRE(!this->set_of_cell_basis_QPs_m_.empty(), "basis value should be precalculated");
-	this->calculate_solution_at_precalulated_points(solution_at_QPs, cell_index, this->set_of_cell_basis_QPs_m_[cell_index]);
+	this->calculate_solution_at_precalulated_points(solution_at_QPs_ptr, cell_index, this->set_of_cell_basis_QPs_m_[cell_index]);
 }
 
 void Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const
@@ -385,7 +385,7 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(std::vector
 	}
 }
 
-void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const
+void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points_ptr, const uint cell_index, const Matrix& basis_points_m) const
 {
 	const auto num_points = basis_points_m.num_column();
 	std::fill(this->solution_at_points_values_.begin(), this->solution_at_points_values_.begin() + this->num_equations_ * num_points, 0.0);
@@ -396,7 +396,7 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_V
 	for (int i = 0; i < num_points; ++i)
 	{
 		GE_solution_points_mcw.column(i, this->GE_soluion.data());
-		this->governing_equation_->extend_to_solution(GE_soluion.data(), solution_v_at_points[i].data());
+		this->governing_equation_->extend_to_solution(GE_soluion.data(), solution_v_at_points_ptr[i].data());
 	}
 }
 

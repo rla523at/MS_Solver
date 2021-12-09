@@ -12,19 +12,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator*(const double constant
 {
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
 	
-	if (this->num_values_ <= ms::blas_dscal_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			result[i] *= constant;
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto incx = 1;
-		cblas_dscal(n, constant, result.data(), incx);
-	}
+	ms::BLAS::cx(constant, this->num_values_, result.data());
 
 	return result;
 }
@@ -34,23 +22,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator+(const Euclidean_Vecto
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
 	
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
-
-	if (this->num_values_ <= ms::blas_axpy_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			result[i] += other.const_data_ptr_[i];
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto a = 1.0;
-		const auto incx = 1;
-		const auto incy = 1;
-
-		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data(), incy);
-	}
+	ms::vpv(*this, other, result.data());
 
 	return result;
 }
@@ -60,23 +32,7 @@ Euclidean_Vector Euclidean_Vector_Constant_Base::operator-(const Euclidean_Vecto
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
 
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);
-
-	if (this->num_values_ <= ms::blas_axpy_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			result[i] -= other.const_data_ptr_[i];
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto a = -1.0;
-		const auto incx = 1;
-		const auto incy = 1;
-
-		cblas_daxpy(n, a, other.const_data_ptr_, incx, result.data(), incy);
-	}
+	ms::vmv(*this, other, result.data());
 
 	return result;
 }
@@ -130,24 +86,7 @@ const double* Euclidean_Vector_Constant_Base::end(void) const
 
 double Euclidean_Vector_Constant_Base::L1_norm(void) const
 {
-	double result = 0.0;
-
-	if (this->num_values_ <= ms::blas_dasum_criteria) 
-	{
-		for (size_t i = 0; i < this->num_values_; ++i)
-		{
-			result += std::abs(this->const_data_ptr_[i]);
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto incx = 1;
-
-		result = cblas_dasum(n, this->const_data_ptr_, incx);
-	}
-
-	return result;
+	return ms::BLAS::abs_x(this->num_values_, this->const_data_ptr_);
 }
 
 double Euclidean_Vector_Constant_Base::L2_norm(void) const
@@ -168,25 +107,7 @@ double Euclidean_Vector_Constant_Base::inner_product(const Euclidean_Vector_Cons
 {
 	REQUIRE(this->num_values_ == other.num_values_, "other vector should be same size");
 	
-	double result = 0.0;
-
-	if (this->num_values_ <= ms::blas_dot_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			result += this->const_data_ptr_[i] * other.const_data_ptr_[i];
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto incx = 1;
-		const auto incy = 1;
-
-		result = cblas_ddot(n, this->const_data_ptr_, incx, other.const_data_ptr_, incy);
-	}
-
-	return result;
+	return ms::BLAS::x_dot_y(this->num_values_, this->const_data_ptr_, other.const_data_ptr_);
 }
 
 bool Euclidean_Vector_Constant_Base::is_axis_translation(const Euclidean_Vector_Constant_Base& other) const
@@ -220,43 +141,14 @@ std::string Euclidean_Vector_Constant_Base::to_string(void) const
 
 void Euclidean_Vector_Base::operator*=(const double constant)
 {
-	if (this->num_values_ <= ms::blas_dscal_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			this->data_ptr_[i] *= constant;
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto incx = 1;
-
-		cblas_dscal(n, constant, this->data_ptr_, incx);
-	}
+	ms::BLAS::cx(constant, this->num_values_, this->data_ptr_);
 }
 
 void Euclidean_Vector_Base::operator+=(const Euclidean_Vector_Constant_Base& other)
 {
 	REQUIRE(this->num_values_ == other.size(), "other vector should be same size");
 
-	const double* other_data_ptr = other.data();
-	if (this->num_values_ <= ms::blas_axpy_criteria)
-	{
-		for (int i = 0; i < this->num_values_; ++i)
-		{
-			this->data_ptr_[i] += other_data_ptr[i];
-		}
-	}
-	else
-	{
-		const auto n = this->num_values_;
-		const auto a = 1.0;
-		const auto incx = 1;
-		const auto incy = 1;
-
-		cblas_daxpy(n, a, other_data_ptr, incx, this->data_ptr_, incy);
-	}
+	ms::BLAS::x_plus_assign_y(this->num_values_, this->data_ptr_, other.data());
 }
 
 double& Euclidean_Vector_Base::operator[](const size_t position)
@@ -307,131 +199,49 @@ const double* Euclidean_Vector_Base::data(void) const
 }
 
 Euclidean_Vector::Euclidean_Vector(const size_t size)
+	:values_(size)
 {
-	this->num_values_ = static_cast<int>(size);
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_.resize(num_values_);
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_.resize(num_values_);
+	this->num_values_ = static_cast<int>(this->values_.size());
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(const std::initializer_list<double> list)
+	:values_(list)
 {
-	this->num_values_ = static_cast<int>(list.size());
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	std::copy(list.begin(), list.end(), this->small_buffer_.begin());
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = list;
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_ = list;
+	this->num_values_ = static_cast<int>(this->values_.size());
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(std::vector<double>&& values)
+	:values_(std::move(values))
 {
-	this->num_values_ = static_cast<int>(values.size());
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	std::copy(values.begin(), values.end(), this->small_buffer_.begin());
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = std::move(values);
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_ = std::move(values);
+	this->num_values_ = static_cast<int>(this->values_.size());
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 };
 
 Euclidean_Vector::Euclidean_Vector(const std::vector<double>& values)
+	:values_(values)
 {
-	this->num_values_ = static_cast<int>(values.size());
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	std::copy(values.begin(), values.end(), this->small_buffer_.begin());
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = values;
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_ = values;
+	this->num_values_ = static_cast<int>(this->values_.size());
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(const Euclidean_Vector& other)
+	:values_(other.values_)
 {
 	this->num_values_ = other.num_values_;
-	
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	this->small_buffer_ = other.small_buffer_;
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = other.values_;
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_ = other.values_;
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
 
 Euclidean_Vector::Euclidean_Vector(Euclidean_Vector&& other) noexcept
+	:values_(std::move(other.values_))
 {
 	this->num_values_ = other.num_values_;
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	this->small_buffer_ = other.small_buffer_;
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = std::move(other.values_);
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
-	this->values_ = std::move(other.values_);
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 
@@ -442,46 +252,16 @@ Euclidean_Vector::Euclidean_Vector(Euclidean_Vector&& other) noexcept
 
 void Euclidean_Vector::operator=(const Euclidean_Vector& other)
 {
-	this->num_values_ = other.num_values_;
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
-
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = other.values_;
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
 	this->values_ = other.values_;
+	this->num_values_ = other.num_values_;
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
 
 void Euclidean_Vector::operator=(Euclidean_Vector&& other) noexcept
 {
-	this->num_values_ = other.num_values_;
-
-	//if (this->num_values_ <= this->small_criterion_)
-	//{
-	//	std::copy(other.small_buffer_.begin(), other.small_buffer_.begin() + this->num_values_, this->small_buffer_.begin());
-
-	//	this->const_data_ptr_ = this->small_buffer_.data();
-	//	this->data_ptr_ = this->small_buffer_.data();
-	//}
-	//else
-	//{
-	//	this->values_ = std::move(other.values_);
-	//	this->const_data_ptr_ = this->values_.data();
-	//	this->data_ptr_ = this->values_.data();
-	//}
-
 	this->values_ = std::move(other.values_);
+	this->num_values_ = other.num_values_;
 	this->const_data_ptr_ = this->values_.data();
 	this->data_ptr_ = this->values_.data();
 }
@@ -492,37 +272,33 @@ std::vector<double>&& Euclidean_Vector::move_values(void)
 	this->const_data_ptr_ = nullptr;
 	this->data_ptr_ = nullptr;
 
-	//if (this->num_values_ <= )
 	return std::move(this->values_);
 }
-
-//bool Euclidean_Vector::is_small(void) const
-//{
-//	return this->values_.empty();
-//}
-
-
 
 Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator-(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
 	return this->base_ - other;
 }
+
 Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator+(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
 	return this->base_ + other;
 }
+
 Euclidean_Vector Euclidean_Vector_Constant_Wrapper::operator*(const double constant) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
 	return this->base_ * constant;
 }
+
 double Euclidean_Vector_Constant_Wrapper::operator[](const size_t position) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
 	return this->base_[position];
 }
+
 bool Euclidean_Vector_Constant_Wrapper::operator==(const Euclidean_Vector_Constant_Base& other) const
 {
 	REQUIRE(this->is_sync(), "wrapper should be sync");
@@ -621,15 +397,6 @@ void Euclidean_Vector_Wrapper::operator+=(const Euclidean_Vector_Constant_Base& 
 void Euclidean_Vector_Wrapper::operator=(Euclidean_Vector&& other) noexcept
 {
 	this->num_values_ = static_cast<int>(other.size());
-
-	//if (other.is_small())
-	//{
-	//	std::copy(other.begin(), other.end(), this->values_wrapper_.begin());
-	//}
-	//else
-	//{
-	//	this->values_wrapper_ = std::move(other.move_values());
-	//}
 
 	this->values_wrapper_ = std::move(other.move_values());
 
@@ -769,91 +536,17 @@ std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Constant_Base&
 
 namespace ms
 {
-	void copy(const int n, const double* x_ptr, double* result_ptr)
-	{
-		if (n <= ms::blas_dcopy_criteria)
-		{
-			for (int i = 0; i < n; ++i)
-			{
-				result_ptr[i] = x_ptr[i];
-			}
-		}
-		else
-		{
-			const auto incx = 1;
-			const auto incy = 1;
-			cblas_dcopy(n, x_ptr, incx, result_ptr, incy);
-		}
-	}
-
-	void cx(const double c, const int n, double* x_ptr)
-	{
-		if (n <= ms::blas_dscal_criteria)
-		{
-			for (int i = 0; i < n; ++i)
-			{
-				x_ptr[i] *= c;
-			}
-		}
-		else
-		{
-			const auto incx = 1;
-			cblas_dscal(n, c, x_ptr, incx);
-		}
-
-	}
-
-	void xpy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
-	{
-		ms::copy(n, x_ptr, result_ptr);
-
-		if (n <= ms::blas_axpy_criteria)
-		{
-			for (int i = 0; i < n; ++i)
-			{
-				result_ptr[i] += y_ptr[i];
-			}
-		}
-		else
-		{
-			const auto a = 1.0;
-			const auto incx = 1;
-			const auto incy = 1;
-			cblas_daxpy(n, a, y_ptr, incx, result_ptr, incy);
-		}
-	}
-
-	void xmy(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
-	{
-		ms::copy(n, x_ptr, result_ptr);
-
-		if (n <= ms::blas_axpy_criteria)
-		{
-			for (int i = 0; i < n; ++i)
-			{
-				result_ptr[i] -= y_ptr[i];
-			}
-		}
-		else
-		{
-			const auto a = -1.0;
-			const auto incx = 1;
-			const auto incy = 1;
-			cblas_daxpy(n, a, y_ptr, incx, result_ptr, incy);
-		}
-	}
-
-	void vpv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr)
+	void vpv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr)
 	{
 		const auto n = static_cast<int>(v1.size());
 		REQUIRE(n == v2.size(), "size should be same");
-		ms::xpy(n, v1.data(), v2.data(), result_ptr);
+		ms::BLAS::x_plus_y(n, v1.data(), v2.data(), result_ptr);
 	}
 
-	void vmv(const Euclidean_Vector_Base& v1, const Euclidean_Vector_Base& v2, double* result_ptr)
+	void vmv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr)
 	{
 		const auto n = static_cast<int>(v1.size());
 		REQUIRE(n == v2.size(), "size should be same");
-		ms::xmy(n, v1.data(), v2.data(), result_ptr);
+		ms::BLAS::x_minus_y(n, v1.data(), v2.data(), result_ptr);
 	}
 }

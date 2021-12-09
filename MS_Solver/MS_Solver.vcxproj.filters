@@ -132,6 +132,9 @@
     <ClCompile Include="SRC\Exact_Solution.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\MBLAS.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Configuration.h">
@@ -231,6 +234,9 @@
       <Filter>헤더 파일\Post</Filter>
     </ClInclude>
     <ClInclude Include="INC\Exact_Solution.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\MBLAS.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
