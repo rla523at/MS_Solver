@@ -16,107 +16,34 @@ private:
 		print_on
 	};
 
+public:
+	static Log& get_instance(void);
+
 public://Command
 	template <typename T> Log& operator<<(const T& value)
 	{
 		this->content_ << value;
 		return *this;
 	}
-	Log& operator<<(const Command& command)
-	{
-		switch (command)
-		{
-		case Command::print:	
-		{
-			this->print(); 
-			break;
-		}
-		case Command::print_off:	
-		{
-			this->is_print_on = false;
-			break;
-		}
-		case Command::print_on:
-		{
-			this->is_print_on = true;
-			break;
-		}
-		default:				
-		{
-			EXCEPTION("not supported command");
-		}
-		}
-		return *this;
-	}
+	Log& operator<<(const Command& command);
 	
-	void clear(void)
-	{
-		this->log_txt_.clear();
-	}
-	static Log& get_instance(void)
-	{
-		static Log instance;
-		return instance;
-	}
-	void set_path(const std::string& path) 
-	{	
-		this->path_ = path;
-	}
+	void clear(void);	
+	void set_path(const std::string& grid_folder_path); //initialize로 바꾸고 grid file name도 받아오자
 
 public://Query
-	void write(void) const
-	{
-		const auto file_path = this->path_ + "_log.txt";
-		this->log_txt_.write(file_path);
-	}
-
-	void write_error_text(const std::vector<double>& error_values) const
-	{
-		//calculate grid file name from my path
-		const auto pos = ms::rfind_nth(this->path_, "/", 2);
-		const auto sub_str = this->path_.substr(pos + 1);
-		const auto parsed_str = ms::parse(sub_str, '_');
-		const auto grid_file_name = parsed_str[0];
-
-		Sentence error_sentence = grid_file_name + "      \t";
-		error_sentence.insert_with_space(error_values);
-
-		Text txt = { error_sentence };
-
-		auto error_text_path = this->path_;
-		error_text_path.erase(pos + 1);
-
-		txt.add_write(error_text_path + "error.txt");
-	}
-	std::string date_string(void) const
-	{
-		time_t date_calculator = time(nullptr);
-		tm date;
-		localtime_s(&date, &date_calculator);
-
-		return std::to_string(date.tm_year + 1900) + "." + std::to_string(date.tm_mon + 1) + "." + std::to_string(date.tm_mday)
-			+ "__(" + std::to_string(date.tm_hour) + "：" + std::to_string(date.tm_min) + ")";
-	}
+	void write(void) const;
+	void write_error_text(const std::string& grid_file_name, const std::vector<double>& error_values) const;
 
 private:
-	void print(void) 
-	{
-		auto log_str = this->content_.str();
-		
-		if (this->is_print_on)
-			std::cout << log_str;
-
-		this->log_txt_ << std::move(log_str);
-
-		std::ostringstream tmp;
-		this->content_.swap(tmp);
-	}
+	void print(void);
+	std::string make_error_file_path(const std::string& path);
 
 private:
 	std::ostringstream content_;
 	bool is_print_on = true;
 	Text log_txt_;
-	std::string path_;
+	std::string log_folder_path_;
+	std::string error_log_folder_path_;
 
 public:
 	static constexpr Command print_ = Command::print;

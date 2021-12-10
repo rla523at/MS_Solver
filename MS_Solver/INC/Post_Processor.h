@@ -10,6 +10,7 @@ public:
 	//static void post_solution(void);
 	static void post_solution(const std::string_view sv = "");
 	static void record_variables(const std::string& name, const std::vector<double>& values);	
+	static void set_path(const std::string& path);
 	static void syncronize_solution_time(const double& solution_time);
 
 private:

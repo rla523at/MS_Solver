@@ -1,33 +1,46 @@
 space_dimension				= 2
 
-governing_equation			= Linear_Advection			//Linear_Advection, Burgers, Euler
-Initial_condition			= Sine_Wave					//Constant1, Sine_Wave
+governing_equation			= Linear_Advection			
+							//Linear_Advection, Burgers, Euler
 
-grid_file_path				= RSC/Grid/2D/RQ40.msh
+Initial_condition			= Sine_Wave					
+							//Constant1, Sine_Wave
+
+grid_file_paths				= RSC/Grid/2D/RQ10.msh, RSC/Grid/2D/RQ15.msh, RSC/Grid/2D/RQ20.msh, RSC/Grid/2D/RQ25.msh, RSC/Grid/2D/RQ30.msh
 grid_file_type				= Gmsh
 
-spatial_discrete_scheme		= DG
-solution_degree				= 2
+spatial_discrete_scheme		= DG_P4
 
 numerical_flux				= LLF
 
-Time_Discrete_scheme		= SSPRK54					//SSPRK33, SSPRK54
+Time_Discrete_scheme		= SSPRK54					
+							//SSPRK33, SSPRK54
 
-Time_step_method			= CFL						//CFL, constant_dt
+Time_step_method			= CFL						
+							//CFL, constant_dt
+
 CFL_number					= 0.9
 constant_dt					= 0.0001
 
-solve_end_controller_type	= Time						//Time, Iter
-solve_end_time				= 1.0
-solve_end_iter				= 100
+solve_end_controller_type	= Time						
+							//Time, Iter
 
-solve_post_controller_type	= Iter						//Time, Iter
+solve_end_time				= 2.0
+solve_end_iter				= 0
+
+solve_post_controller_type	= Iter						
+							//Time, Iter
+
 solve_post_time_step		= 0.1
-solve_post_iter_unit		= 100
+solve_post_iter_unit		= 1000
 
-post_base_path				= C:/Users/KimMinseok/Desktop/»õÆú´õ/
-post_file_format			= Binary 					//ASCII, Binary
-post_point_location			= Node						//Center, Node
+post_base_path				= E:/CodeData/Result/RDD/Test4/
+post_file_format			= Binary 					
+							//ASCII, Binary
+
+post_point_location			= Node						
+							//Center, Node
+
 post_order					= 1
 
 //linear advection option

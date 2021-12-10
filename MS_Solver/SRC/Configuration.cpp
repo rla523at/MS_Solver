@@ -22,9 +22,9 @@ const std::string& Configuration::get_initial_condition(void) const
 	return this->initial_condition_;
 }
 
-const std::string& Configuration::get_grid_file_path(void) const
+const std::vector<std::string>& Configuration::get_grid_file_paths(void) const
 {
-	return this->grid_file_path_;
+	return this->grid_file_paths_;
 }
 
 const std::string& Configuration::get_grid_file_type(void) const
@@ -132,17 +132,17 @@ const double* Configuration::periodic_lengths_ptr(void) const
 	return this->periodic_lengths_.data();
 }
 
-std::string Configuration::post_folder_path_str(void) const
+std::string Configuration::post_folder_path_str(const std::string& grid_file_name) const
 {
 	REQUIRE(this->post_base_path_.back() == '/', "post base path should be end with /");
-	return this->post_base_path_ + this->governing_equation_str() + "/" + this->initial_condition_str() + "/" + this->grid_file_name() + "_" + this->date_time_str_ + "/";
+	return this->post_base_path_ + this->governing_equation_str() + "/" + this->initial_condition_str() + "/"
+		+ this->spatial_discrete_scheme_ + "/" + grid_file_name + "_" + this->date_time_str_ + "/";
 }
 
-std::string Configuration::configuration_str(void) const
+std::string Configuration::configuration_str(const std::string& grid_file_name) const
 {
 	const auto governing_equation_str = this->governing_equation_str();
 	const auto initial_condition_str = this->initial_condition_str();
-	const auto grid_file_name = this->grid_file_name();
 	const auto time_step_str = this->time_step_str();
 	const auto solve_end_condition_str = this->solve_end_condition_str();
 
@@ -156,7 +156,7 @@ std::string Configuration::configuration_str(void) const
 	os << std::left << std::setw(40) << "Governing Equation" << governing_equation_str << "\n";
 	os << std::left << std::setw(40) << "Initial Condtion" << initial_condition_str << "\n";
 	os << std::left << std::setw(40) << "Grid" << grid_file_name << "\n";
-	//os << "Spatial Discrete Method" << SPATIAL_DISCRETE_METHOD::name() << "\n";
+	os << std::setw(40) << "Spatial Discrete Method" << this->spatial_discrete_scheme_ << "\n";
 	//if constexpr (SCAILING_METHOD_FLAG)
 	//	os << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << " with scailing method\n";
 	//else
@@ -195,9 +195,9 @@ std::string Configuration::governing_equation_str(void) const
 }
 
 
-std::string Configuration::grid_file_name(void) const
+std::string Configuration::grid_file_name(const std::string& grid_file_path) const
 {
-	const auto parsed_strs = ms::parse(this->grid_file_path_, '/');
+	const auto parsed_strs = ms::parse(grid_file_path, '/');
 	return ms::parse(parsed_strs.back(), '.').front();
 }
 
@@ -221,6 +221,29 @@ std::string Configuration::initial_condition_str(void) const
 	}
 		
 	return result;
+}
+
+ushort Configuration::find_solution_degree(void) const
+{
+	REQUIRE(!this->spatial_discrete_scheme_.empty(), "spatial discrete scheme should be initialized first");
+
+	if (ms::contains_icase(this->spatial_discrete_scheme_, "DG"))
+	{
+		auto parsed_str = ms::parse(this->spatial_discrete_scheme_, '_');
+		REQUIRE(parsed_str.size() == 2, "spatial discrete scheme in configuration file shoul have DG_Pn form");
+
+		auto& degree_str = parsed_str.back();
+		REQUIRE(ms::compare_icase(degree_str.front(), 'p'), "spatial discrete scheme in configuration file shoul have DG_Pn form");
+
+		degree_str.erase(degree_str.begin());
+		REQUIRE(ms::is_digit(degree_str), "spatial discrete scheme in configuration file shoul have DG_Pn form and n should be a number");
+
+		return ms::string_to_value<ushort>(degree_str);		
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 Text Configuration::read_file(const std::string_view file_path) const
@@ -267,11 +290,13 @@ void Configuration::set_value(const Text& config_text)
 	this->governing_equation_ = this->get<std::string>(name_to_value, "governing_equation");
 	this->initial_condition_ = this->get<std::string>(name_to_value, "initial_condition");
 
-	this->grid_file_path_ = this->get<std::string>(name_to_value, "grid_file_path");
+	auto grid_file_paths = this->get<std::string>(name_to_value, "grid_file_paths");
+	this->grid_file_paths_ = ms::parse(grid_file_paths, ',');
+
 	this->grid_file_type_ = this->get<std::string>(name_to_value, "grid_file_type");
 
 	this->spatial_discrete_scheme_ = this->get<std::string>(name_to_value, "spatial_discrete_scheme");
-	this->solution_degree_ = this->get<ushort>(name_to_value, "solution_degree");
+	this->solution_degree_ = this->find_solution_degree();
 
 	this->numerical_flux_ = this->get<std::string>(name_to_value, "numerical_flux");
 
@@ -344,7 +369,6 @@ std::string Configuration::time_step_str(void) const
 		return "";
 	}
 }
-
 
 namespace ms
 {

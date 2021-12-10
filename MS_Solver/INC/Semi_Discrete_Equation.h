@@ -45,9 +45,9 @@ public://Query
 	std::vector<double> calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
 
 private:
-	double calculate_cell_L1_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_cell_L2_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_cell_Linf_error(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
+	double calculate_global_error_L1_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
+	double calculate_global_error_L2_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
+	double calculate_global_error_Linf_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
 
 private:
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;

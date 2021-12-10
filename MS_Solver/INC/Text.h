@@ -133,6 +133,8 @@ namespace ms
 		//static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};
+	bool compare_icase(const std::string& str1, const std::string& str2);
+	bool compare_icase(const char str1, const char str2);
 	std::string double_to_string(const double val);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	std::vector<std::string> file_paths_in_path(const std::string& path);
@@ -140,7 +142,9 @@ namespace ms
 	std::string get_replace(const std::string& str, const std::string_view target, const std::string_view replacement);
 	std::string get_remove(const std::string& str, const char target);
 	std::string get_remove(const std::string& str, const std::string_view target);
+	char get_upper_case(const char c);
 	std::string get_upper_case(const std::string& str);
+	bool is_digit(const std::string& str);
 	void make_path(std::string_view file_path);
 	std::vector<std::string> parse(const std::string& str, const char delimiter);
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
@@ -177,6 +181,7 @@ namespace ms
 
 		return result;
 	};
+	void upper_case(char& c);
 	void upper_case(std::string& str);
 }
 

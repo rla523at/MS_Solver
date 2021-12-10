@@ -81,6 +81,17 @@ ushort Grid::space_dimension(void) const
 	return this->space_dimension_;
 }
 
+double Grid::total_volume(void) const
+{
+	auto total_volume = 0.0;
+
+	for (const auto& elem : this->cell_elements_)
+	{
+		total_volume += elem.volume();
+	}
+
+	return total_volume;
+}
 
 size_t Grid::num_cells(void) const 
 {

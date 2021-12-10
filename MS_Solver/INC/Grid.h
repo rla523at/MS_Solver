@@ -11,6 +11,7 @@ public:
 
 public:
 	ushort space_dimension(void) const;
+	double total_volume(void) const;
 
 	size_t num_cells(void) const;
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;

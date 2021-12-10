@@ -102,6 +102,20 @@ TEST(Text, add_empty_line_1)
 	EXPECT_EQ(result, ref);
 }
 
+TEST(ms, compare_icase_1)
+{
+	EXPECT_TRUE(ms::compare_icase('a', 'A'));
+}
+TEST(ms, compare_icase_2)
+{
+	std::string str = "Pn";
+	EXPECT_TRUE(ms::compare_icase(str.front(), 'p'));
+}
+TEST(ms, compare_icase_3)
+{
+	std::string str = "Pn";
+	EXPECT_FALSE(ms::compare_icase(str.front(), 'w'));
+}
 TEST(ms, contain_icase_1) 
 {
 	std::string str = "abc_qwer,wer__,,";
@@ -225,6 +239,23 @@ TEST(ms, is_there_icase_5) {
 	const auto ref = false;
 	EXPECT_EQ(result, ref);
 }
+TEST(ms, is_digit_1)
+{
+	EXPECT_FALSE(ms::is_digit("n"));
+}
+TEST(ms, is_digit_2)
+{
+	EXPECT_FALSE(ms::is_digit("n2"));
+}
+TEST(ms, is_digit_3)
+{
+	EXPECT_TRUE(ms::is_digit("34"));
+}
+TEST(ms, is_digit_4)
+{
+	EXPECT_FALSE(ms::is_digit(""));
+}
+
 TEST(ms, rfind_nth_1) {
 	std::string str = "abcaba";
 	std::string target_str = "a";

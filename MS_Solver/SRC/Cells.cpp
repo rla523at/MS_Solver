@@ -62,10 +62,10 @@ Cells_DG::Cells_DG(const std::shared_ptr<Governing_Equation>& governing_equation
         //
     }
 
-    ////for precalculation
-    //discrete_solution.precalculate_cell_P0_basis_values();
-    //discrete_solution.precalcualte_cell_QPs_basis_values(quadrature_rules);
-    ////
+    //for precalculation
+    discrete_solution.precalculate_cell_P0_basis_values();
+    discrete_solution.precalcualte_cell_QPs_basis_values(quadrature_rules);
+    //
 
     LOG << std::left << std::setw(50) << "@ Cells DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }

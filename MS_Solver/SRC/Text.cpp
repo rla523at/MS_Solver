@@ -272,6 +272,20 @@ Binary_Writer& Binary_Writer::operator<<(const std::string& str)
 
 namespace ms 
 {
+	bool compare_icase(const std::string& str1, const std::string& str2)
+	{
+		auto str1_u = ms::get_upper_case(str1);
+		auto str2_u = ms::get_upper_case(str2);
+		return str1_u == str2_u;
+	}
+
+	bool compare_icase(const char c1, const char c2)
+	{
+		auto c1_u = ms::get_upper_case(c1);
+		auto c2_u = ms::get_upper_case(c2);
+		return c1_u == c2_u;
+	}
+
 	bool contains_icase(const std::string& str, const char* target) 
 	{
 		return ms::find_icase(str, target) != std::string::npos;
@@ -349,11 +363,31 @@ namespace ms
 		return result;
 	}
 
+	char get_upper_case(const char c)
+	{
+		auto result = c;
+		ms::upper_case(result);
+		return result;
+	}
+
 	std::string get_upper_case(const std::string& str) 
 	{
 		auto result = str;
 		ms::upper_case(result);
 		return result;
+	}
+
+	bool is_digit(const std::string& str)
+	{
+		if (str.empty())
+		{
+			return false;
+		}
+		else
+		{
+			return std::all_of(str.begin(), str.end(), ::isdigit); //왜 ::isdigit해야되지??
+		}
+
 	}
 
 	void make_path(std::string_view file_path)
@@ -394,8 +428,9 @@ namespace ms
 	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) 
 	{
 		if (delimiters.empty())
-			return 
-{ str };
+		{
+			return { str };
+		}
 
 		const auto num_delimiter = delimiters.size();
 
@@ -477,6 +512,11 @@ namespace ms
 		}
 
 		return pos;
+	}
+
+	void upper_case(char& c)
+	{
+		c = toupper(c);
 	}
 
 	void upper_case(std::string& str) 

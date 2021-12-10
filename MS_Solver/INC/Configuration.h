@@ -16,7 +16,7 @@ public://Query
 	const std::string& get_governing_equation(void) const;
 	const std::string& get_initial_condition(void) const;
 
-	const std::string& get_grid_file_path(void) const;
+	const std::vector<std::string>& get_grid_file_paths(void) const;
 	const std::string& get_grid_file_type(void) const;
 
 	const std::string& get_spatial_discrete_scheme(void) const;
@@ -47,11 +47,11 @@ public://Query
 	const double* wave_lengths_ptr(void) const;
 	const double* periodic_lengths_ptr(void) const;
 
-	std::string configuration_str(void) const;
+	std::string configuration_str(const std::string& grid_file_name) const;
 	std::string governing_equation_str(void) const;
-	std::string grid_file_name(void) const;
+	std::string grid_file_name(const std::string& grid_file_path) const;
 	std::string initial_condition_str(void) const;
-	std::string post_folder_path_str(void) const;
+	std::string post_folder_path_str(const std::string& grid_file_name) const;
 
 private:
 	template <typename ValueType>	ValueType get(const std::map<Sentence, Sentence>& name_to_value, const std::string_view config_name) const
@@ -61,6 +61,7 @@ private:
 		const auto& value_sentence = name_to_value.at(ms::get_upper_case(config_name.data()));
 		return value_sentence.to_value<ValueType>();
 	};
+	ushort find_solution_degree(void) const;
 	Text read_file(const std::string_view file_path) const;
 	void set_value(const Text& config_text);
 	std::string solve_end_condition_str(void) const;
@@ -76,7 +77,8 @@ private:
 	std::string governing_equation_;
 	std::string initial_condition_;
 
-	std::string grid_file_path_;
+	//std::string grid_file_path_;
+	std::vector<std::string> grid_file_paths_;
 	std::string grid_file_type_;
 
 	std::string spatial_discrete_scheme_;

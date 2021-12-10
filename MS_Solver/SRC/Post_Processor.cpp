@@ -4,13 +4,13 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 {	
 	Profiler::set_time_point();
 
-	This_::post_folder_path_ = configuration.post_folder_path_str();
 	This_::post_order_ = configuration.post_order();
 
 	auto post_variable_convertor = Post_Variable_Converter_Factory::make_unique(configuration, grid, discrete_solution);
 	This_::post_variables_ = std::make_unique<Post_Variables>(grid, std::move(post_variable_convertor), This_::post_order_);
 	This_::file_writer_ = Tecplot_File_Writer_Factory::make_unique(configuration);
 
+	REQUIRE(!This_::post_folder_path_.empty(), "post folder path should be set");
 	This_::is_initialized_ = true;
 
 	LOG << std::left << std::setw(50) << "@ Post Processor precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
@@ -40,6 +40,11 @@ void Post_Processor::record_variables(const std::string& name, const std::vector
 	REQUIRE(This_::is_initialized_, "Post processore should be initialized before record variable");
 
 	This_::post_variables_->record_variable(name, values);
+}
+
+void Post_Processor::set_path(const std::string& path)
+{
+	This_::post_folder_path_ = path;
 }
 
 void Post_Processor::syncronize_solution_time(const double& solution_time) 
