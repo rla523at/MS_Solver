@@ -14,7 +14,8 @@ public:
 
 public://Command      
 	void solve(void);
-	std::vector<double> calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid) const;
+	std::vector<double> calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid) const;
+	std::vector<double> calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid) const;
 
 private:
 	void controll_time_step(const double current_time, double& time_step) const;

@@ -58,7 +58,8 @@ int main(void)
 
 			Profiler::set_time_point();
 
-			const auto error_values = discrete_equation.calculate_error_values(*exact_solution, grid);
+			//const auto error_values = discrete_equation.calculate_global_error_values(*exact_solution, grid);
+			const auto error_values = discrete_equation.calculate_specific_error_values(*exact_solution, grid);
 
 			LOG << std::left << std::setprecision(16);
 			LOG << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";

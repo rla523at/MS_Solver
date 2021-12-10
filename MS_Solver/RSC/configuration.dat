@@ -34,7 +34,7 @@ solve_post_controller_type	= Iter
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1000
 
-post_base_path				= E:/CodeData/Result/RDD/Test4/
+post_base_path				= E:/CodeData/Result/RDD/Test6/
 post_file_format			= Binary 					
 							//ASCII, Binary
 

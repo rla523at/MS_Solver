@@ -51,7 +51,12 @@ void Discrete_Equation::controll_time_step(const double current_time, double& ti
     }
 }
 
-std::vector<double> Discrete_Equation::calculate_error_values(const Exact_Solution& exact_solution, const Grid& grid) const
+std::vector<double> Discrete_Equation::calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid) const
 {
-    return this->semi_discrete_equation_->calculate_error_values(exact_solution, grid, this->current_time_);
+    return this->semi_discrete_equation_->calculate_global_error_values(exact_solution, grid, this->current_time_);
+}
+
+std::vector<double> Discrete_Equation::calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid) const
+{
+    return this->semi_discrete_equation_->calculate_specific_error_values(exact_solution, grid, this->current_time_);
 }
