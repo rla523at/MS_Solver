@@ -151,6 +151,7 @@
     <ClInclude Include="INC\Post_Variables.h" />
     <ClInclude Include="INC\Post_Variable_Convertor.h" />
     <ClInclude Include="INC\Profiler.h" />
+    <ClInclude Include="INC\Reconstruction.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Residual.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

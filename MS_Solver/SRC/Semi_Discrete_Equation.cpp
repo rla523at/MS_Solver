@@ -18,9 +18,9 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	Post_Processor::initialize(configuration, grid, *this->discrete_solution_);
 }
 
-Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::solution_vector_wrapper(void)
+Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::discrete_solution_vector_wrapper(void)
 {
-	return this->discrete_solution_->solution_vector_wrapper();
+	return this->discrete_solution_->discrete_solution_vector_wrapper();
 }
 
 
@@ -49,9 +49,9 @@ Euclidean_Vector Semi_Discrete_Equation_DG::calculate_RHS(void) const
 	return RHS.move_values();	//버그를 일으킬수도 있을것같은데
 }
 
-Euclidean_Vector Semi_Discrete_Equation_DG::solution_vector(void) const
+Euclidean_Vector Semi_Discrete_Equation_DG::discrete_solution_vector(void) const
 {
-	return this->discrete_solution_->solution_vector();
+	return this->discrete_solution_->discrete_solution_vector();
 }
 
 Euclidean_Vector_Constant_Wrapper Semi_Discrete_Equation_DG::solution_vector_constant_wrapper(void) const

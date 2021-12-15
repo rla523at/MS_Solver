@@ -18,9 +18,9 @@ public://Query
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const abstract;
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const abstract;
 	const std::vector<std::string>& get_solution_names(void) const;
-	Euclidean_Vector solution_vector(void) const;
+	Euclidean_Vector discrete_solution_vector(void) const;
 	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const;
-	Euclidean_Vector_Wrapper solution_vector_wrapper(void);
+	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void);
 	ushort num_equations(void) const;
 	ushort num_solutions(void) const;
 	size_t num_total_values(void) const;
@@ -48,6 +48,9 @@ public://Command
 	void precalculate_infs_ocs_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
 	void precalculate_infs_ncs_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
 
+	void project_to_Pn_space(const uint cell_index, const ushort Pn);
+	void limiting_slope(const uint cell_index, const double limiting_value);
+
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
@@ -57,12 +60,13 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
+	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
+	std::vector<double> calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	void calculate_solution_at_bdry_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint bdry_index, const uint oc_index) const;
 	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
 	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
 	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
-	//void calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
-	//void calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
@@ -80,9 +84,10 @@ private:
 	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
 
 	Euclidean_Vector calculate_P0_solution_precalculated(const uint cell_index) const;
-	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Matrix& basis_points_m) const;
-	void calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const;
-	void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Matrix& basis_points_m) const;
+	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Matrix_Base& basis_points_m) const;
+	std::vector<double> calculate_nth_solution_at_precalulated_points(const uint cell_index, const ushort equation_index, const Matrix_Base& basis_points_m) const;
+	void calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Matrix_Base& basis_points_m) const;
+	void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Matrix_Base& basis_points_m) const;
 
 
 	size_t coefficient_start_index(const uint cell_index) const;
@@ -94,6 +99,8 @@ private:
 	const double* coefficient_pointer(const uint cell_index) const;
 	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
 	Matrix_Constant_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index) const;
+	Matrix_Constant_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index, const ushort equation_index) const;
+
 	
 private:
 	std::vector<ushort> set_of_num_values_;
@@ -109,6 +116,7 @@ private:
 	std::vector<Matrix> set_of_bdry_basis_QPs_m_;		//boudnary quadrature point basis value matrix
 	std::vector<double> cell_P0_basis_values_;
 	std::vector<Matrix> set_of_cell_basis_QPs_m_;		//cell quadrature point basis value matrix
+	std::vector<Matrix> set_of_cell_basis_vertices_m_;	
 	std::vector<Matrix> set_of_infc_basis_ocs_QPs_m_;	//inner face owner cell side quadratue point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ncs_QPs_m_;	//inner face neighbor cell side quadratue point basis value matrix
 

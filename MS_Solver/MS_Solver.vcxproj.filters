@@ -233,6 +233,9 @@
     <ClInclude Include="INC\Time_Discrete_Scheme.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Reconstruction.h">
+      <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RSC\configuration.dat">

@@ -8,14 +8,16 @@
 class Semi_Discrete_Equation
 {
 public://Command
-	virtual Euclidean_Vector_Wrapper solution_vector_wrapper(void) abstract;
+	virtual Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) abstract;
+	virtual void reconstruct(void) abstract;
+
 	virtual void update_solution(const Euclidean_Vector& updated_soltuion) abstract;
 	virtual void update_solution(Euclidean_Vector&& updated_soltuion) abstract;
 
 public://Query
 	virtual double calculate_time_step(void) const abstract;
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
-	virtual Euclidean_Vector solution_vector(void) const abstract;
+	virtual Euclidean_Vector discrete_solution_vector(void) const abstract;
 	virtual Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const abstract;
 	virtual std::vector<double> calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const abstract;
 	virtual std::vector<double> calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const abstract;
@@ -34,7 +36,8 @@ public:
 		, inner_faces_(std::move(inner_faces)) {};
 
 public://Command
-	Euclidean_Vector_Wrapper solution_vector_wrapper(void) override;
+	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) override;
+
 
 	void update_solution(const Euclidean_Vector& updated_soltuion) override;
 	void update_solution(Euclidean_Vector&& updated_soltuion) override;
@@ -42,7 +45,7 @@ public://Command
 public://Query
 	double calculate_time_step(void) const override;
 	Euclidean_Vector calculate_RHS(void) const override;
-	Euclidean_Vector solution_vector(void) const override;
+	Euclidean_Vector discrete_solution_vector(void) const override;
 	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const override;
 	std::vector<double> calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
 	std::vector<double> calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
