@@ -28,6 +28,7 @@ public://Query
 	std::vector<double> projected_volumes(void) const;
 	std::vector<std::vector<Euclidean_Vector>> set_of_face_points(void) const;
 	double volume(void) const;
+	std::vector<Euclidean_Vector> vertices(void) const;
 
 protected:	
 	ushort check_space_dimension(void) const;

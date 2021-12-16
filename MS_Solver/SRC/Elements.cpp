@@ -145,9 +145,9 @@ ElementType Element::type(void) const
 
 std::vector<uint> Element::vertex_point_indexes(void) const
 {
-	const auto num_vertex = this->reference_geometry_->num_vertex();
+	const auto num_vertices = this->reference_geometry_->num_vertices();
 
-	return { this->point_indexes_.begin(), this->point_indexes_.begin() + num_vertex };
+	return { this->point_indexes_.begin(), this->point_indexes_.begin() + num_vertices };
 }
 
 bool Element::can_be_periodic_pair(const Element& other) const

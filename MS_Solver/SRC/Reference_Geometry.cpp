@@ -84,10 +84,10 @@ const Quadrature_Rule& Reference_Geometry::get_quadrature_rule(const ushort inte
 
 std::vector<ushort> Reference_Geometry::vertex_node_index_sequneces(void) const
 {
-	const auto num_vertex = this->num_vertex();
-	std::vector<ushort> vnode_index_orders(num_vertex);
+	const auto num_vertices = this->num_vertices();
+	std::vector<ushort> vnode_index_orders(num_vertices);
 
-	for (ushort i = 0; i < num_vertex; ++i)
+	for (ushort i = 0; i < num_vertices; ++i)
 		vnode_index_orders[i] = i;
 
 	return vnode_index_orders;
@@ -126,7 +126,9 @@ Matrix Reference_Geometry::make_inverse_mapping_monomial_matrix(void) const
 		mapping_monomial_matrix.change_column(i, mapping_monomial_vf(mapping_points[i]));
 	}
 
-	return mapping_monomial_matrix.inverse();
+	mapping_monomial_matrix.inverse();
+	
+	return mapping_monomial_matrix;
 }
 
 std::vector<std::vector<uint>> Reference_Geometry::quadrilateral_connectivities(const std::array<uint, 4>& node_indexes) const 
@@ -160,7 +162,7 @@ Figure Reference_Line::figure(void) const
 	return Figure::line;
 }
 
-ushort Reference_Line::num_vertex(void) const 
+ushort Reference_Line::num_vertices(void) const 
 {
 	return 2;
 }
@@ -345,7 +347,7 @@ Figure Reference_Triangle::figure(void) const
 	return Figure::triangle;
 }
 
-ushort Reference_Triangle::num_vertex(void) const 
+ushort Reference_Triangle::num_vertices(void) const 
 {
 	return 3;
 }
@@ -578,7 +580,7 @@ Figure Reference_Quadrilateral::figure(void) const
 	return Figure::quadrilateral;
 }
 
-ushort Reference_Quadrilateral::num_vertex(void) const 
+ushort Reference_Quadrilateral::num_vertices(void) const 
 {
 	return 4;
 }

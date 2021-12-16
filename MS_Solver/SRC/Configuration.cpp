@@ -42,6 +42,11 @@ ushort Configuration::solution_degree(void) const
 	return this->solution_degree_;
 }
 
+const std::string& Configuration::get_reconstruction_scheme(void) const
+{
+	return this->reconstruction_scheme_;
+}
+
 const std::string& Configuration::get_numerical_flux(void) const
 {
 	return this->numerical_flux_;
@@ -297,6 +302,7 @@ void Configuration::set_value(const Text& config_text)
 
 	this->spatial_discrete_scheme_ = this->get<std::string>(name_to_value, "spatial_discrete_scheme");
 	this->solution_degree_ = this->find_solution_degree();
+	this->reconstruction_scheme_ = this->get<std::string>(name_to_value, "reconstruction_scheme");
 
 	this->numerical_flux_ = this->get<std::string>(name_to_value, "numerical_flux");
 

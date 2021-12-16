@@ -1,15 +1,17 @@
 space_dimension				= 2
 
-governing_equation			= Linear_Advection			
+governing_equation			= Burgers			
 							//Linear_Advection, Burgers, Euler
 
 Initial_condition			= Sine_Wave					
 							//Constant1, Sine_Wave
 
-grid_file_paths				= RSC/Grid/2D/RQ10.msh, RSC/Grid/2D/RQ15.msh, RSC/Grid/2D/RQ20.msh, RSC/Grid/2D/RQ25.msh, RSC/Grid/2D/RQ30.msh
+grid_file_paths				= RSC/Grid/2D/RQ60.msh
 grid_file_type				= Gmsh
 
-spatial_discrete_scheme		= DG_P4
+spatial_discrete_scheme		= DG_P2
+reconstruction_scheme		= hMLP
+							//None, hMLP
 
 numerical_flux				= LLF
 
@@ -25,16 +27,16 @@ constant_dt					= 0.0001
 solve_end_controller_type	= Time						
 							//Time, Iter
 
-solve_end_time				= 2.0
+solve_end_time				= 0.4
 solve_end_iter				= 0
 
 solve_post_controller_type	= Iter						
 							//Time, Iter
 
 solve_post_time_step		= 0.1
-solve_post_iter_unit		= 1000
+solve_post_iter_unit		= 1
 
-post_base_path				= E:/CodeData/Result/RDD/Test6/
+post_base_path				= E:/CodeData/Result/RDD/Reconstruction_Test/Test1/
 post_file_format			= Binary 					
 							//ASCII, Binary
 

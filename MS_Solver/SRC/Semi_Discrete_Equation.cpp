@@ -15,6 +15,8 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	this->boundaries_ = std::make_unique<Boundaries_DG>(grid, *this->discrete_solution_, numerical_flux_function);
 	this->inner_faces_ = std::make_unique<Inner_Faces_DG>(numerical_flux_function, grid, *this->discrete_solution_);
 
+	this->reconstruction_ = Reconstruction_DG_Factory::make_unique(configuration, grid, *this->discrete_solution_);
+
 	Post_Processor::initialize(configuration, grid, *this->discrete_solution_);
 }
 
@@ -23,6 +25,10 @@ Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::discrete_solution_vector_wra
 	return this->discrete_solution_->discrete_solution_vector_wrapper();
 }
 
+void Semi_Discrete_Equation_DG::reconstruct(void)
+{
+	return this->reconstruction_->reconstruct(*this->discrete_solution_);
+}
 
 void Semi_Discrete_Equation_DG::update_solution(const Euclidean_Vector& updated_soltuion_v)
 {

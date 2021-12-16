@@ -241,6 +241,12 @@ double Geometry::volume(void) const
 	return volume;
 }
 
+std::vector<Euclidean_Vector> Geometry::vertices(void) const
+{
+	const auto num_vertices = this->reference_geometry_->num_vertices();
+	return { this->points_.begin(), this->points_.begin() + num_vertices };
+}
+
 bool Geometry::is_line(void) const
 {
 	return this->reference_geometry_->is_line();

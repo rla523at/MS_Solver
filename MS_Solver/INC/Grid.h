@@ -12,6 +12,7 @@ public:
 public:
 	ushort space_dimension(void) const;
 	double total_volume(void) const;
+	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
 
 	size_t num_cells(void) const;
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
@@ -21,7 +22,9 @@ public:
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_points(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_element_centers(const ushort post_order) const;
-	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
+	std::vector<std::vector<Euclidean_Vector>> cell_set_of_verticies(void) const;
+	std::vector<std::vector<uint>> cell_set_of_vertex_indexes(void) const;
+ 	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
 	std::vector<double> cell_volumes(void) const;
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;

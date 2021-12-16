@@ -4,6 +4,23 @@
 #include "../MS_Solver/INC/Euclidean_Vector.h"
 #include "../MS_Solver/INC/Polynomial.h"
 
+TEST(Matrix_Wrapper, change_columns_1)
+{
+	std::vector<double> value = { 1,2,3,4,5,6 };
+	Matrix_Wrapper mw(2, 2, value.data() + 2);
+	mw.change_columns(0, 2, 0.0);
+	std::vector<double> ref = { 1,2,0,0,0,0 };
+	EXPECT_EQ(value, ref);
+}
+TEST(Matrix_Wrapper, change_columns_2)
+{
+	std::vector<double> value = { 1,2,3,4,5,6 };
+	Matrix_Wrapper mw(2, 3, value.data());
+	mw.change_columns(1, 3, 0.0);
+	std::vector<double> ref = { 1,2,0,0,0,0 };
+	EXPECT_EQ(value, ref);
+}
+
 TEST(Matrix, construct_diagonal_matrix1) 
 {
 	Matrix m(2, {3, 3});
@@ -58,6 +75,14 @@ TEST(Matrix, change_columns_2)
 	m.change_columns(1, m1);
 
 	const Matrix ref = { 2,3,{ 1,1,1,4,4,4 } };
+	EXPECT_EQ(m, ref);
+}
+TEST(Matrix, change_columns_3)
+{
+	Matrix m = { 2,3,{ 1,2,3,4,5,6 } };
+	m.change_columns(0, 1, 4);
+
+	const Matrix ref = { 2,3,{ 4,2,3,4,5,6 } };
 	EXPECT_EQ(m, ref);
 }
 TEST(Matrix, column_1)
@@ -516,6 +541,17 @@ TEST(Matrix, operator_mv_3)
 	const Euclidean_Vector ref = { 6 };
 	EXPECT_EQ(result, ref);
 }
+TEST(Matrix, operator_substitution_1)
+{
+	Matrix m = { 1,2,{ 1,1 } };
+	Matrix result;
+
+	result = std::move(m);
+	result.at(0, 1) = 2;
+
+	const Matrix ref = { 1,2,{1,2} };
+	EXPECT_EQ(result, ref);
+}
 TEST(Matrix, row1) 
 {
 	Matrix dm(2, 3, { 1,2,3,4,5,6 });
@@ -541,7 +577,22 @@ TEST(Matrix, transpose_2)
 	Matrix ref(3, 2, { 1,2,3,4,5,6 });
 	EXPECT_EQ(result, ref);
 }
+TEST(Matrix, scalar_multiplication_at_columns_1)
+{
+	Matrix m = { 3,3,{ 1,2,3,4,5,6,7,8,9 } };
+	m.scalar_multiplcation_at_columns(0, 1, 3);
 
+	const Matrix ref = { 3,3,{3,2,3,12,5,6,21,8,9} };
+	EXPECT_EQ(m, ref);
+}
+TEST(Matrix, scalar_multiplication_at_columns_2)
+{
+	Matrix m = { 3,3,{ 1,2,3,4,5,6,7,8,9 } };
+	m.scalar_multiplcation_at_columns(1, 3, 3);
+
+	const Matrix ref = { 3,3,{1,6,9,4,15,18,7,24,27} };
+	EXPECT_EQ(m, ref);
+}
 
 
 

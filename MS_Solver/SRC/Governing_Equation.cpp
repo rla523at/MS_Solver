@@ -84,8 +84,8 @@ Matrix Linear_Advection_2D::calculate_physical_flux(const Euclidean_Vector& solu
 
 void Linear_Advection_2D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const 
 {
-	physical_flux.value_at(0, 0) = this->advection_speeds_[0] * solution[0];
-	physical_flux.value_at(0, 1) = this->advection_speeds_[1] * solution[0];
+	physical_flux.at(0, 0) = this->advection_speeds_[0] * solution[0];
+	physical_flux.at(0, 1) = this->advection_speeds_[1] * solution[0];
 }
 
 Linear_Advection_3D::Linear_Advection_3D(const double x_advection_speed, const double y_advection_speed, const double z_advection_speed)
@@ -140,6 +140,17 @@ Matrix Burgers::calculate_physical_flux(const Euclidean_Vector& solution) const
 
 	return { this->num_equations_, this->space_dimension_, std::move(flux_values) };
 }
+
+void Burgers::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const
+{
+	const double flux_value = 0.5 * std::pow(solution[0], 2.0);
+
+	for (ushort i = 0; i < this->space_dimension_; ++i)
+	{
+		physical_flux.at(0, i) = flux_value;
+	}
+}
+
 
 Burgers_2D::Burgers_2D(void)
 {
@@ -233,10 +244,10 @@ void Euler_2D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Ve
 
 	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
 
-	physical_flux.value_at(0, 0) = rhou;				physical_flux.value_at(0, 1) = rhov;
-	physical_flux.value_at(1, 0) = rhou*u + p;			physical_flux.value_at(1, 1) = rhouv;
-	physical_flux.value_at(2, 0) = rhouv;				physical_flux.value_at(2, 1) = rhov * v + p;
-	physical_flux.value_at(3, 0) = (rhoE + p) * u;		physical_flux.value_at(3, 1) = (rhoE + p) * v;
+	physical_flux.at(0, 0) = rhou;				physical_flux.at(0, 1) = rhov;
+	physical_flux.at(1, 0) = rhou*u + p;			physical_flux.at(1, 1) = rhouv;
+	physical_flux.at(2, 0) = rhouv;				physical_flux.at(2, 1) = rhov * v + p;
+	physical_flux.at(3, 0) = (rhoE + p) * u;		physical_flux.at(3, 1) = (rhoE + p) * v;
 }
 
 
@@ -378,11 +389,11 @@ void Euler_3D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Ve
 
 	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
 
-	physical_flux.value_at(0, 0) = rhou;				physical_flux.value_at(0, 1) = rhov;				physical_flux.value_at(0, 2) = rhow;
-	physical_flux.value_at(1, 0) = rhou * u + p;		physical_flux.value_at(1, 1) = rhouv;				physical_flux.value_at(1, 2) = rhouw;
-	physical_flux.value_at(2, 0) = rhouv;				physical_flux.value_at(2, 1) = rhov * v + p;		physical_flux.value_at(2, 2) = rhovw;
-	physical_flux.value_at(3, 0) = rhouw;				physical_flux.value_at(3, 1) = rhovw;				physical_flux.value_at(3, 2) = rhow * w + p;
-	physical_flux.value_at(4, 0) = (rhoE + p) * u;		physical_flux.value_at(4, 1) = (rhoE + p) * v;		physical_flux.value_at(4, 2) = (rhoE + p) * w;
+	physical_flux.at(0, 0) = rhou;				physical_flux.at(0, 1) = rhov;				physical_flux.at(0, 2) = rhow;
+	physical_flux.at(1, 0) = rhou * u + p;		physical_flux.at(1, 1) = rhouv;				physical_flux.at(1, 2) = rhouw;
+	physical_flux.at(2, 0) = rhouv;				physical_flux.at(2, 1) = rhov * v + p;		physical_flux.at(2, 2) = rhovw;
+	physical_flux.at(3, 0) = rhouw;				physical_flux.at(3, 1) = rhovw;				physical_flux.at(3, 2) = rhow * w + p;
+	physical_flux.at(4, 0) = (rhoE + p) * u;		physical_flux.at(4, 1) = (rhoE + p) * v;		physical_flux.at(4, 2) = (rhoE + p) * w;
 }
 
 void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const

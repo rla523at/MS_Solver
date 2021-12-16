@@ -52,7 +52,7 @@ public://Query
 	virtual Figure figure(void) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
-	virtual ushort num_vertex(void) const abstract;
+	virtual ushort num_vertices(void) const abstract;
 	virtual ushort num_post_nodes(const ushort post_order) const abstract;
 	virtual ushort num_post_elements(const ushort post_order) const abstract;
 	virtual Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
@@ -110,7 +110,7 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
-	ushort num_vertex(void) const override;
+	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
@@ -138,7 +138,7 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
-	ushort num_vertex(void) const override;
+	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
@@ -166,7 +166,7 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
-	ushort num_vertex(void) const override;
+	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통

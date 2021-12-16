@@ -4,6 +4,7 @@
 #include "Exact_Solution.h"
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
+#include "Reconstruction.h"
 
 class Semi_Discrete_Equation
 {
@@ -37,7 +38,7 @@ public:
 
 public://Command
 	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) override;
-
+	void reconstruct(void) override;
 
 	void update_solution(const Euclidean_Vector& updated_soltuion) override;
 	void update_solution(Euclidean_Vector&& updated_soltuion) override;
@@ -63,6 +64,7 @@ private:
 	std::unique_ptr<Cells_DG> cells_;	
 	std::unique_ptr<Boundaries_DG> boundaries_;
 	std::unique_ptr<Inner_Faces_DG> inner_faces_;//inter cell faces
+	std::unique_ptr<Reconstruction_DG> reconstruction_;
 };
 
 class Semi_Discrete_Equation_Factory

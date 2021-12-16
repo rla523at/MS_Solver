@@ -132,6 +132,9 @@
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Reconstruction.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Configuration.h">
@@ -234,6 +237,12 @@
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
     <ClInclude Include="INC\Reconstruction.h">
+      <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicator.h">
+      <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Limiter_Function.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
   </ItemGroup>

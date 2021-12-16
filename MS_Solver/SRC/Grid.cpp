@@ -93,6 +93,11 @@ double Grid::total_volume(void) const
 	return total_volume;
 }
 
+const std::unordered_map<uint, std::set<uint>>& Grid::get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const
+{
+	return this->vnode_index_to_share_cell_index_set_consider_pbdry_;
+}
+
 size_t Grid::num_cells(void) const 
 {
 	return this->cell_elements_.size();
@@ -183,6 +188,32 @@ std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_post_points(const u
 	}
 
 	return set_of_post_nodes;
+}
+
+std::vector<std::vector<Euclidean_Vector>> Grid::cell_set_of_verticies(void) const
+{
+	const auto num_cell = this->cell_elements_.size();
+	std::vector<std::vector<Euclidean_Vector>> set_of_verticies(num_cell);
+
+	for (uint i = 0; i < num_cell; ++i)
+	{
+		set_of_verticies[i] = this->cell_elements_[i].vertices();
+	}
+
+	return set_of_verticies;
+}
+
+std::vector<std::vector<uint>> Grid::cell_set_of_vertex_indexes(void) const
+{
+	const auto num_cell = this->cell_elements_.size();
+	std::vector<std::vector<uint>> set_of_vertex_indexes(num_cell);
+
+	for (uint i = 0; i < num_cell; ++i)
+	{
+		set_of_vertex_indexes[i] = this->cell_elements_[i].vertex_point_indexes();
+	}
+
+	return set_of_vertex_indexes;
 }
 
 std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) const 

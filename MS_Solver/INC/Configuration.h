@@ -21,6 +21,7 @@ public://Query
 
 	const std::string& get_spatial_discrete_scheme(void) const;
 	ushort solution_degree(void) const;
+	const std::string& get_reconstruction_scheme(void) const;
 
 	const std::string& get_numerical_flux(void) const;
 
@@ -81,8 +82,9 @@ private:
 	std::vector<std::string> grid_file_paths_;
 	std::string grid_file_type_;
 
-	std::string spatial_discrete_scheme_;
+	std::string spatial_discrete_scheme_;	
 	ushort solution_degree_ = 0;
+	std::string reconstruction_scheme_;
 
 	std::string numerical_flux_;
 	std::string time_discrete_scheme_;

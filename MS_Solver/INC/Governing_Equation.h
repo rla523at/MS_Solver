@@ -81,8 +81,7 @@ public:
     std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
-
-    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override {};
+    void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
 };
 
 class Burgers_2D : public Burgers
