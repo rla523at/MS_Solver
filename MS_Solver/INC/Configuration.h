@@ -44,6 +44,8 @@ public://Query
 	const std::string& get_post_point_location(void) const;
 	ushort post_order(void) const;
 
+	const std::string& get_error_type(void) const;
+
 	const double* advection_speeds_ptr(void) const;
 	const double* wave_lengths_ptr(void) const;
 	const double* periodic_lengths_ptr(void) const;
@@ -53,6 +55,8 @@ public://Query
 	std::string grid_file_name(const std::string& grid_file_path) const;
 	std::string initial_condition_str(void) const;
 	std::string post_folder_path_str(const std::string& grid_file_name) const;
+
+	
 
 private:
 	template <typename ValueType>	ValueType get(const std::map<Sentence, Sentence>& name_to_value, const std::string_view config_name) const
@@ -105,6 +109,8 @@ private:
 	std::string post_file_format_;
 	std::string post_point_location_;
 	ushort post_order_ = 0;
+
+	std::string error_type_;
 
 	//linear advection option
 	std::array<double, max_space_dimension> advection_speeds_ = { 0 };

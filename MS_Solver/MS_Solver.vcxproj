@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="INC\Error.cpp" />
     <ClCompile Include="SRC\Boundaries.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -119,6 +120,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Element.h" />
+    <ClInclude Include="INC\Error.h" />
     <ClInclude Include="INC\Euclidean_Vector.h" />
     <ClInclude Include="INC\Exact_Solution.h" />
     <ClInclude Include="INC\Exception.h" />

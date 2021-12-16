@@ -1,10 +1,11 @@
 #pragma once
 #include "Boundaries.h"
 #include "Cells.h"
-#include "Exact_Solution.h"
+#include "Error.h"
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
 #include "Reconstruction.h"
+
 
 class Semi_Discrete_Equation
 {
@@ -20,8 +21,7 @@ public://Query
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
 	virtual Euclidean_Vector discrete_solution_vector(void) const abstract;
 	virtual Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const abstract;
-	virtual std::vector<double> calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const abstract;
-	virtual std::vector<double> calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const abstract;
+	virtual std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const abstract;
 
 };
 
@@ -48,16 +48,7 @@ public://Query
 	Euclidean_Vector calculate_RHS(void) const override;
 	Euclidean_Vector discrete_solution_vector(void) const override;
 	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const override;
-	std::vector<double> calculate_global_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
-	std::vector<double> calculate_specific_error_values(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const override;
-
-private:
-	double calculate_local_error_L1_norm(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_local_error_L2_norm(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_local_error_Linf_norm(const uint cell_index, const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_global_error_L1_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_global_error_L2_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
-	double calculate_global_error_Linf_norm(const Exact_Solution& exact_solution, const Grid& grid, const double end_time) const;
+	std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const override;
 
 private:
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;
@@ -65,6 +56,7 @@ private:
 	std::unique_ptr<Boundaries_DG> boundaries_;
 	std::unique_ptr<Inner_Faces_DG> inner_faces_;//inter cell faces
 	std::unique_ptr<Reconstruction_DG> reconstruction_;
+	std::unique_ptr<Error> error_;
 };
 
 class Semi_Discrete_Equation_Factory

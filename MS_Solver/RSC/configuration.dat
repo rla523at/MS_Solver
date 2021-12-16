@@ -36,7 +36,7 @@ solve_post_controller_type	= Iter
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1
 
-post_base_path				= E:/CodeData/Result/RDD/Reconstruction_Test/Test1/
+post_base_path				= E:/CodeData/Result/RDD/Reconstruction_Test/Test2/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -44,6 +44,9 @@ post_point_location			= Node
 							//Center, Node
 
 post_order					= 1
+
+Error_type					= Global
+							//Global, Local_Average
 
 //linear advection option
 x_advection_speed			= 1.0

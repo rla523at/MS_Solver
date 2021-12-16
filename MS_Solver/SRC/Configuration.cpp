@@ -122,6 +122,11 @@ ushort Configuration::post_order(void) const
 	return this->post_order_;
 }
 
+const std::string& Configuration::get_error_type(void) const
+{
+	return this->error_type_;
+}
+
 const double* Configuration::advection_speeds_ptr(void) const
 {
 	return this->advection_speeds_.data();
@@ -325,6 +330,7 @@ void Configuration::set_value(const Text& config_text)
 	this->post_point_location_ = this->get<std::string>(name_to_value, "post_point_location");
 	this->post_order_ = this->get<ushort>(name_to_value, "post_order");
 
+	this->error_type_ = this->get<std::string>(name_to_value, "error_type");
 
 	const auto x_advection_speed = this->get<double>(name_to_value, "x_advection_speed");
 	const auto y_advection_speed = this->get<double>(name_to_value, "y_advection_speed");

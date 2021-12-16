@@ -54,22 +54,26 @@ int main(void)
 			LOG << "\t\t\t\t Start Error Analysis\n";
 			LOG << "================================================================================\n";
 
-			const auto exact_solution = Exact_Solution_Factory::make_unique(configuration);
-
 			Profiler::set_time_point();
 
-			//const auto error_values = discrete_equation.calculate_global_error_values(*exact_solution, grid);
-			const auto error_values = discrete_equation.calculate_specific_error_values(*exact_solution, grid);
+			const auto error_values = discrete_equation.calculate_error_norms(grid);
 
-			LOG << std::left << std::setprecision(16);
-			LOG << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
-			LOG << std::setw(25) << error_values[0] << std::setw(25) << error_values[1] << error_values[2] << "\n";
+			if (error_values.empty())
+			{
+				LOG << "Error calculation is not provided in current configuration\n" << LOG.print_;
+			}
+			else
+			{
+				LOG << std::left << std::setprecision(16);
+				LOG << std::setw(25) << "L1 error" << std::setw(25) << "L2 error" << "Linf error \n";
+				LOG << std::setw(25) << error_values[0] << std::setw(25) << error_values[1] << error_values[2] << "\n";
+				LOG.write_error_text(grid_file_name, error_values);
+			}
 
 			LOG << "\n================================================================================\n";
 			LOG << "\t\t\t End Error Analysis(" << Profiler::get_time_duration() << "s)\n";
 			LOG << "================================================================================\n\n" << LOG.print_;
 
-			LOG.write_error_text(grid_file_name, error_values);
 			LOG.write();
 			LOG.clear();
 		}
