@@ -29,7 +29,7 @@ void hMLP_Reconstruction_DG::reconstruct(Discrete_Solution_DG& discrete_solution
 
 		while (true)
 		{
-			const auto cell_type = this->indicator_.indicate_opt(discrete_solution, cell_index, this->stability_criterion_);
+			const auto cell_type = this->indicator_.indicate_opt(discrete_solution, cell_index, this->stability_criterion_);				
 
 			if (cell_type == cell_type::trouble)
 			{

@@ -357,18 +357,6 @@ void Discrete_Solution_DG::calculate_P1_projected_nth_solution_at_vertices(doubl
 	this->calculate_Pn_projected_mth_solution_at_precalulated_points(P1_projected_nth_solution_at_vertices, cell_index, P1, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
 }
 
-//void Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const
-//{
-//	REQUIRE(!this->set_of_infc_basis_ocs_QPs_m_.empty(), "basis value should be precalculated");
-//	this->calculate_solution_at_precalulated_points(solution_at_infc_ocs_QPs, oc_index, this->set_of_infc_basis_ocs_QPs_m_[infs_index]);
-//}
-//
-//void Discrete_Solution_DG::calculate_solution_at_infc_ncs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const
-//{
-//	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "basis value should be precalculated");
-//	this->calculate_solution_at_precalulated_points(solution_at_infc_ncs_QPs, nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
-//}
-
 double Discrete_Solution_DG::calculate_P0_basis_value(const uint cell_index) const
 {
 	const auto& basis_vector_function = this->basis_vector_functions_[cell_index];

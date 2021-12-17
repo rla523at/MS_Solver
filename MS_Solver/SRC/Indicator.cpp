@@ -103,12 +103,6 @@ cell_type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution,
 	discrete_solution.calculate_nth_solution_at_vertices(this->value_at_vertices_.data(), cell_index, criterion_equation_index);
 
 	return this->check_cell_type(cell_index, this->P1_projected_value_at_vertices_.data(), this->value_at_vertices_.data(), criterion);
-
-
-	//const auto P1_projected_value_at_vertices = discrete_solution.calculate_P1_projected_nth_solution_at_vertices(cell_index, criterion_equation_index);
-	//const auto value_at_vertices = discrete_solution.calculate_nth_solution_at_vertices(cell_index, criterion_equation_index);
-
-	//return this->check_cell_type(cell_index, P1_projected_value_at_vertices.data(), value_at_vertices.data(), criterion);
 }
 
 cell_type MLP_Indicator::indicate_opt(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion& criterion) const
@@ -117,12 +111,7 @@ cell_type MLP_Indicator::indicate_opt(const Discrete_Solution_DG& discrete_solut
 
 	discrete_solution.calculate_nth_solution_at_vertices(this->value_at_vertices_.data(), cell_index, criterion_equation_index);
 
-	return this->check_cell_type(cell_index, this->set_of_P1_projected_value_at_vertices_ptr_->data(), this->value_at_vertices_.data(), criterion);
-
-
-	//const auto value_at_vertices = discrete_solution.calculate_nth_solution_at_vertices(cell_index, criterion_equation_index);
-
-	//return this->check_cell_type(cell_index, this->set_of_P1_projected_value_at_vertices_ptr_->data(), value_at_vertices.data(), criterion);
+	return this->check_cell_type(cell_index, this->set_of_P1_projected_value_at_vertices_ptr_->data(), this->value_at_vertices_.data(), criterion);	
 }
 
 cell_type MLP_Indicator::check_cell_type(const uint cell_index, const double* P1_projected_value_at_vertices, const double* value_at_vertices, const MLP_Criterion& criterion) const
