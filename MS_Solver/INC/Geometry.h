@@ -19,6 +19,7 @@ public://Query
 	bool is_line(void) const;
 	ushort num_post_nodes(const ushort post_order) const;
 	ushort num_post_elements(const ushort post_order) const;
+	ushort num_vertices(void) const;
 	Euclidean_Vector normalized_normal_vector(const Euclidean_Vector& node) const;
 	std::vector<Euclidean_Vector> normalized_normal_vectors(const std::vector<Euclidean_Vector>& points) const;
 	Vector_Function<Polynomial> orthonormal_basis_vector_function(const ushort solution_order) const;

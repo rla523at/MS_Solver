@@ -6,12 +6,12 @@ governing_equation			= Burgers
 Initial_condition			= Sine_Wave					
 							//Constant1, Sine_Wave
 
-grid_file_paths				= RSC/Grid/2D/RQ60.msh
+grid_file_paths				= RSC/Grid/2D/RQ30.msh
 grid_file_type				= Gmsh
 
 spatial_discrete_scheme		= DG_P2
 reconstruction_scheme		= hMLP
-							//None, hMLP
+							//No, hMLP
 
 numerical_flux				= LLF
 

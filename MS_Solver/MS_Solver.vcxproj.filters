@@ -138,6 +138,12 @@
     <ClCompile Include="INC\Error.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Indicator.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Limiter_Function.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Configuration.h">

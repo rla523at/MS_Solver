@@ -66,6 +66,11 @@ ushort Geometry::num_post_elements(const ushort post_order) const
 	return this->reference_geometry_->num_post_elements(post_order);
 }
 
+ushort Geometry::num_vertices(void) const
+{
+	return this->reference_geometry_->num_vertices();
+}
+
 Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& point) const
 {
 	auto normal_v = this->normal_vf_(point);
