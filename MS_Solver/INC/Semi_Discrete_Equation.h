@@ -13,9 +13,6 @@ public://Command
 	virtual Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) abstract;
 	virtual void reconstruct(void) abstract;
 
-	virtual void update_solution(const Euclidean_Vector& updated_soltuion) abstract;
-	virtual void update_solution(Euclidean_Vector&& updated_soltuion) abstract;
-
 public://Query
 	virtual double calculate_time_step(void) const abstract;
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
@@ -39,9 +36,6 @@ public:
 public://Command
 	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) override;
 	void reconstruct(void) override;
-
-	void update_solution(const Euclidean_Vector& updated_soltuion) override;
-	void update_solution(Euclidean_Vector&& updated_soltuion) override;
 
 public://Query
 	double calculate_time_step(void) const override;

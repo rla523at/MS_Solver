@@ -5,7 +5,14 @@ hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(const Grid& grid, Discrete_Soluti
 	, indicator_(grid, discrete_solution) 
 {
 	this->num_cells_ = static_cast<uint>(grid.num_cells());
+
+	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
+	
 	this->set_of_P1_projected_criterion_values_at_verticies_.resize(this->num_cells_);
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	{
+		this->set_of_P1_projected_criterion_values_at_verticies_[cell_index].resize(set_of_num_vertices[cell_index]);
+	}
 };
 
 
@@ -52,9 +59,9 @@ void hMLP_Reconstruction_DG::precalculate(const Discrete_Solution_DG& discrete_s
 {
 	const auto criterion_equation_index = this->stability_criterion_.get_criterion_equation_index();
 
-	for (uint i = 0; i < this->num_cells_; ++i)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		this->set_of_P1_projected_criterion_values_at_verticies_[i] = discrete_solution.calculate_P1_projected_nth_solution_at_vertices(i, criterion_equation_index);
+		discrete_solution.calculate_P1_projected_nth_solution_at_vertices(this->set_of_P1_projected_criterion_values_at_verticies_[cell_index].data(), cell_index, criterion_equation_index);
 	}
 
 	this->stability_criterion_.caclulate(discrete_solution);

@@ -31,16 +31,6 @@ void Semi_Discrete_Equation_DG::reconstruct(void)
 	return this->reconstruction_->reconstruct(*this->discrete_solution_);
 }
 
-void Semi_Discrete_Equation_DG::update_solution(const Euclidean_Vector& updated_soltuion_v)
-{
-	this->discrete_solution_->update_solution(updated_soltuion_v);
-}
-
-void Semi_Discrete_Equation_DG::update_solution(Euclidean_Vector&& updated_soltuion_v)
-{
-	this->discrete_solution_->update_solution(std::move(updated_soltuion_v));
-}
-
 double Semi_Discrete_Equation_DG::calculate_time_step(void) const
 {
 	return this->cells_->calculate_time_step(*this->discrete_solution_);

@@ -34,7 +34,9 @@ private:
     std::vector<std::vector<std::pair<double, double>>> set_of_allowable_min_max_criterion_values_;
 
     //construction optimization
+    static constexpr ushort num_max_vertex_share_cell = 15;
     std::unordered_map<uint, std::pair<double, double>> vnode_index_to_allowable_min_max_criterion_value_;
+    std::array<double, num_max_vertex_share_cell> criterion_values_;
 };
 
 class MLP_Indicator
@@ -59,6 +61,11 @@ private:
     std::vector<double> volumes_;
     std::vector<ushort> set_of_num_vertices_;
         
-    //for optimization
+    //for opt
     const std::vector<double>* set_of_P1_projected_value_at_vertices_ptr_ = nullptr;
+
+    //construction optimization
+    static constexpr ushort num_max_vertices = 8;
+    mutable std::array<double, num_max_vertices> value_at_vertices_;
+    mutable std::array<double, num_max_vertices> P1_projected_value_at_vertices_;
 };

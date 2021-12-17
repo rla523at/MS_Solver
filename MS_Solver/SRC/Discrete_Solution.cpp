@@ -8,16 +8,6 @@ Discrete_Solution::Discrete_Solution(const std::shared_ptr<Governing_Equation>& 
 	this->num_equations_ = this->governing_equation_->num_equations();
 }
 
-void Discrete_Solution::update_solution(const Euclidean_Vector& updated_solution_v)
-{
-	this->values_ = updated_solution_v.copy_values();
-}
-
-void Discrete_Solution::update_solution(Euclidean_Vector&& updated_solution_v)
-{
-	this->values_ = std::move(updated_solution_v.move_values());
-}
-
 Euclidean_Vector Discrete_Solution::discrete_solution_vector(void) const
 {
 	return this->values_;
@@ -105,7 +95,7 @@ size_t Discrete_Solution::num_total_values(void) const
 
 Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_degree)
 	: Discrete_Solution(governing_equation, grid)
-	, GE_soluion(this->governing_equation_->num_equations())
+	, GE_soluion_(this->governing_equation_->num_equations())
 {
 	Profiler::set_time_point();
 
@@ -275,7 +265,13 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_P0_solutions(void)
 
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		P0_solutions[cell_index] = this->calculate_P0_solution_precalculated(cell_index);
+		const auto P0_coefficient_v = this->P0_coefficient_v(cell_index);
+		const auto P0_basis = this->cell_P0_basis_values_[cell_index];				
+		auto GE_solution = P0_coefficient_v * P0_basis;
+
+		this->governing_equation_->extend_to_solution(GE_solution);
+		
+		P0_solutions[cell_index] = GE_solution;
 	}
 
 	return P0_solutions;
@@ -307,8 +303,8 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_infc_n
 
 std::vector<double> Discrete_Solution_DG::calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
 {
-	REQUIRE(!this->set_of_cell_basis_QPs_m_.empty(), "cell basis QPs should be precalculated");
-	return this->calculate_nth_solution_at_precalulated_points(cell_index, equation_index, this->set_of_cell_basis_QPs_m_[cell_index]);
+	REQUIRE(!this->set_of_cell_basis_vertices_m_.empty(), "cell basis vertices should be precalculated");
+	return this->calculate_nth_solution_at_precalulated_points(cell_index, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
 }
 
 double Discrete_Solution_DG::calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const
@@ -346,6 +342,19 @@ void Discrete_Solution_DG::calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* 
 {
 	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "basis value should be precalculated");
 	this->calculate_solution_at_precalulated_points(solution_at_infc_ncs_QPs, nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
+}
+
+void Discrete_Solution_DG::calculate_nth_solution_at_vertices(double* nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_cell_basis_vertices_m_.empty(), "cell basis QPs should be precalculated");
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_vertices, cell_index, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
+}
+
+void Discrete_Solution_DG::calculate_P1_projected_nth_solution_at_vertices(double* P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_cell_basis_vertices_m_.empty(), "cell basis vertices should be precalculated");
+	constexpr auto P1 = 1;
+	this->calculate_Pn_projected_mth_solution_at_precalulated_points(P1_projected_nth_solution_at_vertices, cell_index, P1, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
 }
 
 //void Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(std::vector<Euclidean_Vector>& solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const
@@ -403,15 +412,6 @@ Matrix_Function<Polynomial> Discrete_Solution_DG::calculate_tranposed_gradient_b
 	return transposed_gradient_basis;
 }
 
-Euclidean_Vector Discrete_Solution_DG::calculate_P0_solution_precalculated(const uint cell_index) const
-{
-	const auto P0_coefficient_v = this->P0_coefficient_v(cell_index);
-	const auto P0_basis = this->cell_P0_basis_values_[cell_index];
-	auto GE_solution = P0_coefficient_v * P0_basis;
-	this->governing_equation_->extend_to_solution(GE_solution);
-	return GE_solution;
-}
-
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_precalulated_points(const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const
 {
 	const auto num_points = basis_points_m.num_column();
@@ -443,8 +443,8 @@ std::vector<double> Discrete_Solution_DG::calculate_Pn_projected_mth_solution_at
 	const auto num_points = basis_points_m.num_column();
 	std::vector<double> nth_Pn_projected_solution_at_points(num_points);
 
-	const auto Pn_projected_nth_coefficient_mcw = this->Pn_projected_mth_coefficient_matrix_contant_wrapper(cell_index, Pn, equation_index);
-	const auto Pn_projected_basis_mcw = this->Pn_projected_basis_matrix_constant_wrapper(basis_points_m, Pn);
+	const auto Pn_projected_nth_coefficient_mcw = this->Pn_projected_mth_coefficient_contant_matrix_wrapper(cell_index, Pn, equation_index);
+	const auto Pn_projected_basis_mcw = this->Pn_projected_basis_constant_matrix_wrapper(basis_points_m, Pn);
 	ms::gemm(Pn_projected_nth_coefficient_mcw, Pn_projected_basis_mcw, nth_Pn_projected_solution_at_points.data());
 
 	return nth_Pn_projected_solution_at_points;	
@@ -460,8 +460,8 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(std::vector
 
 	for (int i = 0; i < num_points; ++i)
 	{
-		GE_solution_points_mcw.column(i, this->GE_soluion.data());
-		this->governing_equation_->extend_to_solution(GE_soluion.data(), solution_v_at_points[i].data());
+		GE_solution_points_mcw.column(i, this->GE_soluion_.data());
+		this->governing_equation_->extend_to_solution(GE_soluion_.data(), solution_v_at_points[i].data());
 	}
 }
 
@@ -475,9 +475,27 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_V
 
 	for (int i = 0; i < num_points; ++i)
 	{
-		GE_solution_points_mcw.column(i, this->GE_soluion.data());
-		this->governing_equation_->extend_to_solution(GE_soluion.data(), solution_v_at_points_ptr[i].data());
+		GE_solution_points_mcw.column(i, this->GE_soluion_.data());
+		this->governing_equation_->extend_to_solution(GE_soluion_.data(), solution_v_at_points_ptr[i].data());
 	}
+}
+
+void Discrete_Solution_DG::calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
+{
+	const auto num_points = basis_points_m.num_column();
+	std::fill(nth_solution_at_points, nth_solution_at_points + num_points, 0.0);
+
+	ms::gemm(this->nth_coefficient_matrix_contant_wrapper(cell_index, equation_index), basis_points_m, nth_solution_at_points);
+}
+
+void Discrete_Solution_DG::calculate_Pn_projected_mth_solution_at_precalulated_points(double* Pn_projected_mth_solution_at_points, const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
+{
+	const auto num_points = basis_points_m.num_column();
+	std::fill(Pn_projected_mth_solution_at_points, Pn_projected_mth_solution_at_points + num_points, 0.0);
+
+	const auto Pn_projected_nth_coefficient_cmw = this->Pn_projected_mth_coefficient_contant_matrix_wrapper(cell_index, Pn, equation_index);
+	const auto Pn_projected_basis_cmw = this->Pn_projected_basis_constant_matrix_wrapper(basis_points_m, Pn);
+	ms::gemm(Pn_projected_nth_coefficient_cmw, Pn_projected_basis_cmw, Pn_projected_mth_solution_at_points);
 }
 
 
@@ -566,7 +584,7 @@ Constant_Matrix_Wrapper Discrete_Solution_DG::nth_coefficient_matrix_contant_wra
 	return { 1, num_basis , this->coefficient_pointer(cell_index) + jump_index };
 }
 
-Constant_Matrix_Wrapper Discrete_Solution_DG::Pn_projected_mth_coefficient_matrix_contant_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const
+Constant_Matrix_Wrapper Discrete_Solution_DG::Pn_projected_mth_coefficient_contant_matrix_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const
 {
 	const auto num_basis = this->set_of_num_basis_[cell_index];
 	const auto jump_index = equation_index * num_basis;
@@ -576,7 +594,7 @@ Constant_Matrix_Wrapper Discrete_Solution_DG::Pn_projected_mth_coefficient_matri
 }
 
 
-Constant_Matrix_Wrapper Discrete_Solution_DG::Pn_projected_basis_matrix_constant_wrapper(const Constant_Matrix_Wrapper& basis_points_m, const ushort Pn) const
+Constant_Matrix_Wrapper Discrete_Solution_DG::Pn_projected_basis_constant_matrix_wrapper(const Constant_Matrix_Wrapper& basis_points_m, const ushort Pn) const
 {
 	const auto num_Pn_basis = this->degree_to_num_basis_table[Pn];
 	const auto num_points = basis_points_m.num_column();

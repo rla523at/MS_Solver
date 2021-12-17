@@ -11,8 +11,6 @@ public:
 public://Command
 	virtual void precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points) abstract;
 	virtual void precalculate_post_points(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) abstract;
-	void update_solution(const Euclidean_Vector& updated_solution_v);
-	void update_solution(Euclidean_Vector&& updated_solution_v);
 
 public://Query
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const abstract;
@@ -61,13 +59,17 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
-	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
+	
 	double calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const;
+	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
+
 	void calculate_solution_at_bdry_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint bdry_index, const uint oc_index) const;
 	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
 	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
 	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+	void calculate_nth_solution_at_vertices(double* nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
+	void calculate_P1_projected_nth_solution_at_vertices(double* P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
 
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
@@ -99,18 +101,20 @@ private:
 	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
 	Constant_Matrix_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index) const;
 	Constant_Matrix_Wrapper nth_coefficient_matrix_contant_wrapper(const uint cell_index, const ushort equation_index) const;
-	Constant_Matrix_Wrapper Pn_projected_mth_coefficient_matrix_contant_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const;
+	Constant_Matrix_Wrapper Pn_projected_mth_coefficient_contant_matrix_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const;
 
 
-	Constant_Matrix_Wrapper Pn_projected_basis_matrix_constant_wrapper(const Constant_Matrix_Wrapper& basis_points_m, const ushort Pn) const;
+	Constant_Matrix_Wrapper Pn_projected_basis_constant_matrix_wrapper(const Constant_Matrix_Wrapper& basis_points_m, const ushort Pn) const;
 
-	Euclidean_Vector calculate_P0_solution_precalculated(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	std::vector<double> calculate_nth_solution_at_precalulated_points(const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	std::vector<double> calculate_Pn_projected_mth_solution_at_precalulated_points(const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
+
 	void calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
-	
+	void calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
+	void calculate_Pn_projected_mth_solution_at_precalulated_points(double* Pn_projected_mth_solution_at_points, const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
+
 private:
 	std::vector<ushort> set_of_num_values_;
 	std::vector<ushort> solution_degrees_;
@@ -135,9 +139,8 @@ private:
 	//optimize construction
 	static constexpr ushort max_num_equation = 5;
 	static constexpr ushort max_num_precalculated_points = 200;
-	mutable Euclidean_Vector GE_soluion;
+	mutable Euclidean_Vector GE_soluion_;
 	mutable std::array<double, max_num_equation * max_num_precalculated_points> solution_at_points_values_ = { 0 };
-
 };
 
 
