@@ -233,6 +233,40 @@ std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_face_points(void) co
 	return set_of_face_points;
 }
 
+std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_sub_simplex_vertices(void) const
+{
+	const auto set_of_sub_simplex_vertex_index_sequences = this->reference_geometry_->set_of_sub_simplex_vertex_index_sequences();
+	const auto num_sub_simplex = set_of_sub_simplex_vertex_index_sequences.size();
+
+	std::vector<std::vector<Euclidean_Vector>> set_of_simplex_vertices;
+	set_of_simplex_vertices.reserve(num_sub_simplex);
+
+	for (size_t i = 0; i < num_sub_simplex; ++i)
+	{
+		set_of_simplex_vertices.push_back(ms::extract_by_index(this->points_, set_of_sub_simplex_vertex_index_sequences[i]));
+	}
+
+	return set_of_simplex_vertices;
+}
+
+std::vector<Geometry> Geometry::sub_simplex_geometries(void) const
+{
+	auto sub_simplex_reference_geometries = this->reference_geometry_->sub_simplex_reference_geometries();
+	auto set_of_sub_simplex_vertices = this->set_of_sub_simplex_vertices();
+	
+	const auto num_sub_simplex = sub_simplex_reference_geometries.size();
+
+	std::vector<Geometry> sub_simplex_geometries;
+	sub_simplex_geometries.reserve(num_sub_simplex);
+
+	for (ushort i = 0; i < num_sub_simplex; ++i)
+	{
+		sub_simplex_geometries.push_back({ std::move(sub_simplex_reference_geometries[i]), std::move(set_of_sub_simplex_vertices[i]) });
+	}
+
+	return sub_simplex_geometries;
+}
+
 double Geometry::volume(void) const
 {
 	const auto& quadrature_rule = this->get_quadrature_rule(0);
@@ -255,6 +289,11 @@ std::vector<Euclidean_Vector> Geometry::vertices(void) const
 bool Geometry::is_line(void) const
 {
 	return this->reference_geometry_->is_line();
+}
+
+bool Geometry::is_simplex(void) const
+{
+	return this->reference_geometry_->is_simplex();
 }
 
 const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_order) const

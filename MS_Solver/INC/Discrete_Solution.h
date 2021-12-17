@@ -47,6 +47,8 @@ public://Command
 	void precalculate_infs_ocs_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
 	void precalculate_infs_ncs_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
 
+	void precalculate_set_of_simplex_P0_P1_projection_basis_vertices_m(const Grid& grid);
+
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
 	void limit_slope(const uint cell_index, const double limiting_value);
 
@@ -54,13 +56,14 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
 
-	std::vector<Euclidean_Vector> calculate_P0_solutions(void) const;
+	std::vector<Euclidean_Vector> calculate_P0_solutions(void) const;	
 	std::vector<Euclidean_Vector> calculate_solution_at_bdry_QPs(const uint bdry_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
 	
 	double calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const;
+	std::vector<double> calculate_simplex_P0_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 
@@ -86,6 +89,8 @@ private:
 
 	double calculate_P0_basis_value(const uint cell_index) const;
 	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+
+	Vector_Function<Polynomial> calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const ushort Pn, const Geometry& sub_simplex_geometry) const;
 
 	size_t coefficient_start_index(const uint cell_index) const;
 	size_t num_total_basis(void) const;
@@ -135,6 +140,10 @@ private:
 	std::vector<Matrix> set_of_cell_basis_vertices_m_;	
 	std::vector<Matrix> set_of_infc_basis_ocs_QPs_m_;	//inner face owner cell side quadratue point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ncs_QPs_m_;	//inner face neighbor cell side quadratue point basis value matrix
+
+	std::vector<Matrix> set_of_simplex_P0_projected_basis_vertices_m_;
+	std::vector<Matrix> set_of_simplex_P1_projected_basis_vertices_m_;
+
 
 	//optimize construction
 	static constexpr ushort max_num_equation = 5;

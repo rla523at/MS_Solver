@@ -246,6 +246,19 @@ std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequence
 	return { face0_node_index,face1_node_index };
 };
 
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Line::sub_simplex_reference_geometries(void) const
+{
+	EXCEPTION("This routine is not supported for Line element");
+	return {};
+}
+
+std::vector<std::vector<ushort>> Reference_Line::set_of_sub_simplex_vertex_index_sequences(void) const
+{
+	EXCEPTION("This routine is not supported for Line element");
+	return {};
+}
+
+
 Irrational_Function Reference_Line::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
 {
 	constexpr ushort r = 0;
@@ -449,6 +462,19 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequ
 
 	return set_of_face_node_index_orders;
 };
+
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Triangle::sub_simplex_reference_geometries(void) const
+{
+	EXCEPTION("This routine is not supported for Triangle element");
+	return {};
+}
+
+std::vector<std::vector<ushort>> Reference_Triangle::set_of_sub_simplex_vertex_index_sequences(void) const
+{
+	EXCEPTION("This routine is not supported for Triangle element");
+	return {};
+}
+
 
 Irrational_Function Reference_Triangle::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
 {
@@ -684,6 +710,38 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index
 
 	return set_of_face_node_index_orders;
 };
+
+std::vector<std::unique_ptr<Reference_Geometry>> Reference_Quadrilateral::sub_simplex_reference_geometries(void) const
+{
+	constexpr auto num_sub_simplex = 4;
+	
+	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries;
+	sub_simplex_reference_geometries.reserve(num_sub_simplex);
+
+	for (ushort i = 0; i < num_sub_simplex; ++i)
+	{
+		sub_simplex_reference_geometries.push_back(Reference_Geometry_Factory::make_unique(Figure::triangle, this->order_));
+	}
+
+	return sub_simplex_reference_geometries;
+}
+
+std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_sub_simplex_vertex_index_sequences(void) const
+{
+	//   3式式式式式2
+	//   弛     弛   
+	//   0式式式式式1
+
+	constexpr auto num_sub_simplex = 4;
+
+	const std::vector<ushort> simplex1 = { 0,1,3 };
+	const std::vector<ushort> simplex2 = { 1,2,0 };
+	const std::vector<ushort> simplex3 = { 2,3,1 };
+	const std::vector<ushort> simplex4 = { 3,0,2 };
+
+	return { simplex1, simplex2, simplex3, simplex4 };
+}
+
 
 Irrational_Function Reference_Quadrilateral::scale_function(const Vector_Function<Polynomial>& mapping_function) const 
 {

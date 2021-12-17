@@ -17,6 +17,7 @@ public://Query
 	std::vector<Geometry> face_geometries(void) const;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const;
 	bool is_line(void) const;
+	bool is_simplex(void) const;
 	ushort num_post_nodes(const ushort post_order) const;
 	ushort num_post_elements(const ushort post_order) const;
 	ushort num_vertices(void) const;
@@ -28,6 +29,8 @@ public://Query
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	std::vector<double> projected_volumes(void) const;
 	std::vector<std::vector<Euclidean_Vector>> set_of_face_points(void) const;
+	std::vector<std::vector<Euclidean_Vector>> set_of_sub_simplex_vertices(void) const;
+	std::vector<Geometry> sub_simplex_geometries(void) const;
 	double volume(void) const;
 	std::vector<Euclidean_Vector> vertices(void) const;
 

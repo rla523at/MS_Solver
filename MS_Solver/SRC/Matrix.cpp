@@ -238,6 +238,19 @@ void Matrix_Wrapper::change_rows(const size_t start_row_index, const Constant_Ma
 	std::copy(A_data_ptr, A_data_ptr + num_A_rows * num_A_columns, this->data_ptr_ + jump_index);
 }
 
+void Matrix_Wrapper::change_rows(const size_t start_row_index, const size_t end_row_index, const double value)
+{
+	//[start, end)
+	REQUIRE(start_row_index <= end_row_index, "start index can not exceed end index");
+	REQUIRE(end_row_index <= this->num_rows_, "index can not exceed given range");
+	REQUIRE(!this->is_transposed(), "it should be not transposed for this routine");
+
+	const auto start_index = start_row_index * this->num_columns_;
+	const auto end_index = end_row_index * this->num_columns_;
+
+	std::fill(this->data_ptr_ + start_index, this->data_ptr_ + end_index, value);
+}
+
 double* Matrix_Wrapper::data(void)
 {
 	return this->data_ptr_;

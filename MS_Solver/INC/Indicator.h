@@ -3,14 +3,29 @@
 
 #include "Discrete_Solution.h"
 
-enum class cell_type
+class MLP_Criterion_Base
 {
-    normal,
-    smooth_extrema,
-    trouble
+public:
+    MLP_Criterion_Base(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+
+public://Query
+    const std::vector<std::pair<double, double>>& get_criterion_values(const uint cell_index) const;
+    ushort get_criterion_equation_index(void) const;
+
+protected:
+    ushort criterion_equation_index_ = 0;
+    uint num_cells_ = 0;
+    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_index_set_;
+    std::vector<std::vector<uint>> set_of_vnode_indexes_;
+
+    //construction optimization
+    static constexpr ushort num_max_vertex_share_cell = 15;
+    std::array<double, num_max_vertex_share_cell> criterion_values_;
+    std::unordered_map<uint, std::pair<double, double>> vnode_index_to_allowable_min_max_criterion_value_;
+    std::vector<std::vector<std::pair<double, double>>> set_of_allowable_min_max_criterion_values_;
 };
 
-class MLP_Criterion
+class MLP_Criterion : public MLP_Criterion_Base
 {
 public:
     MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution);
@@ -19,24 +34,36 @@ public://Command
     void caclulate(const Discrete_Solution_DG& discrete_solution);
 
 public://Query
-    const std::vector<std::pair<double, double>>& get_criterion_values(const uint cell_index) const;
     double get_P0_value(const uint cell_index) const;
-    ushort get_criterion_equation_index(void) const;
 
 private:
-    ushort criterion_equation_index_ = 0;
-    uint num_cells_ = 0;
-    const std::unordered_map<uint, std::set<uint>>& vnode_index_to_share_cell_index_set_;
-    std::vector<std::vector<uint>> set_of_vnode_indexes_;
-
     //precalculate
-    std::vector<double> P0_values_;
-    std::vector<std::vector<std::pair<double, double>>> set_of_allowable_min_max_criterion_values_;
+    std::vector<double> P0_values_;    
+};
 
-    //construction optimization
-    static constexpr ushort num_max_vertex_share_cell = 15;
-    std::unordered_map<uint, std::pair<double, double>> vnode_index_to_allowable_min_max_criterion_value_;
-    std::array<double, num_max_vertex_share_cell> criterion_values_;
+class Simplex_Decomposed_MLP_Criterion : public MLP_Criterion_Base
+{
+public:
+    Simplex_Decomposed_MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+
+public://Command
+    void caclulate(const Discrete_Solution_DG& discrete_solution);
+
+public://Query
+    double get_P0_value(const uint cell_index) const;
+
+private:
+    //precalculate
+    std::vector<std::map<uint, double>> set_of_vnode_index_to_simplex_P0_values_;
+};
+
+
+
+enum class cell_type
+{
+    normal,
+    smooth_extrema,
+    trouble
 };
 
 class MLP_Indicator

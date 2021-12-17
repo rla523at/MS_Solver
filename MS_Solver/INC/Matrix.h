@@ -116,6 +116,7 @@ public://Command
 	void change_columns(const size_t start_column_index, const Constant_Matrix_Wrapper& A);
 	void change_columns(const size_t start_column_index, const size_t end_column_index, const double value);
 	void change_rows(const size_t start_row_index, const Constant_Matrix_Wrapper& A);
+	void change_rows(const size_t start_row_index, const size_t end_row_index, const double value);
 	double* data(void);
 	void inverse(void);
 	void scalar_multiplcation_at_columns(const size_t start_column_index, const size_t end_column_index, const double scalar);

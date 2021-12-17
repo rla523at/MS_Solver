@@ -58,6 +58,8 @@ public://Query
 	virtual Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
+	virtual std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const abstract;
+	virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const abstract;
 	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual ushort scale_function_order(void) const abstract;	
 
@@ -95,10 +97,6 @@ protected:
 	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> set_of_post_nodes_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //figure_index][post_order]
 	static inline std::vector<std::vector<std::vector<std::vector<uint>>>> set_of_connectivities_ = std::vector<std::vector<std::vector<std::vector<uint>>>>(num_figures_); //[figure_index][post_order]
 	static inline std::vector<std::vector<Quadrature_Rule>> quadrature_rules_ = std::vector<std::vector<Quadrature_Rule>>(num_figures_); //[figure_index][integrand_order]
-
-
-	//virtual std::vector<ReferenceGeometry> sub_simplex_reference_geometries(void) const abstract;
-	//virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_node_index_orders(void) const abstract;
 };
 
 class Reference_Line : public Reference_Geometry
@@ -118,6 +116,8 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	ushort scale_function_order(void) const override;
 
@@ -146,6 +146,8 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
 
@@ -174,6 +176,8 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_node_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
+	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override; 
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
 
@@ -363,18 +367,6 @@ public:
 //	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
 //	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
 //
-//	switch (this->figure_)	{
-//		case Figure::quadrilateral: {
-//			//   3─────2
-//			//   │     │   
-//			//   0─────1
-//
-//			ReferenceGeometry<space_dimension> simplex1(Figure::triangle, this->figure_order_);
-//			ReferenceGeometry<space_dimension> simplex2(Figure::triangle, this->figure_order_);
-//			ReferenceGeometry<space_dimension> simplex3(Figure::triangle, this->figure_order_);
-//			ReferenceGeometry<space_dimension> simplex4(Figure::triangle, this->figure_order_);
-//			return { simplex1, simplex2, simplex3, simplex4 };
-//		}
 //		case Figure::hexahedral: {
 //			//    4─────7
 //			//   /│    /│
@@ -405,20 +397,6 @@ public:
 //	dynamic_require(!this->is_simplex(), "This is routine for non-simplex figure");
 //	dynamic_require(this->figure_order_ == 1, "This is only valid for P1 figure");
 //
-//	switch (this->figure_)
-//	{
-//		case Figure::quadrilateral: {
-//			//   3─────2
-//			//   │     │   
-//			//   0─────1
-//
-//			const std::vector<ushort> simplex1 = { 0,1,3 };
-//			const std::vector<ushort> simplex2 = { 1,2,0 };
-//			const std::vector<ushort> simplex3 = { 2,3,1 };
-//			const std::vector<ushort> simplex4 = { 3,0,2 };
-//
-//			return { simplex1, simplex2, simplex3, simplex4 };
-//		}
 //		case Figure::hexahedral: {
 //			//    4─────7
 //			//   /│    /│

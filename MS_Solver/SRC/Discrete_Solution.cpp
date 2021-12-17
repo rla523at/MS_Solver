@@ -223,6 +223,57 @@ void Discrete_Solution_DG::precalculate_infs_ncs_QPs_basis_values(const std::vec
 	}
 }
 
+void Discrete_Solution_DG::precalculate_set_of_simplex_P0_P1_projection_basis_vertices_m(const Grid& grid)
+{
+	this->set_of_simplex_P0_projected_basis_vertices_m_.resize(this->num_cells_);
+	this->set_of_simplex_P1_projected_basis_vertices_m_.resize(this->num_cells_);
+
+	constexpr ushort P0 = 0;
+	constexpr ushort P1 = 1;
+
+	const auto num_P0_basis = this->degree_to_num_basis_table[P0];
+	const auto num_P1_basis = this->degree_to_num_basis_table[P1];
+
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	{
+		const auto num_basis = this->set_of_num_basis_[cell_index];
+		const auto vertices = grid.cell_vertices(cell_index);
+
+		if (grid.cell_is_simplex(cell_index))
+		{
+			auto basis_vertices_m_ = this->calculate_basis_points_m(cell_index, vertices);
+
+			basis_vertices_m_.change_rows(num_P1_basis, num_basis, 0.0);
+			this->set_of_simplex_P1_projected_basis_vertices_m_[cell_index] = basis_vertices_m_;
+
+			basis_vertices_m_.change_rows(num_P0_basis, num_P1_basis, 0.0);
+			this->set_of_simplex_P0_projected_basis_vertices_m_[cell_index] = std::move(basis_vertices_m_);
+		}
+		else
+		{
+			const auto sub_simplex_geometries = grid.cell_sub_simplex_geometries(cell_index);
+
+			const auto num_vertices = vertices.size();
+			Matrix simplex_P0_projected_basis_vnodes(num_basis, num_vertices);
+			Matrix simplex_P1_projected_basis_vnodes(num_basis, num_vertices);
+
+			for (ushort j = 0; j < num_vertices; ++j)
+			{
+				const auto simplex_P0_projection_basis_vector_function = this->calculate_simplex_Pn_projection_basis_vector_function(cell_index, P0, sub_simplex_geometries[j]);
+				const auto simplex_P1_projection_basis_vector_function = this->calculate_simplex_Pn_projection_basis_vector_function(cell_index, P1, sub_simplex_geometries[j]);
+
+				const auto& vertex = vertices[j];
+
+				simplex_P0_projected_basis_vnodes.change_column(j, simplex_P0_projection_basis_vector_function(vertex));
+				simplex_P1_projected_basis_vnodes.change_column(j, simplex_P1_projection_basis_vector_function(vertex));
+			}
+
+			this->set_of_simplex_P0_projected_basis_vertices_m_[cell_index] = std::move(simplex_P0_projected_basis_vnodes);
+			this->set_of_simplex_P1_projected_basis_vertices_m_[cell_index] = std::move(simplex_P1_projected_basis_vnodes);
+		}
+	}
+}
+
 void Discrete_Solution_DG::project_to_Pn_space(const uint cell_index, const ushort Pn)
 {	
 	REQUIRE(Pn < this->solution_degree(cell_index), "projection degree can not exceed given range");
@@ -313,6 +364,12 @@ double Discrete_Solution_DG::calculate_P0_nth_solution(const uint cell_index, co
 	return this->P0_nth_coefficient(cell_index, equation_index) * this->cell_P0_basis_values_[cell_index];
 }
 
+std::vector<double> Discrete_Solution_DG::calculate_simplex_P0_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_simplex_P0_projected_basis_vertices_m_.empty(), "simplex P0 projected basis vertices should be precalculated");
+	return this->calculate_nth_solution_at_precalulated_points(cell_index, equation_index, this->set_of_simplex_P0_projected_basis_vertices_m_[cell_index]);
+}
+
 std::vector<double> Discrete_Solution_DG::calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
 {
 	REQUIRE(!this->set_of_cell_basis_vertices_m_.empty(), "cell basis vertices should be precalculated");
@@ -379,6 +436,26 @@ Matrix Discrete_Solution_DG::calculate_basis_points_m(const uint cell_index, con
 	}
 
 	return basis_points_m;
+}
+
+Vector_Function<Polynomial> Discrete_Solution_DG::calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const ushort Pn, const Geometry& sub_simplex_geometry) const
+{
+	const auto& basis_vector_function = this->basis_vector_functions_[cell_index];
+	const auto Pn_simplex_basis_vector_function = sub_simplex_geometry.orthonormal_basis_vector_function(Pn);
+
+	const auto num_basis = this->set_of_num_basis_[cell_index];
+
+	std::vector<Polynomial> simplex_Pn_projection_basis_functions(num_basis);
+
+	for (ushort i = 0; i < num_basis; ++i)
+	{
+		for (ushort j = 0; j < this->degree_to_num_basis_table[Pn]; ++j)
+		{
+			simplex_Pn_projection_basis_functions[i] += ms::inner_product(basis_vector_function[i], Pn_simplex_basis_vector_function[j], sub_simplex_geometry) * Pn_simplex_basis_vector_function[j];
+		}
+	}
+
+	return simplex_Pn_projection_basis_functions;
 }
 
 Euclidean_Vector Discrete_Solution_DG::calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& node) const

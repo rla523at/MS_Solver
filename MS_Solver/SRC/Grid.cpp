@@ -251,6 +251,11 @@ std::vector<std::vector<int>> Grid::cell_set_of_connectivities(const ushort post
 	return set_of_connectivities;
 }
 
+bool Grid::cell_is_simplex(const uint cell_index) const
+{
+	return this->cell_elements_[cell_index].is_simplex();
+}
+
 const Quadrature_Rule& Grid::get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const
 {
 	const auto& cell_element = this->cell_elements_[cell_index];
@@ -271,6 +276,11 @@ std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
 
 }
 
+std::vector<Geometry> Grid::cell_sub_simplex_geometries(const uint cell_index) const
+{
+	return this->cell_elements_[cell_index].sub_simplex_geometries();
+}
+
 std::vector<double> Grid::cell_volumes(void) const
 {
 	const auto& cell_elements = this->cell_elements_;
@@ -282,6 +292,11 @@ std::vector<double> Grid::cell_volumes(void) const
 		volumes[i] = cell_elements[i].volume();
 
 	return volumes;
+}
+
+std::vector<Euclidean_Vector> Grid::cell_vertices(const uint cell_index) const
+{
+	return this->cell_elements_[cell_index].vertices();
 }
 
 

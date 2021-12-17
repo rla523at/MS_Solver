@@ -1,12 +1,10 @@
 #include "../INC/Indicator.h"
 
-MLP_Criterion::MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+MLP_Criterion_Base::MLP_Criterion_Base(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 	: vnode_index_to_share_cell_index_set_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry())
 {
 	this->num_cells_ = static_cast<uint>(grid.num_cells());
 	this->set_of_vnode_indexes_ = grid.cell_set_of_vertex_indexes();
-
-	this->P0_values_.resize(this->num_cells_);
 
 	this->set_of_allowable_min_max_criterion_values_.resize(this->num_cells_);
 	for (uint i = 0; i < this->num_cells_; ++i)
@@ -17,10 +15,27 @@ MLP_Criterion::MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_so
 
 	const auto num_vnode = this->vnode_index_to_share_cell_index_set_.size();
 	this->vnode_index_to_allowable_min_max_criterion_value_.reserve(num_vnode);
+
 	for (const auto& [vnode_index, share_cell_index_set] : this->vnode_index_to_share_cell_index_set_)
 	{
 		this->vnode_index_to_allowable_min_max_criterion_value_.emplace(vnode_index, std::pair<double, double>());
 	}
+}
+
+const std::vector<std::pair<double, double>>& MLP_Criterion_Base::get_criterion_values(const uint cell_index) const
+{
+	return this->set_of_allowable_min_max_criterion_values_[cell_index];
+}
+
+ushort MLP_Criterion_Base::get_criterion_equation_index(void) const
+{
+	return this->criterion_equation_index_;
+}
+
+MLP_Criterion::MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+	: MLP_Criterion_Base(grid, discrete_solution)
+{
+	this->P0_values_.resize(this->num_cells_);
 }
 
 void MLP_Criterion::caclulate(const Discrete_Solution_DG& discrete_solution)
@@ -65,20 +80,39 @@ void MLP_Criterion::caclulate(const Discrete_Solution_DG& discrete_solution)
 	}
 }
 
-const std::vector<std::pair<double, double>>& MLP_Criterion::get_criterion_values(const uint cell_index) const
-{
-	return this->set_of_allowable_min_max_criterion_values_[cell_index];
-}
-
 double MLP_Criterion::get_P0_value(const uint cell_index) const
 {
 	return this->P0_values_[cell_index];
 }
 
-ushort MLP_Criterion::get_criterion_equation_index(void) const
+Simplex_Decomposed_MLP_Criterion::Simplex_Decomposed_MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+	: MLP_Criterion_Base(grid, discrete_solution)
 {
-	return this->criterion_equation_index_;
+	this->set_of_vnode_index_to_simplex_P0_values_.resize(this->num_cells_);
 }
+
+void Simplex_Decomposed_MLP_Criterion::caclulate(const Discrete_Solution_DG& discrete_solution)
+{
+	for (uint i = 0; i < this->num_cells_; ++i) 
+	{
+		std::map<uint, double> vnode_index_to_simplex_P0_criterion_value;
+
+		const auto simplex_P0_solution_vnodes = solution_coefficients[i] * this->set_of_simplex_P0_projected_basis_vnodes_[i];
+		const auto simplex_P0_criterion_value_vnodes = simplex_P0_solution_vnodes.row(This_::criterion_variable_index_);
+
+		const auto& vnode_indexes = this->set_of_vnode_indexes_[i];
+		const auto num_vnode = vnode_indexes.size();
+
+		for (ushort j = 0; j < num_vnode; ++j)
+			vnode_index_to_simplex_P0_criterion_value.emplace(vnode_indexes[j], simplex_P0_criterion_value_vnodes[j]);
+
+		vnode_index_to_simplex_P0_criterion_values.push_back(std::move(vnode_index_to_simplex_P0_criterion_value));
+	}
+
+	return vnode_index_to_simplex_P0_criterion_values;
+}
+
+
 
 MLP_Indicator::MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {

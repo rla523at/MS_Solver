@@ -26,8 +26,11 @@ public:
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_verticies(void) const;
 	std::vector<std::vector<uint>> cell_set_of_vertex_indexes(void) const;
  	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
+	bool cell_is_simplex(const uint cell_index) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
+	std::vector<Geometry> cell_sub_simplex_geometries(const uint cell_index) const;
 	std::vector<double> cell_volumes(void) const;
+	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 
 	size_t num_boundaries(void) const;
