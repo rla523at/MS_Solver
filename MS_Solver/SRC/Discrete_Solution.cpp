@@ -189,37 +189,40 @@ void Discrete_Solution_DG::precalculate_cell_vertices_basis_values(const std::ve
 
 void Discrete_Solution_DG::precalculate_cell_P0_basis_values(void)
 {
-	this->cell_P0_basis_values_.reserve(this->num_cells_);
-
-	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	if (this->cell_P0_basis_values_.empty())
 	{
-		this->cell_P0_basis_values_.push_back(this->calculate_P0_basis_value(cell_index));
+		this->cell_P0_basis_values_.resize(this->num_cells_);
+
+		for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+		{
+			this->cell_P0_basis_values_[cell_index] = this->calculate_P0_basis_value(cell_index);
+		}
 	}
 }
 
 void Discrete_Solution_DG::precalculate_infs_ocs_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs)
 {
 	const auto num_infcs = oc_indexes.size();
-	this->set_of_infc_basis_ocs_QPs_m_.reserve(num_infcs);
+	this->set_of_infc_basis_ocs_flux_QPs_m_.reserve(num_infcs);
 
 	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
 	{
 		const auto oc_index = oc_indexes[infc_index];
 		const auto& QPs = set_of_ocs_QPs[infc_index];
-		this->set_of_infc_basis_ocs_QPs_m_.push_back(this->calculate_basis_points_m(oc_index, QPs));
+		this->set_of_infc_basis_ocs_flux_QPs_m_.push_back(this->calculate_basis_points_m(oc_index, QPs));
 	}
 }
 
 void Discrete_Solution_DG::precalculate_infs_ncs_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs)
 {
 	const auto num_infcs = nc_indexes.size();
-	this->set_of_infc_basis_ncs_QPs_m_.reserve(num_infcs);
+	this->set_of_infc_basis_ncs_flux_QPs_m_.reserve(num_infcs);
 
 	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
 	{
 		const auto nc_index = nc_indexes[infc_index];
 		const auto& QPs = set_of_ncs_QPs[infc_index];
-		this->set_of_infc_basis_ncs_QPs_m_.push_back(this->calculate_basis_points_m(nc_index, QPs));
+		this->set_of_infc_basis_ncs_flux_QPs_m_.push_back(this->calculate_basis_points_m(nc_index, QPs));
 	}
 }
 
@@ -274,13 +277,39 @@ void Discrete_Solution_DG::precalculate_set_of_simplex_P0_P1_projection_basis_ve
 	}
 }
 
+void Discrete_Solution_DG::precalculate_infs_ocs_jump_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_jump_QPs)
+{
+	const auto num_infcs = oc_indexes.size();
+	this->set_of_infc_basis_ocs_jump_QPs_m_.reserve(num_infcs);
+
+	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
+	{
+		const auto oc_index = oc_indexes[infc_index];
+		const auto& QPs = set_of_ocs_jump_QPs[infc_index];
+		this->set_of_infc_basis_ocs_jump_QPs_m_.push_back(this->calculate_basis_points_m(oc_index, QPs));
+	}
+}
+
+void Discrete_Solution_DG::precalculate_infs_ncs_jump_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_jump_QPs)
+{
+	const auto num_infcs = nc_indexes.size();
+	this->set_of_infc_basis_ncs_jump_QPs_m_.reserve(num_infcs);
+
+	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
+	{
+		const auto nc_index = nc_indexes[infc_index];
+		const auto& QPs = set_of_ncs_jump_QPs[infc_index];
+		this->set_of_infc_basis_ncs_jump_QPs_m_.push_back(this->calculate_basis_points_m(nc_index, QPs));
+	}
+}
+
 void Discrete_Solution_DG::project_to_Pn_space(const uint cell_index, const ushort Pn)
 {	
 	REQUIRE(Pn < this->solution_degree(cell_index), "projection degree can not exceed given range");
 
 	const auto num_projected_basis = this->degree_to_num_basis_table[Pn];
 	const auto num_basis = this->num_basis(cell_index);
-	constexpr auto zero = 0;
+	constexpr auto zero = 0.0;
 
 	auto coefficient_mw = this->coefficient_matrix_wrapper(cell_index);
 	coefficient_mw.change_columns(num_projected_basis, num_basis, zero);
@@ -342,14 +371,14 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_cell_Q
 
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const
 {
-	REQUIRE(!this->set_of_infc_basis_ocs_QPs_m_.empty(), "inner face basis owner cell side QPs should be precalculated");
-	return this->calculate_solution_at_precalulated_points(oc_index, this->set_of_infc_basis_ocs_QPs_m_[infs_index]);
+	REQUIRE(!this->set_of_infc_basis_ocs_flux_QPs_m_.empty(), "inner face basis owner cell side QPs should be precalculated");
+	return this->calculate_solution_at_precalulated_points(oc_index, this->set_of_infc_basis_ocs_flux_QPs_m_[infs_index]);
 }
 
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const
 {
-	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "inner face basis neighbor cell side QPs should be precalculated");
-	return this->calculate_solution_at_precalulated_points(nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
+	REQUIRE(!this->set_of_infc_basis_ncs_flux_QPs_m_.empty(), "inner face basis neighbor cell side QPs should be precalculated");
+	return this->calculate_solution_at_precalulated_points(nc_index, this->set_of_infc_basis_ncs_flux_QPs_m_[infs_index]);
 }
 
 std::vector<double> Discrete_Solution_DG::calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
@@ -368,6 +397,12 @@ std::vector<double> Discrete_Solution_DG::calculate_simplex_P0_projected_nth_sol
 {
 	REQUIRE(!this->set_of_simplex_P0_projected_basis_vertices_m_.empty(), "simplex P0 projected basis vertices should be precalculated");
 	return this->calculate_nth_solution_at_precalulated_points(cell_index, equation_index, this->set_of_simplex_P0_projected_basis_vertices_m_[cell_index]);
+}
+
+std::vector<double> Discrete_Solution_DG::calculate_simplex_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_simplex_P1_projected_basis_vertices_m_.empty(), "simplex P1 projected basis vertices should be precalculated");
+	return this->calculate_nth_solution_at_precalulated_points(cell_index, equation_index, this->set_of_simplex_P1_projected_basis_vertices_m_[cell_index]);
 }
 
 std::vector<double> Discrete_Solution_DG::calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
@@ -391,14 +426,26 @@ void Discrete_Solution_DG::calculate_solution_at_cell_QPs(Euclidean_Vector* solu
 
 void Discrete_Solution_DG::calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const
 {
-	REQUIRE(!this->set_of_infc_basis_ocs_QPs_m_.empty(), "basis value should be precalculated");
-	this->calculate_solution_at_precalulated_points(solution_at_infc_ocs_QPs, oc_index, this->set_of_infc_basis_ocs_QPs_m_[infs_index]);
+	REQUIRE(!this->set_of_infc_basis_ocs_flux_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_infc_ocs_QPs, oc_index, this->set_of_infc_basis_ocs_flux_QPs_m_[infs_index]);
 }
 
 void Discrete_Solution_DG::calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const
 {
-	REQUIRE(!this->set_of_infc_basis_ncs_QPs_m_.empty(), "basis value should be precalculated");
-	this->calculate_solution_at_precalulated_points(solution_at_infc_ncs_QPs, nc_index, this->set_of_infc_basis_ncs_QPs_m_[infs_index]);
+	REQUIRE(!this->set_of_infc_basis_ncs_flux_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_solution_at_precalulated_points(solution_at_infc_ncs_QPs, nc_index, this->set_of_infc_basis_ncs_flux_QPs_m_[infs_index]);
+}
+
+void Discrete_Solution_DG::calculate_simplex_P0_projected_nth_solution_at_vertices(double* simplex_P0_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_simplex_P0_projected_basis_vertices_m_.empty(), "simplex P0 projected basis vertices should be precalculated");
+	this->calculate_nth_solution_at_precalulated_points(simplex_P0_projected_nth_solution_at_vertices, cell_index, equation_index, this->set_of_simplex_P0_projected_basis_vertices_m_[cell_index]);
+}
+
+void Discrete_Solution_DG::calculate_simplex_P1_projected_nth_solution_at_vertices(double* simplex_P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_simplex_P1_projected_basis_vertices_m_.empty(), "simplex P1 projected basis vertices should be precalculated");
+	this->calculate_nth_solution_at_precalulated_points(simplex_P1_projected_nth_solution_at_vertices, cell_index, equation_index, this->set_of_simplex_P1_projected_basis_vertices_m_[cell_index]);
 }
 
 void Discrete_Solution_DG::calculate_nth_solution_at_vertices(double* nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const
@@ -412,6 +459,18 @@ void Discrete_Solution_DG::calculate_P1_projected_nth_solution_at_vertices(doubl
 	REQUIRE(!this->set_of_cell_basis_vertices_m_.empty(), "cell basis vertices should be precalculated");
 	constexpr auto P1 = 1;
 	this->calculate_Pn_projected_mth_solution_at_precalulated_points(P1_projected_nth_solution_at_vertices, cell_index, P1, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
+}
+
+void Discrete_Solution_DG::calculate_nth_solution_at_infc_ocs_jump_QPs(double* nth_solution_at_infc_ocs_jump_QPs, const uint infc_index, const uint oc_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_infc_basis_ocs_jump_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_infc_ocs_jump_QPs, oc_index, equation_index, this->set_of_infc_basis_ocs_jump_QPs_m_[infc_index]);
+}
+
+void Discrete_Solution_DG::calculate_nth_solution_at_infc_ncs_jump_QPs(double* nth_solution_at_infc_ncs_jump_QPs, const uint infc_index, const uint nc_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_infc_basis_ncs_jump_QPs_m_.empty(), "basis value should be precalculated");
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_infc_ncs_jump_QPs, nc_index, equation_index, this->set_of_infc_basis_ncs_jump_QPs_m_[infc_index]);
 }
 
 double Discrete_Solution_DG::calculate_P0_basis_value(const uint cell_index) const

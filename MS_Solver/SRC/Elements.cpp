@@ -138,6 +138,20 @@ std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const E
 	return normalized_normal_vectors;
 }
 
+std::vector<std::vector<uint>> Element::set_of_face_vertex_indexes(void) const
+{
+	const auto set_of_face_vnode_index_sequences = this->reference_geometry_->set_of_face_vertex_node_index_sequences();
+	const auto num_face = set_of_face_vnode_index_sequences.size();
+
+	std::vector<std::vector<uint>> set_of_face_vnode_indexes(num_face);
+	for (uint i = 0; i < num_face; ++i)
+	{
+		set_of_face_vnode_indexes[i] = ms::extract_by_index(this->point_indexes_, set_of_face_vnode_index_sequences[i]);
+	}
+
+	return set_of_face_vnode_indexes;
+}
+
 ElementType Element::type(void) const 
 {
 	return this->element_type_;
@@ -166,7 +180,7 @@ FaceType Element::check_face_type(const Element& owner_cell_element) const
 	REQUIRE(this->element_type_ != ElementType::cell, "face or boundary element should be use this method");
 
 	const auto this_vnode_indexes = this->vertex_point_indexes();
-	const auto set_of_face_vnode_indexes = owner_cell_element.set_of_face_vertex_node_indexes();
+	const auto set_of_face_vnode_indexes = owner_cell_element.set_of_face_vertex_indexes();
 
 	for (const auto& face_vnode_indexes : set_of_face_vnode_indexes) 
 	{
@@ -210,18 +224,4 @@ std::vector<std::vector<uint>> Element::set_of_face_node_indexes(void) const
 	}
 
 	return set_of_face_node_indexes;
-}
-
-std::vector<std::vector<uint>> Element::set_of_face_vertex_node_indexes(void) const 
-{
-	const auto set_of_face_vnode_index_sequences = this->reference_geometry_->set_of_face_vertex_node_index_sequences();
-	const auto num_face = set_of_face_vnode_index_sequences.size();
-
-	std::vector<std::vector<uint>> set_of_face_vnode_indexes(num_face);
-	for (uint i = 0; i < num_face; ++i)
-	{
-		set_of_face_vnode_indexes[i] = ms::extract_by_index(this->point_indexes_, set_of_face_vnode_index_sequences[i]);
-	}
-
-	return set_of_face_vnode_indexes;
 }

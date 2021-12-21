@@ -27,13 +27,13 @@ Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_vie
 	}
 	
 	this->periodic_boundary_element_pairs_ = this->make_periodic_boundary_element_pairs(std::move(periodic_boundary_elements));
-	this->inner_face_elements_ = this->make_inner_face_elements();
+	this->inter_cell_face_elements_ = this->make_inner_face_elements();
 
 	LOG << std::left << std::setw(50) << "@ Make Grid Element" << " ----------- " << Profiler::get_time_duration() << "s\n\n";
 	LOG << "  " << std::setw(8) << this->cell_elements_.size() << " cell \n";
 	LOG << "  " << std::setw(8) << this->boundary_elements_.size() << " boundary\n";
 	LOG << "  " << std::setw(8) << this->periodic_boundary_element_pairs_.size() << " periodic boundary pair\n";
-	LOG << "  " << std::setw(8) << this->inner_face_elements_.size() << " inner face\n\n" << Log::print_;
+	LOG << "  " << std::setw(8) << this->inter_cell_face_elements_.size() << " inner face\n\n" << Log::print_;
 
 
 	Profiler::set_time_point();
@@ -96,6 +96,36 @@ double Grid::total_volume(void) const
 const std::unordered_map<uint, std::set<uint>>& Grid::get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const
 {
 	return this->vnode_index_to_share_cell_index_set_consider_pbdry_;
+}
+
+std::vector<std::vector<uint>> Grid::set_of_face_share_cell_indexes_consider_pbdry(void) const
+{
+	const auto num_cells = this->cell_elements_.size();
+
+	std::vector<std::vector<uint>> set_of_face_share_cell_indexes(num_cells);	
+
+	for (uint cell_index = 0; cell_index < num_cells; ++cell_index) 
+	{
+		const auto set_of_face_vertex_indexes = this->cell_elements_[cell_index].set_of_face_vertex_indexes();
+		const auto num_faces = set_of_face_vertex_indexes.size();
+
+		std::vector<uint> face_share_cell_indexes;
+		face_share_cell_indexes.reserve(num_faces);
+
+		for (const auto& face_vertex_indexes : set_of_face_vertex_indexes) 
+		{
+			const auto face_share_cell_index = this->find_face_share_cell_index_consider_pbdry(cell_index, face_vertex_indexes);
+
+			if (0 <= face_share_cell_index)
+			{
+				face_share_cell_indexes.push_back(face_share_cell_index);
+			}
+		}
+
+		set_of_face_share_cell_indexes.push_back(std::move(face_share_cell_indexes));
+	}
+
+	return set_of_face_share_cell_indexes; //this is not ordered set
 }
 
 size_t Grid::num_cells(void) const 
@@ -359,66 +389,103 @@ std::vector<Euclidean_Vector> Grid::boundary_normals(const uint bdry_index, cons
 
 size_t Grid::num_inner_faces(void) const
 {
-	return this->inner_face_elements_.size();
+	return this->inter_cell_face_elements_.size() + this->periodic_boundary_element_pairs_.size();
 }
 
 std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_index) const
 {
-	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inner_face_elements_[inner_face_index].vertex_point_indexes());
-	REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
+	const auto num_inter_cell_face = this->inter_cell_face_elements_.size();
 
-	//set first index as oc index
-	const auto oc_index = cell_indexes[0];
-	const auto nc_index = cell_indexes[1];
-	return { oc_index,nc_index };
+	if (inner_face_index < num_inter_cell_face)
+	{
+		const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inter_cell_face_elements_[inner_face_index].vertex_point_indexes());
+		REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
+
+		//set first index as oc index
+		const auto oc_index = cell_indexes[0];
+		const auto nc_index = cell_indexes[1];
+		return { oc_index,nc_index };
+	}
+	else
+	{
+		const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
+
+		const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_point_indexes());
+		const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_point_indexes());
+		REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
+		REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
+
+		const auto oc_index = oc_indexes.front();
+		const auto nc_index = nc_indexes.front();
+		return { oc_index,nc_index };
+	}
 }
 
-Quadrature_Rule Grid::inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const
+std::pair<const Quadrature_Rule&, const Quadrature_Rule&> Grid::inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const
 {
-	return  this->inner_face_elements_[inner_face_index].get_quadrature_rule(polynomial_degree);
+	const auto num_inter_cell_face = this->inter_cell_face_elements_.size();
+
+	if (inner_face_index < num_inter_cell_face)
+	{
+		const auto& quadrature_rule = this->inter_cell_face_elements_[inner_face_index].get_quadrature_rule(polynomial_degree);
+		return  { quadrature_rule,quadrature_rule };
+	}
+	else
+	{
+		const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
+		return { oc_side_element.get_quadrature_rule(polynomial_degree), nc_side_element.get_quadrature_rule(polynomial_degree) };
+	}
 }
 
 std::vector<Euclidean_Vector> Grid::inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const
 {
-	const auto& inner_face_element = this->inner_face_elements_[inner_face_index];
-	const auto& oc_element = this->cell_elements_[oc_index];
+	const auto num_inter_cell_face = this->inter_cell_face_elements_.size();
 
-	return inner_face_element.outward_normalized_normal_vectors(oc_element, points);
+	if (inner_face_index < num_inter_cell_face)
+	{
+		const auto& inter_cell_face_element = this->inter_cell_face_elements_[inner_face_index];
+		const auto& oc_element = this->cell_elements_[oc_index];
+
+		return inter_cell_face_element.outward_normalized_normal_vectors(oc_element, points);
+	}
+	else
+	{
+		const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
+		const auto& oc_element = this->cell_elements_[oc_index];
+
+		return ocs_element.outward_normalized_normal_vectors(oc_element, points);
+	}
 }
 
-size_t Grid::num_periodic_boundary_pairs(void) const
+double Grid::inner_face_volume(const uint inner_face_index) const
 {
-	return this->periodic_boundary_element_pairs_.size();
+	const auto num_inter_cell_face = this->inter_cell_face_elements_.size();
+
+	if (inner_face_index < num_inter_cell_face)
+	{
+		return this->inter_cell_face_elements_[inner_face_index].volume();
+	}
+	else
+	{
+		const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
+		return ocs_element.volume();
+	}
 }
 
-std::pair<uint, uint> Grid::periodic_boundary_oc_nc_index_pair(const uint pbdry_pair_index) const
+std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const
 {
-	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
+	const auto num_vnode = vnode_indexes.size();
 
-	const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_point_indexes());
-	const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_point_indexes());
-	REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
-	REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
+	std::vector<const std::set<uint>*> share_cell_index_set_ptrs;
+	share_cell_index_set_ptrs.reserve(num_vnode);
 
-	const auto oc_index = oc_indexes.front();
-	const auto nc_index = nc_indexes.front();
-	return { oc_index,nc_index };
+	for (int i = 0; i < num_vnode; ++i)
+	{
+		share_cell_index_set_ptrs.push_back(&this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_indexes[i]));
+	}
+
+	return ms::set_intersection(share_cell_index_set_ptrs);
 }
-
-std::pair<Quadrature_Rule, Quadrature_Rule> Grid::periodic_boundary_quadrature_rule_pair(const uint pbdry_pair_index, const ushort solution_degree) const
-{
-	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
-	return { oc_side_element.get_quadrature_rule(solution_degree), nc_side_element.get_quadrature_rule(solution_degree) };
-}
-
-std::vector<Euclidean_Vector> Grid::periodic_boundary_normals(const uint pbdry_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const
-{
-	const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[pbdry_index];
-	const auto& oc_element = this->cell_elements_[oc_index];
-
-	return ocs_element.outward_normalized_normal_vectors(oc_element, points);
-}
-
 
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const
 {
@@ -433,6 +500,22 @@ std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_ignore_pbdry(const s
 	}
 
 	return ms::set_intersection(share_cell_index_set_ptrs);
+}
+
+int Grid::find_face_share_cell_index_consider_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const
+{
+	auto cell_indexes = this->find_cell_indexes_have_these_vnodes_consider_pbdry(my_face_vertex_indexes);
+
+	const auto my_index_iter = ms::find(cell_indexes, my_cell_index);
+	REQUIRE(my_index_iter != cell_indexes.end(), "my index should be included in face share cell indexes");
+
+	cell_indexes.erase(my_index_iter);
+	REQUIRE(cell_indexes.size() <= 1, "face share cell should be unique or absent");
+
+	if (cell_indexes.empty())
+		return -1;
+	else
+		return cell_indexes.front();
 }
 
 std::vector<Element> Grid::make_inner_face_elements(void) const

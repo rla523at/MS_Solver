@@ -13,6 +13,7 @@ public:
 	ushort space_dimension(void) const;
 	double total_volume(void) const;
 	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
+	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_consider_pbdry(void) const;
 
 	size_t num_cells(void) const;
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
@@ -43,18 +44,18 @@ public:
 
 	size_t num_inner_faces(void) const;
 	std::pair<uint, uint> inner_face_oc_nc_index_pair(const uint inner_face_index) const;
-	Quadrature_Rule inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const;
+	std::pair<const Quadrature_Rule&, const Quadrature_Rule&> inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const;
 	std::vector<Euclidean_Vector> inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;
-
-	size_t num_periodic_boundary_pairs(void) const;
-	std::pair<uint, uint> periodic_boundary_oc_nc_index_pair(const uint pbdry_pair_index) const;
-	std::pair<Quadrature_Rule, Quadrature_Rule> periodic_boundary_quadrature_rule_pair(const uint pbdry_pair_index, const ushort solution_degree) const;
-	std::vector<Euclidean_Vector> periodic_boundary_normals(const uint pbdry_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;
-
+	double inner_face_volume(const uint inner_face_index) const;
 
 private:	
 	std::unordered_map<uint, std::set<uint>> calculate_vnode_index_to_peridoic_matched_node_index_set(void) const;
+	
+	std::vector<uint> find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const;
 	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const;
+	int find_face_share_cell_index_consider_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
+
+
 	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
 	std::vector<Element> make_inner_face_elements(void) const;
 
@@ -63,7 +64,7 @@ private:
 
 	std::vector<Element> cell_elements_;
 	std::vector<Element> boundary_elements_;
-	std::vector<Element> inner_face_elements_;
+	std::vector<Element> inter_cell_face_elements_;
 	std::vector<std::pair<Element, Element>> periodic_boundary_element_pairs_;
 
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_share_cell_index_set_ignore_pbdry_;

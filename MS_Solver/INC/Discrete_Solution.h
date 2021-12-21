@@ -46,9 +46,15 @@ public://Command
 	void precalculate_cell_P0_basis_values(void);
 	void precalculate_infs_ocs_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_QPs);
 	void precalculate_infs_ncs_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_QPs);
-
+	
+	//for simplex decomposed MLP criterion
 	void precalculate_set_of_simplex_P0_P1_projection_basis_vertices_m(const Grid& grid);
 
+	//for troubled boundary indicator
+	void precalculate_infs_ocs_jump_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_jump_QPs);
+	void precalculate_infs_ncs_jump_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_jump_QPs);
+
+	
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
 	void limit_slope(const uint cell_index, const double limiting_value);
 
@@ -57,6 +63,7 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
 
 	std::vector<Euclidean_Vector> calculate_P0_solutions(void) const;	
+
 	std::vector<Euclidean_Vector> calculate_solution_at_bdry_QPs(const uint bdry_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
@@ -64,6 +71,7 @@ public://Query
 	
 	double calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_simplex_P0_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
+	std::vector<double> calculate_simplex_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 
@@ -71,8 +79,14 @@ public://Query
 	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
 	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
 	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+
+	void calculate_simplex_P0_projected_nth_solution_at_vertices(double* simplex_P0_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
+	void calculate_simplex_P1_projected_nth_solution_at_vertices(double* simplex_P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
 	void calculate_nth_solution_at_vertices(double* nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
 	void calculate_P1_projected_nth_solution_at_vertices(double* P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
+
+	void calculate_nth_solution_at_infc_ocs_jump_QPs(double* nth_solution_at_infc_ocs_jump_QPs, const uint infc_index, const uint oc_index, const ushort equation_index) const;
+	void calculate_nth_solution_at_infc_ncs_jump_QPs(double* nth_solution_at_infc_ncs_jump_QPs, const uint infc_index, const uint nc_index, const ushort equation_index) const;
 
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
@@ -138,11 +152,13 @@ private:
 	std::vector<double> cell_P0_basis_values_;
 	std::vector<Matrix> set_of_cell_basis_QPs_m_;		//cell quadrature point basis value matrix
 	std::vector<Matrix> set_of_cell_basis_vertices_m_;	
-	std::vector<Matrix> set_of_infc_basis_ocs_QPs_m_;	//inner face owner cell side quadratue point basis value matrix
-	std::vector<Matrix> set_of_infc_basis_ncs_QPs_m_;	//inner face neighbor cell side quadratue point basis value matrix
+	std::vector<Matrix> set_of_infc_basis_ocs_flux_QPs_m_;	//inner face owner cell side flux quadratue point basis value matrix
+	std::vector<Matrix> set_of_infc_basis_ncs_flux_QPs_m_;	//inner face neighbor cell side flux quadratue point basis value matrix
 
 	std::vector<Matrix> set_of_simplex_P0_projected_basis_vertices_m_;
 	std::vector<Matrix> set_of_simplex_P1_projected_basis_vertices_m_;
+	std::vector<Matrix> set_of_infc_basis_ocs_jump_QPs_m_;	//inner face owner cell side jump quadratue point basis value matrix
+	std::vector<Matrix> set_of_infc_basis_ncs_jump_QPs_m_;	//inner face neighbor cell side jump quadratue point basis value matrix
 
 
 	//optimize construction

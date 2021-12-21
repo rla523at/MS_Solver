@@ -41,15 +41,16 @@ public://Query
 	std::vector<Euclidean_Vector> points_at_indexes(const std::vector<uint>& indexes) const;
 	Euclidean_Vector outward_normalized_normal_vector(const Element& owner_cell_element, const Euclidean_Vector& point) const;
 	std::vector<Euclidean_Vector> outward_normalized_normal_vectors(const Element& owner_cell_element, const std::vector<Euclidean_Vector>& points) const;
+	std::vector<std::vector<uint>> set_of_face_vertex_indexes(void) const; 
 	ElementType type(void) const;
 	std::vector<uint> vertex_point_indexes(void) const;
+	
 
 private:
 	bool can_be_periodic_pair(const Element& other) const;
 	FaceType check_face_type(const Element& owner_cell_element) const;
 	bool is_periodic_boundary(void) const;
 	std::vector<std::vector<uint>> set_of_face_node_indexes(void) const;
-	std::vector<std::vector<uint>> set_of_face_vertex_node_indexes(void) const;
 
 private:
 	ElementType element_type_;

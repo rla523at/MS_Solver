@@ -36,7 +36,7 @@ solve_post_controller_type	= Iter
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1
 
-post_base_path				= E:/CodeData/Result/RDD/Reconstruction_Test/Test2/
+post_base_path				= E:/CodeData/Result/RDD/hMLP_Test/after_change/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
