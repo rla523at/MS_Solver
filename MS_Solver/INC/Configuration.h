@@ -39,7 +39,7 @@ public://Query
 	double solve_post_time_step(void) const;
 	size_t solve_post_iter_unit(void) const;
 
-	const std::string& get_post_processor_switch(void) const;
+	const std::string& get_write_post_file(void) const;
 	const std::string& get_post_base_path(void) const;
 	const std::string& get_post_file_format(void) const;
 	const std::string& get_post_point_location(void) const;
@@ -47,6 +47,9 @@ public://Query
 	const std::string& get_post_for_debug(void) const;
 
 	const std::string& get_error_type(void) const;
+
+	const std::string& get_write_log_file(void) const;
+
 
 	const double* advection_speeds_ptr(void) const;
 	const double* wave_lengths_ptr(void) const;
@@ -57,8 +60,7 @@ public://Query
 	std::string grid_file_name(const std::string& grid_file_path) const;
 	std::string initial_condition_str(void) const;
 	std::string post_folder_path_str(const std::string& grid_file_name) const;
-
-	
+	std::string spatial_discrete_scheme_str(void) const;	
 
 private:
 	template <typename ValueType>	ValueType get(const std::map<Sentence, Sentence>& name_to_value, const std::string_view config_name) const
@@ -107,7 +109,7 @@ private:
 	double solve_post_time_step_ = 0.0;
 	size_t solve_post_iter_unit_ = 0;
 
-	std::string post_processor_switch_;
+	std::string write_post_file_;
 	std::string post_base_path_;
 	std::string post_file_format_;
 	std::string post_point_location_;
@@ -115,6 +117,8 @@ private:
 	std::string post_for_debug_;
 
 	std::string error_type_;
+
+	std::string do_write;
 
 	//linear advection option
 	std::array<double, max_space_dimension> advection_speeds_ = { 0 };

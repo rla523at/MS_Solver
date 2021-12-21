@@ -23,6 +23,7 @@ Log& Log::operator<<(const Command& command)
 	default:
 	{
 		EXCEPTION("not supported command");
+		break;
 	}
 	}
 	return *this;
@@ -39,6 +40,20 @@ Log& Log::get_instance(void)
 	return instance;
 }
 
+void Log::set_configuration(const Configuration& configuration)
+{
+	const auto& write_log_file = configuration.get_write_log_file();
+
+	if (ms::compare_icase(write_log_file, "Yes"))
+	{
+		this->do_write = true;
+	}
+	else if (ms::compare_icase(write_log_file, "No"))
+	{
+		this->do_write = false;
+	}
+}
+
 void Log::set_path(const std::string& grid_folder_path)
 {
 	this->log_folder_path_ = grid_folder_path;
@@ -47,6 +62,11 @@ void Log::set_path(const std::string& grid_folder_path)
 
 void Log::write(void) const
 {
+	if (!this->do_write)
+	{
+		return;
+	}
+
 	REQUIRE(!this->log_folder_path_.empty(), "path should be set before write");
 
 	const auto file_path = this->log_folder_path_ + "_log.txt";
@@ -55,6 +75,11 @@ void Log::write(void) const
 
 void Log::write_error_text(const std::string& grid_file_name, const std::vector<double>& error_values) const
 {
+	if (!this->do_write)
+	{
+		return;
+	}
+
 	Sentence error_sentence = grid_file_name + "      \t";
 	error_sentence.insert_with_space(error_values);
 	error_sentence << "\n";

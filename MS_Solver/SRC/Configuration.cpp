@@ -102,9 +102,9 @@ size_t Configuration::solve_post_iter_unit(void) const
 	return this->solve_post_iter_unit_;
 }
 
-const std::string& Configuration::get_post_processor_switch(void) const
+const std::string& Configuration::get_write_post_file(void) const
 {
-	return this->post_processor_switch_;
+	return this->write_post_file_;
 }
 
 const std::string& Configuration::get_post_base_path(void) const
@@ -137,6 +137,11 @@ const std::string& Configuration::get_error_type(void) const
 	return this->error_type_;
 }
 
+const std::string& Configuration::get_write_log_file(void) const
+{
+	return this->do_write;
+}
+
 const double* Configuration::advection_speeds_ptr(void) const
 {
 	return this->advection_speeds_.data();
@@ -155,8 +160,21 @@ const double* Configuration::periodic_lengths_ptr(void) const
 std::string Configuration::post_folder_path_str(const std::string& grid_file_name) const
 {
 	REQUIRE(this->post_base_path_.back() == '/', "post base path should be end with /");
+
 	return this->post_base_path_ + this->governing_equation_str() + "/" + this->initial_condition_str() + "/"
-		+ this->spatial_discrete_scheme_ + "/" + grid_file_name + "_" + this->date_time_str_ + "/";
+		+ this->spatial_discrete_scheme_str() + "/" + grid_file_name + "_" + this->date_time_str_ + "/";
+}
+
+std::string Configuration::spatial_discrete_scheme_str(void) const
+{
+	if (ms::compare_icase(this->reconstruction_scheme_, "no"))
+	{
+		return this->spatial_discrete_scheme_;
+	}
+	else
+	{
+		return this->spatial_discrete_scheme_ + "_with_" + this->reconstruction_scheme_;
+	}	
 }
 
 std::string Configuration::configuration_str(const std::string& grid_file_name) const
@@ -173,19 +191,14 @@ std::string Configuration::configuration_str(const std::string& grid_file_name) 
 	os << "\t\t\t\t Configuration \n";
 	os << "================================================================================\n";
 	os << std::left << std::setw(40) << "Space dimension" << this->space_dimension_ << "\n";
-	os << std::left << std::setw(40) << "Governing Equation" << governing_equation_str << "\n";
-	os << std::left << std::setw(40) << "Initial Condtion" << initial_condition_str << "\n";
-	os << std::left << std::setw(40) << "Grid" << grid_file_name << "\n";
-	os << std::setw(40) << "Spatial Discrete Method" << this->spatial_discrete_scheme_ << "\n";
-	//if constexpr (SCAILING_METHOD_FLAG)
-	//	os << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << " with scailing method\n";
-	//else
-	//	os << "Reconstruction Method" << RECONSTRUCTION_METHOD::name() << "\n";
-
-	os << std::left << std::setw(40) << "Numeraical Flux Function" << this->numerical_flux_ << "\n";
-	os << std::left << std::setw(40) << "Time Discrete Scheme" << this->time_discrete_scheme_ << "\n";
-	os << std::left << std::setw(40) << "Time Step Method" << time_step_str << "\n";
-	os << std::left << std::setw(40) << "Solve End Condtion" << solve_end_condition_str << "\n";
+	os << std::setw(40) << "Governing Equation" << governing_equation_str << "\n";
+	os << std::setw(40) << "Initial Condtion" << initial_condition_str << "\n";
+	os << std::setw(40) << "Grid" << grid_file_name << "\n";
+	os << std::setw(40) << "Spatial Discrete Method" << this->spatial_discrete_scheme_str() << "\n";
+	os << std::setw(40) << "Numeraical Flux Function" << this->numerical_flux_ << "\n";
+	os << std::setw(40) << "Time Discrete Scheme" << this->time_discrete_scheme_ << "\n";
+	os << std::setw(40) << "Time Step Method" << time_step_str << "\n";
+	os << std::setw(40) << "Solve End Condtion" << solve_end_condition_str << "\n";
 	os << "================================================================================\n";
 	os << "================================================================================\n\n";
 
@@ -335,7 +348,7 @@ void Configuration::set_value(const Text& config_text)
 	this->solve_post_time_step_ = this->get<double>(name_to_value, "solve_post_time_step");
 	this->solve_post_iter_unit_ = this->get<size_t>(name_to_value, "solve_post_iter_unit");
 
-	this->post_processor_switch_ = this->get<std::string>(name_to_value, "post_processor_switch");
+	this->write_post_file_ = this->get<std::string>(name_to_value, "write_post_file");
 	this->post_base_path_ = this->get<std::string>(name_to_value, "post_base_path");
 	this->post_file_format_ = this->get<std::string>(name_to_value, "post_file_format");
 	this->post_point_location_ = this->get<std::string>(name_to_value, "post_point_location");
@@ -343,6 +356,8 @@ void Configuration::set_value(const Text& config_text)
 	this->post_for_debug_ = this->get<std::string>(name_to_value, "post_for_debug");
 
 	this->error_type_ = this->get<std::string>(name_to_value, "error_type");
+
+	this->do_write = this->get<std::string>(name_to_value, "write_log_file");
 
 	const auto x_advection_speed = this->get<double>(name_to_value, "x_advection_speed");
 	const auto y_advection_speed = this->get<double>(name_to_value, "y_advection_speed");

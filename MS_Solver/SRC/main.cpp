@@ -8,6 +8,8 @@ int main(void)
 		const auto configuration_file_path = "RSC/configuration.dat";
 		Configuration configuration(configuration_file_path);
 		
+		LOG.set_configuration(configuration);
+
 		const auto& grid_file_paths = configuration.get_grid_file_paths();
 		for (const auto& grid_file_path : grid_file_paths)
 		{

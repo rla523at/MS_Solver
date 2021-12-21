@@ -1,5 +1,5 @@
 #pragma once
-#include "Text.h"
+#include "Configuration.h"
 
 #include <iostream>
 #include <sstream>
@@ -28,7 +28,8 @@ public://Command
 	Log& operator<<(const Command& command);
 	
 	void clear(void);	
-	void set_path(const std::string& grid_folder_path); //initialize로 바꾸고 grid file name도 받아오자
+	void set_configuration(const Configuration& configuration);
+	void set_path(const std::string& grid_folder_path);
 
 public://Query
 	void write(void) const;
@@ -39,6 +40,8 @@ private:
 	std::string make_error_file_path(const std::string& path);
 
 private:
+	bool do_write = true;
+
 	std::ostringstream content_;
 	bool is_print_on = true;
 	Text log_txt_;

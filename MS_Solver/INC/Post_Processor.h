@@ -20,7 +20,7 @@ private:
 private:
 	using This_ = Post_Processor;
 	
-	static inline bool on_ = true;
+	static inline bool do_write_ = true;
 	static inline bool is_initialized_ = false;
 	static inline bool is_solution_recorded_ = false;
 	static inline std::string post_folder_path_;

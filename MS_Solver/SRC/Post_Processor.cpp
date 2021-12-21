@@ -4,14 +4,14 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 {	
 	Profiler::set_time_point();
 
-	const auto& post_processor_switch = configuration.get_post_processor_switch();
-	if (ms::compare_icase(post_processor_switch, "On"))
+	const auto& write_post_file = configuration.get_write_post_file();
+	if (ms::compare_icase(write_post_file, "Yes"))
 	{
-		This_::on_ = true;
+		This_::do_write_ = true;
 	}
-	else if (ms::compare_icase(post_processor_switch, "Off"))
+	else if (ms::compare_icase(write_post_file, "No"))
 	{
-		This_::on_ = false;
+		This_::do_write_ = false;
 	}
 	else
 	{
@@ -33,7 +33,7 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 
 void Post_Processor::post_grid(void) 
 {
-	if (!This_::on_)
+	if (!This_::do_write_)
 	{
 		return;
 	}
@@ -47,7 +47,7 @@ void Post_Processor::post_grid(void)
 
 void Post_Processor::post_solution(const std::string_view sv)
 {
-	if (!This_::on_)
+	if (!This_::do_write_)
 	{
 		return;
 	}
@@ -65,7 +65,7 @@ void Post_Processor::post_solution(const std::string_view sv)
 
 void Post_Processor::record_solution(void)
 {
-	if (!This_::on_)
+	if (!This_::do_write_)
 	{
 		return;
 	}
@@ -76,7 +76,7 @@ void Post_Processor::record_solution(void)
 
 void Post_Processor::record_variables(const std::string& name, const std::vector<double>& values) 
 {
-	if (!This_::on_)
+	if (!This_::do_write_)
 	{
 		return;
 	}
@@ -93,7 +93,7 @@ void Post_Processor::set_path(const std::string& path)
 
 void Post_Processor::syncronize_solution_time(const double& solution_time) 
 {
-	if (!This_::on_)
+	if (!This_::do_write_)
 	{
 		return;
 	}
