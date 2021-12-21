@@ -102,7 +102,7 @@ public:
 	Euler_2D(void);
 
 public://Query
-    static constexpr ushort pressure_index(void);
+    static constexpr ushort pressure_index(void) { return 6; };
 
     std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
@@ -122,7 +122,7 @@ public:
     Euler_3D(void);
 
 public://Query
-    static constexpr ushort pressure_index(void);
+    static constexpr ushort pressure_index(void) { return 8; };
 
     std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;

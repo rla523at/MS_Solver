@@ -4,7 +4,8 @@
 enum class Zone_Type
 {
 	FETriangle = 2,
-	FETetrahedron = 4
+	FETetrahedron = 4,
+	Noting = -1
 };
 
 class Post_Variables
@@ -16,7 +17,7 @@ public://Command
 	void clear_variables(void);
 	void record_solution(void);
 	void record_variable(const std::string& name, const std::vector<double>& values);
-	void syncronize_solution_time(const double& get_solution_time);	
+	void syncronize_solution_time(const double& compute);	
 
 public://Query
 	const std::vector<std::vector<double>>& get_post_coordinate_blocks(void) const;
@@ -32,6 +33,7 @@ public://Query
 	std::string variable_location_str(void) const;
 	Zone_Type zone_type(void) const;
 
+	bool is_emptry(void) const;
 private:
 	std::vector<std::vector<double>> make_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 

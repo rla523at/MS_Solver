@@ -3,8 +3,47 @@
 #include "Post_Variables.h"
 #include "Post_Variable_Convertor.h"
 
+class Solution_Time_For_Header
+{
+public:
+	virtual double compute(const double solution_time, const size_t strand_id) const
+	{
+		return solution_time;
+	};
+};
+
+class Solution_Time_For_Debug : public Solution_Time_For_Header
+{
+public:
+	double compute(const double solution_time, const size_t strand_id) const override
+	{
+		return 0.001 * strand_id;
+	};
+};
+
+class Solution_Time_For_Header_Factory
+{
+public:
+	static std::unique_ptr<Solution_Time_For_Header> make_unqiue(const Configuration& configuration)
+	{
+		const auto post_for_debug = configuration.get_post_for_debug();
+		if (ms::compare_icase(post_for_debug, "Yes"))
+		{
+			return std::make_unique<Solution_Time_For_Debug>();
+		}
+		else
+		{
+			return std::make_unique<Solution_Time_For_Header>();
+		}
+	}
+};
+
 class Tecplot_File_Writer
 {
+public:
+	Tecplot_File_Writer(std::unique_ptr<Solution_Time_For_Header>&& solution_time_for_header)
+		: header_solution_time_(std::move(solution_time_for_header)) {};
+
 public://Command
 	void write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path);
 	void write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path);
@@ -20,15 +59,21 @@ protected:
 	
 protected:
 	//common header variable
-	Zone_Type zone_type_;
+	Zone_Type zone_type_ = Zone_Type::Noting;
 	int num_post_points_ = 0;
 	int num_post_elements_ = 0;
 	double solution_time_ = 0.0;
 	size_t strand_id_ = 0;
+
+	std::unique_ptr<Solution_Time_For_Header> header_solution_time_;
 };
 
 class Tecplot_ASCII_File_Writer : public Tecplot_File_Writer
 {
+public:
+	Tecplot_ASCII_File_Writer(std::unique_ptr<Solution_Time_For_Header>&& solution_time_for_header)
+		: Tecplot_File_Writer(std::move(solution_time_for_header)) {};
+
 private:
     void set_grid_header_variable(const Post_Variables& post_variables) override;
 	void set_solution_header_variable(const Post_Variables& post_variables) override;
@@ -77,6 +122,10 @@ private:
 
 class Tecplot_Binary_File_Writer : public Tecplot_File_Writer
 {
+public:
+	Tecplot_Binary_File_Writer(std::unique_ptr<Solution_Time_For_Header>&& solution_time_for_header)
+		: Tecplot_File_Writer(std::move(solution_time_for_header)) {};
+
 private:
 	void set_grid_header_variable(const Post_Variables& post_variables) override;
 	void set_solution_header_variable(const Post_Variables& post_variables) override;
@@ -90,12 +139,12 @@ private:
 
 private:
 	//header variable for Binary
-	int file_type_;
+	int file_type_ = -1;
 	std::vector<int> title_tecplot_binary_format_;
-	int num_variable_;
+	int num_variable_ = -1;
 	std::vector<int> variable_names_tecplot_binary_format_;
 	std::vector<int> zone_name_tecplot_binary_format_;
-	int specify_variable_location_;
+	int specify_variable_location_ = -1;
 };
 
 class Tecplot_File_Writer_Factory//static class

@@ -102,6 +102,11 @@ size_t Configuration::solve_post_iter_unit(void) const
 	return this->solve_post_iter_unit_;
 }
 
+const std::string& Configuration::get_post_processor_switch(void) const
+{
+	return this->post_processor_switch_;
+}
+
 const std::string& Configuration::get_post_base_path(void) const
 {
 	return this->post_base_path_;
@@ -120,6 +125,11 @@ const std::string& Configuration::get_post_point_location(void) const
 ushort Configuration::post_order(void) const
 {
 	return this->post_order_;
+}
+
+const std::string& Configuration::get_post_for_debug(void) const
+{
+	return this->post_for_debug_;
 }
 
 const std::string& Configuration::get_error_type(void) const
@@ -325,10 +335,12 @@ void Configuration::set_value(const Text& config_text)
 	this->solve_post_time_step_ = this->get<double>(name_to_value, "solve_post_time_step");
 	this->solve_post_iter_unit_ = this->get<size_t>(name_to_value, "solve_post_iter_unit");
 
+	this->post_processor_switch_ = this->get<std::string>(name_to_value, "post_processor_switch");
 	this->post_base_path_ = this->get<std::string>(name_to_value, "post_base_path");
 	this->post_file_format_ = this->get<std::string>(name_to_value, "post_file_format");
 	this->post_point_location_ = this->get<std::string>(name_to_value, "post_point_location");
 	this->post_order_ = this->get<ushort>(name_to_value, "post_order");
+	this->post_for_debug_ = this->get<std::string>(name_to_value, "post_for_debug");
 
 	this->error_type_ = this->get<std::string>(name_to_value, "error_type");
 

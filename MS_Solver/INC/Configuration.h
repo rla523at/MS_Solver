@@ -39,10 +39,12 @@ public://Query
 	double solve_post_time_step(void) const;
 	size_t solve_post_iter_unit(void) const;
 
+	const std::string& get_post_processor_switch(void) const;
 	const std::string& get_post_base_path(void) const;
 	const std::string& get_post_file_format(void) const;
 	const std::string& get_post_point_location(void) const;
 	ushort post_order(void) const;
+	const std::string& get_post_for_debug(void) const;
 
 	const std::string& get_error_type(void) const;
 
@@ -105,10 +107,12 @@ private:
 	double solve_post_time_step_ = 0.0;
 	size_t solve_post_iter_unit_ = 0;
 
+	std::string post_processor_switch_;
 	std::string post_base_path_;
 	std::string post_file_format_;
 	std::string post_point_location_;
 	ushort post_order_ = 0;
+	std::string post_for_debug_;
 
 	std::string error_type_;
 

@@ -9,11 +9,9 @@ void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, 
 
 void Tecplot_File_Writer::write_solution_file(Post_Variables& post_variables, const std::string_view post_file_path)
 {
-	post_variables.record_solution();
 	this->set_solution_header_variable(post_variables);
 	this->write_header(post_file_path);
 	this->write_solution_data(post_variables, post_file_path);
-	post_variables.clear_variables();
 }
 
 size_t Tecplot_File_Writer::strand_id(void) const
@@ -70,7 +68,9 @@ void Tecplot_ASCII_File_Writer::write_header(const std::string_view post_file_pa
 	header_text[8] << "DataPacking = Block";
 	header_text[9] << "VarLocation = " + this->variable_location_str_;
 	header_text[10] << "StrandID = " + std::to_string(this->strand_id_++);
-	header_text[11] << "SolutionTime = " + std::to_string(this->solution_time_);
+	header_text[11] << "SolutionTime = " + std::to_string(this->header_solution_time_->compute(this->solution_time_, this->strand_id_));
+	//header_text[11] << "SolutionTime = " + this->solution_time_for_header_->get_solution_time(this->solution_time_, this->strand_id_) std::to_string(this->solution_time_);
+
 
 	header_text.write(post_file_path);
 }
@@ -175,7 +175,8 @@ void Tecplot_Binary_File_Writer::write_header(const std::string_view post_file_p
 	writer << this->zone_name_tecplot_binary_format_;					//zone name
 	writer << -1;														//parent zone - default
 	writer << static_cast<int>(this->strand_id_++);						//strand id
-	writer << this->solution_time_;										//solution_time
+	//writer << this->solution_time_;										//solution_time
+	writer << this->header_solution_time_->compute(this->solution_time_, strand_id_);										//solution_time
 	writer << -1;														//Default zone color, seldom used - default
 	writer << static_cast<int>(this->zone_type_);						//zone type
 	if (this->specify_variable_location_ == 0)							//specify var location
@@ -265,14 +266,15 @@ void Tecplot_Binary_File_Writer::write_data(const std::vector<std::vector<double
 std::unique_ptr<Tecplot_File_Writer> Tecplot_File_Writer_Factory::make_unique(const Configuration& configuration)
 {
 	const auto& format = configuration.get_post_file_format();
+	auto solution_time_for_header = Solution_Time_For_Header_Factory::make_unqiue(configuration);
 
 	if (ms::contains_icase(format, "ASCII"))
-	{
-		return std::make_unique<Tecplot_ASCII_File_Writer>();
+	{	
+		return std::make_unique<Tecplot_ASCII_File_Writer>(std::move(solution_time_for_header));
 	}
 	else if (ms::contains_icase(format, "Binary"))
 	{
-		return std::make_unique<Tecplot_Binary_File_Writer>();
+		return std::make_unique<Tecplot_Binary_File_Writer>(std::move(solution_time_for_header));
 	}
 	else
 	{

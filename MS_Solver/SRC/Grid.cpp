@@ -58,7 +58,7 @@ Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_vie
 	//calculate vnode_index_to_share_cell_index_set_consider_pbdry_
 	this->vnode_index_to_share_cell_index_set_consider_pbdry_ = this->vnode_index_to_share_cell_index_set_ignore_pbdry_;
 	
-	const auto vnode_index_to_periodic_matched_node_index_set = this->calculate_vnode_index_to_peridoic_matched_node_index_set();
+	const auto vnode_index_to_periodic_matched_node_index_set = this->vertex_index_to_peridoic_matched_vertex_index_set();
 
 	for (const auto& [vnode_index, periodic_matched_node_index_set] : vnode_index_to_periodic_matched_node_index_set)
 	{
@@ -109,7 +109,7 @@ std::vector<std::vector<uint>> Grid::set_of_face_share_cell_indexes_consider_pbd
 		const auto set_of_face_vertex_indexes = this->cell_elements_[cell_index].set_of_face_vertex_indexes();
 		const auto num_faces = set_of_face_vertex_indexes.size();
 
-		std::vector<uint> face_share_cell_indexes;
+		auto& face_share_cell_indexes = set_of_face_share_cell_indexes[cell_index];
 		face_share_cell_indexes.reserve(num_faces);
 
 		for (const auto& face_vertex_indexes : set_of_face_vertex_indexes) 
@@ -121,8 +121,6 @@ std::vector<std::vector<uint>> Grid::set_of_face_share_cell_indexes_consider_pbd
 				face_share_cell_indexes.push_back(face_share_cell_index);
 			}
 		}
-
-		set_of_face_share_cell_indexes.push_back(std::move(face_share_cell_indexes));
 	}
 
 	return set_of_face_share_cell_indexes; //this is not ordered set
@@ -614,7 +612,7 @@ std::vector<std::pair<Element, Element>> Grid::make_periodic_boundary_element_pa
 	return matched_periodic_element_pairs;
 }
 
-std::unordered_map<uint, std::set<uint>> Grid::calculate_vnode_index_to_peridoic_matched_node_index_set(void) const
+std::unordered_map<uint, std::set<uint>> Grid::vertex_index_to_peridoic_matched_vertex_index_set(void) const
 {
 	std::unordered_map<uint, std::set<uint>> vnode_index_to_periodic_matched_vnode_index_set;
 

@@ -257,6 +257,9 @@
     <ClInclude Include="INC\Error.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
+    <ClInclude Include="Debugger.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RSC\configuration.dat">

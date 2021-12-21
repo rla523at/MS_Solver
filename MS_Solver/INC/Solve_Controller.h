@@ -55,6 +55,17 @@ protected:
     size_t num_post_ = 0;
 };
 
+class Solve_No_Post_Controller : public Solve_Post_Controller
+{
+public://Command
+    void increase_num_post(void) override {};
+
+public://Query
+    bool is_need_to_controll_time_step(const double current_time, const double time_step) const override;
+    void controll_time_step(const double current_time, double& time_step) const override {};
+    bool is_time_to_post(const size_t current_iter, const double current_time) const override;
+};
+
 class Solve_Post_Controller_By_Time : public Solve_Post_Controller
 {
 public:

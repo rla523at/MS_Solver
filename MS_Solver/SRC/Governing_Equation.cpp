@@ -170,11 +170,6 @@ Euler_2D::Euler_2D(void)
 	this->solution_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "a" };
 }
 
-constexpr ushort Euler_2D::pressure_index(void)
-{
-	return 6;
-}
-
 std::vector<std::vector<double>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	auto num_solution = P0_solutions.size();
@@ -303,11 +298,6 @@ Euler_3D::Euler_3D(void)
 	this->num_solutions_ = 10;
 	this->num_equations_ = 5;
 	this->solution_names_ = { "rho", "rhou", "rhov", "rhow", "rhoE", "u", "v", "w", "p", "a" };
-}
-
-constexpr ushort Euler_3D::pressure_index(void)
-{
-	return 8;
 }
 
 std::vector<std::vector<double>> Euler_3D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const

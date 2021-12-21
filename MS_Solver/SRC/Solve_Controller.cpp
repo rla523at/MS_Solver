@@ -47,6 +47,16 @@ std::string Solve_End_Controller_By_Iter::progress_percentage_str(const size_t c
     return oss.str();
 }
 
+bool Solve_No_Post_Controller::is_need_to_controll_time_step(const double current_time, const double time_step) const
+{
+    return false;
+}
+
+bool Solve_No_Post_Controller::is_time_to_post(const size_t current_iter, const double current_time) const
+{
+    return false;
+}
+
 Solve_Post_Controller_By_Time::Solve_Post_Controller_By_Time(const double post_time_step)
     : post_time_step_(post_time_step) {
     this->update_post_time();
@@ -136,7 +146,11 @@ std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(
 std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make_unique(const Configuration& configuration)
 {
     const auto& type_name = configuration.get_solve_post_controller_type();
-    if (ms::contains_icase(type_name, "Time"))
+    if (ms::contains_icase(type_name, "NoPostController"))
+    {
+        return std::make_unique<Solve_No_Post_Controller>();
+    }
+    else if (ms::contains_icase(type_name, "Time"))
     {
         const auto post_time_step = configuration.solve_post_time_step();
         return std::make_unique<Solve_Post_Controller_By_Time>(post_time_step);

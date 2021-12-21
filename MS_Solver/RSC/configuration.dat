@@ -6,12 +6,12 @@ governing_equation			= Burgers
 Initial_condition			= Sine_Wave					
 							//Constant1, Sine_Wave
 
-grid_file_paths				= RSC/Grid/2D/RQ30.msh
+grid_file_paths				= RSC/Grid/2D/RQ40.msh
 grid_file_type				= Gmsh
 
-spatial_discrete_scheme		= DG_P2
-reconstruction_scheme		= hMLP
-							//No, hMLP
+spatial_discrete_scheme		= DG_P4
+reconstruction_scheme		= hMLP_BD
+							//No, hMLP, hMLP_BD
 
 numerical_flux				= LLF
 
@@ -31,12 +31,17 @@ solve_end_time				= 0.4
 solve_end_iter				= 0
 
 solve_post_controller_type	= Iter						
-							//Time, Iter
+							//Time, Iter, NoPostController
 
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1
 
-post_base_path				= E:/CodeData/Result/RDD/hMLP_Test/after_change/
+///////////////////// Post Processor /////////////////////////////
+
+post_processor_switch		= Off
+							//On, Off
+
+post_base_path				= E:/CodeData/Result/RDD/hMLP_BD_Test/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -44,6 +49,11 @@ post_point_location			= Node
 							//Center, Node
 
 post_order					= 1
+
+post_for_debug				= No
+							//Yes, No
+
+///////////////////////////////////////////////////////////////////
 
 Error_type					= Global
 							//Global, Local_Average

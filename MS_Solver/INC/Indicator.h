@@ -52,15 +52,17 @@ public://Command
     void precaclulate(const Discrete_Solution_DG& discrete_solution);
 
 private:
+    std::unordered_map<uint, std::set<uint>> vertex_index_to_matched_vertex_index_set_;
+
     //precalculate
     std::vector<std::map<uint, double>> set_of_vertex_index_to_simplex_P0_value_;
 };
 
 enum class cell_type
 {
-    normal,
-    smooth_extrema,
-    trouble,
+    normal = 0,
+    smooth_extrema = 1,
+    trouble = 2,
 };
 
 class MLP_Indicator

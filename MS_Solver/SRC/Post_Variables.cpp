@@ -153,6 +153,11 @@ Zone_Type Post_Variables::zone_type(void) const
 	return this->zone_type_;
 }
 
+bool Post_Variables::is_emptry(void) const
+{
+	return this->post_variable_names_.empty();
+}
+
 std::vector<std::vector<double>> Post_Variables::make_post_coordinate_blocks(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) const 
 {
 	std::vector<std::vector<double>> coordinate_blocks(this->space_dimension_);

@@ -97,6 +97,9 @@ void MLP_Criterion::precaclulate(const Discrete_Solution_DG& discrete_solution)
 Simplex_Decomposed_MLP_Criterion::Simplex_Decomposed_MLP_Criterion(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 	: MLP_Criterion_Base(grid, discrete_solution)
 {
+	Profiler::set_time_point();
+
+	this->vertex_index_to_matched_vertex_index_set_ = grid.vertex_index_to_peridoic_matched_vertex_index_set();
 	this->set_of_vertex_index_to_simplex_P0_value_.resize(this->num_cells_);
 
 	for (uint i = 0; i < this->num_cells_; ++i)
@@ -116,6 +119,8 @@ Simplex_Decomposed_MLP_Criterion::Simplex_Decomposed_MLP_Criterion(const Grid& g
 
 	//precalcuate
 	discrete_solution.precalculate_set_of_simplex_P0_P1_projection_basis_vertices_m(grid);
+
+	LOG << std::left << std::setw(50) << "@ Simplex Decomposed MLP Criterion precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
 void Simplex_Decomposed_MLP_Criterion::precaclulate(const Discrete_Solution_DG& discrete_solution)
@@ -144,7 +149,31 @@ void Simplex_Decomposed_MLP_Criterion::precaclulate(const Discrete_Solution_DG& 
 		auto iter = start_iter;
 		for (const auto cell_index : share_cell_index_set)
 		{
-			*iter = this->set_of_vertex_index_to_simplex_P0_value_[cell_index].at(vertex_index);
+			auto& vertex_index_to_simplex_P0_value = this->set_of_vertex_index_to_simplex_P0_value_[cell_index];
+
+			if (vertex_index_to_simplex_P0_value.contains(vertex_index))
+			{
+				*iter = vertex_index_to_simplex_P0_value.at(vertex_index);
+			}
+			else
+			{
+				const auto& matched_vertex_index_set = this->vertex_index_to_matched_vertex_index_set_.at(vertex_index);
+
+				for (const auto& matched_vertex_index : matched_vertex_index_set)
+				{
+					if (vertex_index_to_simplex_P0_value.contains(matched_vertex_index))
+					{
+						*iter = vertex_index_to_simplex_P0_value.at(matched_vertex_index);
+						break;
+					}					
+
+					if (matched_vertex_index == *matched_vertex_index_set.rbegin())
+					{
+						EXCEPTION("can not find matched vertex");
+					}
+				}
+			}			
+
 			++iter;
 		}
 
@@ -325,11 +354,10 @@ void Subcell_Oscillation_Indicator::precalculate(const Discrete_Solution_DG& dis
 		const auto [oc_index, nc_index] = this->inner_face_oc_nc_index_pairs_[infc_index];
 
 		//calculate smooth_boundary_indicator
-		const auto num_QPs = this->set_of_jump_QWs_v_[infc_index].size();
-
 		discrete_solution.calculate_nth_solution_at_infc_ocs_jump_QPs(this->value_at_ocs_jump_QPs_.data(), infc_index, oc_index, this->criterion_equation_index_);
 		discrete_solution.calculate_nth_solution_at_infc_ncs_jump_QPs(this->value_at_ncs_jump_QPs_.data(), infc_index, nc_index, this->criterion_equation_index_);
 
+		const auto num_QPs = static_cast<int>(this->set_of_jump_QWs_v_[infc_index].size());
 		ms::BLAS::x_minus_y(num_QPs, this->value_at_ocs_jump_QPs_.data(), this->value_at_ncs_jump_QPs_.data(), this->value_diff_at_jump_QPs_.data());
 		ms::BLAS::abs_x(num_QPs, this->value_diff_at_jump_QPs_.data());
 		
@@ -381,6 +409,8 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 		return; //it means that governing equation is linear advection
 	}
 
+	std::fill(this->are_shock_.begin(), this->are_shock_.end(), false);
+
 	const auto P0_solutions = discrete_solution.calculate_P0_solutions();
 
 	const auto num_cells = this->are_shock_.size();
@@ -391,7 +421,7 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 		const auto my_value = P0_solutions[i][this->criterion_solution_index_];
 		for (const auto face_share_cell_index : face_share_cell_indexes) 
 		{
-			const auto other_value = P0_solutions[i][face_share_cell_index];
+			const auto other_value = P0_solutions[face_share_cell_index][this->criterion_solution_index_];
 
 			if (std::abs(my_value - other_value) >= 0.1 * (std::min)(my_value, other_value)) 
 			{
