@@ -7,18 +7,18 @@
 #include <vector>
 
 class Euclidean_Vector;
-class Euclidean_Vector_Constant_Base
+class Constant_Euclidean_Vector_Wrapper
 {
 public:
-	Euclidean_Vector_Constant_Base(void) = default;
-	Euclidean_Vector_Constant_Base(const size_t num_value, const double* const_data_ptr);
+	Constant_Euclidean_Vector_Wrapper(void) = default;
+	Constant_Euclidean_Vector_Wrapper(const size_t num_value, const double* const_data_ptr);
 
 public://Query
-	Euclidean_Vector operator-(const Euclidean_Vector_Constant_Base& other) const;
-	Euclidean_Vector operator+(const Euclidean_Vector_Constant_Base& other) const;
+	Euclidean_Vector operator-(const Constant_Euclidean_Vector_Wrapper& other) const;
+	Euclidean_Vector operator+(const Constant_Euclidean_Vector_Wrapper& other) const;
 	Euclidean_Vector operator*(const double constant) const;
 	double operator[](const size_t position) const;
-	bool operator==(const Euclidean_Vector_Constant_Base& other) const;
+	bool operator==(const Constant_Euclidean_Vector_Wrapper& other) const;
 
 	double at(const size_t position) const;
 	const double* begin(void) const;
@@ -28,8 +28,8 @@ public://Query
 	double L1_norm(void) const;
 	double L2_norm(void) const;
 	double Linf_norm(void) const;
-	double inner_product(const Euclidean_Vector_Constant_Base& other) const;
-	bool is_axis_translation(const Euclidean_Vector_Constant_Base& other) const;
+	double inner_product(const Constant_Euclidean_Vector_Wrapper& other) const;
+	bool is_axis_translation(const Constant_Euclidean_Vector_Wrapper& other) const;
 	size_t size(void) const;
 	std::string to_string(void) const;
 
@@ -38,17 +38,17 @@ protected:
 	const double* const_data_ptr_ = nullptr;
 };
 
-class Euclidean_Vector_Base : public Euclidean_Vector_Constant_Base
+class Euclidean_Vector_Wrapper : public Constant_Euclidean_Vector_Wrapper
 {
 public:
-	Euclidean_Vector_Base(void) = default;
-	Euclidean_Vector_Base(const size_t num_values, double* data_ptr)
-		: Euclidean_Vector_Constant_Base(num_values, data_ptr)
+	Euclidean_Vector_Wrapper(void) = default;
+	Euclidean_Vector_Wrapper(const size_t num_values, double* data_ptr)
+		: Constant_Euclidean_Vector_Wrapper(num_values, data_ptr)
 		, data_ptr_(data_ptr) {};
 		
 public://Command
 	void operator*=(const double constant);
-	void operator+=(const Euclidean_Vector_Constant_Base& other);
+	void operator+=(const Constant_Euclidean_Vector_Wrapper& other);
 	double& operator[](const size_t position);
 
 	double& at(const size_t position);
@@ -66,7 +66,7 @@ protected:
 	double* data_ptr_ = nullptr;
 };
 
-class Euclidean_Vector : public Euclidean_Vector_Base
+class Euclidean_Vector : public Euclidean_Vector_Wrapper
 {
 public:
 	Euclidean_Vector(void) = default;
@@ -92,92 +92,6 @@ public://Command
 
 private:
 	std::vector<double> values_;
-};
-
-class Euclidean_Vector_Constant_Wrapper : public Euclidean_Vector_Constant_Base	//upcasting을 위한 상속
-{
-public:
-	Euclidean_Vector_Constant_Wrapper(const std::vector<double>& values)
-		: values_wrapper_(values)
-		, base_(this->values_wrapper_.size(), this->values_wrapper_.data()) 
-	{
-		this->num_values_ = static_cast<int>(this->values_wrapper_.size());
-		this->const_data_ptr_ = this->values_wrapper_.data();
-	};
-
-public://Query
-	Euclidean_Vector operator-(const Euclidean_Vector_Constant_Base& other) const;
-	Euclidean_Vector operator+(const Euclidean_Vector_Constant_Base& other) const;
-	Euclidean_Vector operator*(const double constant) const;
-	double operator[](const size_t position) const;
-	bool operator==(const Euclidean_Vector_Constant_Base& other) const;
-
-	double at(const size_t position) const;
-	const double* begin(void) const;
-	std::vector<double> copy_values(void) const;
-	const double* data(void) const;
-	const double* end(void) const;
-	double L1_norm(void) const;
-	double L2_norm(void) const;
-	double Linf_norm(void) const;
-	double inner_product(const Euclidean_Vector_Constant_Base& other) const;
-	bool is_axis_translation(const Euclidean_Vector_Constant_Base& other) const;
-	size_t size(void) const;
-	std::string to_string(void) const;
-
-private:
-	bool is_sync(void) const;
-
-private:
-	const std::vector<double>& values_wrapper_;
-	Euclidean_Vector_Constant_Base base_;
-};
-
-class Euclidean_Vector_Wrapper : public Euclidean_Vector_Base
-{
-public:
-	Euclidean_Vector_Wrapper(std::vector<double>& values)
-		: values_wrapper_(values)
-		, base_(this->values_wrapper_.size(), this->values_wrapper_.data())
-	{
-		this->num_values_ = static_cast<int>(this->values_wrapper_.size());
-		this->const_data_ptr_ = this->values_wrapper_.data();
-		this->data_ptr_ = this->values_wrapper_.data();
-	};
-
-public://Command
-	void operator*=(const double constant);
-	void operator+=(const Euclidean_Vector_Constant_Base& other);
-	void operator=(Euclidean_Vector&& other) noexcept;
-
-	void normalize(void);
-
-public://Query
-	Euclidean_Vector operator-(const Euclidean_Vector_Constant_Base& other) const;
-	Euclidean_Vector operator+(const Euclidean_Vector_Constant_Base& other) const;
-	Euclidean_Vector operator*(const double constant) const;
-	double operator[](const size_t position) const;
-	bool operator==(const Euclidean_Vector_Constant_Base& other) const;
-
-	double at(const size_t position) const;
-	const double* begin(void) const;
-	std::vector<double> copy_values(void) const;
-	const double* data(void) const;
-	const double* end(void) const;
-	double L1_norm(void) const;
-	double L2_norm(void) const;
-	double Linf_norm(void) const;
-	double inner_product(const Euclidean_Vector_Constant_Base& other) const;
-	bool is_axis_translation(const Euclidean_Vector_Constant_Base& other) const;
-	size_t size(void) const;
-	std::string to_string(void) const;
-
-private:
-	bool is_sync(void) const;
-
-private:
-	std::vector<double>& values_wrapper_;
-	Euclidean_Vector_Base base_;
 };
 
 template <typename Function>
@@ -279,12 +193,12 @@ private:
 
 namespace ms
 {
-	void vpv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr);
-	void vmv(const Euclidean_Vector_Constant_Base& v1, const Euclidean_Vector_Constant_Base& v2, double* result_ptr);
+	void vpv(const Constant_Euclidean_Vector_Wrapper& v1, const Constant_Euclidean_Vector_Wrapper& v2, double* result_ptr);
+	void vmv(const Constant_Euclidean_Vector_Wrapper& v1, const Constant_Euclidean_Vector_Wrapper& v2, double* result_ptr);
 }
 
-Euclidean_Vector operator*(const double constant, const Euclidean_Vector_Constant_Base& x);
-std::ostream& operator<<(std::ostream& os, const Euclidean_Vector_Constant_Base& x);
+Euclidean_Vector operator*(const double constant, const Constant_Euclidean_Vector_Wrapper& x);
+std::ostream& operator<<(std::ostream& os, const Constant_Euclidean_Vector_Wrapper& x);
 template <typename Function>	std::ostream& operator<<(std::ostream& os, const Vector_Function<Function>& vf)
 {
 	return os << vf.to_string();

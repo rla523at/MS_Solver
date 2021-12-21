@@ -51,9 +51,9 @@ Euclidean_Vector Semi_Discrete_Equation_DG::discrete_solution_vector(void) const
 	return this->discrete_solution_->discrete_solution_vector();
 }
 
-Euclidean_Vector_Constant_Wrapper Semi_Discrete_Equation_DG::solution_vector_constant_wrapper(void) const
+Constant_Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::discrete_solution_constant_vector_wrapper(void) const
 {
-	return this->discrete_solution_->solution_vector_constant_wrapper();
+	return this->discrete_solution_->discrete_solution_constant_vector_wrapper();
 }
 
 std::vector<double> Semi_Discrete_Equation_DG::calculate_error_norms(const Grid& grid, const double end_time) const

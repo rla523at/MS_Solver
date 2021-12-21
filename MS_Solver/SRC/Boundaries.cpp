@@ -74,7 +74,7 @@ void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG
     for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
         const auto oc_index = this->oc_indexes_[bdry_index];
-        discrete_solution.calculate_solution_at_bdry_QPs(this->solution_v_at_QPs_, bdry_index, oc_index);
+        discrete_solution.calculate_solution_at_bdry_QPs(this->solution_v_at_QPs_.data(), bdry_index, oc_index);
         
         auto& boundary_flux_function = *this->boundary_flux_functions_[bdry_index];
         const auto& normals = this->set_of_normals_[bdry_index];

@@ -17,7 +17,7 @@ TEST(Matrix_Wrapper, change_columns_2)
 	std::vector<double> value = { 1,2,3,4,5,6 };
 	Matrix_Wrapper mw(2, 3, value.data());
 	mw.change_columns(1, 3, 0.0);
-	std::vector<double> ref = { 1,2,0,0,0,0 };
+	std::vector<double> ref = { 1,0,0,4,0,0 };
 	EXPECT_EQ(value, ref);
 }
 

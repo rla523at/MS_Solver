@@ -42,18 +42,18 @@ solve_end_controller_type	= Time
 solve_end_time				= 0.4
 solve_end_iter				= 0
 
-solve_post_controller_type	= Iter						
-							//Time, Iter, NoPostController
+solve_post_controller_type	= NotUse						
+							//Time, Iter, NotUse
 
 solve_post_time_step		= 0.1
-solve_post_iter_unit		= 1
+solve_post_iter_unit		= 10
 
 ///////////////////////////////////////////////////////////////////
 
 
 ///////////////////// Post Processor /////////////////////////////
 
-write_post_file				= No
+write_post_file				= Yes
 							//Yes, No
 
 post_base_path				= E:/CodeData/Result/RDD/hMLP_BD_Test/

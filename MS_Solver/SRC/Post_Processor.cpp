@@ -1,9 +1,6 @@
 #include "../INC/Post_Processor.h"
-
-void Post_Processor::initialize(const Configuration& configuration, const Grid& grid, Discrete_Solution& discrete_solution) 
-{	
-	Profiler::set_time_point();
-
+void Post_Processor::set_configuration(const Configuration& configuration)
+{
 	const auto& write_post_file = configuration.get_write_post_file();
 	if (ms::compare_icase(write_post_file, "Yes"))
 	{
@@ -17,7 +14,11 @@ void Post_Processor::initialize(const Configuration& configuration, const Grid& 
 	{
 		EXCEPTION("post processor switch in configuaration file is not supported");
 	}
+}
 
+void Post_Processor::initialize(const Configuration& configuration, const Grid& grid, Discrete_Solution& discrete_solution) 
+{	
+	Profiler::set_time_point();
 
 	This_::post_order_ = configuration.post_order();
 

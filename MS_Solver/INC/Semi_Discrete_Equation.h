@@ -17,7 +17,7 @@ public://Query
 	virtual double calculate_time_step(void) const abstract;
 	virtual Euclidean_Vector calculate_RHS(void) const abstract;
 	virtual Euclidean_Vector discrete_solution_vector(void) const abstract;
-	virtual Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const abstract;
+	virtual Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const abstract;
 	virtual std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const abstract;
 
 };
@@ -41,7 +41,7 @@ public://Query
 	double calculate_time_step(void) const override;
 	Euclidean_Vector calculate_RHS(void) const override;
 	Euclidean_Vector discrete_solution_vector(void) const override;
-	Euclidean_Vector_Constant_Wrapper solution_vector_constant_wrapper(void) const override;
+	Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const override;
 	std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const override;
 
 private:

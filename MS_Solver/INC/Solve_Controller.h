@@ -55,7 +55,7 @@ protected:
     size_t num_post_ = 0;
 };
 
-class Solve_No_Post_Controller : public Solve_Post_Controller
+class Solve_Post_Controller_Not_Use : public Solve_Post_Controller
 {
 public://Command
     void increase_num_post(void) override {};

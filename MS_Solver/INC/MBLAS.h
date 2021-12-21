@@ -18,6 +18,7 @@ namespace ms::BLAS
 	double x_dot_y(const int n, const double* x_ptr, const double* y_ptr);
 	void x_plus_y(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
 	void x_plus_assign_y(const int n, double* x_ptr, const double* y_ptr);
+	void x_plus_assign_cy(const int n, double* x_ptr, const double c, const double* y_ptr);
 	void x_minus_y(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr);
 	void x_minus_assign_y(const int n, double* x_ptr, const double* y_ptr);
 }

@@ -9,6 +9,7 @@ int main(void)
 		Configuration configuration(configuration_file_path);
 		
 		LOG.set_configuration(configuration);
+		Post_Processor::set_configuration(configuration);
 
 		const auto& grid_file_paths = configuration.get_grid_file_paths();
 		for (const auto& grid_file_path : grid_file_paths)

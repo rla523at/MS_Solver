@@ -13,14 +13,14 @@ Euclidean_Vector Discrete_Solution::discrete_solution_vector(void) const
 	return this->values_;
 }
 
-Euclidean_Vector_Constant_Wrapper Discrete_Solution::solution_vector_constant_wrapper(void) const
+Constant_Euclidean_Vector_Wrapper Discrete_Solution::discrete_solution_constant_vector_wrapper(void) const
 {
-	return this->values_;
+	return { this->values_.size(), this->values_.data() };
 }
 
 Euclidean_Vector_Wrapper Discrete_Solution::discrete_solution_vector_wrapper(void)
 {
-	return this->values_;
+	return { this->values_.size(), this->values_.data() };
 }
 
 
@@ -195,7 +195,10 @@ void Discrete_Solution_DG::precalculate_cell_P0_basis_values(void)
 
 		for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 		{
-			this->cell_P0_basis_values_[cell_index] = this->calculate_P0_basis_value(cell_index);
+			const auto& basis_vector_function = this->basis_vector_functions_[cell_index];
+			const auto& P0_basis_function = basis_vector_function[0];
+
+			this->cell_P0_basis_values_[cell_index] = P0_basis_function.to_constant();
 		}
 	}
 }
@@ -412,7 +415,7 @@ std::vector<double> Discrete_Solution_DG::calculate_P1_projected_nth_solution_at
 	return this->calculate_Pn_projected_mth_solution_at_precalulated_points(cell_index, P1, equation_index, this->set_of_cell_basis_vertices_m_[cell_index]);
 }
 
-void Discrete_Solution_DG::calculate_solution_at_bdry_QPs(std::vector<Euclidean_Vector>& solution_at_QPs, const uint bdry_index, const uint oc_index) const
+void Discrete_Solution_DG::calculate_solution_at_bdry_QPs(Euclidean_Vector* solution_at_QPs, const uint bdry_index, const uint oc_index) const
 {
 	REQUIRE(!this->set_of_bdry_basis_QPs_m_.empty(), "basis value should be precalculated");
 	this->calculate_solution_at_precalulated_points(solution_at_QPs, oc_index, this->set_of_bdry_basis_QPs_m_[bdry_index]);
@@ -471,14 +474,6 @@ void Discrete_Solution_DG::calculate_nth_solution_at_infc_ncs_jump_QPs(double* n
 {
 	REQUIRE(!this->set_of_infc_basis_ncs_jump_QPs_m_.empty(), "basis value should be precalculated");
 	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_infc_ncs_jump_QPs, nc_index, equation_index, this->set_of_infc_basis_ncs_jump_QPs_m_[infc_index]);
-}
-
-double Discrete_Solution_DG::calculate_P0_basis_value(const uint cell_index) const
-{
-	const auto& basis_vector_function = this->basis_vector_functions_[cell_index];
-	const auto& P0_basis_function = basis_vector_function[0];
-
-	return P0_basis_function.to_constant();
 }
 
 Matrix Discrete_Solution_DG::calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const
@@ -574,21 +569,6 @@ std::vector<double> Discrete_Solution_DG::calculate_Pn_projected_mth_solution_at
 	return nth_Pn_projected_solution_at_points;	
 }
 
-void Discrete_Solution_DG::calculate_solution_at_precalulated_points(std::vector<Euclidean_Vector>& solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const
-{
-	const auto num_points = basis_points_m.num_column();
-	std::fill(this->solution_at_points_values_.begin(), this->solution_at_points_values_.begin() + this->num_equations_ * num_points, 0.0);
-
-	ms::gemm(this->coefficient_matrix_contant_wrapper(cell_index), basis_points_m, this->solution_at_points_values_.data());
-	Constant_Matrix_Wrapper GE_solution_points_mcw(this->num_equations_, num_points, this->solution_at_points_values_.data());
-
-	for (int i = 0; i < num_points; ++i)
-	{
-		GE_solution_points_mcw.column(i, this->GE_soluion_.data());
-		this->governing_equation_->extend_to_solution(GE_soluion_.data(), solution_v_at_points[i].data());
-	}
-}
-
 void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points_ptr, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const
 {
 	const auto num_points = basis_points_m.num_column();
@@ -622,12 +602,6 @@ void Discrete_Solution_DG::calculate_Pn_projected_mth_solution_at_precalulated_p
 	ms::gemm(Pn_projected_nth_coefficient_cmw, Pn_projected_basis_cmw, Pn_projected_mth_solution_at_points);
 }
 
-
-size_t Discrete_Solution_DG::coefficient_start_index(const uint cell_index) const
-{
-	return this->coefficieint_start_indexes_[cell_index];
-}
-
 ushort Discrete_Solution_DG::num_basis(const uint cell_index) const
 {
 	return this->set_of_num_basis_[cell_index];
@@ -652,16 +626,6 @@ ushort Discrete_Solution_DG::solution_degree(const uint cell_index) const
 const std::vector<size_t>& Discrete_Solution_DG::get_coefficient_start_indexes(void) const
 {
 	return this->coefficieint_start_indexes_;
-}
-
-const std::vector<ushort>& Discrete_Solution_DG::get_solution_degrees(void) const
-{
-	return this->solution_degrees_;
-}
-
-const std::vector<ushort>& Discrete_Solution_DG::get_set_of_num_basis(void) const
-{
-	return this->set_of_num_basis_;
 }
 
 double* Discrete_Solution_DG::coefficient_pointer(const uint cell_index) 

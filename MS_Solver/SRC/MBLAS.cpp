@@ -103,6 +103,23 @@ namespace ms::BLAS
 		}
 	}
 
+	void x_plus_assign_cy(const int n, double* x_ptr, const double c, const double* y_ptr)
+	{
+		if (n <= ms::BLAS::axpy_criteria)
+		{
+			for (int i = 0; i < n; ++i)
+			{
+				x_ptr[i] += c * y_ptr[i];
+			}
+		}
+		else
+		{			
+			const auto incx = 1;
+			const auto incy = 1;
+			cblas_daxpy(n, c, y_ptr, incx, x_ptr, incy);
+		}
+	}
+
 	void x_minus_y(const int n, const double* x_ptr, const double* y_ptr, double* result_ptr)
 	{
 		ms::BLAS::copy(n, x_ptr, result_ptr);
