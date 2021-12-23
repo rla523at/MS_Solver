@@ -1,5 +1,28 @@
 #include "../INC/Tecplot_File_Writer.h"
 
+double Solution_Time_For_Header::compute(const double solution_time, const size_t strand_id) const
+{
+	return solution_time;
+};
+
+double Solution_Time_For_Header_Debug_Mode::compute(const double solution_time, const size_t strand_id) const 
+{
+	return 0.001 * strand_id;
+};
+
+std::unique_ptr<Solution_Time_For_Header> Solution_Time_For_Header_Factory::make_unqiue(const Configuration& configuration)
+{
+	const auto post_for_debug = configuration.get_post_for_debug();
+	if (ms::compare_icase(post_for_debug, "Yes"))
+	{
+		return std::make_unique<Solution_Time_For_Header_Debug_Mode>();
+	}
+	else
+	{
+		return std::make_unique<Solution_Time_For_Header>();
+	}
+}
+
 void Tecplot_File_Writer::write_grid_file(const Post_Variables& post_variables, const std::string_view post_file_path)
 {
 	this->set_grid_header_variable(post_variables);
@@ -69,8 +92,6 @@ void Tecplot_ASCII_File_Writer::write_header(const std::string_view post_file_pa
 	header_text[9] << "VarLocation = " + this->variable_location_str_;
 	header_text[10] << "StrandID = " + std::to_string(this->strand_id_++);
 	header_text[11] << "SolutionTime = " + std::to_string(this->header_solution_time_->compute(this->solution_time_, this->strand_id_));
-	//header_text[11] << "SolutionTime = " + this->solution_time_for_header_->get_solution_time(this->solution_time_, this->strand_id_) std::to_string(this->solution_time_);
-
 
 	header_text.write(post_file_path);
 }

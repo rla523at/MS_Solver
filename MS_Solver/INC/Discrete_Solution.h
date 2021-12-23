@@ -64,6 +64,9 @@ public://Command
 	void precalculate_infs_ocs_jump_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ocs_jump_QPs);
 	void precalculate_infs_ncs_jump_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_jump_QPs);	
 
+	//for discontinuity indicator
+	void precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(const std::vector<Quadrature_Rule>& quadrature_rules, const std::vector<std::vector<uint>>& set_of_face_neighbor_cell_indexes);
+
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
@@ -105,6 +108,9 @@ public://Query
 	//for subcell oscillation indicator
 	void calculate_nth_solution_at_infc_ocs_jump_QPs(double* nth_solution_at_infc_ocs_jump_QPs, const uint infc_index, const uint oc_index, const ushort equation_index) const;
 	void calculate_nth_solution_at_infc_ncs_jump_QPs(double* nth_solution_at_infc_ncs_jump_QPs, const uint infc_index, const uint nc_index, const ushort equation_index) const;
+
+	//for discontinuity indicator	
+	void calculate_nth_solution_at_target_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint target_cell_index, const uint my_cell_index, const ushort equation_index) const;
 
 private:	
 	std::vector<double> calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
@@ -156,10 +162,13 @@ private:
 	std::vector<Matrix> set_of_infc_basis_ocs_jump_QPs_m_;	//inner face owner cell side jump quadratue point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ncs_jump_QPs_m_;	//inner face neighbor cell side jump quadratue point basis value matrix
 
+	std::vector<std::map<uint, Matrix>> set_of_cell_index_to_target_cell_basis_QPs_m_;
+
 	//optimize construction
 	static constexpr ushort max_num_equation = 5;
 	static constexpr ushort max_num_precalculated_points = 200;
 	mutable Euclidean_Vector GE_soluion_;
+	mutable Euclidean_Vector solution_;
 	mutable std::array<double, max_num_equation * max_num_precalculated_points> solution_at_points_values_ = { 0 };
 };
 

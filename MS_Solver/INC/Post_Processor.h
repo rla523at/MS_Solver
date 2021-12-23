@@ -8,7 +8,6 @@ public:
 	static void set_configuration(const Configuration& configuration);
 	static void initialize(const Configuration& configuration, const Grid& grid, Discrete_Solution& discrete_solution);
 	static void post_grid(void);
-	//static void post_solution(void);
 	static void post_solution(const std::string_view sv = "");
 	static void record_solution(void);
 	static void record_variables(const std::string& name, const std::vector<double>& values);	

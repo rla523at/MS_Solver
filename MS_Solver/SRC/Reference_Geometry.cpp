@@ -230,7 +230,7 @@ bool Reference_Line::is_line(void) const
 	return true;
 }
 
-std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_node_index_sequences(void) const 
+std::vector<std::vector<ushort>> Reference_Line::set_of_face_vertex_index_sequences(void) const 
 {
 	// 0 式式式式 1
 	const std::vector<ushort> face0_node_index = { 0 };
@@ -425,7 +425,7 @@ bool Reference_Triangle::is_line(void) const
 	return false;
 };
 
-std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_node_index_sequences(void) const 
+std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_vertex_index_sequences(void) const 
 {
 	//      2
 	//  2  / \  1
@@ -671,7 +671,7 @@ bool Reference_Quadrilateral::is_line(void) const
 	return false;
 }
 
-std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_node_index_sequences(void) const 
+std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_vertex_index_sequences(void) const 
 {
 	//      2
 	//   3式式式式式2

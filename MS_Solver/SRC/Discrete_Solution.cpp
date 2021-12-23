@@ -96,6 +96,7 @@ size_t Discrete_Solution::num_total_values(void) const
 Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_degree)
 	: Discrete_Solution(governing_equation, grid)
 	, GE_soluion_(this->governing_equation_->num_equations())
+	, solution_(this->governing_equation_->num_solutions())
 {
 	Profiler::set_time_point();
 
@@ -306,6 +307,22 @@ void Discrete_Solution_DG::precalculate_infs_ncs_jump_QPs_basis_values(const std
 	}
 }
 
+void Discrete_Solution_DG::precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(const std::vector<Quadrature_Rule>& quadrature_rules, const std::vector<std::vector<uint>>& set_of_face_share_cell_indexes)
+{
+	this->set_of_cell_index_to_target_cell_basis_QPs_m_.resize(this->num_cells_);
+
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	{
+		const auto& QPs = quadrature_rules[cell_index].points;
+		const auto& face_share_cell_indexes = set_of_face_share_cell_indexes[cell_index];
+
+		for (const auto face_share_cell_index : face_share_cell_indexes)
+		{
+			this->set_of_cell_index_to_target_cell_basis_QPs_m_[cell_index].emplace(face_share_cell_index, this->calculate_basis_points_m(face_share_cell_index, QPs));
+		}		
+	}
+}
+
 void Discrete_Solution_DG::project_to_Pn_space(const uint cell_index, const ushort Pn)
 {	
 	REQUIRE(Pn < this->solution_degree(cell_index), "projection degree can not exceed given range");
@@ -393,7 +410,25 @@ std::vector<double> Discrete_Solution_DG::calculate_nth_solution_at_vertices(con
 double Discrete_Solution_DG::calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const
 {
 	REQUIRE(!this->cell_P0_basis_values_.empty(), "cell P0 basis values should be precalculated");	
-	return this->P0_nth_coefficient(cell_index, equation_index) * this->cell_P0_basis_values_[cell_index];
+
+	if (equation_index <= this->governing_equation_->num_equations())
+	{
+		return this->P0_nth_coefficient(cell_index, equation_index) * this->cell_P0_basis_values_[cell_index];
+	}
+	else if (equation_index <= this->governing_equation_->num_solutions())
+	{
+		const auto P0_coefficient_v = this->P0_coefficient_v(cell_index);
+		const auto P0_basis = this->cell_P0_basis_values_[cell_index];
+		auto P0_GE_solution = P0_coefficient_v * P0_basis;
+
+		this->governing_equation_->extend_to_solution(P0_GE_solution);
+		return P0_GE_solution[equation_index];
+	}
+	else
+	{
+		EXCEPTION("equation index exceed given range");
+		return NULL;
+	}
 }
 
 std::vector<double> Discrete_Solution_DG::calculate_simplex_P0_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const
@@ -474,6 +509,13 @@ void Discrete_Solution_DG::calculate_nth_solution_at_infc_ncs_jump_QPs(double* n
 {
 	REQUIRE(!this->set_of_infc_basis_ncs_jump_QPs_m_.empty(), "basis value should be precalculated");
 	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_infc_ncs_jump_QPs, nc_index, equation_index, this->set_of_infc_basis_ncs_jump_QPs_m_[infc_index]);
+}
+
+void Discrete_Solution_DG::calculate_nth_solution_at_target_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint target_cell_index, const uint my_cell_index, const ushort equation_index) const
+{
+	REQUIRE(!this->set_of_cell_index_to_target_cell_basis_QPs_m_.empty(), "basis value should be precalculated");
+	const auto& basis_points_m = this->set_of_cell_index_to_target_cell_basis_QPs_m_[target_cell_index].at(my_cell_index);
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_target_cell_QPs, target_cell_index, equation_index, basis_points_m);
 }
 
 Matrix Discrete_Solution_DG::calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const
@@ -586,10 +628,32 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_V
 
 void Discrete_Solution_DG::calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
 {
-	const auto num_points = basis_points_m.num_column();
-	std::fill(nth_solution_at_points, nth_solution_at_points + num_points, 0.0);
+	if (equation_index <= this->governing_equation_->num_equations())
+	{
+		const auto num_points = basis_points_m.num_column();
+		std::fill(nth_solution_at_points, nth_solution_at_points + num_points, 0.0);
 
-	ms::gemm(this->nth_coefficient_matrix_contant_wrapper(cell_index, equation_index), basis_points_m, nth_solution_at_points);
+		ms::gemm(this->nth_coefficient_matrix_contant_wrapper(cell_index, equation_index), basis_points_m, nth_solution_at_points);
+	}
+	else if (equation_index <= this->governing_equation_->num_solutions())
+	{
+		const auto num_points = basis_points_m.num_column();
+		std::fill(this->solution_at_points_values_.begin(), this->solution_at_points_values_.begin() + this->num_equations_ * num_points, 0.0);
+
+		ms::gemm(this->coefficient_matrix_contant_wrapper(cell_index), basis_points_m, this->solution_at_points_values_.data());
+		Constant_Matrix_Wrapper GE_solution_points_cmw(this->num_equations_, num_points, this->solution_at_points_values_.data());
+
+		for (int i = 0; i < num_points; ++i)
+		{
+			GE_solution_points_cmw.column(i, this->GE_soluion_.data());			
+			this->governing_equation_->extend_to_solution(this->GE_soluion_.data(), this->solution_.data());
+			nth_solution_at_points[i] = this->solution_[equation_index];
+		}
+	}
+	else
+	{
+		EXCEPTION("equation index exceed given range");
+	}
 }
 
 void Discrete_Solution_DG::calculate_Pn_projected_mth_solution_at_precalulated_points(double* Pn_projected_mth_solution_at_points, const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
