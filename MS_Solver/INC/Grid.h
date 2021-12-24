@@ -10,13 +10,18 @@ public:
 	Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path);
 
 public:
+	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(void) const;
+	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
+	std::vector<std::pair<uint, uint>> pbdry_pair_index_to_oc_nc_index_pair_table(void) const;
+	std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_consider_pbdry(void) const;
+	std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_ignore_pbdry(void) const;
 	ushort space_dimension(void) const;
 	double total_volume(void) const;
-	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
-	std::vector<std::vector<uint>> set_of_face_share_cell_indexes_consider_pbdry(void) const;
 	std::unordered_map<uint, std::set<uint>> vertex_index_to_peridoic_matched_vertex_index_set(void) const;
 
-	size_t num_cells(void) const;
+
+
+	uint num_cells(void) const;
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
 	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const; //unnecessary
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
@@ -31,7 +36,7 @@ public:
 	bool cell_is_simplex(const uint cell_index) const;
 	std::vector<std::vector<double>> cell_projected_volumes(void) const;
 	std::vector<Geometry> cell_sub_simplex_geometries(const uint cell_index) const;
-	std::vector<double> cell_volumes(void) const;
+	std::vector<double> cell_index_to_volume_table(void) const;
 	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 
@@ -53,9 +58,10 @@ private:
 	std::vector<uint> find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const;
 	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const;
 	int find_face_share_cell_index_consider_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
-
+	int find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
 	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
 	std::vector<Element> make_inner_face_elements(void) const;
+	std::pair<uint, uint> pbdry_oc_nc_index_pair(const uint pbdry_pair_index) const;
 
 private:
 	ushort space_dimension_;

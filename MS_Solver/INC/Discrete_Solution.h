@@ -28,7 +28,7 @@ public://Query
 protected:
 	ushort space_dimension_;
 	ushort num_equations_;	
-	size_t num_cells_;
+	uint num_cells_;
 	std::vector<double> values_;
 	std::shared_ptr<Governing_Equation> governing_equation_;
 };
@@ -65,7 +65,11 @@ public://Command
 	void precalculate_infs_ncs_jump_QPs_basis_values(const std::vector<uint>& nc_indexes, const std::vector<std::vector<Euclidean_Vector>>& set_of_ncs_jump_QPs);	
 
 	//for discontinuity indicator
-	void precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(const std::vector<Quadrature_Rule>& quadrature_rules, const std::vector<std::vector<uint>>& set_of_face_neighbor_cell_indexes);
+	void precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(
+		const std::vector<std::vector<Euclidean_Vector>>& set_of_QPs,
+		const std::vector<std::vector<uint>>& set_of_face_share_cell_indexes_ignore_pbdry,
+		const std::vector<std::pair<uint, uint>>& pbdry_oc_nc_index_pairs,
+		const std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>>& pbdry_set_of_oc_nc_moved_QPs);
 
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;

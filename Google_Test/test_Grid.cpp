@@ -66,7 +66,7 @@ TEST(Grid, cell_volumes_1)
 	Gmsh_Convertor convertor(space_dimension);
 	Grid grid(convertor, grid_file_path);
 
-	const auto result = grid.cell_volumes();
+	const auto result = grid.cell_index_to_volume_table();
 
 	const auto ref = 0.01;
 	for (const auto& volume : result)

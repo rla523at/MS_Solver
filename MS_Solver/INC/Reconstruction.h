@@ -63,6 +63,21 @@ private:
     std::vector<std::vector<double>> set_of_P1_projected_criterion_values_at_verticies_;
 };
 
+
+#include "../INC/Post_Processor.h"
+class Test_Reconstuction_DG : public Reconstruction_DG
+{
+public:
+    Test_Reconstuction_DG(Discontinuity_Indicator&& discontinuity_indicator)
+        : discontinuity_indicator_(discontinuity_indicator) {};
+
+public:
+    void reconstruct(Discrete_Solution_DG& discrete_solution) override;
+
+private:
+    Discontinuity_Indicator discontinuity_indicator_;
+};
+
 class Reconstruction_DG_Factory//static class
 {
 public://Query

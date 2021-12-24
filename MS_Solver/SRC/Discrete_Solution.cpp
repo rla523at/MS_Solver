@@ -134,7 +134,7 @@ void Discrete_Solution_DG::precalculate_post_elements(const std::vector<std::vec
 
 	this->set_of_basis_post_element_center_points_m_.reserve(this->num_cells_);
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto& points = set_of_post_element_center_points[cell_index];
 		this->set_of_basis_post_element_center_points_m_.push_back(this->calculate_basis_points_m(cell_index, points));
@@ -147,7 +147,7 @@ void Discrete_Solution_DG::precalculate_post_points(const std::vector<std::vecto
 
 	this->set_of_basis_post_points_m_.reserve(this->num_cells_);
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto& points = set_of_post_points[cell_index];
 		this->set_of_basis_post_points_m_.push_back(this->calculate_basis_points_m(cell_index, points));
@@ -159,7 +159,7 @@ void Discrete_Solution_DG::precalculate_basis_bdry_QPs_basis_values(const std::v
 	const auto num_bdrys = oc_indexes.size();
 	this->set_of_bdry_basis_QPs_m_.reserve(num_bdrys);
 
-	for (int bdry_index = 0; bdry_index < num_bdrys; ++bdry_index)
+	for (uint bdry_index = 0; bdry_index < num_bdrys; ++bdry_index)
 	{
 		const auto& QPs = quadrature_rules[bdry_index].points;
 		this->set_of_bdry_basis_QPs_m_.push_back(this->calculate_basis_points_m(oc_indexes[bdry_index], QPs));
@@ -170,7 +170,7 @@ void Discrete_Solution_DG::precalcualte_cell_QPs_basis_values(const std::vector<
 {
 	this->set_of_cell_basis_QPs_m_.resize(this->num_cells_);
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto& QPs = quadrature_rules[cell_index].points;
 		this->set_of_cell_basis_QPs_m_[cell_index] = this->calculate_basis_points_m(cell_index, QPs);
@@ -181,7 +181,7 @@ void Discrete_Solution_DG::precalculate_cell_vertices_basis_values(const std::ve
 {
 	this->set_of_cell_basis_vertices_m_.resize(this->num_cells_);
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto& vertices = set_of_verticies[cell_index];
 		this->set_of_cell_basis_vertices_m_[cell_index] = this->calculate_basis_points_m(cell_index, vertices);
@@ -209,7 +209,7 @@ void Discrete_Solution_DG::precalculate_infs_ocs_QPs_basis_values(const std::vec
 	const auto num_infcs = oc_indexes.size();
 	this->set_of_infc_basis_ocs_flux_QPs_m_.reserve(num_infcs);
 
-	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
+	for (uint infc_index = 0; infc_index < num_infcs; ++infc_index)
 	{
 		const auto oc_index = oc_indexes[infc_index];
 		const auto& QPs = set_of_ocs_QPs[infc_index];
@@ -222,7 +222,7 @@ void Discrete_Solution_DG::precalculate_infs_ncs_QPs_basis_values(const std::vec
 	const auto num_infcs = nc_indexes.size();
 	this->set_of_infc_basis_ncs_flux_QPs_m_.reserve(num_infcs);
 
-	for (int infc_index = 0; infc_index < num_infcs; ++infc_index)
+	for (uint infc_index = 0; infc_index < num_infcs; ++infc_index)
 	{
 		const auto nc_index = nc_indexes[infc_index];
 		const auto& QPs = set_of_ncs_QPs[infc_index];
@@ -307,19 +307,34 @@ void Discrete_Solution_DG::precalculate_infs_ncs_jump_QPs_basis_values(const std
 	}
 }
 
-void Discrete_Solution_DG::precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(const std::vector<Quadrature_Rule>& quadrature_rules, const std::vector<std::vector<uint>>& set_of_face_share_cell_indexes)
+void Discrete_Solution_DG::precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(
+	const std::vector<std::vector<Euclidean_Vector>>& cell_index_to_order_n_QPs_table,
+	const std::vector<std::vector<uint>>& cell_index_to_face_share_cell_indexes_table_ignore_pbdry,
+	const std::vector<std::pair<uint, uint>>& pbdry_pair_index_to_oc_nc_index_pair_table,
+	const std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>>& pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table)
 {
 	this->set_of_cell_index_to_target_cell_basis_QPs_m_.resize(this->num_cells_);
 
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		const auto& QPs = quadrature_rules[cell_index].points;
-		const auto& face_share_cell_indexes = set_of_face_share_cell_indexes[cell_index];
+		const auto& QPs = cell_index_to_order_n_QPs_table[cell_index];
+		const auto& face_share_cell_indexes = cell_index_to_face_share_cell_indexes_table_ignore_pbdry[cell_index];
 
 		for (const auto face_share_cell_index : face_share_cell_indexes)
 		{
 			this->set_of_cell_index_to_target_cell_basis_QPs_m_[cell_index].emplace(face_share_cell_index, this->calculate_basis_points_m(face_share_cell_index, QPs));
-		}		
+		}
+	}
+
+	const auto num_pbdry_pairs = pbdry_pair_index_to_oc_nc_index_pair_table.size();
+
+	for (uint i = 0; i < num_pbdry_pairs; ++i)
+	{
+		const auto [oc_index, nc_index] = pbdry_pair_index_to_oc_nc_index_pair_table[i];
+		const auto& [moved_oc_QPs, moved_nc_QPs] = pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table[i];
+
+		this->set_of_cell_index_to_target_cell_basis_QPs_m_[oc_index].emplace(nc_index, this->calculate_basis_points_m(nc_index, moved_oc_QPs));
+		this->set_of_cell_index_to_target_cell_basis_QPs_m_[nc_index].emplace(oc_index, this->calculate_basis_points_m(oc_index, moved_nc_QPs));
 	}
 }
 
@@ -515,7 +530,7 @@ void Discrete_Solution_DG::calculate_nth_solution_at_target_cell_QPs(double* nth
 {
 	REQUIRE(!this->set_of_cell_index_to_target_cell_basis_QPs_m_.empty(), "basis value should be precalculated");
 	const auto& basis_points_m = this->set_of_cell_index_to_target_cell_basis_QPs_m_[target_cell_index].at(my_cell_index);
-	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_target_cell_QPs, target_cell_index, equation_index, basis_points_m);
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_target_cell_QPs, my_cell_index, equation_index, basis_points_m);
 }
 
 Matrix Discrete_Solution_DG::calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const
@@ -628,7 +643,7 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_V
 
 void Discrete_Solution_DG::calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
 {
-	if (equation_index <= this->governing_equation_->num_equations())
+	if (equation_index < this->governing_equation_->num_equations())
 	{
 		const auto num_points = basis_points_m.num_column();
 		std::fill(nth_solution_at_points, nth_solution_at_points + num_points, 0.0);

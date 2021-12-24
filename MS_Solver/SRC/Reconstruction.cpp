@@ -4,7 +4,7 @@ hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(const Grid& grid, Discrete_Soluti
 	: stability_criterion_(grid, discrete_solution)
 	, MLP_indicator_(grid, discrete_solution) 
 {
-	this->num_cells_ = static_cast<uint>(grid.num_cells());
+	this->num_cells_ = grid.num_cells();
 
 	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
 	
@@ -20,7 +20,7 @@ hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(MLP_Criterion&& stability_criteri
 	, MLP_indicator_(std::move(MLP_indicator))
 	, MLP_u1_limiter_(std::move(MLP_u1_limiter))
 {
-	this->num_cells_ = static_cast<uint>(grid.num_cells());
+	this->num_cells_ = grid.num_cells();
 
 	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
 
@@ -92,7 +92,7 @@ hMLP_BD_Reconstruction_DG::hMLP_BD_Reconstruction_DG(Simplex_Decomposed_MLP_Crit
 	, subcell_oscillation_indicator(std::move(boundary_indicator))
 	, shock_indicator_(std::move(shock_indicator))
 {
-	this->num_cells_ = static_cast<uint>(grid.num_cells());
+	this->num_cells_ = grid.num_cells();
 
 	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
 
@@ -198,6 +198,15 @@ void hMLP_BD_Reconstruction_DG::limit_solution(Discrete_Solution_DG& discrete_so
 	}
 }
 
+void Test_Reconstuction_DG::reconstruct(Discrete_Solution_DG& discrete_solution)
+{
+	this->discontinuity_indicator_.precalculate(discrete_solution);
+	const auto& discontinuity_factor = this->discontinuity_indicator_.get_discontinuity_factor();
+	Post_Processor::record_solution();
+	Post_Processor::record_variables("discontinuity_factor", discontinuity_factor);
+	Post_Processor::post_solution();
+};
+
 std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const Configuration& configuration, const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {
 	const auto& reconstruction_scheme = configuration.get_reconstruction_scheme();
@@ -226,6 +235,11 @@ std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const 
 
 		return std::make_unique<hMLP_BD_Reconstruction_DG>(std::move(simplex_decomposed_MLP_criterion), std::move(MLP_indicator),
 			std::move(MLP_u1_limiter), std::move(subcell_oscillation_indicator), std::move(shock_indicator), grid);
+	}
+	else if (ms::compare_icase(reconstruction_scheme, "Test"))
+	{
+		Discontinuity_Indicator discontinuity_indicator(grid, discrete_solution, 0);
+		return std::make_unique<Test_Reconstuction_DG>(std::move(discontinuity_indicator));
 	}
 	else
 	{

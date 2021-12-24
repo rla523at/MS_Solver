@@ -18,7 +18,7 @@ public://Query
 
 private:
     double cfl_;
-    std::vector<double> cell_volumes_;
+    std::vector<double> cell_index_to_volume_table_;
     std::vector<std::vector<double>> cell_projected_volumes_;
 };
 

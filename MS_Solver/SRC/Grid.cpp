@@ -76,21 +76,20 @@ Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_vie
 	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;	
 }
 
-ushort Grid::space_dimension(void) const
+std::vector<Euclidean_Vector> Grid::pbdry_pair_index_to_ocs_to_ncs_v_table(void) const
 {
-	return this->space_dimension_;
-}
+	const auto num_pbdry_pairs = this->periodic_boundary_element_pairs_.size();
+	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(num_pbdry_pairs);
 
-double Grid::total_volume(void) const
-{
-	auto total_volume = 0.0;
-
-	for (const auto& elem : this->cell_elements_)
+	for (uint i = 0; i < num_pbdry_pairs; ++i)
 	{
-		total_volume += elem.volume();
+		const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[i];
+		const auto ocs_to_ncs = ncs_element.center_point() - ocs_element.center_point();
+
+		pbdry_pair_index_to_ocs_to_ncs_v_table[i] = ocs_to_ncs;
 	}
 
-	return total_volume;
+	return pbdry_pair_index_to_ocs_to_ncs_v_table;
 }
 
 const std::unordered_map<uint, std::set<uint>>& Grid::get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const
@@ -98,7 +97,20 @@ const std::unordered_map<uint, std::set<uint>>& Grid::get_vnode_index_to_share_c
 	return this->vnode_index_to_share_cell_index_set_consider_pbdry_;
 }
 
-std::vector<std::vector<uint>> Grid::set_of_face_share_cell_indexes_consider_pbdry(void) const
+std::vector<std::pair<uint, uint>> Grid::pbdry_pair_index_to_oc_nc_index_pair_table(void) const
+{
+	const auto num_pbdry_pairs = this->periodic_boundary_element_pairs_.size();
+	std::vector<std::pair<uint, uint>> pbdry_pair_index_to_oc_nc_index_pair_table(num_pbdry_pairs);
+
+	for (uint i = 0; i < num_pbdry_pairs; ++i)
+	{
+		pbdry_pair_index_to_oc_nc_index_pair_table[i] = this->pbdry_oc_nc_index_pair(i);
+	}
+
+	return pbdry_pair_index_to_oc_nc_index_pair_table;
+}
+
+std::vector<std::vector<uint>> Grid::cell_index_to_face_share_cell_indexes_table_consider_pbdry(void) const
 {
 	const auto num_cells = this->cell_elements_.size();
 
@@ -126,9 +138,114 @@ std::vector<std::vector<uint>> Grid::set_of_face_share_cell_indexes_consider_pbd
 	return set_of_face_share_cell_indexes; //this is not ordered set
 }
 
-size_t Grid::num_cells(void) const 
+std::vector<std::vector<uint>> Grid::cell_index_to_face_share_cell_indexes_table_ignore_pbdry(void) const
 {
-	return this->cell_elements_.size();
+	const auto num_cells = this->cell_elements_.size();
+
+	std::vector<std::vector<uint>> set_of_face_share_cell_indexes(num_cells);
+
+	for (uint cell_index = 0; cell_index < num_cells; ++cell_index)
+	{
+		const auto set_of_face_vertex_indexes = this->cell_elements_[cell_index].set_of_face_vertex_indexes();
+		const auto num_faces = set_of_face_vertex_indexes.size();
+
+		auto& face_share_cell_indexes = set_of_face_share_cell_indexes[cell_index];
+		face_share_cell_indexes.reserve(num_faces);
+
+		for (const auto& face_vertex_indexes : set_of_face_vertex_indexes)
+		{
+			const auto face_share_cell_index = this->find_face_share_cell_index_ignore_pbdry(cell_index, face_vertex_indexes);
+
+			if (0 <= face_share_cell_index)
+			{
+				face_share_cell_indexes.push_back(face_share_cell_index);
+			}
+		}
+	}
+
+	return set_of_face_share_cell_indexes; //this is not ordered set
+}
+
+ushort Grid::space_dimension(void) const
+{
+	return this->space_dimension_;
+}
+
+double Grid::total_volume(void) const
+{
+	auto total_volume = 0.0;
+
+	for (const auto& elem : this->cell_elements_)
+	{
+		total_volume += elem.volume();
+	}
+
+	return total_volume;
+}
+
+
+std::unordered_map<uint, std::set<uint>> Grid::vertex_index_to_peridoic_matched_vertex_index_set(void) const
+{
+	std::unordered_map<uint, std::set<uint>> vnode_index_to_periodic_matched_vnode_index_set;
+
+	for (const auto& [oc_side_element, nc_side_element] : this->periodic_boundary_element_pairs_)
+	{
+		const auto oc_side_vnode_indexes = oc_side_element.vertex_point_indexes();
+		const auto nc_side_vnode_indexes = nc_side_element.vertex_point_indexes();
+
+		const auto num_vnode = oc_side_vnode_indexes.size();
+		for (ushort i = 0; i < num_vnode; ++i)
+		{
+			const auto i_vnode_index = oc_side_vnode_indexes[i];
+			const auto j_vnode_index = nc_side_vnode_indexes[i];
+
+			if (!vnode_index_to_periodic_matched_vnode_index_set.contains(i_vnode_index))
+				vnode_index_to_periodic_matched_vnode_index_set.emplace(i_vnode_index, std::set<uint>());
+
+			if (!vnode_index_to_periodic_matched_vnode_index_set.contains(j_vnode_index))
+				vnode_index_to_periodic_matched_vnode_index_set.emplace(j_vnode_index, std::set<uint>());
+
+			vnode_index_to_periodic_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
+			vnode_index_to_periodic_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
+		}
+	}
+
+	//consider pbdry conner
+	for (ushort i = 0; i < this->space_dimension_ - 1; ++i)
+	{
+		for (auto& [vnode_index, matched_vnode_index_set] : vnode_index_to_periodic_matched_vnode_index_set)
+		{
+			if (matched_vnode_index_set.size() == 1)
+			{
+				continue;
+			}
+
+			for (const auto matched_vnode_index : matched_vnode_index_set)
+			{
+				const auto& other_matched_vnode_index_set = vnode_index_to_periodic_matched_vnode_index_set.at(matched_vnode_index);
+
+				auto& i_set = matched_vnode_index_set;
+				const auto& j_set = other_matched_vnode_index_set;
+
+				const auto difference = ms::set_difference(j_set, i_set);
+
+				if (difference.empty())
+				{
+					continue;
+				}
+
+				i_set.insert(difference.begin(), difference.end());
+				i_set.erase(vnode_index);
+			}
+		}
+	}
+
+	return vnode_index_to_periodic_matched_vnode_index_set;
+}
+
+uint Grid::num_cells(void) const 
+{
+	return static_cast<uint>(this->cell_elements_.size());
 }
 
 Vector_Function<Polynomial> Grid::cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const
@@ -309,7 +426,7 @@ std::vector<Geometry> Grid::cell_sub_simplex_geometries(const uint cell_index) c
 	return this->cell_elements_[cell_index].sub_simplex_geometries();
 }
 
-std::vector<double> Grid::cell_volumes(void) const
+std::vector<double> Grid::cell_index_to_volume_table(void) const
 {
 	const auto& cell_elements = this->cell_elements_;
 	const auto num_cell = cell_elements.size();
@@ -392,7 +509,7 @@ size_t Grid::num_inner_faces(void) const
 
 std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_index) const
 {
-	const auto num_inter_cell_face = this->inter_cell_face_elements_.size();
+	const auto num_inter_cell_face = static_cast<uint>(this->inter_cell_face_elements_.size());
 
 	if (inner_face_index < num_inter_cell_face)
 	{
@@ -406,16 +523,8 @@ std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_in
 	}
 	else
 	{
-		const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
-
-		const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_point_indexes());
-		const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_point_indexes());
-		REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
-		REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
-
-		const auto oc_index = oc_indexes.front();
-		const auto nc_index = nc_indexes.front();
-		return { oc_index,nc_index };
+		const auto pbdry_pair_index = inner_face_index - num_inter_cell_face;
+		return this->pbdry_oc_nc_index_pair(pbdry_pair_index);
 	}
 }
 
@@ -516,6 +625,22 @@ int Grid::find_face_share_cell_index_consider_pbdry(const uint my_cell_index, co
 		return cell_indexes.front();
 }
 
+int Grid::find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const
+{
+	auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(my_face_vertex_indexes);
+
+	const auto my_index_iter = ms::find(cell_indexes, my_cell_index);
+	REQUIRE(my_index_iter != cell_indexes.end(), "my index should be included in face share cell indexes");
+
+	cell_indexes.erase(my_index_iter);
+	REQUIRE(cell_indexes.size() <= 1, "face share cell should be unique or absent");
+
+	if (cell_indexes.empty())
+		return -1;
+	else
+		return cell_indexes.front();
+}
+
 std::vector<Element> Grid::make_inner_face_elements(void) const
 {
 	std::set<std::vector<uint>> constructed_face_vnode_index_set;
@@ -565,6 +690,21 @@ std::vector<Element> Grid::make_inner_face_elements(void) const
 	return inner_face_elements;
 }
 
+
+std::pair<uint, uint> Grid::pbdry_oc_nc_index_pair(const uint pbdry_pair_index) const
+{
+	const auto& [oc_side_element, nc_side_element] = this->periodic_boundary_element_pairs_[pbdry_pair_index];
+
+	const auto oc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(oc_side_element.vertex_point_indexes());
+	const auto nc_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(nc_side_element.vertex_point_indexes());
+	REQUIRE(oc_indexes.size() == 1, "periodic boundary should have unique owner cell");
+	REQUIRE(nc_indexes.size() == 1, "periodic boundary should have unique neighbor cell");
+
+	const auto oc_index = oc_indexes.front();
+	const auto nc_index = nc_indexes.front();
+	return { oc_index,nc_index };
+}
+
 std::vector<std::pair<Element, Element>> Grid::make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const
 {
 	const auto num_periodic_element = periodic_boundary_elements.size();
@@ -610,63 +750,4 @@ std::vector<std::pair<Element, Element>> Grid::make_periodic_boundary_element_pa
 
 	REQUIRE(matched_periodic_element_pairs.size() == num_pair, "every periodic boundary should be matched");
 	return matched_periodic_element_pairs;
-}
-
-std::unordered_map<uint, std::set<uint>> Grid::vertex_index_to_peridoic_matched_vertex_index_set(void) const
-{
-	std::unordered_map<uint, std::set<uint>> vnode_index_to_periodic_matched_vnode_index_set;
-
-	for (const auto& [oc_side_element, nc_side_element] : this->periodic_boundary_element_pairs_) 
-	{
-		const auto oc_side_vnode_indexes = oc_side_element.vertex_point_indexes();
-		const auto nc_side_vnode_indexes = nc_side_element.vertex_point_indexes();
-
-		const auto num_vnode = oc_side_vnode_indexes.size();
-		for (ushort i = 0; i < num_vnode; ++i) 
-		{
-			const auto i_vnode_index = oc_side_vnode_indexes[i];
-			const auto j_vnode_index = nc_side_vnode_indexes[i];
-
-			if (!vnode_index_to_periodic_matched_vnode_index_set.contains(i_vnode_index))
-				vnode_index_to_periodic_matched_vnode_index_set.emplace(i_vnode_index, std::set<uint>());
-
-			if (!vnode_index_to_periodic_matched_vnode_index_set.contains(j_vnode_index))
-				vnode_index_to_periodic_matched_vnode_index_set.emplace(j_vnode_index, std::set<uint>());
-
-			vnode_index_to_periodic_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
-			vnode_index_to_periodic_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
-		}
-	}
-
-	//consider pbdry conner
-	for (ushort i = 0; i < this->space_dimension_ - 1; ++i) 
-	{
-		for (auto& [vnode_index, matched_vnode_index_set] : vnode_index_to_periodic_matched_vnode_index_set) 
-		{
-			if (matched_vnode_index_set.size() == 1)
-			{
-				continue;
-			}
-
-			for (const auto matched_vnode_index : matched_vnode_index_set) 
-			{
-				const auto& other_matched_vnode_index_set = vnode_index_to_periodic_matched_vnode_index_set.at(matched_vnode_index);
-
-				auto& i_set = matched_vnode_index_set;
-				const auto& j_set = other_matched_vnode_index_set;
-
-				const auto difference = ms::set_difference(j_set, i_set);
-
-				if (difference.empty())
-				{
-					continue;
-				}
-
-				i_set.insert(difference.begin(), difference.end());
-				i_set.erase(vnode_index);
-			}
-		}
-	}
-
-	return vnode_index_to_periodic_matched_vnode_index_set;
 }

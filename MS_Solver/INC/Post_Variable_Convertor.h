@@ -14,7 +14,7 @@ public://Query
 	const std::vector<std::string>& get_solution_names(void) const;
 
 protected:
-	size_t num_cells_ = 0;
+	uint num_cells_ = 0;
 	const Discrete_Solution& discrete_solution_;
 };
 

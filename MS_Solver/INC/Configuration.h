@@ -1,6 +1,7 @@
 #pragma once
 #include "Text.h"
 
+#include <array>
 #include <map>
 
 using ushort = unsigned short;

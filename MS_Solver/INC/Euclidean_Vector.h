@@ -49,6 +49,7 @@ public:
 public://Command
 	void operator*=(const double constant);
 	void operator+=(const Constant_Euclidean_Vector_Wrapper& other);
+	void operator-=(const Constant_Euclidean_Vector_Wrapper& other);
 	double& operator[](const size_t position);
 
 	double& at(const size_t position);

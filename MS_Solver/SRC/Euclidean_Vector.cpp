@@ -151,6 +151,13 @@ void Euclidean_Vector_Wrapper::operator+=(const Constant_Euclidean_Vector_Wrappe
 	ms::BLAS::x_plus_assign_y(this->num_values_, this->data_ptr_, other.data());
 }
 
+void Euclidean_Vector_Wrapper::operator-=(const Constant_Euclidean_Vector_Wrapper& other)
+{
+	REQUIRE(this->num_values_ == other.size(), "other vector should be same size");
+
+	ms::BLAS::x_minus_assign_y(this->num_values_, this->data_ptr_, other.data());
+}
+
 double& Euclidean_Vector_Wrapper::operator[](const size_t position)
 {
 	REQUIRE(position < this->num_values_, "position should be less then size");

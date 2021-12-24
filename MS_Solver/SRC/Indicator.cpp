@@ -3,7 +3,7 @@
 MLP_Criterion_Base::MLP_Criterion_Base(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 	: vnode_index_to_share_cell_index_set_(grid.get_vnode_index_to_share_cell_index_set_consider_pbdry())
 {
-	this->num_cells_ = static_cast<uint>(grid.num_cells());
+	this->num_cells_ = grid.num_cells();
 	this->set_of_vertex_indexes_ = grid.cell_set_of_vertex_indexes();
 
 	this->set_of_P0_value_at_vertices.resize(this->num_cells_);
@@ -189,7 +189,7 @@ void Simplex_Decomposed_MLP_Criterion::precaclulate(const Discrete_Solution_DG& 
 
 MLP_Indicator::MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {
-	this->volumes_ = grid.cell_volumes();
+	this->volumes_ = grid.cell_index_to_volume_table();
 	this->set_of_num_vertices_ = grid.cell_set_of_num_vertices();
 
 	//precalculate
@@ -399,7 +399,7 @@ Shock_Indicator::Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discret
 	const auto num_cells = grid.num_cells();
 	this->average_pressures_.resize(num_cells);
 	this->are_shock_.resize(num_cells, false);
-	this->set_of_face_share_cell_indexes_ = grid.set_of_face_share_cell_indexes_consider_pbdry();
+	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
 }
 
 void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
@@ -416,7 +416,7 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 	const auto num_cells = this->are_shock_.size();
 	for (uint i = 0; i < num_cells; ++i)
 	{
-		const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_[i];
+		const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[i];
 
 		const auto my_value = P0_solutions[i][this->criterion_solution_index_];
 		for (const auto face_share_cell_index : face_share_cell_indexes) 
@@ -457,5 +457,113 @@ void Shock_Indicator::set_criterion_solution_index(const ushort space_dimension,
 		{
 			this->criterion_solution_index_ = Euler_3D::pressure_index();
 		}
+	}
+}
+
+Discontinuity_Indicator::Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+	: criterion_solution_index_(criterion_solution_index)
+{
+	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
+	this->cell_index_to_volume_table_ = grid.cell_index_to_volume_table();
+
+	this->num_cells_ = grid.num_cells();
+	this->cell_index_to_has_discontinuity_table_.resize(this->num_cells_, false);
+	this->cell_index_to_QW_v_table_.resize(this->num_cells_);
+
+
+	const auto cell_index_to_face_share_cell_indexes_table_ignore_pbdry = grid.cell_index_to_face_share_cell_indexes_table_ignore_pbdry();
+
+	std::vector<std::vector<Euclidean_Vector>> cell_index_to_order_n_QPs_table(this->num_cells_);
+
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	{
+		const auto solution_degree = discrete_solution.solution_degree(cell_index);
+		const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, solution_degree);
+		
+		cell_index_to_order_n_QPs_table[cell_index] = quadrature_rule.points;
+		this->cell_index_to_QW_v_table_[cell_index] = quadrature_rule.weights;
+	}
+
+
+	const auto pbdry_pair_index_to_oc_nc_index_pair_table = grid.pbdry_pair_index_to_oc_nc_index_pair_table();
+	const auto pbdry_pair_index_to_ocs_to_ncs_v_table = grid.pbdry_pair_index_to_ocs_to_ncs_v_table();
+	const auto num_pbdry_pair = pbdry_pair_index_to_oc_nc_index_pair_table.size();
+
+	std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>> pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table(num_pbdry_pair);
+
+	for (uint pbdry_pair_index = 0; pbdry_pair_index < num_pbdry_pair; ++pbdry_pair_index)
+	{
+		const auto [oc_index, nc_index] = pbdry_pair_index_to_oc_nc_index_pair_table[pbdry_pair_index];
+		const auto& ocs_to_ncs_v = pbdry_pair_index_to_ocs_to_ncs_v_table.at(pbdry_pair_index);
+
+		const auto oc_solution_degree = discrete_solution.solution_degree(oc_index);
+		const auto nc_solution_degree = discrete_solution.solution_degree(nc_index);
+
+		const auto& oc_quadrature_rule = grid.get_cell_quadrature_rule(oc_index, oc_solution_degree);
+		const auto& nc_quadrature_rule = grid.get_cell_quadrature_rule(nc_index, nc_solution_degree);
+
+		auto translated_oc_QPs = oc_quadrature_rule.points;
+		for (auto& QP : translated_oc_QPs)
+		{
+			QP += ocs_to_ncs_v;
+		}
+
+		auto translated_nc_QPs = nc_quadrature_rule.points;
+		for (auto& QP : translated_nc_QPs)
+		{
+			QP -= ocs_to_ncs_v;
+		}
+
+		pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table[pbdry_pair_index] = { std::move(translated_oc_QPs),std::move(translated_nc_QPs) };
+	}
+
+
+	//for precalculation
+	discrete_solution.precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(
+		cell_index_to_order_n_QPs_table, 
+		cell_index_to_face_share_cell_indexes_table_ignore_pbdry, 
+		pbdry_pair_index_to_oc_nc_index_pair_table, 
+		pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table);
+	//
+
+	//test
+	this->discontinuity_factor_.resize(this->num_cells_);
+	//
+}
+
+void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+{
+	static constexpr ushort max_num_QPs = 100;
+	std::array<double, max_num_QPs> nth_solution_at_target_cell_QPs = { 0 };
+
+	//test
+	std::fill(this->discontinuity_factor_.begin(), this->discontinuity_factor_.end(), 0.0);
+	//
+
+	for (uint i = 0; i < this->num_cells_; ++i)
+	{
+		const auto cell_volume = this->cell_index_to_volume_table_[i];
+		const auto P0_value = discrete_solution.calculate_P0_nth_solution(i, this->criterion_solution_index_);
+
+		const auto& QWs_v = this->cell_index_to_QW_v_table_[i];
+		const auto num_QPs = static_cast<int>(QWs_v.size());
+
+		const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[i];
+		const auto num_face_share_cells = face_share_cell_indexes.size();
+
+
+		for (ushort j = 0; j < num_face_share_cells; ++j)
+		{
+			const auto my_cell_index = face_share_cell_indexes[j];
+
+			discrete_solution.calculate_nth_solution_at_target_cell_QPs(nth_solution_at_target_cell_QPs.data(), i, my_cell_index, this->criterion_solution_index_);
+
+			const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_solution_at_target_cell_QPs.data(), QWs_v.data());
+
+			this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate - P0_value * cell_volume);
+			//this->discontinuity_factor_[i] += P0_value_by_extrapolate;
+		}
+
+		this->discontinuity_factor_[i] /= num_face_share_cells;
 	}
 }

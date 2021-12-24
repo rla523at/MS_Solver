@@ -9,7 +9,7 @@ public:
     Cells(const std::shared_ptr<Governing_Equation>& governing_equation, std::unique_ptr<Time_Step_Calculator>&& time_step_calculator, const Grid& grid);
 
 protected:
-    size_t num_cells_;
+    uint num_cells_;
     std::shared_ptr<Governing_Equation> governing_equation_;
     std::unique_ptr<Time_Step_Calculator> time_step_calculator_;
 };

@@ -16,7 +16,7 @@ Node_Base_Convertor::Node_Base_Convertor(const Grid& grid, const ushort post_ord
 {
 	this->set_of_num_post_points_ = grid.cell_set_of_num_post_points(post_order);
 
-	for (int i = 0; i < this->num_cells_; ++i)
+	for (uint i = 0; i < this->num_cells_; ++i)
 	{
 		this->num_post_points_ += this->set_of_num_post_points_[i];
 	}
@@ -31,7 +31,7 @@ std::vector<double> Node_Base_Convertor::convert_values(const std::vector<double
 	std::vector<double> post_variable_values(this->num_post_points_);
 
 	size_t index = 0;
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto num_post_elements = this->set_of_num_post_points_[cell_index];
 
@@ -55,7 +55,7 @@ std::vector<std::vector<double>> Node_Base_Convertor::calculate_set_of_post_poin
 		solution_values.reserve(this->num_post_points_);
 	}
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto solution_at_post_points = this->discrete_solution_.calculate_solution_at_post_points(cell_index);
 
@@ -83,7 +83,7 @@ Center_Base_Convertor::Center_Base_Convertor(const Grid& grid, const ushort post
 {
 	this->set_of_num_post_elements_ = grid.cell_set_of_num_post_elements(post_order);
 
-	for (int i = 0; i < this->num_cells_; ++i)
+	for (uint i = 0; i < this->num_cells_; ++i)
 	{
 		this->num_post_elements_ += this->set_of_num_post_elements_[i];
 	}
@@ -98,7 +98,7 @@ std::vector<double> Center_Base_Convertor::convert_values(const std::vector<doub
 	std::vector<double> post_variable_values(this->num_post_elements_);
 
 	size_t index = 0;
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto num_post_elements = this->set_of_num_post_elements_[cell_index];
 		for (int j = 0; j < num_post_elements; ++j)
@@ -121,7 +121,7 @@ std::vector<std::vector<double>> Center_Base_Convertor::calculate_set_of_post_po
 		solution_values.reserve(this->num_post_elements_);
 	}
 
-	for (int cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
 		const auto solution_at_post_element_centers = this->discrete_solution_.calculate_solution_at_post_element_centers(cell_index);
 

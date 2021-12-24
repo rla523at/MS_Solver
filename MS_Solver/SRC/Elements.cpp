@@ -140,13 +140,13 @@ std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const E
 
 std::vector<std::vector<uint>> Element::set_of_face_vertex_indexes(void) const
 {
-	const auto set_of_face_vnode_index_sequences = this->reference_geometry_->set_of_face_vertex_node_index_sequences();
-	const auto num_face = set_of_face_vnode_index_sequences.size();
+	const auto set_of_face_vnode_sequences = this->reference_geometry_->set_of_face_vertex_index_sequences();
+	const auto num_face = set_of_face_vnode_sequences.size();
 
 	std::vector<std::vector<uint>> set_of_face_vnode_indexes(num_face);
 	for (uint i = 0; i < num_face; ++i)
 	{
-		set_of_face_vnode_indexes[i] = ms::extract_by_index(this->point_indexes_, set_of_face_vnode_index_sequences[i]);
+		set_of_face_vnode_indexes[i] = ms::extract_by_index(this->point_indexes_, set_of_face_vnode_sequences[i]);
 	}
 
 	return set_of_face_vnode_indexes;

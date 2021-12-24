@@ -141,7 +141,7 @@ private:
 
 private:    
     short criterion_solution_index_;    
-    std::vector<std::vector<uint>> set_of_face_share_cell_indexes_;
+    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
 
     //construction optimization
     std::vector<double> average_pressures_;
@@ -151,71 +151,23 @@ private:
 class Discontinuity_Indicator
 {
 public:
-    Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
-        : criterion_solution_index_(criterion_solution_index)
-    {
-        this->num_cells_ = grid.num_cells();
-        
-        this->has_discontinuities_.resize(this->num_cells_, false);
-        this->set_of_QWs_v_.resize(this->num_cells_);
-        this->set_of_face_share_cell_indexes_ = grid.set_of_face_share_cell_indexes_consider_pbdry();
-
-        
-        std::vector<Quadrature_Rule> quadrature_rules(this->num_cells_);
-
-        for (uint i = 0; i < this->num_cells_; ++i)
-        {
-            const auto solution_degree = discrete_solution.solution_degree(i);
-            quadrature_rules[i] = grid.get_cell_quadrature_rule(i, solution_degree);
-            this->set_of_QWs_v_[i] = quadrature_rules[i].weights;
-        }
-
-        //for precalculation
-        discrete_solution.precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(quadrature_rules, this->set_of_face_share_cell_indexes_);
-        //
-    }
+    Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution)
-    {
-        static constexpr ushort max_num_QPs = 100;
-        std::array<double, max_num_QPs> nth_solution_at_target_cell_QPs = { 0 };
+    void precalculate(const Discrete_Solution_DG& discrete_solution);
 
-        //for test
-        std::vector<double> discontinuity_factor_(this->num_cells_);
-
-
-        for (uint i = 0; i < this->num_cells_; ++i)
-        {
-            const auto P0_value = discrete_solution.calculate_P0_nth_solution(i, this->criterion_solution_index_);
-
-            const auto& QWs_v = this->set_of_QWs_v_[i];
-            const auto num_QPs = static_cast<int>(QWs_v.size());
-
-            const auto& face_share_cell_indexes = this->set_of_face_share_cell_indexes_[i];
-            const auto num_face_share_cells = face_share_cell_indexes.size();
-
-
-            for (ushort j = 0; j < num_face_share_cells; ++j)
-            {
-                const auto my_cell_index = face_share_cell_indexes[j];
-
-                discrete_solution.calculate_nth_solution_at_target_cell_QPs(nth_solution_at_target_cell_QPs.data(), i, my_cell_index, this->criterion_solution_index_);
-                
-                const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_solution_at_target_cell_QPs.data(), QWs_v.data());
-
-                discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate - P0_value);
-            }
-
-            discontinuity_factor_[i] /= num_face_share_cells;
-        }
-    }
+    const std::vector<double>& get_discontinuity_factor(void) const { return this->discontinuity_factor_; };
 
 private:
     ushort criterion_solution_index_;
     uint num_cells_;
 
-    std::vector<std::vector<uint>> set_of_face_share_cell_indexes_;
-    std::vector<Euclidean_Vector> set_of_QWs_v_;
-    std::vector<bool> has_discontinuities_;
+    std::vector<double> cell_index_to_volume_table_;
+    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
+    std::vector<Euclidean_Vector> cell_index_to_QW_v_table_;
+    std::vector<bool> cell_index_to_has_discontinuity_table_;
+
+    //for test
+    std::vector<double> discontinuity_factor_;
+
 };
