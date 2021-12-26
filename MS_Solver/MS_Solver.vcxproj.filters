@@ -31,14 +31,20 @@
     <Filter Include="소스 파일\Solver">
       <UniqueIdentifier>{6e27faa5-bee1-40a8-9246-6d917e9ee399}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Geometry">
+      <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Geometry">
+      <UniqueIdentifier>{fd516600-3969-42ae-81c2-88a316f07908}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Math">
+      <UniqueIdentifier>{2c1dd029-0429-4be3-9be5-ee8c5285a62b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Math">
+      <UniqueIdentifier>{cabd3350-c930-4f5a-87f1-b57563f5bf60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SRC\Euclidean_Vector.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Matrix.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Text.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -51,25 +57,13 @@
     <ClCompile Include="SRC\Elements.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Geometry.cpp">
-      <Filter>소스 파일\Grid</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Grid.cpp">
-      <Filter>소스 파일\Grid</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Polynomial.cpp">
-      <Filter>소스 파일\Grid</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Reference_Geometry.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Grid_File_Convertor.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Profiler.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Configuration.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Boundaries.cpp">
@@ -114,12 +108,6 @@
     <ClCompile Include="SRC\Post_Variables.cpp">
       <Filter>소스 파일\Post</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Exact_Solution.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\MBLAS.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Log.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -144,17 +132,35 @@
     <ClCompile Include="SRC\Limiter_Function.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Reference_Geometry_Impl.cpp">
+      <Filter>소스 파일\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Reference_Geometry.cpp">
+      <Filter>소스 파일\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Geometry.cpp">
+      <Filter>소스 파일\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Euclidean_Vector.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Matrix.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\MBLAS.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Polynomial.cpp">
+      <Filter>소스 파일\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Configuration.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Exact_Solution.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="INC\Configuration.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Euclidean_Vector.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Matrix.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Exception.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -167,16 +173,7 @@
     <ClInclude Include="INC\Element.h">
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Geometry.h">
-      <Filter>헤더 파일\Grid</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Grid.h">
-      <Filter>헤더 파일\Grid</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Polynomial.h">
-      <Filter>헤더 파일\Grid</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Reference_Geometry.h">
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid_File_Convertor.h">
@@ -230,12 +227,6 @@
     <ClInclude Include="INC\Post_Variables.h">
       <Filter>헤더 파일\Post</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Exact_Solution.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\MBLAS.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Discrete_Equation.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
@@ -259,6 +250,33 @@
     </ClInclude>
     <ClInclude Include="Debugger.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reference_Geometry.h">
+      <Filter>헤더 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Geometry.h">
+      <Filter>헤더 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reference_Geometry_Impl.h">
+      <Filter>헤더 파일\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Matrix.h">
+      <Filter>헤더 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\MBLAS.h">
+      <Filter>헤더 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Euclidean_Vector.h">
+      <Filter>헤더 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Polynomial.h">
+      <Filter>헤더 파일\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Configuration.h">
+      <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Exact_Solution.h">
+      <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

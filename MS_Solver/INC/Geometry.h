@@ -4,7 +4,6 @@
 class Geometry
 {
 public:
-	Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_nodes); //숨겨진 의존성인가?
 	Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
 
 public://Command

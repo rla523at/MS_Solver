@@ -79,6 +79,7 @@
     <ClCompile Include="SRC\Profiler.cpp" />
     <ClCompile Include="SRC\Reconstruction.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />
+    <ClCompile Include="SRC\Reference_Geometry_Impl.cpp" />
     <ClCompile Include="SRC\Residual.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -161,6 +162,7 @@
     <ClInclude Include="INC\Profiler.h" />
     <ClInclude Include="INC\Reconstruction.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
+    <ClInclude Include="INC\Reference_Geometry_Impl.h" />
     <ClInclude Include="INC\Residual.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

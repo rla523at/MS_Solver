@@ -1,15 +1,5 @@
 #include "../INC/Geometry.h"
 
-Geometry::Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_points)
-{
-	this->reference_geometry_ = Reference_Geometry_Factory::make_unique(figure, order);
-	this->points_ = std::move(consisting_points);
-	this->space_dimension_ = this->check_space_dimension();
-	this->mapping_vf_ = this->make_mapping_function();
-	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
-	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
-}
-
 Geometry::Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_points)
 	: reference_geometry_(std::move(reference_goemetry)),
 	  points_(std::move(consisting_points))
