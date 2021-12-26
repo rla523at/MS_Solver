@@ -1,6 +1,6 @@
 #include "../INC/Inner_Faces.h"
 
-Inner_Faces_DG::Inner_Faces_DG(const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function, const Grid& grid, Discrete_Solution_DG& discrete_solution)
+Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function)
 	: numerical_flux_function_(numerical_flux_function)
 {
 	Profiler::set_time_point();

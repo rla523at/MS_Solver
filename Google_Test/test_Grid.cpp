@@ -83,7 +83,7 @@ TEST(Grid, coordinate_projected_volumes_1)
 	Gmsh_Convertor convertor(space_dimension);
 	Grid grid(convertor, grid_file_path);
 
-	const auto result = grid.cell_projected_volumes();
+	const auto result = grid.cell_index_to_projected_volumes_table();
 
 	const auto ref = 0.1;
 	for (const auto& projected_volumes : result)

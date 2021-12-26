@@ -4,30 +4,33 @@ CFL::CFL(const double cfl, const Grid& grid)
     :cfl_(cfl)
 {
     this->cell_index_to_volume_table_ = grid.cell_index_to_volume_table();
-    this->cell_projected_volumes_ = grid.cell_projected_volumes();
+    this->cell_index_to_projected_volumes_table_ = grid.cell_index_to_projected_volumes_table();
 }
 
 double CFL::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation& governing_equation) const
 {
     const auto space_dimension = governing_equation.space_dimension();
 
-    const auto coordinate_projected_maximum_lambdas = governing_equation.calculate_coordinate_projected_maximum_lambdas(P0_solutions);
+    const auto cell_index_to_coordinate_projected_maximum_lambdas_table = governing_equation.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(P0_solutions);
 
     const auto num_cell = P0_solutions.size();
-    std::vector<double> local_time_step(num_cell);
+    std::vector<double> allowable_local_time_steps(num_cell);
 
-    for (size_t i = 0; i < num_cell; ++i)
+    for (size_t cell_index = 0; cell_index < num_cell; ++cell_index)
     {
+        const auto& projected_volumes = this->cell_index_to_projected_volumes_table_[cell_index];
+        const auto& coordinate_projected_maximum_lambdas = cell_index_to_coordinate_projected_maximum_lambdas_table[cell_index];
+
         double radii = 0;
         for (ushort j = 0; j < space_dimension; ++j)
         {
-            radii += this->cell_projected_volumes_[i][j] * coordinate_projected_maximum_lambdas[i][j];
+            radii += projected_volumes[j] * coordinate_projected_maximum_lambdas[j];
         }
 
-        local_time_step[i] = this->cfl_ * this->cell_index_to_volume_table_[i] / radii;
+        allowable_local_time_steps[cell_index] = this->cfl_ * this->cell_index_to_volume_table_[cell_index] / radii;
     }
 
-    return *std::min_element(local_time_step.begin(), local_time_step.end());
+    return *std::min_element(allowable_local_time_steps.begin(), allowable_local_time_steps.end());
 }
 
 double Constant_Dt::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const Governing_Equation& governing_equation) const

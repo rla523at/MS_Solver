@@ -36,6 +36,7 @@ protected:
 class Discrete_Solution_DG : public Discrete_Solution
 {
 public:	
+	Discrete_Solution_DG(void) = default;
 	Discrete_Solution_DG(const std::shared_ptr<Governing_Equation>& governing_equation, const Grid& grid, const Initial_Condition& initial_condition, const ushort solution_degree);
 
 public://Command

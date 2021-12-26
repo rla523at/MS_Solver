@@ -27,7 +27,7 @@ Scalar_Equation::Scalar_Equation(void)
 	this->solution_names_ = { "q" };
 }
 
-std::vector<std::vector<double>> Linear_Advection::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+std::vector<std::vector<double>> Linear_Advection::calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	const auto num_solution = P0_solutions.size();
 
@@ -107,7 +107,7 @@ Matrix Linear_Advection_3D::calculate_physical_flux(const Euclidean_Vector& solu
 	};
 }
 
-std::vector<std::vector<double>> Burgers::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+std::vector<std::vector<double>> Burgers::calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	const auto num_solution = P0_solutions.size();
 
@@ -170,7 +170,7 @@ Euler_2D::Euler_2D(void)
 	this->solution_names_ = { "rho", "rhou", "rhov", "rhoE", "u", "v", "p", "a" };
 }
 
-std::vector<std::vector<double>> Euler_2D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+std::vector<std::vector<double>> Euler_2D::calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	auto num_solution = P0_solutions.size();
 
@@ -300,7 +300,7 @@ Euler_3D::Euler_3D(void)
 	this->solution_names_ = { "rho", "rhou", "rhov", "rhow", "rhoE", "u", "v", "w", "p", "a" };
 }
 
-std::vector<std::vector<double>> Euler_3D::calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const
+std::vector<std::vector<double>> Euler_3D::calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const
 {
 	auto num_solution = P0_solutions.size();
 

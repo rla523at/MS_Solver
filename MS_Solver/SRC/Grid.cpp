@@ -1,11 +1,12 @@
 #include "../INC/Grid.h"
 
-Grid::Grid(std::vector<Element>&& elements)
+Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
+	:space_dimension_(space_dimension)
 {
 	//this->space_dimension_ = grid_file_convertor.get_space_dimension();
 	//auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
 
-	//Profiler::set_time_point();
+	Profiler::set_time_point();
 
 	std::vector<Element> periodic_boundary_elements;
 
@@ -406,7 +407,7 @@ const Quadrature_Rule& Grid::get_cell_quadrature_rule(const uint cell_index, con
 	return cell_element.get_quadrature_rule(solution_degree);
 }
 
-std::vector<std::vector<double>> Grid::cell_projected_volumes(void) const
+std::vector<std::vector<double>> Grid::cell_index_to_projected_volumes_table(void) const
 {
 	const auto& cell_elements = this->cell_elements_;
 	const auto num_cell = cell_elements.size();

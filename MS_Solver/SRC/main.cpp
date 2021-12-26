@@ -1,5 +1,6 @@
 #include "../INC/Configuration.h"
 #include "../INC/Discrete_Equation.h"
+#include "../INC/Grid_File_Convertor.h"
 
 int main(void) 
 {	
@@ -27,8 +28,11 @@ int main(void)
 
 			Profiler::set_time_point();
 
-			auto grid_file_convertor = Grid_File_Convertor_Factory::make_unique(configuration);
-			Grid grid(*grid_file_convertor, grid_file_path);
+			const auto grid_file_convertor = Grid_File_Convertor_Factory::make_unique(configuration);
+			auto elements = grid_file_convertor->convert_to_elements(grid_file_path);
+
+			const auto space_dimension = configuration.space_dimension();
+			Grid grid(space_dimension, std::move(elements));
 
 			auto semi_discrete_equation = Semi_Discrete_Equation_Factory::make_unique(configuration, grid);
 			auto time_discrete_scheme = Time_Discrete_Scheme_Factory::make_unique(configuration);

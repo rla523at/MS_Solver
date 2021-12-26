@@ -16,9 +16,9 @@ public://Query
 class hMLP_Reconstruction_DG : public Reconstruction_DG
 {
 public:
-    hMLP_Reconstruction_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+    hMLP_Reconstruction_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution);//멤버 변수의 구체클레스가 결정되어 있기 때문에 의존성 주입을 할 필요가 없다
     hMLP_Reconstruction_DG(MLP_Criterion&& stability_criterion, MLP_Indicator&& MLP_indicator, MLP_u1_Limiter&& MLP_u1_limiter, const Grid& grid);
-
+    
 public:
     void reconstruct(Discrete_Solution_DG& discrete_solution) override;
 

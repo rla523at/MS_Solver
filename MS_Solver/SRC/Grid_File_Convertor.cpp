@@ -24,12 +24,10 @@ std::vector<Element> Gmsh_Convertor::convert_to_elements(const std::string_view 
 	const auto nodes = this->make_nodes(node_text);
 	const auto physical_group_index_to_element_type = this->make_physical_group_index_to_element_type(physical_name_text);
 	return this->make_elements(element_text, physical_group_index_to_element_type, nodes);
-
-
-	//복사가 발생해서 error가 나는데 왜 어디서 복사가 발생하는거지 ?
+	
 	//const auto elements = this->make_elements(element_text, physical_group_index_to_element_type, nodes);
-	//return elements;
 	//LOG << std::left << std::setw(50) << "@ Convert Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+	//return elements; //복사가 발생해서 error가 나는데 왜 어디서 복사가 발생하는거지 ?
 }
 
 Text Gmsh_Convertor::read_about(std::ifstream& grid_file_stream, const std::string& target) const

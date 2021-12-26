@@ -13,7 +13,7 @@ public://Query
     ushort num_solutions(void) const;
     ushort space_dimension(void) const;
     
-    virtual std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
+    virtual std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const abstract;
     virtual double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const abstract;
     virtual Matrix calculate_physical_flux(const Euclidean_Vector& solution) const abstract;
     virtual void extend_to_solution(Euclidean_Vector& governing_equation_solution) const abstract;
@@ -44,7 +44,7 @@ public:
 class Linear_Advection : public Scalar_Equation
 {
 public://Query
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     //Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     const Euclidean_Vector& get_advection_speed_vector(void) const;
@@ -78,7 +78,7 @@ public:
 class Burgers : public Scalar_Equation
 {
 public:
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
@@ -104,7 +104,7 @@ public:
 public://Query
     static constexpr ushort pressure_index(void) { return 6; };
 
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
 	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
@@ -124,7 +124,7 @@ public:
 public://Query
     static constexpr ushort pressure_index(void) { return 8; };
 
-    std::vector<std::vector<double>> calculate_coordinate_projected_maximum_lambdas(const std::vector<Euclidean_Vector>& P0_solutions) const override;
+    std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
     Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;

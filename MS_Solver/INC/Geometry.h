@@ -52,9 +52,6 @@ protected:
 	Vector_Function<Polynomial> normal_vf_;
 	Irrational_Function scale_f_;
 	mutable std::map<size_t, Quadrature_Rule> degree_to_quadrature_rule_;
-
-//public:
-//	std::vector<Geometry> sub_simplex_geometries(void) const;
 };
 
 
@@ -92,22 +89,3 @@ namespace ms
 	double L2_Norm(const Polynomial& function, const Geometry& geometry);
 	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry);	
 }
-
-
-//std::vector<Geometry> Geometry::sub_simplex_geometries(void) const {
-//	const auto sub_simplex_reference_geometries = this->reference_geometry_.sub_simplex_reference_geometries();
-//	const auto set_of_sub_simplex_vnode_index_orders = this->reference_geometry_.set_of_sub_simplex_vertex_node_index_orders();
-//	const auto num_sub_simplex = set_of_sub_simplex_vnode_index_orders.size();
-//
-//	std::vector<Geometry> sub_simplex_geometries;
-//	sub_simplex_geometries.reserve(num_sub_simplex);
-//
-//	for (ushort i = 0; i < num_sub_simplex; ++i) {
-//		const auto& reference_geometry = sub_simplex_reference_geometries[i];
-//		auto sub_simplex_vnodes = ms::extract_by_index(this->nodes_, set_of_sub_simplex_vnode_index_orders[i]);
-//
-//		sub_simplex_geometries.push_back({ reference_geometry,std::move(sub_simplex_vnodes) });
-//	}
-//
-//	return sub_simplex_geometries;
-//}

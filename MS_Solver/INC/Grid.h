@@ -10,8 +10,7 @@
 class Grid 
 {
 public:
-	//Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path);
-	Grid(std::vector<Element>&& elements);
+	Grid(const ushort space_dimension, std::vector<Element>&& elements);
 
 public:
 	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(void) const;
@@ -38,7 +37,7 @@ public:
 	std::vector<std::vector<uint>> cell_set_of_vertex_indexes(void) const;
  	std::vector<std::vector<int>> cell_set_of_connectivities(const ushort post_order, const std::vector<std::vector<Euclidean_Vector>>& set_of_post_nodes) const;
 	bool cell_is_simplex(const uint cell_index) const;
-	std::vector<std::vector<double>> cell_projected_volumes(void) const;
+	std::vector<std::vector<double>> cell_index_to_projected_volumes_table(void) const;
 	std::vector<Geometry> cell_sub_simplex_geometries(const uint cell_index) const;
 	std::vector<double> cell_index_to_volume_table(void) const;
 	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;

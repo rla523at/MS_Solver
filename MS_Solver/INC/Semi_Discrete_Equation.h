@@ -26,12 +26,6 @@ class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
 {
 public:
 	Semi_Discrete_Equation_DG(const Configuration& configuration, const Grid& grid);
-	Semi_Discrete_Equation_DG(std::unique_ptr<Discrete_Solution_DG>&& discrete_solution, std::unique_ptr<Cells_DG>&& cells
-		, std::unique_ptr<Boundaries_DG>&& boundaries, std::unique_ptr<Inner_Faces_DG>&& inner_faces)
-		: discrete_solution_(std::move(discrete_solution))
-		, cells_(std::move(cells))
-		, boundaries_(std::move(boundaries))
-		, inner_faces_(std::move(inner_faces)) {};
 
 public://Command
 	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) override;
@@ -45,10 +39,13 @@ public://Query
 	std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const override;
 
 private:
+	//Concrete class이지만 기본 생성자가 없음으로 unique ptr을 활용
 	std::unique_ptr<Discrete_Solution_DG> discrete_solution_;
 	std::unique_ptr<Cells_DG> cells_;	
 	std::unique_ptr<Boundaries_DG> boundaries_;
-	std::unique_ptr<Inner_Faces_DG> inner_faces_;//inter cell faces
+	std::unique_ptr<Inner_Faces_DG> inner_faces_;
+
+	//Abstract class
 	std::unique_ptr<Reconstruction_DG> reconstruction_;
 	std::unique_ptr<Error> error_;
 };

@@ -13,7 +13,7 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 
 	const auto numerical_flux_function = Numerical_Flux_Function_Factory::make_shared(configuration, governing_equation);
 	this->boundaries_ = std::make_unique<Boundaries_DG>(grid, *this->discrete_solution_, numerical_flux_function);
-	this->inner_faces_ = std::make_unique<Inner_Faces_DG>(numerical_flux_function, grid, *this->discrete_solution_);
+	this->inner_faces_ = std::make_unique<Inner_Faces_DG>(grid, *this->discrete_solution_, numerical_flux_function);
 
 	this->reconstruction_ = Reconstruction_DG_Factory::make_unique(configuration, grid, *this->discrete_solution_);
 	this->error_ = Error_Factory::make_unqiue(configuration);

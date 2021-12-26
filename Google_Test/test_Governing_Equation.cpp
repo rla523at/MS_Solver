@@ -16,7 +16,7 @@ TEST(Linear_Advection_2D, calculate_coordinate_projected_maximum_lambdas_1)
 		solutions[i] = { 1.0 * i };
 	}
 
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num, { 1.0,0.5 });
 	EXPECT_EQ(result, ref);
@@ -83,7 +83,7 @@ TEST(Linear_Advection_3D, calculate_coordinate_projected_maximum_lambdas_1)
 		solutions[i] = { 1.0 * i };
 	}
 
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num, { 1.0,0.5, 3.0 });
 	EXPECT_EQ(result, ref);
@@ -153,7 +153,7 @@ TEST(Burgers_2D, calculate_coordinate_projected_maximum_lambdas_1) {
 	{
 		solutions[i] = { 1.0 * i };
 	}
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num);
 	for (int i = 0; i < num; ++i)
@@ -171,7 +171,7 @@ TEST(Burgers_2D, calculate_coordinate_projected_maximum_lambdas_2) {
 	{
 		solutions[i] = { -1.0 * i };
 	}
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num);
 	for (int i = 0; i < num; ++i)
@@ -228,7 +228,7 @@ TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_1) {
 	std::vector<Euclidean_Vector> solutions(num);
 	for (size_t i = 0; i < num; ++i)
 		solutions[i] = { 1.0 * i };
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num);
 	for (int i = 0; i < num; ++i)
@@ -245,7 +245,7 @@ TEST(Burgers_3D, calculate_coordinate_projected_maximum_lambdas_2)
 	std::vector<Euclidean_Vector> solutions(num);
 	for (int i = 0; i < num; ++i)
 		solutions[i] = { -1.0 * i };
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solutions);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solutions);
 
 	std::vector<std::vector<double>> ref(num);
 	for (int i = 0; i < num; ++i)
@@ -310,7 +310,7 @@ TEST(Euler_2D, calculate_coordinate_projected_maximum_lambda_1)
 
 	std::vector<Euclidean_Vector> solution = { { 1,1,1,1 } };
 	gov_eq.extend_to_solution(solution[0]);
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solution);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solution);
 
 	const std::vector<double> ref = { 1,1 };
 	EXPECT_EQ(result[0], ref);
@@ -357,7 +357,7 @@ TEST(Euler_3D, calculate_coordinate_projected_maximum_lambda_1)
 
 	std::vector<Euclidean_Vector> solution = { { 1,1,1,1,1.5 } };
 	gov_eq.extend_to_solution(solution[0]);
-	const auto result = gov_eq.calculate_coordinate_projected_maximum_lambdas(solution);
+	const auto result = gov_eq.calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(solution);
 
 	const std::vector<double> ref = { 1,1,1 };
 	EXPECT_EQ(result[0], ref);
