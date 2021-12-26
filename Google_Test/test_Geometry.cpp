@@ -1,6 +1,7 @@
 #pragma once
 #include "gtest/gtest.h"
 #include "../MS_Solver/INC/Geometry.h"
+#include "../MS_Solver/INC/Reference_Geometry_Impl.h"
 
 TEST(Geometry, center_1) {
 	const Figure fig = Figure::line;

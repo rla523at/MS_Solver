@@ -1,6 +1,6 @@
 #pragma once
 #include "gtest/gtest.h"
-#include "../MS_Solver/INC/Reference_Geometry.h"
+#include "../MS_Solver/INC/Reference_Geometry_Impl.h"
 
 TEST(Reference_Geometry, mapping_monomial_vector_function_1) 
 {

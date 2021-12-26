@@ -8,6 +8,16 @@ Constant_Euclidean_Vector_Wrapper::Constant_Euclidean_Vector_Wrapper(const size_
 	this->const_data_ptr_ = const_data_ptr;
 }
 
+Constant_Euclidean_Vector_Wrapper::Constant_Euclidean_Vector_Wrapper(const std::vector<double>& vec)
+{
+	const auto num_values = vec.size();
+	
+	REQUIRE((0 < num_values) && (num_values <= std::numeric_limits<int>::max()), "number of values should be in range");
+	this->num_values_ = static_cast<int>(num_values);
+	this->const_data_ptr_ = vec.data();
+}
+
+
 Euclidean_Vector Constant_Euclidean_Vector_Wrapper::operator*(const double constant) const
 {
 	Euclidean_Vector result(this->const_data_ptr_, this->const_data_ptr_ + this->num_values_);

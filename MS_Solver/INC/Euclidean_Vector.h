@@ -12,6 +12,7 @@ class Constant_Euclidean_Vector_Wrapper
 public:
 	Constant_Euclidean_Vector_Wrapper(void) = default;
 	Constant_Euclidean_Vector_Wrapper(const size_t num_value, const double* const_data_ptr);
+	Constant_Euclidean_Vector_Wrapper(const std::vector<double>& vec);
 
 public://Query
 	Euclidean_Vector operator-(const Constant_Euclidean_Vector_Wrapper& other) const;
@@ -45,7 +46,12 @@ public:
 	Euclidean_Vector_Wrapper(const size_t num_values, double* data_ptr)
 		: Constant_Euclidean_Vector_Wrapper(num_values, data_ptr)
 		, data_ptr_(data_ptr) {};
-		
+	Euclidean_Vector_Wrapper(std::vector<double>& vec)
+		: Constant_Euclidean_Vector_Wrapper(vec)
+		, data_ptr_(vec.data()) {}
+	Euclidean_Vector_Wrapper(const Euclidean_Vector_Wrapper&) = delete;
+	Euclidean_Vector_Wrapper(Euclidean_Vector_Wrapper&&) = delete;
+
 public://Command
 	void operator*=(const double constant);
 	void operator+=(const Constant_Euclidean_Vector_Wrapper& other);
