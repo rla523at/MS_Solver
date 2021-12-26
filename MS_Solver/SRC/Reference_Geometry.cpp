@@ -13,19 +13,19 @@ bool Reference_Geometry::operator!=(const Reference_Geometry& other) const
 const std::vector<Euclidean_Vector>& Reference_Geometry::get_mapping_nodes(void) const
 {
 	const auto figure_index = static_cast<int>(this->figure());
-	return this->set_of_mapping_nodes_[figure_index][this->order_];
+	return this->figure_index_and_order_to_mapping_points_table_[figure_index][this->order_];
 }
 
 const Vector_Function<Polynomial>& Reference_Geometry::get_mapping_monomial_vector_function(void) const
 {
 	const auto figure_index = static_cast<int>(this->figure());
-	return this->set_of_mapping_monomial_vector_function_[figure_index][this->order_];
+	return this->figure_index_and_order_to_mapping_monomial_vf_[figure_index][this->order_];
 }
 
 const Matrix& Reference_Geometry::get_inverse_mapping_monomial_matrix(void) const
 {
 	const auto figure_index = static_cast<int>(this->figure());
-	return this->set_of_inverse_mapping_monomial_matrix_[figure_index][this->order_];
+	return this->figure_index_and_order_to_inverse_mapping_monomial_m_[figure_index][this->order_];
 }
 
 const std::vector<Euclidean_Vector>& Reference_Geometry::get_post_points(const ushort post_order) const
@@ -97,19 +97,19 @@ void Reference_Geometry::initialize(void)
 {
 	const auto figure_index = static_cast<int>(this->figure());
 
-	if (this->set_of_mapping_nodes_[figure_index].size() < this->order_)
+	if (this->figure_index_and_order_to_mapping_points_table_[figure_index].size() < this->order_)
 	{
 		const auto new_size = this->order_ + 1;
-		this->set_of_mapping_nodes_[figure_index].resize(new_size);
-		this->set_of_mapping_monomial_vector_function_[figure_index].resize(new_size);
-		this->set_of_inverse_mapping_monomial_matrix_[figure_index].resize(new_size);
+		this->figure_index_and_order_to_mapping_points_table_[figure_index].resize(new_size);
+		this->figure_index_and_order_to_mapping_monomial_vf_[figure_index].resize(new_size);
+		this->figure_index_and_order_to_inverse_mapping_monomial_m_[figure_index].resize(new_size);
 	}
 
-	if (this->set_of_mapping_nodes_[figure_index][this->order_].empty())
+	if (this->figure_index_and_order_to_mapping_points_table_[figure_index][this->order_].empty())
 	{
-		this->set_of_mapping_nodes_[figure_index][this->order_] = this->make_mapping_nodes();
-		this->set_of_mapping_monomial_vector_function_[figure_index][this->order_] = this->make_mapping_monomial_vector_function();
-		this->set_of_inverse_mapping_monomial_matrix_[figure_index][this->order_] = this->make_inverse_mapping_monomial_matrix();
+		this->figure_index_and_order_to_mapping_points_table_[figure_index][this->order_] = this->make_mapping_nodes();
+		this->figure_index_and_order_to_mapping_monomial_vf_[figure_index][this->order_] = this->make_mapping_monomial_vector_function();
+		this->figure_index_and_order_to_inverse_mapping_monomial_m_[figure_index][this->order_] = this->make_inverse_mapping_monomial_matrix();
 	}
 }
 

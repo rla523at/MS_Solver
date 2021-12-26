@@ -25,9 +25,9 @@ class Element : public Geometry
 {
 public:
 	Element(const ElementType element_type, std::vector<uint>&& node_indexes, Geometry&& geometry)
-		: element_type_(element_type), 
-		point_indexes_(std::move(node_indexes)),
-		Geometry(std::move(geometry)) {};
+		: element_type_(element_type)
+		, point_indexes_(std::move(node_indexes))
+		, Geometry(std::move(geometry)) {};
 
 public://Command
 	void rearrange_node_indexes(std::vector<uint>&& rearranged_node_indexes);

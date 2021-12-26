@@ -1,5 +1,8 @@
 #pragma once
-#include "Grid_File_Convertor.h"
+#include "Element.h"
+
+#include "Log.h"
+#include "Profiler.h"
 
 #include <set>
 #include <unordered_map>
@@ -7,7 +10,8 @@
 class Grid 
 {
 public:
-	Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path);
+	//Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path);
+	Grid(std::vector<Element>&& elements);
 
 public:
 	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(void) const;
@@ -60,7 +64,7 @@ private:
 	int find_face_share_cell_index_consider_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
 	int find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
 	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
-	std::vector<Element> make_inner_face_elements(void) const;
+	std::vector<Element> make_inter_cell_face_elements(void) const;
 	std::pair<uint, uint> pbdry_oc_nc_index_pair(const uint pbdry_pair_index) const;
 
 private:

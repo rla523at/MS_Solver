@@ -175,17 +175,19 @@ bool Element::can_be_periodic_pair(const Element& other) const
 	return true;
 }
 
-FaceType Element::check_face_type(const Element& owner_cell_element) const 
+FaceType Element::check_face_type(const Element& oc_element) const 
 {
 	REQUIRE(this->element_type_ != ElementType::cell, "face or boundary element should be use this method");
 
 	const auto this_vnode_indexes = this->vertex_point_indexes();
-	const auto set_of_face_vnode_indexes = owner_cell_element.set_of_face_vertex_indexes();
+	const auto set_of_face_vnode_indexes = oc_element.set_of_face_vertex_indexes();
 
 	for (const auto& face_vnode_indexes : set_of_face_vnode_indexes) 
 	{
 		if (!std::is_permutation(face_vnode_indexes.begin(), face_vnode_indexes.end(), this_vnode_indexes.begin()))
+		{
 			continue;
+		}
 
 		if (this->is_line()) 
 		{

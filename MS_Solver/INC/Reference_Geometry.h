@@ -91,9 +91,9 @@ protected:
 	//static inline std::array<std::vector<std::vector<std::vector<uint>>>, num_figures_> set_of_connectivities_; //[figure_index][post_order]
 	//static inline std::array<std::vector<Quadrature_Rule>, num_figures_> quadrature_rules_; //[figure_index][integrand_order]
 
-	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> set_of_mapping_nodes_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //[figure_index][figure_order]
-	static inline std::vector<std::vector<Vector_Function<Polynomial>>> set_of_mapping_monomial_vector_function_ = std::vector<std::vector<Vector_Function<Polynomial>>>(num_figures_);; //[figure_index][figure_order]
-	static inline std::vector<std::vector<Matrix>> set_of_inverse_mapping_monomial_matrix_ = std::vector<std::vector<Matrix>>(num_figures_); //[figure_index][figure_order]
+	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> figure_index_and_order_to_mapping_points_table_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //[figure_index][figure_order]
+	static inline std::vector<std::vector<Vector_Function<Polynomial>>> figure_index_and_order_to_mapping_monomial_vf_ = std::vector<std::vector<Vector_Function<Polynomial>>>(num_figures_);; //[figure_index][figure_order]
+	static inline std::vector<std::vector<Matrix>> figure_index_and_order_to_inverse_mapping_monomial_m_ = std::vector<std::vector<Matrix>>(num_figures_); //[figure_index][figure_order]
 	static inline std::vector<std::vector<std::vector<Euclidean_Vector>>> set_of_post_nodes_ = std::vector<std::vector<std::vector<Euclidean_Vector>>>(num_figures_); //figure_index][post_order]
 	static inline std::vector<std::vector<std::vector<std::vector<uint>>>> set_of_connectivities_ = std::vector<std::vector<std::vector<std::vector<uint>>>>(num_figures_); //[figure_index][post_order]
 	static inline std::vector<std::vector<Quadrature_Rule>> quadrature_rules_ = std::vector<std::vector<Quadrature_Rule>>(num_figures_); //[figure_index][integrand_order]

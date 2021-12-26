@@ -4,7 +4,7 @@
 class Geometry
 {
 public:
-	Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_nodes); // 의존성이 들어나도록 생성자 지우기 --> 지울필요까지 있을까 ?
+	Geometry(const Figure figure, const ushort order, std::vector<Euclidean_Vector>&& consisting_nodes); //숨겨진 의존성인가?
 	Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
 
 public://Command
@@ -51,7 +51,7 @@ protected:
 	Vector_Function<Polynomial> mapping_vf_;
 	Vector_Function<Polynomial> normal_vf_;
 	Irrational_Function scale_f_;
-	mutable std::map<size_t, Quadrature_Rule> integrand_order_to_quadrature_rule_;
+	mutable std::map<size_t, Quadrature_Rule> degree_to_quadrature_rule_;
 
 //public:
 //	std::vector<Geometry> sub_simplex_geometries(void) const;

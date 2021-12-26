@@ -1,18 +1,17 @@
 #include "../INC/Grid.h"
 
-Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_view grid_file_path)
+Grid::Grid(std::vector<Element>&& elements)
 {
-	this->space_dimension_ = grid_file_convertor.get_space_dimension();
-	auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
+	//this->space_dimension_ = grid_file_convertor.get_space_dimension();
+	//auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
 
-	Profiler::set_time_point();
+	//Profiler::set_time_point();
 
 	std::vector<Element> periodic_boundary_elements;
 
 	for (auto& element : elements)
 	{
-		const auto type = element.type();
-		switch (type) 
+		switch (element.type())
 		{
 		case ElementType::cell:
 			this->cell_elements_.push_back(std::move(element));
@@ -25,9 +24,9 @@ Grid::Grid(const Grid_File_Convertor& grid_file_convertor, const std::string_vie
 			break;
 		}
 	}
-	
+		
 	this->periodic_boundary_element_pairs_ = this->make_periodic_boundary_element_pairs(std::move(periodic_boundary_elements));
-	this->inter_cell_face_elements_ = this->make_inner_face_elements();
+	this->inter_cell_face_elements_ = this->make_inter_cell_face_elements();
 
 	LOG << std::left << std::setw(50) << "@ Make Grid Element" << " ----------- " << Profiler::get_time_duration() << "s\n\n";
 	LOG << "  " << std::setw(8) << this->cell_elements_.size() << " cell \n";
@@ -641,7 +640,7 @@ int Grid::find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, cons
 		return cell_indexes.front();
 }
 
-std::vector<Element> Grid::make_inner_face_elements(void) const
+std::vector<Element> Grid::make_inter_cell_face_elements(void) const
 {
 	std::set<std::vector<uint>> constructed_face_vnode_index_set;
 

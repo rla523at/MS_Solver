@@ -296,12 +296,12 @@ bool Geometry::is_simplex(void) const
 	return this->reference_geometry_->is_simplex();
 }
 
-const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_order) const
+const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_degree) const
 {
-	if (!this->integrand_order_to_quadrature_rule_.contains(integrand_order))
-		this->integrand_order_to_quadrature_rule_.emplace(integrand_order, this->make_quadrature_rule(integrand_order));
+	if (!this->degree_to_quadrature_rule_.contains(integrand_degree))
+		this->degree_to_quadrature_rule_.emplace(integrand_degree, this->make_quadrature_rule(integrand_degree));
 
-	return this->integrand_order_to_quadrature_rule_.at(integrand_order);
+	return this->degree_to_quadrature_rule_.at(integrand_degree);
 }
 
 ushort Geometry::check_space_dimension(void) const
