@@ -311,6 +311,46 @@ namespace ms
 		return os.str();
 	}
 
+	std::vector<std::string> file_names_in_folder(const std::string_view folder_path)
+	{
+		std::vector<std::string> file_names;
+
+		std::filesystem::directory_iterator iter(folder_path);
+		while (iter != std::filesystem::end(iter))
+		{
+			const auto& entry = *iter;
+
+			if (!entry.is_directory())
+			{
+				file_names.push_back(entry.path().filename().string());
+			}
+
+			iter++;
+		}
+
+		return file_names;
+	}
+
+	std::vector<std::string> folder_names_in_folder(const std::string_view folder_path)
+	{
+		std::vector<std::string> folder_names;
+
+		std::filesystem::directory_iterator iter(folder_path);
+		while (iter != std::filesystem::end(iter))
+		{
+			const auto& entry = *iter;
+
+			if (entry.is_directory())
+			{
+				folder_names.push_back(entry.path().filename().string());
+			}
+
+			iter++;
+		}
+
+		return folder_names;
+	}
+
 	std::vector<std::string> file_paths_in_path(const std::string& path) 
 	{
 		std::vector<std::string> file_name_text;
@@ -494,6 +534,7 @@ namespace ms
 
 	void rename(const std::string& path, const std::string& old_name, const std::string& new_name)
 	{
+		REQUIRE(path.back() == '/', "path should be end with /");
 		std::filesystem::rename(path + old_name, path + new_name);
 	}
 

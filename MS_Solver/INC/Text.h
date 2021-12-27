@@ -137,6 +137,8 @@ namespace ms
 	bool compare_icase(const char str1, const char str2);
 	std::string double_to_string(const double val);
 	std::string double_to_str_sp(const double value); //double to string with show point
+	std::vector<std::string> file_names_in_folder(const std::string_view folder_path);
+	std::vector<std::string> folder_names_in_folder(const std::string_view folder_path);
 	std::vector<std::string> file_paths_in_path(const std::string& path);
 	size_t find_icase(const std::string& str, const std::string& target);
 	std::string get_replace(const std::string& str, const std::string_view target, const std::string_view replacement);
