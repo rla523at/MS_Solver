@@ -15,6 +15,8 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	this->boundaries_ = std::make_unique<Boundaries_DG>(grid, *this->discrete_solution_, numerical_flux_function);
 	this->inner_faces_ = std::make_unique<Inner_Faces_DG>(grid, *this->discrete_solution_, numerical_flux_function);
 
+	this->RHS_ = std::make_unique<Residual>(this->discrete_solution_->num_total_values(), this->discrete_solution_->get_coefficient_start_indexes());
+
 	this->reconstruction_ = Reconstruction_DG_Factory::make_unique(configuration, grid, *this->discrete_solution_);
 	this->error_ = Error_Factory::make_unqiue(configuration);
 
@@ -36,14 +38,12 @@ double Semi_Discrete_Equation_DG::calculate_time_step(void) const
 	return this->cells_->calculate_time_step(*this->discrete_solution_);
 }
 
-Euclidean_Vector Semi_Discrete_Equation_DG::calculate_RHS(void) const
+void Semi_Discrete_Equation_DG::calculate_RHS(void) const
 {
-	Residual RHS(this->discrete_solution_->num_total_values(), this->discrete_solution_->get_coefficient_start_indexes());
-	this->cells_->calculate_RHS(RHS, *this->discrete_solution_);
-	this->boundaries_->calculate_RHS(RHS, *this->discrete_solution_);
-	this->inner_faces_->calculate_RHS(RHS, *this->discrete_solution_);
-
-	return RHS.move_values();	//버그를 일으킬수도 있을것같은데
+	this->RHS_->initialize();
+	this->cells_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
+	this->boundaries_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
+	this->inner_faces_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
 }
 
 Euclidean_Vector Semi_Discrete_Equation_DG::discrete_solution_vector(void) const
@@ -54,6 +54,16 @@ Euclidean_Vector Semi_Discrete_Equation_DG::discrete_solution_vector(void) const
 Constant_Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::discrete_solution_constant_vector_wrapper(void) const
 {
 	return this->discrete_solution_->discrete_solution_constant_vector_wrapper();
+}
+
+Constant_Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::RHS_constant_vector_wrapper(void) const
+{
+	return this->RHS_->residual_constant_vector_wrapper();
+}
+
+Euclidean_Vector Semi_Discrete_Equation_DG::RHS_vector(void) const
+{
+	return this->RHS_->residual_vector();
 }
 
 std::vector<double> Semi_Discrete_Equation_DG::calculate_error_norms(const Grid& grid, const double end_time) const

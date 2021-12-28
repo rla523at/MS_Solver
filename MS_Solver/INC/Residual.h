@@ -1,6 +1,5 @@
 #pragma once
-#include "Exception.h"
-#include "Matrix.h"
+#include "Euclidean_Vector.h"
 
 #include <vector>
 
@@ -12,8 +11,12 @@ public:
     Residual(const size_t num_values, const std::vector<size_t>& coefficient_start_indexes);         
 
 public://Command
+    void initialize(void);
     void update_rhs(const uint cell_index, const double* delta_rhs);
-    std::vector<double>&& move_values(void);
+    
+public://Query
+    Constant_Euclidean_Vector_Wrapper residual_constant_vector_wrapper(void) const;
+    Euclidean_Vector residual_vector(void) const;
 
 private:
     double* get_icell_residual(const uint cell_index);

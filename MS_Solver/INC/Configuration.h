@@ -47,6 +47,7 @@ public://Query
 	ushort post_order(void) const;
 	const std::string& get_post_for_debug(void) const;
 
+	const std::string& get_write_error_file(void) const;
 	const std::string& get_error_type(void) const;
 
 	const std::string& get_write_log_file(void) const;
@@ -117,6 +118,7 @@ private:
 	ushort post_order_ = 0;
 	std::string post_for_debug_;
 
+	std::string write_error_file_;
 	std::string error_type_;
 
 	std::string do_write;

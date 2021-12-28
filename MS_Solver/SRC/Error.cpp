@@ -226,6 +226,13 @@ double Local_Average_Error::calculate_local_error_Linf_norm(const uint cell_inde
 
 std::unique_ptr<Error> Error_Factory::make_unqiue(const Configuration& configuration)
 {
+	const auto& write_error_file = configuration.get_write_error_file();
+
+	if (ms::compare_icase(write_error_file, "No"))
+	{
+		return std::make_unique<No_Error_Calculation>();
+	}
+
 	const auto& governing_equation_name = configuration.get_governing_equation();
 
 	if (ms::contains_icase(governing_equation_name, "Linear", "Advection"))

@@ -45,6 +45,7 @@ public://Command
 
 	void limit_slope(const uint cell_index, const double limiting_value);
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
+	void scailing(const double scail_factor);
 
 	//for time step calculation
 	void precalculate_cell_P0_basis_values(void);
@@ -143,7 +144,7 @@ private:
 
 private:
 	std::vector<ushort> set_of_num_values_;
-	std::vector<ushort> solution_degrees_;
+	std::vector<ushort> cell_index_to_solution_degree_table_;
 	std::vector<Vector_Function<Polynomial>> basis_vector_functions_;
 	std::vector<ushort> set_of_num_basis_;
 	std::vector<size_t> coefficieint_start_indexes_;

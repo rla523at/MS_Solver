@@ -75,11 +75,6 @@ void Log::write(void) const
 
 void Log::write_error_text(const std::string& grid_file_name, const std::vector<double>& error_values) const
 {
-	if (!this->do_write)
-	{
-		return;
-	}
-
 	Sentence error_sentence = grid_file_name + "      \t";
 	error_sentence.insert_with_space(error_values);
 	error_sentence << "\n";

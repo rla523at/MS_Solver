@@ -13,7 +13,7 @@ Initial_condition			= Sine_Wave
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/RQ10.msh
+grid_file_paths				= RSC/Grid/2D/RQ10.msh, RSC/Grid/2D/RQ15.msh, RSC/Grid/2D/RQ20.msh, RSC/Grid/2D/RQ25.msh, RSC/Grid/2D/RQ30.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ reconstruction_scheme		= No
 
 numerical_flux				= LLF
 
-Time_Discrete_scheme		= SSPRK54					
+Time_Discrete_scheme		= SSPRK33					
 							//SSPRK33, SSPRK54
 
 Time_step_method			= CFL						
@@ -42,7 +42,7 @@ solve_end_controller_type	= Time
 solve_end_time				= 2.0
 solve_end_iter				= 10
 
-solve_post_controller_type	= Iter						
+solve_post_controller_type	= Time						
 							//Time, Iter, NotUse
 
 solve_post_time_step		= 0.1
@@ -56,7 +56,7 @@ solve_post_iter_unit		= 1
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/refactoring_test/
+post_base_path				= E:/CodeData/Result/RDD/Refactoring_Test/SSPRK33/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -73,6 +73,9 @@ post_for_debug				= No
 
 /////////////////////////// ERROR /////////////////////////////////
 
+write_error_file			= Yes
+							//Yes, No
+
 Error_type					= Global
 							//Global, Local_Average
 
@@ -81,7 +84,7 @@ Error_type					= Global
 
 //////////////////////////// LOG //////////////////////////////////
 
-write_log_file				= Yes
+write_log_file				= No
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////

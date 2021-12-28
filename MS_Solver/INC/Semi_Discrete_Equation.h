@@ -15,11 +15,13 @@ public://Command
 
 public://Query
 	virtual double calculate_time_step(void) const abstract;
-	virtual Euclidean_Vector calculate_RHS(void) const abstract;
+	virtual void calculate_RHS(void) const abstract;
 	virtual Euclidean_Vector discrete_solution_vector(void) const abstract;
 	virtual Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const abstract;
-	virtual std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const abstract;
+	virtual Constant_Euclidean_Vector_Wrapper RHS_constant_vector_wrapper(void) const abstract;
+	virtual Euclidean_Vector RHS_vector(void) const abstract;
 
+	virtual std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const abstract;
 };
 
 class Semi_Discrete_Equation_DG : public Semi_Discrete_Equation
@@ -33,9 +35,12 @@ public://Command
 
 public://Query
 	double calculate_time_step(void) const override;
-	Euclidean_Vector calculate_RHS(void) const override;
+	void calculate_RHS(void) const override;
 	Euclidean_Vector discrete_solution_vector(void) const override;
 	Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const override;
+	Constant_Euclidean_Vector_Wrapper RHS_constant_vector_wrapper(void) const override;
+	Euclidean_Vector RHS_vector(void) const override;
+
 	std::vector<double> calculate_error_norms(const Grid& grid, const double end_time) const override;
 
 private:
@@ -44,6 +49,7 @@ private:
 	std::unique_ptr<Cells_DG> cells_;	
 	std::unique_ptr<Boundaries_DG> boundaries_;
 	std::unique_ptr<Inner_Faces_DG> inner_faces_;
+	std::unique_ptr<Residual> RHS_;
 
 	//Abstract class
 	std::unique_ptr<Reconstruction_DG> reconstruction_;

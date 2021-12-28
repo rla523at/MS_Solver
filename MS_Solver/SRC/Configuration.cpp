@@ -132,6 +132,11 @@ const std::string& Configuration::get_post_for_debug(void) const
 	return this->post_for_debug_;
 }
 
+const std::string& Configuration::get_write_error_file(void) const
+{
+	return this->write_error_file_;
+}
+
 const std::string& Configuration::get_error_type(void) const
 {
 	return this->error_type_;
@@ -355,6 +360,7 @@ void Configuration::set_value(const Text& config_text)
 	this->post_order_ = this->get<ushort>(name_to_value, "post_order");
 	this->post_for_debug_ = this->get<std::string>(name_to_value, "post_for_debug");
 
+	this->write_error_file_ = this->get<std::string>(name_to_value, "write_error_file");
 	this->error_type_ = this->get<std::string>(name_to_value, "error_type");
 
 	this->do_write = this->get<std::string>(name_to_value, "write_log_file");

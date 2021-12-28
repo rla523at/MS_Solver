@@ -105,14 +105,14 @@ Discrete_Solution_DG::Discrete_Solution_DG(const std::shared_ptr<Governing_Equat
 		this->degree_to_num_basis_table[i] = ms::combination_with_repetition(1 + this->space_dimension_, i);
 	}
 
-	this->solution_degrees_.resize(this->num_cells_, solution_degree);
+	this->cell_index_to_solution_degree_table_.resize(this->num_cells_, solution_degree);
 	
 	this->basis_vector_functions_.resize(this->num_cells_);
 	this->set_of_num_basis_.resize(this->num_cells_);
 	this->set_of_num_values_.resize(this->num_cells_);
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		this->basis_vector_functions_[cell_index] = grid.cell_basis_vector_function(cell_index, this->solution_degrees_[cell_index]);
+		this->basis_vector_functions_[cell_index] = grid.cell_basis_vector_function(cell_index, this->cell_index_to_solution_degree_table_[cell_index]);
 		this->set_of_num_basis_[cell_index] = static_cast<ushort>(this->basis_vector_functions_[cell_index].size());		
 		this->set_of_num_values_[cell_index] = this->num_equations_ * this->set_of_num_basis_[cell_index];
 	}
@@ -348,6 +348,21 @@ void Discrete_Solution_DG::project_to_Pn_space(const uint cell_index, const usho
 
 	auto coefficient_mw = this->coefficient_matrix_wrapper(cell_index);
 	coefficient_mw.change_columns(num_projected_basis, num_basis, zero);
+}
+
+void Discrete_Solution_DG::scailing(const double scaling_factor)
+{
+	constexpr auto P0 = 0;
+	const auto num_P0_basis = this->degree_to_num_basis_table[P0];
+
+	for (uint i = 0; i < this->num_cells_; ++i)
+	{
+		const auto solution_degree = this->cell_index_to_solution_degree_table_[i];		
+		const auto num_basis = this->degree_to_num_basis_table[solution_degree];
+
+		auto coefficient_mw = this->coefficient_matrix_wrapper(i);
+		coefficient_mw.scalar_multiplcation_at_columns(num_P0_basis, num_basis, scaling_factor);
+	}
 }
 
 void Discrete_Solution_DG::limit_slope(const uint cell_index, const double limiting_value)
@@ -694,12 +709,12 @@ ushort Discrete_Solution_DG::num_values(const uint cell_index) const
 
 ushort Discrete_Solution_DG::maximum_solution_degree(void) const
 {
-	return *std::max_element(this->solution_degrees_.begin(), this->solution_degrees_.end());
+	return *std::max_element(this->cell_index_to_solution_degree_table_.begin(), this->cell_index_to_solution_degree_table_.end());
 }
 
 ushort Discrete_Solution_DG::solution_degree(const uint cell_index) const
 {
-	return this->solution_degrees_[cell_index];
+	return this->cell_index_to_solution_degree_table_[cell_index];
 }
 
 const std::vector<size_t>& Discrete_Solution_DG::get_coefficient_start_indexes(void) const
@@ -785,7 +800,7 @@ std::vector<double> Discrete_Solution_DG::calculate_initial_values(const Grid& g
 
 	for (uint i = 0; i < this->num_cells_; ++i)
 	{
-		const auto integrand_degree = this->solution_degrees_[i] * 2;
+		const auto integrand_degree = this->cell_index_to_solution_degree_table_[i] * 2;
 
 		const auto quadrature_rule = grid.get_cell_quadrature_rule(i, integrand_degree);
 		const auto& qnodes = quadrature_rule.points;

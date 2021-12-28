@@ -5,6 +5,11 @@ Residual::Residual(const size_t num_values, const std::vector<size_t>& coefficie
     , num_cell_(coefficient_start_indexes.size())
     , values_(num_values) {};
 
+void Residual::initialize(void)
+{
+    std::fill(this->values_.begin(), this->values_.end(), 0.0);
+}
+
 void Residual::update_rhs(const uint cell_index, const double* delta_rhs_ptr)
 {
     const auto n = static_cast<MKL_INT>(this->num_icell_values(cell_index));
@@ -16,9 +21,14 @@ void Residual::update_rhs(const uint cell_index, const double* delta_rhs_ptr)
     cblas_daxpy(n, a, delta_rhs_ptr, incx, icell_rhs_ptr, incy);
 }
 
-std::vector<double>&& Residual::move_values(void)
+Constant_Euclidean_Vector_Wrapper Residual::residual_constant_vector_wrapper(void) const
 {
-    return std::move(this->values_);
+    return this->values_;
+}
+
+Euclidean_Vector Residual::residual_vector(void) const
+{
+    return this->values_;
 }
 
 double* Residual::get_icell_residual(const uint cell_index)

@@ -123,9 +123,6 @@
     <ClCompile Include="SRC\Reconstruction.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
-    <ClCompile Include="INC\Error.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Indicator.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
@@ -157,6 +154,9 @@
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Exact_Solution.cpp">
+      <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Error.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
   </ItemGroup>
