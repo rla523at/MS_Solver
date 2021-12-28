@@ -78,7 +78,7 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
 	LOG << std::left << std::setw(50) << "@ Inner faces DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
-void Inner_Faces_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const
+void Inner_Faces_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_solution) const
 {
 	for (uint infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
 	{

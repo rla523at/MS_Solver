@@ -128,7 +128,19 @@ std::unique_ptr<Solve_End_Controller> Solve_End_Controller_Factory::make_unique(
     const auto& type_name = configuration.get_solve_end_controller_type();
     if (ms::contains_icase(type_name, "Time"))
     {
-        const auto solve_end_time = configuration.solve_end_time();
+        auto solve_end_time = configuration.solve_end_time();
+        if (solve_end_time < 0.0)
+        {
+            const auto initial_condition = Initial_Condition_Factory::make_unique(configuration);
+            solve_end_time = initial_condition->target_end_time();
+
+            if (solve_end_time < 0.0)
+            {
+                EXCEPTION("Initial condition in configuration file does not provide target end time, Please write down solve end time at configuration file");
+                return nullptr;
+            }
+        }
+
         return std::make_unique<Solve_End_Controller_By_Time>(solve_end_time);
     }
     else if (ms::contains_icase(type_name, "Iter"))

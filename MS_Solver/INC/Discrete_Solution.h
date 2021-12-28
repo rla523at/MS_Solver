@@ -45,7 +45,7 @@ public://Command
 
 	void limit_slope(const uint cell_index, const double limiting_value);
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
-	void scailing(const double scail_factor);
+	void scailing(const uint cell_index, const double scail_factor);
 
 	//for time step calculation
 	void precalculate_cell_P0_basis_values(void);
@@ -93,10 +93,10 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_cell_QPs(const uint cell_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ocs_QPs(const uint infs_index, const uint oc_index) const;
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
-	void calculate_solution_at_bdry_QPs(Euclidean_Vector* solution_at_QPs, const uint bdry_index, const uint oc_index) const;
-	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
-	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index) const;
-	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index) const;
+	void calculate_solution_at_bdry_QPs(Euclidean_Vector* solution_at_QPs, const uint bdry_index, const uint oc_index);
+	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index);
+	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index);
+	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index);
 
 	//for MLP criterion
 	double calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const;
@@ -148,6 +148,8 @@ private:
 	std::vector<Vector_Function<Polynomial>> basis_vector_functions_;
 	std::vector<ushort> set_of_num_basis_;
 	std::vector<size_t> coefficieint_start_indexes_;
+
+	double scaling_factor_ = 0.5;
 
 	//precalculated
 	static constexpr ushort max_solution_degree = 20;

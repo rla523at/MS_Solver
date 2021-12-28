@@ -69,7 +69,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
     LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
 
-void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const
+void Boundaries_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_solution) const
 {
     for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
@@ -87,9 +87,8 @@ void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG
             bdry_flux_QPs_m.change_column(q, this->boundary_flux_);
         }
 
-        const auto num_values = discrete_solution.num_values(oc_index);
-        this->reset_residual_values(num_values);
 
+        std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(oc_index), 0.0);
         ms::gemm(bdry_flux_QPs_m, this->set_of_oc_side_QWs_basis_m_[bdry_index], this->residual_values_.data());
         residual.update_rhs(oc_index, this->residual_values_.data());
     }
@@ -97,5 +96,5 @@ void Boundaries_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG
 
 void Boundaries_DG::reset_residual_values(const uint num_values) const
 {
-    std::fill(this->residual_values_.begin(), this->residual_values_.begin() + num_values, 0.0);
+    //std::fill(this->residual_values_.begin(), this->residual_values_.begin() + num_values, 0.0);
 }

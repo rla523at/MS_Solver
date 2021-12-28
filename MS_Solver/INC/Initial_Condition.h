@@ -9,6 +9,7 @@ class Initial_Condition
 {
 public:
 	virtual Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const abstract;
+	virtual double target_end_time(void) const { return -1.0; };
 };
 
 class Constant1 : public Initial_Condition
@@ -157,12 +158,14 @@ class Modified_SOD_2D : public Initial_Condition, Euler_Shocktube_2D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.2; };
 };
 
 class Modified_SOD_3D : public Initial_Condition, Euler_Shocktube_3D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.2; };
 };
 
 class Supersonic_Expansion_2D : public Initial_Condition 

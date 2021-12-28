@@ -21,7 +21,7 @@ public:
 
 public://Query
     double calculate_time_step(const Discrete_Solution_DG& discrete_solution) const;
-    void calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const;
+    void calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_solution) const;
 
 private:
     void reset_residual_values(const uint oc_index) const;

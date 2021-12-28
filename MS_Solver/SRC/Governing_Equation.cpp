@@ -245,9 +245,9 @@ void Euler_2D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Ve
 	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
 
 	physical_flux.at(0, 0) = rhou;				physical_flux.at(0, 1) = rhov;
-	physical_flux.at(1, 0) = rhou*u + p;			physical_flux.at(1, 1) = rhouv;
+	physical_flux.at(1, 0) = rhou*u + p;		physical_flux.at(1, 1) = rhouv;
 	physical_flux.at(2, 0) = rhouv;				physical_flux.at(2, 1) = rhov * v + p;
-	physical_flux.at(3, 0) = (rhoE + p) * u;		physical_flux.at(3, 1) = (rhoE + p) * v;
+	physical_flux.at(3, 0) = (rhoE + p) * u;	physical_flux.at(3, 1) = (rhoE + p) * v;
 }
 
 
@@ -281,6 +281,12 @@ void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solu
 	const auto v = rhov * one_over_rho;
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	if (rho < 0.0 || p < 0.0)
+	{
+		throw std::runtime_error("should be positive");
+		return;
+	}
 
 	solution_values[0] = rho;
 	solution_values[1] = rhou;

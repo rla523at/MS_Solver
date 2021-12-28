@@ -9,7 +9,7 @@ public:
     Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function);
 
 public:
-	void calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const;
+	void calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_soltuion) const;
 
 protected:
     std::shared_ptr<Numerical_Flux_Function> numerical_flux_function_;

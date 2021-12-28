@@ -23,6 +23,14 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	Post_Processor::initialize(configuration, grid, *this->discrete_solution_);
 }
 
+void Semi_Discrete_Equation_DG::calculate_RHS(void)
+{
+	this->RHS_->initialize();
+	this->cells_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
+	this->boundaries_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
+	this->inner_faces_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
+}
+
 Euclidean_Vector_Wrapper Semi_Discrete_Equation_DG::discrete_solution_vector_wrapper(void)
 {
 	return this->discrete_solution_->discrete_solution_vector_wrapper();
@@ -38,13 +46,6 @@ double Semi_Discrete_Equation_DG::calculate_time_step(void) const
 	return this->cells_->calculate_time_step(*this->discrete_solution_);
 }
 
-void Semi_Discrete_Equation_DG::calculate_RHS(void) const
-{
-	this->RHS_->initialize();
-	this->cells_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
-	this->boundaries_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
-	this->inner_faces_->calculate_RHS(*this->RHS_, *this->discrete_solution_);
-}
 
 Euclidean_Vector Semi_Discrete_Equation_DG::discrete_solution_vector(void) const
 {

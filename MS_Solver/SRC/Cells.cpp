@@ -81,7 +81,7 @@ double Cells_DG::calculate_time_step(const Discrete_Solution_DG& discrete_soluti
     return time_step * relaxation_factor;
 }
 
-void Cells_DG::calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_solution) const
+void Cells_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_solution) const
 {
     const auto num_equations = this->governing_equation_->num_equations();
     const auto space_dimension = this->governing_equation_->space_dimension();

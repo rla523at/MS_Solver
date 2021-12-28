@@ -9,7 +9,7 @@ public:
     Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux);
 
 public://Query
-    void calculate_RHS(Residual& residual, const Discrete_Solution_DG& discrete_soltuion) const;
+    void calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_soltuion) const;
 
 private:
     void reset_residual_values(const uint oc_index) const;

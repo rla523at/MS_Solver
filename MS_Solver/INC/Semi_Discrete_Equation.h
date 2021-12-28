@@ -12,10 +12,10 @@ class Semi_Discrete_Equation
 public://Command
 	virtual Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) abstract;
 	virtual void reconstruct(void) abstract;
+	virtual void calculate_RHS(void) abstract;
 
 public://Query
 	virtual double calculate_time_step(void) const abstract;
-	virtual void calculate_RHS(void) const abstract;
 	virtual Euclidean_Vector discrete_solution_vector(void) const abstract;
 	virtual Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const abstract;
 	virtual Constant_Euclidean_Vector_Wrapper RHS_constant_vector_wrapper(void) const abstract;
@@ -32,10 +32,10 @@ public:
 public://Command
 	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void) override;
 	void reconstruct(void) override;
+	void calculate_RHS(void) override;
 
 public://Query
 	double calculate_time_step(void) const override;
-	void calculate_RHS(void) const override;
 	Euclidean_Vector discrete_solution_vector(void) const override;
 	Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const override;
 	Constant_Euclidean_Vector_Wrapper RHS_constant_vector_wrapper(void) const override;

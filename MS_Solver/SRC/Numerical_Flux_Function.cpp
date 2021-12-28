@@ -30,10 +30,13 @@ void LLF::calculate(double* numerical_flux_ptr, const Euclidean_Vector& oc_solut
     ms::mv(this->central_flux_, normal_vector, this->central_normal_flux_.data());
     this->central_normal_flux_ *= 0.5;
 
-    ms::vmv(oc_solution, nc_solution, this->correction_flux_.data());
+    const auto n = static_cast<int>(this->correction_flux_.size());
+    ms::BLAS::x_minus_y(n, oc_solution.data(), nc_solution.data(), this->correction_flux_.data());
+    //ms::vmv(oc_solution, nc_solution, this->correction_flux_.data()); //bug!!!!
     this->correction_flux_ *= (0.5 * inner_face_maximum_lambda);
 
-    ms::vpv(this->central_normal_flux_, this->correction_flux_, numerical_flux_ptr);
+    ms::BLAS::x_plus_y(n, this->central_normal_flux_.data(), this->correction_flux_.data(), numerical_flux_ptr);
+    //ms::vpv(this->central_normal_flux_, this->correction_flux_, numerical_flux_ptr);
 }
 
 

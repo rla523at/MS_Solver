@@ -694,11 +694,11 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 	const auto& name = configuration.get_initial_condition();
 	const auto space_dimension = configuration.space_dimension();
 
-	if (ms::contains_icase(name, "constant1"))
+	if (ms::compare_icase(name, "constant1"))
 	{
 		return std::make_unique<Constant1>();
 	}
-	else if (ms::contains_icase(name, "sine"))
+	else if (ms::compare_icase(name, "sine"))
 	{
 		const auto wave_lengths_ptr = configuration.wave_lengths_ptr();
 
@@ -716,7 +716,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "square"))
+	else if (ms::compare_icase(name, "square"))
 	{
 		if (space_dimension == 2)
 		{
@@ -732,7 +732,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "circle"))
+	else if (ms::compare_icase(name, "circle"))
 	{
 		if (space_dimension == 2)
 		{
@@ -748,7 +748,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "gaussian"))
+	else if (ms::compare_icase(name, "gaussian"))
 	{
 		if (space_dimension == 2)
 		{
@@ -764,7 +764,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "SOD"))
+	else if (ms::compare_icase(name, "SOD"))
 	{
 		if (space_dimension == 2)
 		{
@@ -780,7 +780,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Modified_SOD"))
+	else if (ms::compare_icase(name, "Modified_SOD"))
 	{
 		if (space_dimension == 2)
 		{
@@ -796,7 +796,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Supersonic_Expansion"))
+	else if (ms::compare_icase(name, "Supersonic_Expansion"))
 	{
 		if (space_dimension == 2)
 		{
@@ -812,7 +812,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Left_Half_Blast_Wave"))
+	else if (ms::compare_icase(name, "Left_Half_Blast_Wave"))
 	{
 		if (space_dimension == 2)
 		{
@@ -828,7 +828,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Double_Strong_Shock"))
+	else if (ms::compare_icase(name, "Double_Strong_Shock"))
 	{
 		if (space_dimension == 2)
 		{
@@ -844,7 +844,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Slowly_Moving_Contact"))
+	else if (ms::compare_icase(name, "Slowly_Moving_Contact"))
 	{
 		if (space_dimension == 2)
 		{
@@ -860,7 +860,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Harten_Lax"))
+	else if (ms::compare_icase(name, "Harten_Lax"))
 	{
 		if (space_dimension == 2)
 		{
@@ -876,7 +876,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Shu_Osher"))
+	else if (ms::compare_icase(name, "Shu_Osher"))
 	{
 		if (space_dimension == 2)
 		{
@@ -892,7 +892,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Blast_Wave"))
+	else if (ms::compare_icase(name, "Blast_Wave"))
 	{
 		if (space_dimension == 2)
 		{
@@ -908,7 +908,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			return nullptr;
 		}
 	}
-	else if (ms::contains_icase(name, "Explosion"))
+	else if (ms::compare_icase(name, "Explosion"))
 	{
 		if (space_dimension == 2)
 		{
