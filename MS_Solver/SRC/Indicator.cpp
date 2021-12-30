@@ -560,8 +560,8 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 
 			const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_solution_at_target_cell_QPs.data(), QWs_v.data());
 
-			this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate - P0_value * cell_volume);
-			//this->discontinuity_factor_[i] += P0_value_by_extrapolate;
+			//this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate - P0_value * cell_volume);
+			this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate / cell_volume - P0_value);
 		}
 
 		this->discontinuity_factor_[i] /= num_face_share_cells;

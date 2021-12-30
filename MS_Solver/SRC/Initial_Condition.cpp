@@ -698,7 +698,7 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 	{
 		return std::make_unique<Constant1>();
 	}
-	else if (ms::compare_icase(name, "sine"))
+	else if (ms::compare_icase(name, "sine_wave"))
 	{
 		const auto wave_lengths_ptr = configuration.wave_lengths_ptr();
 

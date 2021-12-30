@@ -3,6 +3,7 @@
 hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 	: stability_criterion_(grid, discrete_solution)
 	, MLP_indicator_(grid, discrete_solution) 
+	, discontinuity_indicator_(grid, discrete_solution, 0) // test
 {
 	this->num_cells_ = grid.num_cells();
 
@@ -15,25 +16,33 @@ hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(const Grid& grid, Discrete_Soluti
 	}
 };
 
-hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(MLP_Criterion&& stability_criterion, MLP_Indicator&& MLP_indicator, MLP_u1_Limiter&& MLP_u1_limiter, const Grid& grid)
-	: stability_criterion_(std::move(stability_criterion))
-	, MLP_indicator_(std::move(MLP_indicator))
-	, MLP_u1_limiter_(std::move(MLP_u1_limiter))
-{
-	this->num_cells_ = grid.num_cells();
-
-	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
-
-	this->set_of_P1_projected_criterion_values_at_verticies_.resize(this->num_cells_);
-	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
-	{
-		this->set_of_P1_projected_criterion_values_at_verticies_[cell_index].resize(set_of_num_vertices[cell_index]);
-	}
-}
+//hMLP_Reconstruction_DG::hMLP_Reconstruction_DG(MLP_Criterion&& stability_criterion, MLP_Indicator&& MLP_indicator, MLP_u1_Limiter&& MLP_u1_limiter, const Grid& grid)
+//	: stability_criterion_(std::move(stability_criterion))
+//	, MLP_indicator_(std::move(MLP_indicator))
+//	, MLP_u1_limiter_(std::move(MLP_u1_limiter))
+//{
+//	this->num_cells_ = grid.num_cells();
+//
+//	const auto set_of_num_vertices = grid.cell_set_of_num_vertices();
+//
+//	this->set_of_P1_projected_criterion_values_at_verticies_.resize(this->num_cells_);
+//	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+//	{
+//		this->set_of_P1_projected_criterion_values_at_verticies_[cell_index].resize(set_of_num_vertices[cell_index]);
+//	}
+//}
 
 
 void hMLP_Reconstruction_DG::reconstruct(Discrete_Solution_DG& discrete_solution)
 {
+	//test
+	this->discontinuity_indicator_.precalculate(discrete_solution);
+	const auto& discontinuity_factor = this->discontinuity_indicator_.get_discontinuity_factor();
+	Post_Processor::record_solution();
+	Post_Processor::record_variables("discontinuity_factor", discontinuity_factor);
+	Post_Processor::post_solution();
+	//test
+
 	this->precalculate(discrete_solution);
 
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
@@ -217,11 +226,12 @@ std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const 
 	}
 	else if (ms::compare_icase(reconstruction_scheme, "hMLP"))
 	{
-		MLP_Criterion MLP_criterion(grid, discrete_solution);
-		MLP_Indicator MLP_indicator(grid, discrete_solution);
-		MLP_u1_Limiter MLP_u1_limiter;
+		//MLP_Criterion MLP_criterion(grid, discrete_solution);
+		//MLP_Indicator MLP_indicator(grid, discrete_solution);
+		//MLP_u1_Limiter MLP_u1_limiter;
 
-		return std::make_unique<hMLP_Reconstruction_DG>(std::move(MLP_criterion), std::move(MLP_indicator), std::move(MLP_u1_limiter), grid);
+		//return std::make_unique<hMLP_Reconstruction_DG>(std::move(MLP_criterion), std::move(MLP_indicator), std::move(MLP_u1_limiter), grid);
+		return std::make_unique<hMLP_Reconstruction_DG>(grid, discrete_solution);
 	}
 	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD"))
 	{
