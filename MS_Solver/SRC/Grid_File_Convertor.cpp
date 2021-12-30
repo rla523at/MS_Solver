@@ -119,7 +119,7 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		//reference geometry
 		const auto figure = this->figure_type_index_to_element_figure(figure_type_index);
 		const auto figure_order = this->figure_type_index_to_figure_order(figure_type_index);
-		auto reference_geometry = Reference_Geometry_Factory::make_unique(figure, figure_order);
+		const auto& reference_geometry = Reference_Geometry_Container::get(figure, figure_order);
 
 		//geometry
 		constexpr auto num_indexes = 5;
@@ -133,7 +133,7 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		}
 
 		auto nodes = ms::extract_by_index(node_datas, node_indexes);
-		Geometry geometry(std::move(reference_geometry), std::move(nodes));
+		Geometry geometry(reference_geometry, std::move(nodes));
 
 		//element
 		const auto type = physical_group_index_to_element_type.at(physical_gorup_index);

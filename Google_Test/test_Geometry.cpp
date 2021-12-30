@@ -6,29 +6,31 @@
 TEST(Geometry, center_1) {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 1.5,1 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, center_2) 
+TEST(Geometry, center_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	const auto result = geometry.center_point();
 
@@ -38,31 +40,33 @@ TEST(Geometry, center_2)
 TEST(Geometry, center_3) {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	const Euclidean_Vector n4 = { 1,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
-	
+	Geometry geometry(ref_geometry, std::move(nodes));
+
 	const auto result = geometry.center_point();
 
 	const Euclidean_Vector ref = { 2,1.5 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, center_4) 
+TEST(Geometry, center_4)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1,2 };
 	const Euclidean_Vector n2 = { 2,1,3 };
 	const Euclidean_Vector n3 = { 4,2,4 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	const auto result = geometry.center_point();
 
@@ -73,13 +77,14 @@ TEST(Geometry, change_points_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	const Euclidean_Vector n4 = { 5,4 };
 	const Euclidean_Vector n5 = { 6,3 };
@@ -97,13 +102,14 @@ TEST(Geometry, change_points_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	const Euclidean_Vector n4 = { 1.524,1 };
 	const Euclidean_Vector n5 = { 2,1.154 };
@@ -122,32 +128,33 @@ TEST(Geometry, face_geometries_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.face_geometries();
 
 	const Figure f_fig = Figure::line;
+	const auto& ref_face_geometry = Reference_Geometry_Container::get(f_fig, fig_order);
 
 	const Euclidean_Vector f1_n1 = { 1,1 };
 	const Euclidean_Vector f1_n2 = { 2,1 };
 	std::vector<Euclidean_Vector> f1_nodes = { f1_n1,f1_n2 };
-	Geometry f1_geometry(f_fig, fig_order, std::move(f1_nodes));
+	Geometry f1_geometry(ref_face_geometry, std::move(f1_nodes));
 
 	const Euclidean_Vector f2_n1 = { 2,1 };
 	const Euclidean_Vector f2_n2 = { 4,2 };
 	std::vector<Euclidean_Vector> f2_nodes = { f2_n1,f2_n2 };
-	Geometry f2_geometry(f_fig, fig_order, std::move(f2_nodes));
+	Geometry f2_geometry(ref_face_geometry, std::move(f2_nodes));
 
 	const Euclidean_Vector f3_n1 = { 4,2 };
 	const Euclidean_Vector f3_n2 = { 1,1 };
 	std::vector<Euclidean_Vector> f3_nodes = { f3_n1,f3_n2 };
-	Geometry f3_geometry(f_fig, fig_order, std::move(f3_nodes));
+	Geometry f3_geometry(ref_face_geometry, std::move(f3_nodes));
 
 	//const std::vector<Geometry> ref = { std::move(f1_geometry),std::move(f2_geometry),std::move(f3_geometry) };
 	EXPECT_EQ(result[0], f1_geometry);
@@ -158,13 +165,13 @@ TEST(Geometry, normalized_normal_vector_1)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 3,1 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2 };
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto normal = geometry.normalized_normal_vector(geometry.center_point());
 
 	const Euclidean_Vector ref_direct = { 0,1 };
@@ -186,14 +193,14 @@ TEST(Geometry, normalized_normal_vector_2)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2 };
 
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto normal = geometry.normalized_normal_vector(geometry.center_point());
 
 	const auto tangent = n2 - n1;
@@ -209,6 +216,7 @@ TEST(Geometry, normalized_normal_vector_2)
 TEST(Geometry, orthonormal_basis_1) {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 3,1 };
@@ -216,7 +224,7 @@ TEST(Geometry, orthonormal_basis_1) {
 	const Euclidean_Vector n4 = { 1,3 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
@@ -240,15 +248,15 @@ TEST(Geometry, orthonormal_basis_2) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 0,2 };
 	const Euclidean_Vector n2 = { 2,0 };
 	const Euclidean_Vector n3 = { 2,2 };
 	const Euclidean_Vector n4 = { 0,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
@@ -273,15 +281,15 @@ TEST(Geometry, orthonormal_basis_3) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 2.4874,1.257 };
 	const Euclidean_Vector n3 = { 3.4874,1.24 };
 	const Euclidean_Vector n4 = { 1,2.577 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
@@ -305,15 +313,15 @@ TEST(Geometry, orthonormal_basis_4) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148 };
 	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218 };
 	const Euclidean_Vector n3 = { 0.3309655464243111, 0.3010404355350647 };
 	const Euclidean_Vector n4 = { 0.3359655464243111, 0.2910404355350647 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
@@ -338,14 +346,14 @@ TEST(Geometry, orthonormal_basis_5) {
 
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148 };
 	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218 };
 	const Euclidean_Vector n3 = { 0.3309655464243111, 0.3010404355350647 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	constexpr auto polynomial_order = 5;
 	const auto orthonormal_basis = geometry.orthonormal_basis_vector_function(polynomial_order);
@@ -369,15 +377,15 @@ TEST(Geometry, projected_volume_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
 	const Euclidean_Vector n3 = { 4.47411,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.projected_volumes();
 
 	const std::vector<double> ref = { 1, 4.47411 - 1.524 };
@@ -387,43 +395,44 @@ TEST(Geometry, projected_volume_2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	const Euclidean_Vector n4 = { 1,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.projected_volumes();
 
 	const std::vector<double> ref = { 1, 3 };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, projected_volume_3)
-{
-	const Figure fig = Figure::triangle;
-	const ushort fig_order = 1;
-
-	const Euclidean_Vector n1 = { 1,1,2 };
-	const Euclidean_Vector n2 = { 2,1,2 };
-	const Euclidean_Vector n3 = { 4,2,2 };
-	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
-
-	Geometry geometry(fig, fig_order, std::move(nodes));
-
-	const auto result = geometry.projected_volumes();
-
-	const std::vector<double> ref = { 0.0, 0.0, 0.5 };
-	EXPECT_EQ(result, ref);
-}
+//TEST(Geometry, projected_volume_3) //non-sense
+//{
+//	const Figure fig = Figure::triangle;
+//	const ushort fig_order = 1;
+//	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//
+//	const Euclidean_Vector n1 = { 1,1,2 };
+//	const Euclidean_Vector n2 = { 2,1,2 };
+//	const Euclidean_Vector n3 = { 4,2,2 };
+//	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
+//
+//	Geometry geometry(ref_geometry, std::move(nodes));
+//
+//	const auto result = geometry.projected_volumes();
+//
+//	const std::vector<double> ref = { 0.0, 0.0, 0.5 };
+//	EXPECT_EQ(result, ref);
+//}
 TEST(Geometry, set_of_face_points1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
 	const Euclidean_Vector n3 = { 4.47411,2 };
@@ -431,7 +440,7 @@ TEST(Geometry, set_of_face_points1)
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.set_of_face_points();
 
 	const std::vector<std::vector<Euclidean_Vector>> ref = { {n1,n2},{n2,n3},{n3,n1} };
@@ -441,8 +450,8 @@ TEST(Geometry, set_of_face_points2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	Euclidean_Vector n1 = { 1,1 };
 	Euclidean_Vector n2 = { 2,1 };
 	Euclidean_Vector n3 = { 4,2 };
@@ -450,16 +459,17 @@ TEST(Geometry, set_of_face_points2)
 
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(std::move(ref_geo), std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.set_of_face_points();
 
 	const std::vector<std::vector<Euclidean_Vector>> ref = { {n1,n2},{n2,n3},{n3,n4}, {n4,n1} };
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, volume_1) 
+TEST(Geometry, volume_1)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 1,2 };
@@ -467,16 +477,17 @@ TEST(Geometry, volume_1)
 	const Euclidean_Vector n4 = { 2,1 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 1;
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, volume_2) 
+TEST(Geometry, volume_2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -484,16 +495,17 @@ TEST(Geometry, volume_2)
 	const Euclidean_Vector n4 = { 1,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 2;
 	EXPECT_EQ(result, ref);
 }
-TEST(Geometry, volume_3) 
+TEST(Geometry, volume_3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -501,7 +513,7 @@ TEST(Geometry, volume_3)
 	const Euclidean_Vector n4 = { -100,1 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 51;
@@ -511,13 +523,14 @@ TEST(Geometry, volume_4)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
 	const Euclidean_Vector n3 = { 4,2 };
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 0.5;
@@ -527,6 +540,7 @@ TEST(Geometry, volume_5)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
@@ -534,7 +548,7 @@ TEST(Geometry, volume_5)
 
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 0.01084153;
@@ -545,6 +559,7 @@ TEST(Geometry, volume_6)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.5, 1.257 };
@@ -552,7 +567,7 @@ TEST(Geometry, volume_6)
 
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
 	const auto ref = 0.362569100000000;
@@ -562,6 +577,7 @@ TEST(Geometry, volume_7)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.0016, 1.257 };
@@ -571,18 +587,19 @@ TEST(Geometry, volume_7)
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 	const auto result = geometry.volume();
 
-	const auto ref = 8.939999999999641e-04;
-	EXPECT_DOUBLE_EQ(result, ref);
+	const auto ref = 0.000894;
+	const auto epsilon = 1.0E-15;
+	EXPECT_NEAR(result, ref,epsilon);
 }
-TEST(Geometry, volume_8) 
+TEST(Geometry, volume_8)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	auto ref_geo = Reference_Geometry_Factory::make_unique(fig, fig_order);
-
+	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.5, 1.257 };
 	const Euclidean_Vector n3 = { 2.4874, 1.24 };
@@ -590,7 +607,7 @@ TEST(Geometry, volume_8)
 	std::vector<Euclidean_Vector> nodes = { n1,n2,n3 };
 
 
-	Geometry geometry(fig, fig_order, std::move(nodes));
+	Geometry geometry(ref_geometry, std::move(nodes));
 
 	for (ushort integrand_order = 0; integrand_order < 16; ++integrand_order) {
 		const auto quadrature_rule = geometry.get_quadrature_rule(integrand_order);
@@ -608,6 +625,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::quadrilateral;
 //	const ushort fig_order = 1;
+//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 1,1 };
@@ -616,7 +634,7 @@ TEST(Geometry, volume_8)
 //	const Euclidean_Vector n4 = { 1,2 };
 //	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4 };
 //
-//	Geometry geometry(std::move(ref_geo), std::move(nodes));
+//	Geometry geometry(ref_geometry, std::move(nodes));
 //
 //	const auto result = geometry.sub_simplexgeometries();
 //
@@ -644,6 +662,7 @@ TEST(Geometry, volume_8)
 //
 //	const auto fig = Figure::hexahedral;
 //	const ushort fig_order = 1;
+//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 1,1,0 };
@@ -656,7 +675,7 @@ TEST(Geometry, volume_8)
 //	const Euclidean_Vector n8 = { 1,2,2 };
 //	std::vector<Euclidean_Vector> nodes = { n1,n2,n3,n4,n5,n6,n7,n8 };
 //
-//	Geometry geometry(std::move(ref_geo), std::move(nodes));
+//	Geometry geometry(ref_geometry, std::move(nodes));
 //	const auto result = geometry.projected_volume();
 //
 //	const std::array<double, space_dimension> ref = { 2,2,1 };
@@ -670,12 +689,13 @@ TEST(Geometry, volume_8)
 //{
 //	const Figure fig = Figure::line;
 //	const ushort fig_order = 1;
+//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0,0 };
 //	const Euclidean_Vector n2 = { 0,1 };
 //	std::vector<Euclidean_Vector> nodes = { n1,n2 };
-//	Geometry geometry(std::move(ref_geo), std::move(nodes));
+//	Geometry geometry(ref_geometry, std::move(nodes));
 //
 //	const Euclidean_Vector n3 = { 1,1 };
 //	const Euclidean_Vector n4 = { 1,2 };
@@ -689,6 +709,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::triangle;
 //	const ushort fig_order = 1;
+//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 0 };
@@ -711,6 +732,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::triangle;
 //	const ushort fig_order = 1;
+//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 1 };

@@ -4,7 +4,7 @@
 class Geometry
 {
 public:
-	Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
+	Geometry(const Reference_Geometry& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
 
 public://Command
 	void change_points(std::vector<Euclidean_Vector>&& nodes);
@@ -34,39 +34,24 @@ public://Query
 	std::vector<Euclidean_Vector> vertices(void) const;
 
 protected:	
-	ushort check_space_dimension(void) const;
+	//ushort check_space_dimension(void) const;
 	Vector_Function<Polynomial> initial_basis_vector_function(const ushort solution_order) const;
 	bool is_axis_parallel_node(const Euclidean_Vector& node) const;
 	bool is_on_axis_plane(const ushort axis_tag) const;
 	bool is_on_this_axis_plane(const ushort axis_tag, const double reference_value) const;
 	bool is_on_same_axis_plane(const Geometry& other) const;
-	Vector_Function<Polynomial> make_mapping_function(void) const;
+	//Vector_Function<Polynomial> make_mapping_function(void) const;
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const;
 
 protected:
 	ushort space_dimension_ = 0;
-	std::unique_ptr<Reference_Geometry> reference_geometry_;
+	const Reference_Geometry& reference_geometry_;
 	std::vector<Euclidean_Vector> points_;
 	Vector_Function<Polynomial> mapping_vf_;
 	Vector_Function<Polynomial> normal_vf_;
 	Irrational_Function scale_f_;
 	mutable std::map<size_t, Quadrature_Rule> degree_to_quadrature_rule_;
 };
-
-
-template <typename Function>
-Vector_Function<Function> operator*(const Matrix& matrix, const Vector_Function<Function>& vector_function) 
-{
-	const auto [num_row, num_column] = matrix.size();
-
-	std::vector<Function> functions(num_row);
-
-	for (size_t i = 0; i < num_row; ++i)
-		for (size_t j = 0; j < num_column; ++j)
-			functions[i] += matrix.at(i, j) * vector_function[j];
-
-	return functions;
-}
 
 namespace ms
 {	

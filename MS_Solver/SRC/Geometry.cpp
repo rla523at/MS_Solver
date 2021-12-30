@@ -1,38 +1,39 @@
 #include "../INC/Geometry.h"
 
-Geometry::Geometry(std::unique_ptr<Reference_Geometry>&& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_points)
-	: reference_geometry_(std::move(reference_goemetry)),
+Geometry::Geometry(const Reference_Geometry& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_points)
+	: reference_geometry_(reference_goemetry),
 	  points_(std::move(consisting_points))
 {
-	this->space_dimension_ = this->check_space_dimension();
-	this->mapping_vf_ = this->make_mapping_function();
-	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
-	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
+	this->space_dimension_ = this->reference_geometry_.check_space_dimension(this->points_);
+	this->mapping_vf_ = this->reference_geometry_.make_mapping_function(this->points_);
+	this->normal_vf_ = this->reference_geometry_.make_normal_vector_function(this->mapping_vf_);
+	this->scale_f_ = this->reference_geometry_.scale_function(this->mapping_vf_);
 };
 
 void Geometry::change_points(std::vector<Euclidean_Vector>&& points)
 {
+	REQUIRE(this->space_dimension_ == this->reference_geometry_.check_space_dimension(points), "space dimension should be matched");
+
 	this->points_ = std::move(points);
-	this->mapping_vf_ = this->make_mapping_function();
-	this->normal_vf_ = this->reference_geometry_->normal_vector_function(this->mapping_vf_);
-	this->scale_f_ = this->reference_geometry_->scale_function(this->mapping_vf_);
+	this->mapping_vf_ = this->reference_geometry_.make_mapping_function(this->points_);
+	this->normal_vf_ = this->reference_geometry_.make_normal_vector_function(this->mapping_vf_);
+	this->scale_f_ = this->reference_geometry_.scale_function(this->mapping_vf_);
 }
 
 bool Geometry::operator==(const Geometry& other) const
 {
-	return this->points_ == other.points_ 
-		&& *this->reference_geometry_ == *other.reference_geometry_;
+	return this->points_ == other.points_ && this->reference_geometry_ == other.reference_geometry_;
 }
 
 Euclidean_Vector Geometry::center_point(void) const
 {
-	return this->mapping_vf_(this->reference_geometry_->center_point());
+	return this->mapping_vf_(this->reference_geometry_.center_point());
 }
 
 std::vector<Geometry> Geometry::face_geometries(void) const
 {
 	auto set_of_face_points = this->set_of_face_points();
-	auto face_reference_geometries = this->reference_geometry_->face_reference_geometries();
+	auto face_reference_geometries = this->reference_geometry_.face_reference_geometries();
 	const auto num_face = face_reference_geometries.size();
 
 	std::vector<Geometry> face_geometries;
@@ -40,7 +41,7 @@ std::vector<Geometry> Geometry::face_geometries(void) const
 
 	for (ushort i = 0; i < num_face; ++i)
 	{
-		face_geometries.push_back({ std::move(face_reference_geometries[i]), std::move(set_of_face_points[i]) });
+		face_geometries.push_back({ *face_reference_geometries[i], std::move(set_of_face_points[i]) });
 	}
 
 	return face_geometries;
@@ -48,17 +49,17 @@ std::vector<Geometry> Geometry::face_geometries(void) const
 
 ushort Geometry::num_post_nodes(const ushort post_order) const
 {
-	return this->reference_geometry_->num_post_nodes(post_order);
+	return this->reference_geometry_.num_post_nodes(post_order);
 }
 
 ushort Geometry::num_post_elements(const ushort post_order) const
 {
-	return this->reference_geometry_->num_post_elements(post_order);
+	return this->reference_geometry_.num_post_elements(post_order);
 }
 
 ushort Geometry::num_vertices(void) const
 {
-	return this->reference_geometry_->num_vertices();
+	return this->reference_geometry_.num_vertices();
 }
 
 Euclidean_Vector Geometry::normalized_normal_vector(const Euclidean_Vector& point) const
@@ -83,7 +84,7 @@ std::vector<Euclidean_Vector> Geometry::normalized_normal_vectors(const std::vec
 
 std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const
 {
-	const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
+	const auto& ref_post_points = this->reference_geometry_.get_post_points(post_order);
 	const auto num_post_points = ref_post_points.size();
 
 	std::vector<Euclidean_Vector> post_points;
@@ -100,7 +101,7 @@ std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) con
 std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_order) const
 {
 	const auto post_points = this->post_points(post_order);
-	const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+	const auto& ref_connectivities = this->reference_geometry_.get_connectivities(post_order);
 
 	const auto num_post_element = ref_connectivities.size();
 	std::vector<Euclidean_Vector> post_element_centers;
@@ -125,7 +126,7 @@ std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_o
 
 std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const
 {
-	const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+	const auto& ref_connectivities = this->reference_geometry_.get_connectivities(post_order);
 
 	const auto num_connectivity = ref_connectivities.size();
 	std::vector<std::vector<int>> connectivities(num_connectivity);
@@ -209,7 +210,7 @@ std::vector<double> Geometry::projected_volumes(void) const
 
 std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_face_points(void) const
 {
-	const auto set_of_face_point_index_sequences = this->reference_geometry_->set_of_face_node_index_sequences();
+	const auto set_of_face_point_index_sequences = this->reference_geometry_.set_of_face_node_index_sequences();
 	const auto num_face = set_of_face_point_index_sequences.size();
 
 	std::vector<std::vector<Euclidean_Vector>> set_of_face_points;
@@ -225,7 +226,7 @@ std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_face_points(void) co
 
 std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_sub_simplex_vertices(void) const
 {
-	const auto set_of_sub_simplex_vertex_index_sequences = this->reference_geometry_->set_of_sub_simplex_vertex_index_sequences();
+	const auto set_of_sub_simplex_vertex_index_sequences = this->reference_geometry_.set_of_sub_simplex_vertex_index_sequences();
 	const auto num_sub_simplex = set_of_sub_simplex_vertex_index_sequences.size();
 
 	std::vector<std::vector<Euclidean_Vector>> set_of_simplex_vertices;
@@ -241,7 +242,7 @@ std::vector<std::vector<Euclidean_Vector>> Geometry::set_of_sub_simplex_vertices
 
 std::vector<Geometry> Geometry::sub_simplex_geometries(void) const
 {
-	auto sub_simplex_reference_geometries = this->reference_geometry_->sub_simplex_reference_geometries();
+	auto sub_simplex_reference_geometries = this->reference_geometry_.sub_simplex_reference_geometries();
 	auto set_of_sub_simplex_vertices = this->set_of_sub_simplex_vertices();
 	
 	const auto num_sub_simplex = sub_simplex_reference_geometries.size();
@@ -251,7 +252,7 @@ std::vector<Geometry> Geometry::sub_simplex_geometries(void) const
 
 	for (ushort i = 0; i < num_sub_simplex; ++i)
 	{
-		sub_simplex_geometries.push_back({ std::move(sub_simplex_reference_geometries[i]), std::move(set_of_sub_simplex_vertices[i]) });
+		sub_simplex_geometries.push_back({ *sub_simplex_reference_geometries[i], std::move(set_of_sub_simplex_vertices[i]) });
 	}
 
 	return sub_simplex_geometries;
@@ -272,18 +273,18 @@ double Geometry::volume(void) const
 
 std::vector<Euclidean_Vector> Geometry::vertices(void) const
 {
-	const auto num_vertices = this->reference_geometry_->num_vertices();
+	const auto num_vertices = this->reference_geometry_.num_vertices();
 	return { this->points_.begin(), this->points_.begin() + num_vertices };
 }
 
 bool Geometry::is_line(void) const
 {
-	return this->reference_geometry_->is_line();
+	return this->reference_geometry_.is_line();
 }
 
 bool Geometry::is_simplex(void) const
 {
-	return this->reference_geometry_->is_simplex();
+	return this->reference_geometry_.is_simplex();
 }
 
 const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_degree) const
@@ -292,19 +293,6 @@ const Quadrature_Rule& Geometry::get_quadrature_rule(const ushort integrand_degr
 		this->degree_to_quadrature_rule_.emplace(integrand_degree, this->make_quadrature_rule(integrand_degree));
 
 	return this->degree_to_quadrature_rule_.at(integrand_degree);
-}
-
-ushort Geometry::check_space_dimension(void) const
-{
-	const auto expect_dimension = static_cast<ushort>(this->points_.front().size());
-
-	const auto num_nodes = this->points_.size();
-	for (ushort i = 1; i < num_nodes; ++i)
-	{
-		REQUIRE(expect_dimension == this->points_[i].size(), "every point should have same space dimension");
-	}
-
-	return expect_dimension;
 }
 
 Vector_Function<Polynomial> Geometry::initial_basis_vector_function(const ushort solution_order) const
@@ -431,33 +419,10 @@ bool Geometry::is_on_same_axis_plane(const Geometry& other) const
 	return false;
 }
 
-Vector_Function<Polynomial> Geometry::make_mapping_function(void) const
-{
-	//	X = CM
-	//	X : mapped node matrix			
-	//	C : mapping coefficient matrix	
-	//	M : mapping monomial matrix
-
-	const auto num_nodes = this->points_.size();
-	Matrix X(this->space_dimension_, num_nodes);
-	for (size_t j = 0; j < num_nodes; ++j)
-	{
-		X.change_column(j, this->points_[j]);
-	}
-
-	const auto& inv_M = this->reference_geometry_->get_inverse_mapping_monomial_matrix();
-
-	const auto C = X * inv_M;
-
-	const auto& monomial_vf = this->reference_geometry_->get_mapping_monomial_vector_function();
-
-	return C * monomial_vf;
-}
-
 Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) const
 {
-	const auto reference_integrand_order = integrand_order + this->reference_geometry_->scale_function_order();
-	const auto& ref_quadrature_rule = this->reference_geometry_->get_quadrature_rule(reference_integrand_order);
+	const auto reference_integrand_order = integrand_order + this->reference_geometry_.scale_function_order();
+	const auto& ref_quadrature_rule = this->reference_geometry_.get_quadrature_rule(reference_integrand_order);
 
 	const auto num_QP = ref_quadrature_rule.points.size();
 	std::vector<Euclidean_Vector> transformed_QPs;

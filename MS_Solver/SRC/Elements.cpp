@@ -11,7 +11,7 @@ bool Element::operator==(const Element& other) const
 {
 	return this->element_type_ == other.element_type_ &&
 		this->point_indexes_ == other.point_indexes_ &&
-		*this->reference_geometry_ == *other.reference_geometry_;
+		this->reference_geometry_ == other.reference_geometry_;
 }
 
 
@@ -140,7 +140,7 @@ std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const E
 
 std::vector<std::vector<uint>> Element::set_of_face_vertex_indexes(void) const
 {
-	const auto set_of_face_vnode_sequences = this->reference_geometry_->set_of_face_vertex_index_sequences();
+	const auto set_of_face_vnode_sequences = this->reference_geometry_.set_of_face_vertex_index_sequences();
 	const auto num_face = set_of_face_vnode_sequences.size();
 
 	std::vector<std::vector<uint>> set_of_face_vnode_indexes(num_face);
@@ -159,14 +159,14 @@ ElementType Element::type(void) const
 
 std::vector<uint> Element::vertex_point_indexes(void) const
 {
-	const auto num_vertices = this->reference_geometry_->num_vertices();
+	const auto num_vertices = this->reference_geometry_.num_vertices();
 
 	return { this->point_indexes_.begin(), this->point_indexes_.begin() + num_vertices };
 }
 
 bool Element::can_be_periodic_pair(const Element& other) const
 {
-	if (*this->reference_geometry_ != *other.reference_geometry_)
+	if (this->reference_geometry_ != other.reference_geometry_)
 		return false;
 
 	if (this->is_on_same_axis_plane(other))
@@ -216,7 +216,7 @@ bool Element::is_periodic_boundary(void) const
 
 std::vector<std::vector<uint>> Element::set_of_face_node_indexes(void) const 
 {
-	const auto set_of_face_node_index_sequences = this->reference_geometry_->set_of_face_node_index_sequences();
+	const auto set_of_face_node_index_sequences = this->reference_geometry_.set_of_face_node_index_sequences();
 	const auto num_face = set_of_face_node_index_sequences.size();
 
 	std::vector<std::vector<uint>> set_of_face_node_indexes(num_face);

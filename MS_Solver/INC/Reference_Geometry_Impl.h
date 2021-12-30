@@ -8,25 +8,25 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
+	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	ushort scale_function_order(void) const override;
 
 protected:
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
-	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
-	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
+	std::vector<Euclidean_Vector> make_mapping_points(void) const override;
+	std::vector<Euclidean_Vector> make_post_points(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
 };
@@ -38,25 +38,25 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
+	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
 
 protected:
-	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
+	std::vector<Euclidean_Vector> make_mapping_points(void) const override;
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
-	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
+	std::vector<Euclidean_Vector> make_post_points(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
 };
@@ -68,33 +68,47 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> face_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
-	Vector_Function<Polynomial> normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
+	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	bool is_simplex(void) const override;
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<std::unique_ptr<Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
+	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
 
 protected:
-	std::vector<Euclidean_Vector> make_mapping_nodes(void) const override;
+	std::vector<Euclidean_Vector> make_mapping_points(void) const override;
 	Quadrature_Rule make_quadrature_rule(const ushort integrand_order) const override;
-	std::vector<Euclidean_Vector> make_post_nodes(const ushort post_order) const override;
+	std::vector<Euclidean_Vector> make_post_points(const ushort post_order) const override;
 	std::vector<std::vector<uint>> make_connectivities(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_mapping_monomial_vector_function(void) const override;
 };
 
-class Reference_Geometry_Factory
+class Reference_Geometry_Container
 {
 public:
-	static std::unique_ptr<Reference_Geometry> make_unique(const Figure figure, const ushort order);
+	static const Reference_Geometry& get(const Figure figure, const ushort order);
+
+private:
+	static void store_line(const ushort order);
+	static void store_triangle(const ushort order);
+	static void store_quadrilateral(const ushort order);
+
+
+private:
+	Reference_Geometry_Container(void) = delete;
+
+private:
+	static inline std::map<ushort, Reference_Line> order_to_reference_line_;
+	static inline std::map<ushort, Reference_Triangle> order_to_reference_triangle_;
+	static inline std::map<ushort, Reference_Quadrilateral> order_to_reference_quadrilateral_;
 };
 
 
