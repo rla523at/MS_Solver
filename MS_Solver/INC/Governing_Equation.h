@@ -96,27 +96,39 @@ public:
     Burgers_3D(void);
 };
 
-class Euler_2D : public Governing_Equation
+class Fluid_Governing_Equation : public Governing_Equation
+{
+protected:
+    void check_non_physical_value(const double density, const double pressure) const
+    {
+        if (density < 0.0 || pressure < 0.0)
+        {
+            throw std::invalid_argument("density and pressure shold be positive");
+        }
+    }
+
+protected:
+    static constexpr double gamma_ = 1.4;
+};
+
+
+class Euler_2D : public Fluid_Governing_Equation
 {
 public:
-	Euler_2D(void);
+    Euler_2D(void);
 
 public://Query
     static constexpr ushort pressure_index(void) { return 6; };
 
     std::vector<std::vector<double>> calculate_cell_index_to_coordinate_projected_maximum_lambdas_table(const std::vector<Euclidean_Vector>& P0_solutions) const override;
     double calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& nomal_vector) const override;
-	Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
+    Matrix calculate_physical_flux(const Euclidean_Vector& solution) const override;
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
     void extend_to_solution(Euclidean_Vector& governing_equation_solution) const override;
     void extend_to_solution(const double* GE_solution_values, double* solution_values) const override;
-
-
-private:
-    static constexpr auto gamma_ = 1.4;
 };
 
-class Euler_3D : public Governing_Equation
+class Euler_3D : public Fluid_Governing_Equation
 {
 public:
     Euler_3D(void);
@@ -131,9 +143,6 @@ public://Query
     void extend_to_solution(const double* GE_solution_values, double* solution_values) const override;
 
     void calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vector& solution) const override;
-
-private:
-    static constexpr auto gamma_ = 1.4;
 };
 
 class Governing_Equation_Factory//static class

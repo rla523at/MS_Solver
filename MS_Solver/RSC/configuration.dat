@@ -2,10 +2,10 @@
 
 space_dimension				= 2
 
-governing_equation			= Linear_Advection		
+governing_equation			= Euler		
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Sine_Wave					
+Initial_condition			= Modified_Sod					
 							//Constant1, Sine_Wave
 							//Modified_Sod
 
@@ -24,7 +24,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/RQ10.msh, RSC/Grid/2D/RQ15.msh, RSC/Grid/2D/RQ20.msh, RSC/Grid/2D/RQ25.msh, RSC/Grid/2D/RQ30.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ grid_file_type				= Gmsh
 
 /////////////////////// Solver Option /////////////////////////////
 
-spatial_discrete_scheme		= DG_P2
+spatial_discrete_scheme		= DG_P4
 reconstruction_scheme		= No
 							//No, hMLP, hMLP_BD, Test
 
@@ -50,12 +50,12 @@ constant_dt					= 0.0001
 solve_end_controller_type	= Time						
 							//Time, Iter
 
-solve_end_time				= 2.0
+solve_end_time				= -1
 							//negative value refer to problem dependent end time
 
 solve_end_iter				= 1
 
-solve_post_controller_type	= Iter						
+solve_post_controller_type	= NotUse
 							//Time, Iter, NotUse
 
 solve_post_time_step		= 0.1
@@ -69,7 +69,7 @@ solve_post_iter_unit		= 100
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/OrderTest/After_RFT/
+post_base_path				= E:/CodeData/Result/RDD/PerformanceTest/Before/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -86,7 +86,7 @@ post_for_debug				= Yes
 
 /////////////////////////// ERROR /////////////////////////////////
 
-write_error_file			= Yes
+write_error_file			= No
 							//Yes, No
 
 Error_type					= Global

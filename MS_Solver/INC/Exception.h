@@ -33,7 +33,7 @@ namespace ms
 
 		return location_str;
 	}
-	inline void require(const bool requirement, const std::string_view message, const std::string& location_str)
+	inline void require(const bool requirement, const std::string_view message, const std::string& location_str = "")
 	{
 		if (!requirement)
 		{

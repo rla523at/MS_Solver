@@ -218,9 +218,7 @@ Matrix Euler_2D::calculate_physical_flux(const Euclidean_Vector& solution) const
 	const auto p = solution[6];
 
 	const auto rhouv = rhou * v;
-
-	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
-		
+	
 	return { this->num_equations_, this->space_dimension_,
 		{
 		rhou,				rhov,
@@ -242,8 +240,6 @@ void Euler_2D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Ve
 
 	const auto rhouv = rhou * v;
 
-	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
-
 	physical_flux.at(0, 0) = rhou;				physical_flux.at(0, 1) = rhov;
 	physical_flux.at(1, 0) = rhou*u + p;		physical_flux.at(1, 1) = rhouv;
 	physical_flux.at(2, 0) = rhouv;				physical_flux.at(2, 1) = rhov * v + p;
@@ -264,6 +260,8 @@ void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	const auto v = rhov * one_over_rho;
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+	
+	this->check_non_physical_value(rho, p);
 
 	GE_solution = { rho, rhou, rhov, rhoE, u, v, p, a };
 }
@@ -282,11 +280,7 @@ void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solu
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 
-	if (rho < 0.0 || p < 0.0)
-	{
-		throw std::runtime_error("should be positive");
-		return;
-	}
+	this->check_non_physical_value(rho, p);
 
 	solution_values[0] = rho;
 	solution_values[1] = rhou;
@@ -364,8 +358,6 @@ Matrix Euler_3D::calculate_physical_flux(const Euclidean_Vector& solution) const
 	const auto rhouw = rhou * w;
 	const auto rhovw = rhov * w;
 
-	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
-
 	return { this->num_equations_, this->space_dimension_,
 	{
 		rhou,				rhov,               rhow,
@@ -393,8 +385,6 @@ void Euler_3D::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Ve
 	const auto rhouw = rhou * w;
 	const auto rhovw = rhov * w;
 
-	REQUIRE(rho >= 0 && p >= 0, "density and pressure shold be positive");
-
 	physical_flux.at(0, 0) = rhou;				physical_flux.at(0, 1) = rhov;				physical_flux.at(0, 2) = rhow;
 	physical_flux.at(1, 0) = rhou * u + p;		physical_flux.at(1, 1) = rhouv;				physical_flux.at(1, 2) = rhouw;
 	physical_flux.at(2, 0) = rhouv;				physical_flux.at(2, 1) = rhov * v + p;		physical_flux.at(2, 2) = rhovw;
@@ -418,6 +408,8 @@ void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 
+	this->check_non_physical_value(rho, p);
+
 	GE_solution = { rho, rhou, rhov, rhow, rhoE, u, v, w, p, a };
 }
 
@@ -436,6 +428,8 @@ void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solu
 	const auto w = rhow * one_over_rho;
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
+
+	this->check_non_physical_value(rho, p);
 
 	solution_values[0] = rho;
 	solution_values[1] = rhou;
