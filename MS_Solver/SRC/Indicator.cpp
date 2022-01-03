@@ -542,6 +542,8 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 
 	for (uint i = 0; i < this->num_cells_; ++i)
 	{
+		double discontinuity_indicator_value = 0.0;
+
 		const auto cell_volume = this->cell_index_to_volume_table_[i];
 		const auto P0_value = discrete_solution.calculate_P0_nth_solution(i, this->criterion_solution_index_);
 
@@ -561,9 +563,14 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 			const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_solution_at_target_cell_QPs.data(), QWs_v.data());
 
 			//this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate - P0_value * cell_volume);
-			this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate / cell_volume - P0_value);
+			//this->discontinuity_factor_[i] += std::abs(P0_value_by_extrapolate / cell_volume - P0_value);
+			discontinuity_indicator_value += std::abs(P0_value_by_extrapolate / cell_volume - P0_value);
 		}
 
-		this->discontinuity_factor_[i] /= num_face_share_cells;
+		//this->discontinuity_factor_[i] /= num_face_share_cells;
+		discontinuity_indicator_value /= num_face_share_cells;
+		const auto characteristic_length = std::sqrt(this->cell_index_to_volume_table_[i]);
+
+		this->discontinuity_factor_[i] = std::log(discontinuity_indicator_value) / std::log(characteristic_length);
 	}
 }

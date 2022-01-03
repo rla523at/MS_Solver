@@ -261,9 +261,9 @@ void Euler_2D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 	
-	this->check_non_physical_value(rho, p);
-
 	GE_solution = { rho, rhou, rhov, rhoE, u, v, p, a };
+
+	this->check_non_physical_value(rho, p);
 }
 
 void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solution_values) const

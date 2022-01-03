@@ -33,7 +33,7 @@ private:
     MLP_u1_Limiter MLP_u1_limiter_;
 
     //test
-    Discontinuity_Indicator discontinuity_indicator_;
+    Discontinuity_Indicator discontinuity_indicator_;    
     //test
 
     //precalculate
@@ -43,6 +43,8 @@ private:
 class hMLP_BD_Reconstruction_DG : public Reconstruction_DG
 {
 public:
+    hMLP_BD_Reconstruction_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name);
+
     hMLP_BD_Reconstruction_DG(Simplex_Decomposed_MLP_Criterion&& stability_criterion, MLP_Indicator&& MLP_indicator, MLP_u1_Limiter&& MLP_u1_limiter,
         Subcell_Oscillation_Indicator&& boundary_indicator, Shock_Indicator&& shock_indicator,  const Grid& grid);
 
@@ -62,6 +64,10 @@ private:
     MLP_u1_Limiter MLP_u1_limiter_;
     Subcell_Oscillation_Indicator subcell_oscillation_indicator;
     Shock_Indicator shock_indicator_;
+
+    //test
+    Discontinuity_Indicator discontinuity_indicator_;
+    //
 
     //precalculate
     std::vector<std::vector<double>> set_of_P1_projected_criterion_values_at_verticies_;

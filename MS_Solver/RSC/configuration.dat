@@ -33,7 +33,7 @@ grid_file_type				= Gmsh
 /////////////////////// Solver Option /////////////////////////////
 
 spatial_discrete_scheme		= DG_P4
-reconstruction_scheme		= No
+reconstruction_scheme		= hMLP_BD
 							//No, hMLP, hMLP_BD, Test
 
 numerical_flux				= LLF
@@ -69,7 +69,7 @@ solve_post_iter_unit		= 100
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/PerformanceTest/Before/
+post_base_path				= E:/CodeData/Result/RDD/Discontinuity_Indicator_Test/exponent/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -102,7 +102,7 @@ z_periodic_length			= 1.0
 
 //////////////////////////// LOG //////////////////////////////////
 
-write_log_file				= Yes
+write_log_file				= No
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////

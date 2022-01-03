@@ -384,7 +384,26 @@ std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_post_e
 std::vector<Euclidean_Vector> Discrete_Solution_DG::calculate_solution_at_post_points(const uint cell_index) const 
 {
 	REQUIRE(!this->set_of_basis_post_points_m_.empty(), "basis value should be precalculated");
-	return this->calculate_solution_at_precalulated_points(cell_index, this->set_of_basis_post_points_m_[cell_index]);
+	//return this->calculate_solution_at_precalulated_points(cell_index, this->set_of_basis_post_points_m_[cell_index]);
+
+	const auto& basis_points_m = this->set_of_basis_post_points_m_[cell_index];
+
+	const auto num_points = basis_points_m.num_column();
+	const auto GE_solution_points_m = this->coefficient_matrix_contant_wrapper(cell_index) * basis_points_m;
+
+	std::vector<Euclidean_Vector> solution_at_points(num_points);
+
+	for (int i = 0; i < num_points; ++i)
+	{
+		solution_at_points[i] = GE_solution_points_m.column(i);
+		try
+		{
+			this->governing_equation_->extend_to_solution(solution_at_points[i]);
+		}
+		catch (...) {}
+	}
+
+	return solution_at_points;
 }
 
 
@@ -710,6 +729,29 @@ void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_V
 		this->governing_equation_->extend_to_solution(GE_soluion_.data(), solution_v_at_points_ptr[i].data());
 	}
 }
+
+//void Discrete_Solution_DG::calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points_ptr, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m)
+//{
+//	try
+//	{
+//		const auto num_points = basis_points_m.num_column();
+//		std::fill(this->solution_at_points_values_.begin(), this->solution_at_points_values_.begin() + this->num_equations_ * num_points, 0.0);
+//
+//		ms::gemm(this->coefficient_matrix_contant_wrapper(cell_index), basis_points_m, this->solution_at_points_values_.data());
+//		Constant_Matrix_Wrapper GE_solution_points_mcw(this->num_equations_, num_points, this->solution_at_points_values_.data());
+//
+//		for (int i = 0; i < num_points; ++i)
+//		{
+//			GE_solution_points_mcw.column(i, this->GE_soluion_.data());
+//			this->governing_equation_->extend_to_solution(GE_soluion_.data(), solution_v_at_points_ptr[i].data());
+//		}
+//	}
+//	catch (...)
+//	{
+//		this->scailing(cell_index, this->scaling_factor_);
+//		this->calculate_solution_at_precalulated_points(solution_v_at_points_ptr, cell_index, basis_points_m);
+//	}
+//}
 
 void Discrete_Solution_DG::calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const
 {

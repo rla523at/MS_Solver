@@ -156,7 +156,9 @@ public:
 public:
     void precalculate(const Discrete_Solution_DG& discrete_solution);
 
+    //test
     const std::vector<double>& get_discontinuity_factor(void) const { return this->discontinuity_factor_; };
+    //
 
 private:
     ushort criterion_solution_index_;
@@ -169,5 +171,6 @@ private:
 
     //for test
     std::vector<double> discontinuity_factor_;
+    //
 
 };
