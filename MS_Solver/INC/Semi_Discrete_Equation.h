@@ -4,7 +4,7 @@
 #include "Error.h"
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
-#include "Reconstruction.h"
+#include "Reconstruction_Impl.h"
 
 
 class Semi_Discrete_Equation

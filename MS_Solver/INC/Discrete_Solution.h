@@ -22,6 +22,7 @@ public://Query
 	Euclidean_Vector discrete_solution_vector(void) const;
 	Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const;
 	const std::vector<std::string>& get_solution_names(void) const;
+	uint num_cells(void) const { return this->num_cells_; };
 	ushort num_equations(void) const;
 	ushort num_solutions(void) const;
 	size_t num_total_values(void) const;

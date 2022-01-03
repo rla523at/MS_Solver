@@ -55,6 +55,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SRC\Indicator.cpp" />
+    <ClCompile Include="SRC\Indicating_Function.cpp" />
     <ClCompile Include="SRC\Initial_Condition.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -78,6 +79,7 @@
     <ClCompile Include="SRC\Post_Variable_Convertor.cpp" />
     <ClCompile Include="SRC\Profiler.cpp" />
     <ClCompile Include="SRC\Reconstruction.cpp" />
+    <ClCompile Include="SRC\Reconstruction_Impl.cpp" />
     <ClCompile Include="SRC\Reference_Geometry.cpp" />
     <ClCompile Include="SRC\Reference_Geometry_Impl.cpp" />
     <ClCompile Include="SRC\Residual.cpp">
@@ -92,6 +94,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="SRC\Stability_Criterion.cpp" />
+    <ClCompile Include="SRC\Stability_Criterion_Impl.cpp" />
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
@@ -139,6 +143,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Indicator.h" />
+    <ClInclude Include="INC\Indicating_Function.h" />
+    <ClInclude Include="INC\Indicator_Impl.h" />
     <ClInclude Include="INC\Initial_Condition.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -147,7 +153,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="INC\Limiter_Function.h" />
+    <ClInclude Include="INC\Limiter.h" />
+    <ClInclude Include="INC\Limiting_Function.h" />
+    <ClInclude Include="INC\Limiter_Impl.h" />
     <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\MBLAS.h" />
@@ -161,6 +169,7 @@
     <ClInclude Include="INC\Post_Variable_Convertor.h" />
     <ClInclude Include="INC\Profiler.h" />
     <ClInclude Include="INC\Reconstruction.h" />
+    <ClInclude Include="INC\Reconstruction_Impl.h" />
     <ClInclude Include="INC\Reference_Geometry.h" />
     <ClInclude Include="INC\Reference_Geometry_Impl.h" />
     <ClInclude Include="INC\Residual.h">
@@ -172,6 +181,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Solve_Controller.h" />
+    <ClInclude Include="INC\Stability_Criterion.h" />
+    <ClInclude Include="INC\Stability_Criterion_Impl.h" />
     <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />
     <ClInclude Include="INC\Time_Discrete_Scheme.h" />

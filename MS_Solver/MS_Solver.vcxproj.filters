@@ -43,6 +43,30 @@
     <Filter Include="소스 파일\Math">
       <UniqueIdentifier>{cabd3350-c930-4f5a-87f1-b57563f5bf60}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Solver\Reconstruction">
+      <UniqueIdentifier>{72a1ecd5-90b6-4bc0-afe2-95adc99799e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Solver\Reconstruction\Limiter">
+      <UniqueIdentifier>{348d11b5-80b2-4f11-ab1f-73b7ff37bdb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Solver\Reconstruction\Indicator">
+      <UniqueIdentifier>{1cf116c5-40d8-4952-9474-8ef958723294}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Solver\Reconstruction\Stability_Criterion">
+      <UniqueIdentifier>{ab47009c-b114-4583-b9f9-45e57b5e4022}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\Reconstruction">
+      <UniqueIdentifier>{4fc8ff9d-9852-40f3-9b34-65b5c03217f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\Reconstruction\Indicator">
+      <UniqueIdentifier>{948fdb39-512f-44ba-8ade-89d3e347a9f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\Reconstruction\Limiter">
+      <UniqueIdentifier>{3d728dc1-763b-4176-8f75-dff68b70b617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\Reconstruction\Stability_Criterion">
+      <UniqueIdentifier>{67f8c301-ff75-42b8-8063-6ae2086b59a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SRC\Text.cpp">
@@ -120,15 +144,6 @@
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Reconstruction.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Indicator.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Limiter_Function.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Reference_Geometry_Impl.cpp">
       <Filter>소스 파일\Geometry</Filter>
     </ClCompile>
@@ -158,6 +173,27 @@
     </ClCompile>
     <ClCompile Include="SRC\Error.cpp">
       <Filter>소스 파일\Solver</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Indicator.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Indicating_Function.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Stability_Criterion.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Stability_Criterion</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Stability_Criterion_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Stability_Criterion</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Limiter_Function.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Limiter</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Reconstruction.cpp">
+      <Filter>소스 파일\Solver\Reconstruction</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Reconstruction_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -236,15 +272,6 @@
     <ClInclude Include="INC\Time_Discrete_Scheme.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Reconstruction.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Indicator.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Limiter_Function.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Error.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
@@ -277,6 +304,36 @@
     </ClInclude>
     <ClInclude Include="INC\Exact_Solution.h">
       <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Limiter.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Limiter</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Limiter_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Limiter</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Limiting_Function.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Limiter</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicator.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicating_Function.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Stability_Criterion.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Stability_Criterion</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Stability_Criterion_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Stability_Criterion</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reconstruction.h">
+      <Filter>헤더 파일\Solver\Reconstruction</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Reconstruction_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

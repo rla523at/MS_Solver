@@ -47,7 +47,7 @@ Time_step_method			= CFL
 CFL_number					= 0.9
 constant_dt					= 0.0001
 
-solve_end_controller_type	= Iter						
+solve_end_controller_type	= Time						
 							//Time, Iter
 
 solve_end_time				= -1
@@ -55,11 +55,11 @@ solve_end_time				= -1
 
 solve_end_iter				= 100
 
-solve_post_controller_type	= NotUse
+solve_post_controller_type	= Iter
 							//Time, Iter, NotUse
 
 solve_post_time_step		= 0.1
-solve_post_iter_unit		= 100
+solve_post_iter_unit		= 1
 
 ///////////////////////////////////////////////////////////////////
 
@@ -69,7 +69,7 @@ solve_post_iter_unit		= 100
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/Post_Test/
+post_base_path				= E:/CodeData/Result/RDD/RFT_Reconstruction/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -78,7 +78,7 @@ post_point_location			= Node
 
 post_order					= 1
 
-post_for_debug				= Yes
+post_for_debug				= No
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ z_periodic_length			= 1.0
 
 //////////////////////////// LOG //////////////////////////////////
 
-write_log_file				= No
+write_log_file				= Yes
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////

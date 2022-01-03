@@ -28,7 +28,7 @@ public:
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
 	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const; //unnecessary
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
-	std::vector<ushort> cell_set_of_num_vertices(void) const;
+	std::vector<ushort> cell_index_to_num_vertices_table(void) const;
 	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_points(const ushort post_order) const;

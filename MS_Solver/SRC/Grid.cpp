@@ -282,17 +282,17 @@ std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const
 	return center_nodes;
 }
 
-std::vector<ushort> Grid::cell_set_of_num_vertices(void) const
+std::vector<ushort> Grid::cell_index_to_num_vertices_table(void) const
 {
 	const auto num_cell = this->cell_elements_.size();
-	std::vector<ushort> cell_set_of_num_vertices(num_cell);
+	std::vector<ushort> cell_index_to_num_vertices_table(num_cell);
 
 	for (uint i = 0; i < num_cell; ++i)
 	{
-		cell_set_of_num_vertices[i] = this->cell_elements_[i].num_vertices();
+		cell_index_to_num_vertices_table[i] = this->cell_elements_[i].num_vertices();
 	}
 
-	return cell_set_of_num_vertices;
+	return cell_index_to_num_vertices_table;
 
 }
 
