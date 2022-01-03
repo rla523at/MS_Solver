@@ -398,7 +398,7 @@ Shock_Indicator::Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discret
 
 	const auto num_cells = grid.num_cells();
 	this->average_pressures_.resize(num_cells);
-	this->are_shock_.resize(num_cells, false);
+	this->cell_index_to_is_shock_.resize(num_cells, false);
 	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
 }
 
@@ -409,11 +409,11 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 		return; //it means that governing equation is linear advection
 	}
 
-	std::fill(this->are_shock_.begin(), this->are_shock_.end(), false);
+	std::fill(this->cell_index_to_is_shock_.begin(), this->cell_index_to_is_shock_.end(), false);
 
 	const auto P0_solutions = discrete_solution.calculate_P0_solutions();
 
-	const auto num_cells = this->are_shock_.size();
+	const auto num_cells = this->cell_index_to_is_shock_.size();
 	for (uint i = 0; i < num_cells; ++i)
 	{
 		const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[i];
@@ -425,7 +425,7 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 
 			if (std::abs(my_value - other_value) >= 0.1 * (std::min)(my_value, other_value)) 
 			{
-				this->are_shock_[i] = true;
+				this->cell_index_to_is_shock_[i] = true;
 				break;
 			}
 		}
@@ -434,7 +434,7 @@ void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution
 
 bool Shock_Indicator::is_shock(const uint cell_index) const
 {
-	return this->are_shock_[cell_index];
+	return this->cell_index_to_is_shock_[cell_index];
 }
 
 void Shock_Indicator::set_criterion_solution_index(const ushort space_dimension, const std::string& governing_equation_name)

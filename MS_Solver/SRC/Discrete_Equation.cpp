@@ -5,15 +5,22 @@ void Discrete_Equation::solve(void)
     size_t current_iter = 0;
     Post_Processor::syncronize_solution_time(this->current_time_);
     Post_Processor::post_grid();
-    Post_Processor::record_solution();
-    Post_Processor::post_solution("initial");
+
+    if (this->post_controller_->is_post_initial_solution())
+    {
+        Post_Processor::record_solution();
+        Post_Processor::post_solution("initial");
+    }
 
     while (true)
     {
         if (this->end_controller_->is_time_to_end(current_iter, this->current_time_))
         {
-            Post_Processor::record_solution();
-            Post_Processor::post_solution("final");
+            if (this->post_controller_->is_post_final_solution())
+            {
+                Post_Processor::record_solution();
+                Post_Processor::post_solution("final");
+            }
             break;
         }
 

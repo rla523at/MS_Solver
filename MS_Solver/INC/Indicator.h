@@ -145,7 +145,7 @@ private:
 
     //construction optimization
     std::vector<double> average_pressures_;
-    std::vector<bool> are_shock_;    
+    std::vector<bool> cell_index_to_is_shock_;    
 };
 
 class Discontinuity_Indicator
