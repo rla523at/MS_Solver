@@ -138,7 +138,7 @@
     <ClCompile Include="SRC\Discrete_Equation.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Solve_Controller.cpp">
+    <ClCompile Include="SRC\Solve_Controller_Impl.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
@@ -174,7 +174,7 @@
     <ClCompile Include="SRC\Error.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Indicator.cpp">
+    <ClCompile Include="SRC\Indicator_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Indicating_Function.cpp">
@@ -194,6 +194,9 @@
     </ClCompile>
     <ClCompile Include="SRC\Reconstruction_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Limiter_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Limiter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,6 +337,9 @@
     </ClInclude>
     <ClInclude Include="INC\Reconstruction_Impl.h">
       <Filter>헤더 파일\Solver\Reconstruction</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Solve_Controller_Impl.h">
+      <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

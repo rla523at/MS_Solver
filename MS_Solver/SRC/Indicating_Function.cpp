@@ -27,30 +27,7 @@ void MLP_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
 	}
 }
 
-//void MLP_Indicator::set_precalculated_result(const std::vector<double>* set_of_P1_projected_value_at_vertices_ptr)
-//{
-//	this->set_of_P1_projected_value_at_vertices_ptr_ = set_of_P1_projected_value_at_vertices_ptr;
-//}
-//
-//cell_type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion& criterion) const
-//{
-//	discrete_solution.calculate_P1_projected_nth_solution_at_vertices(this->P1_projected_value_at_vertices_.data(), cell_index, this->criterion_equation_index_);
-//	discrete_solution.calculate_nth_solution_at_vertices(this->value_at_vertices_.data(), cell_index, this->criterion_equation_index_);
-//
-//	return this->check_cell_type(cell_index, this->P1_projected_value_at_vertices_.data(), this->value_at_vertices_.data(), criterion);
-//}
-//
-//cell_type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const Simplex_Decomposed_MLP_Criterion& criterion) const
-//{
-//	const auto criterion_equation_index = criterion.get_criterion_equation_index();
-//
-//	discrete_solution.calculate_simplex_P1_projected_nth_solution_at_vertices(this->P1_projected_value_at_vertices_.data(), cell_index, criterion_equation_index);
-//	discrete_solution.calculate_nth_solution_at_vertices(this->value_at_vertices_.data(), cell_index, criterion_equation_index);
-//
-//	return this->check_cell_type(cell_index, this->P1_projected_value_at_vertices_.data(), this->value_at_vertices_.data(), criterion);
-//}
-
-cell_type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
+Cell_Type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
 {
 	const auto criterion_equation_index = criterion.get_criterion_equation_index();
 
@@ -59,7 +36,7 @@ cell_type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution,
 	return this->check_cell_type(cell_index, this->value_at_vertices_.data(), criterion);
 }
 
-cell_type MLP_Indicator::check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const
+Cell_Type MLP_Indicator::check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const
 {
 	const auto& P1_projected_value_at_vertices = this->cell_index_to_P1_projected_value_at_vertices_table_[cell_index]; 
 	const auto& P0_value_at_vertices = criterion.get_P0_value_at_vertices(cell_index);
@@ -86,18 +63,18 @@ cell_type MLP_Indicator::check_cell_type(const uint cell_index, const double* va
 			}
 			else
 			{
-				return cell_type::trouble;
+				return Cell_Type::trouble;
 			}
 		}
 	}
 
 	if (has_smooth_extrma)
 	{
-		return cell_type::smooth_extrema;
+		return Cell_Type::smooth_extrema;
 	}
 	else
 	{
-		return cell_type::normal;
+		return Cell_Type::normal;
 	}
 }
 

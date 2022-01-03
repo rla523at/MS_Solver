@@ -8,13 +8,12 @@ public:
 
 public://Command
     void precalculate(const Discrete_Solution_DG& discrete_solution);
-    //void set_precalculated_result(const std::vector<double>* set_of_P1_projected_value_at_vertices_ptr);
 
 public://Query
-    cell_type indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const;
+    Cell_Type indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const;
 
 private:
-    cell_type check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const;
+    Cell_Type check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const;
     bool is_constant(const double value, const double P0_value, const uint cell_index) const;
     bool is_satisfy_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max) const;
     bool is_smooth_extrema(const double value, const double higher_mode_value, const double P1_mode_value, const double allowable_min, const double allowable_max) const;

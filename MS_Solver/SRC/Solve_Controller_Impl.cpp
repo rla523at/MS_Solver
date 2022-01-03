@@ -1,4 +1,4 @@
-#include "../INC/Solve_Controller.h"
+#include "../INC/Solve_Controller_Impl.h"
 
 bool Solve_End_Controller_By_Time::is_need_to_controll_time_step(const double current_time, const double time_step) const
 {
@@ -45,16 +45,6 @@ std::string Solve_End_Controller_By_Iter::progress_percentage_str(const size_t c
     std::ostringstream oss;
     oss << std::setprecision(2) << std::fixed << current_iter * 100 / this->end_iter_ << "%";
     return oss.str();
-}
-
-bool Solve_Post_Controller_Not_Use::is_need_to_controll_time_step(const double current_time, const double time_step) const
-{
-    return false;
-}
-
-bool Solve_Post_Controller_Not_Use::is_time_to_post(const size_t current_iter, const double current_time) const
-{
-    return false;
 }
 
 Solve_Post_Controller_By_Time::Solve_Post_Controller_By_Time(const double post_time_step)
@@ -161,6 +151,10 @@ std::unique_ptr<Solve_Post_Controller> Solve_Post_Controller_Factory::make_uniqu
     if (ms::contains_icase(type_name, "NotUse"))
     {
         return std::make_unique<Solve_Post_Controller_Not_Use>();
+    }
+    else if (ms::contains_icase(type_name, "Initial_Final"))
+    {
+        return std::make_unique<Solve_Post_Controller_Inital_Final>();
     }
     else if (ms::contains_icase(type_name, "Time"))
     {

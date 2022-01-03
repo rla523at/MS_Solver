@@ -1,6 +1,7 @@
 #include "../INC/Configuration.h"
 #include "../INC/Discrete_Equation.h"
 #include "../INC/Grid_File_Convertor.h"
+#include "../INC/Solve_Controller_Impl.h"
 
 int main(void) 
 {	

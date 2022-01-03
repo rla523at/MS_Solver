@@ -26,17 +26,6 @@ std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const 
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
-
-		//Simplex_Decomposed_MLP_Criterion simplex_decomposed_MLP_criterion(grid, discrete_solution);
-		//MLP_Indicator MLP_indicator(grid, discrete_solution);
-		//MLP_u1_Limiter MLP_u1_limiter;
-		//Subcell_Oscillation_Indicator subcell_oscillation_indicator(grid, discrete_solution);
-		//Shock_Indicator shock_indicator(grid, discrete_solution, governing_equation_name);
-
-		//return std::make_unique<hMLP_BD_Reconstruction_DG>(std::move(simplex_decomposed_MLP_criterion), std::move(MLP_indicator),
-		//	std::move(MLP_u1_limiter), std::move(subcell_oscillation_indicator), std::move(shock_indicator), grid);
-
-		//return std::make_unique<hMLP_BD_Reconstruction_DG>(grid, discrete_solution, governing_equation_name);
 	}
 	//else if (ms::compare_icase(reconstruction_scheme, "Test"))
 	//{

@@ -2,7 +2,7 @@
 
 space_dimension				= 2
 
-governing_equation			= Euler		
+governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
 Initial_condition			= Modified_Sod					
@@ -25,6 +25,7 @@ z_wave_length				= 1.0
 /////////////////////// Grid Option ///////////////////////////////
 
 grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
+//grid_file_paths				= RSC/Grid/2D/RQ40.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -51,12 +52,12 @@ solve_end_controller_type	= Time
 							//Time, Iter
 
 solve_end_time				= -1
-							//negative value refer to problem dependent end time
+							//negative value ==> problem dependent end time
 
 solve_end_iter				= 100
 
-solve_post_controller_type	= Iter
-							//Time, Iter, NotUse
+solve_post_controller_type	= Initial_Final
+							//Time, Iter, NotUse, Initial_Final
 
 solve_post_time_step		= 0.1
 solve_post_iter_unit		= 1
@@ -69,7 +70,7 @@ solve_post_iter_unit		= 1
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/RFT_Reconstruction/
+post_base_path				= E:/CodeData/Result/RDD/RFT_Reconstruction/After/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
