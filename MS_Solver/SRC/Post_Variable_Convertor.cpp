@@ -14,30 +14,33 @@ const std::vector<std::string>& Post_Variable_Convertor::get_solution_names(void
 Node_Base_Convertor::Node_Base_Convertor(const Grid& grid, const ushort post_order, Discrete_Solution& discrete_solution)
 	: Post_Variable_Convertor(grid, post_order, discrete_solution) 
 {
-	this->set_of_num_post_points_ = grid.cell_set_of_num_post_points(post_order);
+	this->cell_index_to_num_post_points_table_ = grid.cell_set_of_num_post_points(post_order);
 
 	for (uint i = 0; i < this->num_cells_; ++i)
 	{
-		this->num_post_points_ += this->set_of_num_post_points_[i];
+		this->num_post_points_ += this->cell_index_to_num_post_points_table_[i];
 	}
 
 	discrete_solution.precalculate_post_points(grid.cell_set_of_post_points(post_order));
+
+	//construction optimization
+	this->solution_at_post_points_.fill(Euclidean_Vector(this->discrete_solution_.num_solutions()));
 };
 
-std::vector<double> Node_Base_Convertor::convert_values(const std::vector<double>& values) const
+std::vector<double> Node_Base_Convertor::convert_values(const std::vector<double>& cell_index_to_value) const
 {
-	REQUIRE(values.size() == this->num_cells_, "number of copy_values should be same with number of cells");
+	REQUIRE(cell_index_to_value.size() == this->num_cells_, "number of copy_values should be same with number of cells");
 
 	std::vector<double> post_variable_values(this->num_post_points_);
 
 	size_t index = 0;
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		const auto num_post_elements = this->set_of_num_post_points_[cell_index];
+		const auto num_post_elements = this->cell_index_to_num_post_points_table_[cell_index];
 
 		for (int j = 0; j < num_post_elements; ++j)
 		{
-			post_variable_values[index++] = values[cell_index];
+			post_variable_values[index++] = cell_index_to_value[cell_index];
 		}
 	}
 
@@ -57,11 +60,11 @@ std::vector<std::vector<double>> Node_Base_Convertor::calculate_set_of_post_poin
 
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		const auto solution_at_post_points = this->discrete_solution_.calculate_solution_at_post_points(cell_index);
+		this->discrete_solution_.calculate_solution_at_post_points(this->solution_at_post_points_.data(), cell_index);
 
-		for (int j = 0; j < this->set_of_num_post_points_[cell_index]; ++j)
+		for (ushort j = 0; j < this->cell_index_to_num_post_points_table_[cell_index]; ++j)
 		{
-			const auto& solution = solution_at_post_points[j];
+			const auto& solution = this->solution_at_post_points_[j];
 
 			for (int i = 0; i < num_solutions; ++i)
 			{

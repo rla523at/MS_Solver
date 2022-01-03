@@ -101,8 +101,19 @@ public:
 	Binary_Writer(const std::string_view file_path, std::ios_base::openmode mode);
 
 public://Command
-	template <typename T>	Binary_Writer& operator<<(const T value);
-	template <typename T>	Binary_Writer& operator<<(const std::vector<T>& values);
+	template <typename T>	Binary_Writer& operator<<(const T value) 
+	{
+		this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+		return *this;
+	};
+	template <typename T>	Binary_Writer& operator<<(const std::vector<T>& values) 
+	{
+		for (const auto value : values)
+		{
+			this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
+		}
+		return *this;
+	};
 	template <>		Binary_Writer& operator<<(const char* value);
 	template <>		Binary_Writer& operator<<(const std::string& str);
 
@@ -112,17 +123,6 @@ private:
 
 std::ostream& operator<<(std::ostream& ostream, const Sentence& sentece);
 std::ostream& operator<<(std::ostream& ostream, const Text& text);
-template <typename T>	Binary_Writer& Binary_Writer::operator<<(const T value) 
-{
-	this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
-	return *this;
-}
-template <typename T>	Binary_Writer& Binary_Writer::operator<<(const std::vector<T>& values) 
-{
-	for (const auto value : values)
-		this->binary_file_stream_.write(reinterpret_cast<const char*>(&value), sizeof(T));
-	return *this;
-}
 
 namespace ms
 {

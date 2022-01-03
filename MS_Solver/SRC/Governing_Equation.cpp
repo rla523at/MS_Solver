@@ -280,8 +280,6 @@ void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solu
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 
-	this->check_non_physical_value(rho, p);
-
 	solution_values[0] = rho;
 	solution_values[1] = rhou;
 	solution_values[2] = rhov;
@@ -290,6 +288,8 @@ void Euler_2D::extend_to_solution(const double* GE_solution_values, double* solu
 	solution_values[5] = v;
 	solution_values[6] = p;
 	solution_values[7] = a;
+
+	this->check_non_physical_value(rho, p);
 }
 
 Euler_3D::Euler_3D(void)
@@ -408,9 +408,9 @@ void Euler_3D::extend_to_solution(Euclidean_Vector& GE_solution) const
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 
-	this->check_non_physical_value(rho, p);
-
 	GE_solution = { rho, rhou, rhov, rhow, rhoE, u, v, w, p, a };
+
+	this->check_non_physical_value(rho, p);
 }
 
 void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solution_values) const
@@ -429,8 +429,6 @@ void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solu
 	const auto p = (rhoE - 0.5 * (rhou * u + rhov * v + rhow * w)) * (this->gamma_ - 1);
 	const auto a = std::sqrt(this->gamma_ * p * one_over_rho);
 
-	this->check_non_physical_value(rho, p);
-
 	solution_values[0] = rho;
 	solution_values[1] = rhou;
 	solution_values[2] = rhov;
@@ -441,6 +439,8 @@ void Euler_3D::extend_to_solution(const double* GE_solution_values, double* solu
 	solution_values[7] = w;
 	solution_values[8] = p;
 	solution_values[9] = a;
+
+	this->check_non_physical_value(rho, p);
 }
 
 

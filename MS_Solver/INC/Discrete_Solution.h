@@ -10,13 +10,14 @@ public:
 
 public://Command
 	virtual void precalculate_post_elements(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_element_center_points) abstract;
-	virtual void precalculate_post_points(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) abstract;
+	virtual void precalculate_post_points(const std::vector<std::vector<Euclidean_Vector>>& set_of_post_points) abstract;	
 
 	Euclidean_Vector_Wrapper discrete_solution_vector_wrapper(void);
 
 public://Query
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const abstract;
 	virtual std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const abstract;
+	virtual void calculate_solution_at_post_points(Euclidean_Vector* solution_at_post_points, const uint cell_index) const abstract;
 
 	Euclidean_Vector discrete_solution_vector(void) const;
 	Constant_Euclidean_Vector_Wrapper discrete_solution_constant_vector_wrapper(void) const;
@@ -76,6 +77,7 @@ public://Command
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
+	void calculate_solution_at_post_points(Euclidean_Vector* solution_at_post_points, const uint cell_index) const override;
 
 	Euclidean_Vector calculate_basis_point_v(const uint cell_index, const Euclidean_Vector& point) const;
 	Matrix_Function<Polynomial> calculate_tranposed_gradient_basis(const uint cell_index) const;
@@ -131,9 +133,11 @@ private:
 	Matrix_Wrapper coefficient_matrix_wrapper(const uint cell_index);
 	double P0_nth_coefficient(const uint cell_index, const ushort equation_index) const;
 	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
-	Constant_Matrix_Wrapper coefficient_matrix_contant_wrapper(const uint cell_index) const;
+	Constant_Matrix_Wrapper coefficient_constant_matrix_wrapper(const uint cell_index) const;
 	Constant_Matrix_Wrapper nth_coefficient_matrix_contant_wrapper(const uint cell_index, const ushort equation_index) const;
 	Constant_Matrix_Wrapper Pn_projected_mth_coefficient_contant_matrix_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const;
+
+	Constant_Matrix_Wrapper calculate_GE_solution_points_constant_matrix_wrapper(const uint cell_index, const Constant_Matrix_Wrapper & basis_points_m) const;
 
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	std::vector<double> calculate_nth_solution_at_precalulated_points(const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
@@ -157,7 +161,7 @@ private:
 	std::array<ushort, max_solution_degree> degree_to_num_basis_table = { 0 };
 
 	std::vector<Matrix> set_of_basis_post_element_center_points_m_;
-	std::vector<Matrix> set_of_basis_post_points_m_;
+	std::vector<Matrix> cell_index_to_basis_post_points_m_table_;
 
 	std::vector<Matrix> set_of_bdry_basis_QPs_m_;		//boudnary quadrature point basis value matrix
 	std::vector<double> cell_P0_basis_values_;
