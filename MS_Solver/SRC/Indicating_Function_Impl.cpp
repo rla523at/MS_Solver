@@ -24,7 +24,7 @@ void Heuristic_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG&
 };
 
 Extrapolation_Discontinuity_Indicator::Extrapolation_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
-    : Discontinuity_Indicator(grid, criterion_solution_index)
+    : Discontinuity_Indicator_Base(grid, criterion_solution_index)
 {
     this->cell_index_to_has_discontinuity_table_.resize(this->num_cells_, false);
 

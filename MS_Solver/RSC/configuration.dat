@@ -25,7 +25,6 @@ z_wave_length				= 1.0
 /////////////////////// Grid Option ///////////////////////////////
 
 grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
-//grid_file_paths				= RSC/Grid/2D/RQ40.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -35,7 +34,7 @@ grid_file_type				= Gmsh
 
 spatial_discrete_scheme		= DG_P2
 reconstruction_scheme		= hMLP_BD
-							//No, hMLP, hMLP_BD, Test
+							//No, hMLP, hMLP_BD, Improved_hMLP_BD1, Improved_hMLP_BD2
 
 numerical_flux				= LLF
 

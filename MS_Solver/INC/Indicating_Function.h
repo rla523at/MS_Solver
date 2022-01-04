@@ -62,24 +62,9 @@ private:
 
 class Discontinuity_Indicator
 {
-public:
-    Discontinuity_Indicator(const Grid& grid, const ushort criterion_solution_index)
-        : criterion_solution_index_(criterion_solution_index)
-        , num_cells_(grid.num_cells())
-        , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
-        , cell_index_to_has_discontinuity_table_(this->num_cells_, false) {};
-
 public://Command
     virtual void precalculate(const Discrete_Solution_DG& discrete_solution) abstract;
 
 public://Query
-    bool has_discontinuity(const uint cell_index) const { return this->cell_index_to_has_discontinuity_table_[cell_index]; };
-
-protected:
-    ushort criterion_solution_index_;
-    uint num_cells_;
-
-    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
-    std::vector<bool> cell_index_to_has_discontinuity_table_;
+    virtual bool has_discontinuity(const uint cell_index) const abstract;
 };
-

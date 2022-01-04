@@ -8,7 +8,7 @@ Cell_Type hMLP_BD_Indicator::indicate(const Discrete_Solution_DG& discrete_solut
     {
     case Cell_Type::normal:
     {
-        if (this->subcell_oscillation_indicator_.is_typeI_cell(cell_index) && shock_indicator_->has_discontinuity(cell_index))
+        if (this->subcell_oscillation_indicator_.is_typeI_cell(cell_index) && this->shock_indicator_->has_discontinuity(cell_index))
         {
             Cell_Type = Cell_Type::typeI;
         }
@@ -16,7 +16,7 @@ Cell_Type hMLP_BD_Indicator::indicate(const Discrete_Solution_DG& discrete_solut
     }
     case Cell_Type::smooth_extrema:
     {
-        if (this->subcell_oscillation_indicator_.is_typeII_cell(cell_index))
+        if (this->subcell_oscillation_indicator_.is_typeII_cell(cell_index) && this->contact_indicator_->has_discontinuity(cell_index))
         {
             Cell_Type = Cell_Type::typeII;
         }

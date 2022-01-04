@@ -1,21 +1,49 @@
 #pragma once
 #include "Indicating_Function.h"
 
-class Not_Use_Discontinuity_Indicator : public Discontinuity_Indicator
+class Always_False_Discontinuity_Indicator : public Discontinuity_Indicator
 {
 public:
-    Not_Use_Discontinuity_Indicator(const Grid& grid)
-        : Discontinuity_Indicator(grid, NULL) {};
+    void precalculate(const Discrete_Solution_DG& discrete_solution) override {};
 
 public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override {};
+    bool has_discontinuity(const uint cell_index) const override { return false; };
 };
 
-class Heuristic_Discontinuity_Indicator : public Discontinuity_Indicator
+class Always_True_Discontinuity_Indicator : public Discontinuity_Indicator
+{
+public:
+    void precalculate(const Discrete_Solution_DG& discrete_solution) override {};
+
+public:
+    bool has_discontinuity(const uint cell_index) const override { return true; };
+};
+
+class Discontinuity_Indicator_Base : public Discontinuity_Indicator
+{
+public:
+    Discontinuity_Indicator_Base(const Grid& grid, const ushort criterion_solution_index)
+        : criterion_solution_index_(criterion_solution_index)
+        , num_cells_(grid.num_cells())
+        , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
+        , cell_index_to_has_discontinuity_table_(this->num_cells_, false) {};
+
+public://Query
+    bool has_discontinuity(const uint cell_index) const override { return this->cell_index_to_has_discontinuity_table_[cell_index]; };
+
+protected:
+    ushort criterion_solution_index_;
+    uint num_cells_;
+
+    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
+    std::vector<bool> cell_index_to_has_discontinuity_table_;
+};
+
+class Heuristic_Discontinuity_Indicator : public Discontinuity_Indicator_Base
 {
 public:
     Heuristic_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
-        : Discontinuity_Indicator(grid, criterion_solution_index) 
+        : Discontinuity_Indicator_Base(grid, criterion_solution_index)
     {
         //for precalculation
         discrete_solution.precalculate_cell_P0_basis_values();
@@ -25,7 +53,7 @@ public://Command
     void precalculate(const Discrete_Solution_DG& discrete_solution) override;
 };
 
-class Extrapolation_Discontinuity_Indicator : public Discontinuity_Indicator
+class Extrapolation_Discontinuity_Indicator : public Discontinuity_Indicator_Base
 {
 public:
     Extrapolation_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
@@ -44,9 +72,13 @@ class Discontinuity_Indicator_Factory
 public:
     static std::unique_ptr<Discontinuity_Indicator> make_unique(const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     {
-        if (ms::compare_icase(type_name, "Not_Use"))
+        if (ms::compare_icase(type_name, "Always_Flase"))
         {
-            return std::make_unique<Not_Use_Discontinuity_Indicator>(grid);
+            return std::make_unique<Always_False_Discontinuity_Indicator>();
+        }
+        else if (ms::compare_icase(type_name, "Always_True"))
+        {
+            return std::make_unique<Always_True_Discontinuity_Indicator>();
         }
         else if (ms::compare_icase(type_name, "Heuristic"))
         {
@@ -62,6 +94,16 @@ public:
         }
     }
 
+    static std::unique_ptr<Discontinuity_Indicator> make_always_false(void)
+    {
+        return std::make_unique<Always_False_Discontinuity_Indicator>();
+    }
+
+    static std::unique_ptr<Discontinuity_Indicator> make_always_true(void)
+    {
+        return std::make_unique<Always_True_Discontinuity_Indicator>();
+    }
+
 private:
     Discontinuity_Indicator_Factory(void) = delete;
 };
@@ -69,33 +111,38 @@ private:
 class Shock_Indicator_Factory
 {
 public:
-    static std::unique_ptr<Discontinuity_Indicator> make_unique(const std::string& type_name, const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
+    static std::unique_ptr<Discontinuity_Indicator> make_unique(const std::string& governing_equation_name, const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
     {
         if (ms::compare_icase(governing_equation_name, "Linear_Advection"))
         {
-            return Discontinuity_Indicator_Factory::make_unique("Not_Use", grid, discrete_solution, NULL);
+            return Discontinuity_Indicator_Factory::make_always_false();
         }
-
-        auto solution_index = 0;
-        if (ms::compare_icase(governing_equation_name, "Euler"))
+        else if (ms::compare_icase(governing_equation_name, "Burgers"))
+        {
+            constexpr auto criterion_solution_index = 0;
+            return Discontinuity_Indicator_Factory::make_unique(type_name, grid, discrete_solution, criterion_solution_index);
+        }
+        else if (ms::compare_icase(governing_equation_name, "Euler"))
         {
             const auto space_dimension = grid.space_dimension();
 
             if (space_dimension == 2)
             {
-                solution_index = Euler_2D::pressure_index();
+                return Discontinuity_Indicator_Factory::make_unique(type_name, grid, discrete_solution, Euler_2D::pressure_index());
             }
             else if (space_dimension == 3)
             {
-                solution_index = Euler_3D::pressure_index();
+                return Discontinuity_Indicator_Factory::make_unique(type_name, grid, discrete_solution, Euler_3D::pressure_index());
             }
             else
             {
                 EXCEPTION("not supported space_dimension");
             }
+        }    
+        else
+        {
+            EXCEPTION("not supported governing equation");
         }
-
-        return Discontinuity_Indicator_Factory::make_unique(type_name, grid, discrete_solution, solution_index);
     }
 
 private:
@@ -107,33 +154,10 @@ class Contact_Indicator_Factory
 public:
     static std::unique_ptr<Discontinuity_Indicator> make_unique(const std::string& type_name, const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
     {
-        if (ms::compare_icase(governing_equation_name, "Linear_Advection") || ms::compare_icase(governing_equation_name, "Burgers"))
-        {
-            return Discontinuity_Indicator_Factory::make_unique("Not_Use", grid, discrete_solution, NULL);
-        }
-
-        auto solution_index = 0;
-        if (ms::compare_icase(governing_equation_name, "Euler"))
-        {
-            const auto space_dimension = grid.space_dimension();
-
-            if (space_dimension == 2)
-            {
-                solution_index = Euler_2D::pressure_index();
-            }
-            else if (space_dimension == 3)
-            {
-                solution_index = Euler_3D::pressure_index();
-            }
-            else
-            {
-                EXCEPTION("not supported space_dimension");
-            }
-        }
-
+        constexpr auto solution_index = 0;
         return Discontinuity_Indicator_Factory::make_unique(type_name, grid, discrete_solution, solution_index);
     }
 
 private:
-    Shock_Indicator_Factory(void) = delete;
+    Contact_Indicator_Factory(void) = delete;
 };
