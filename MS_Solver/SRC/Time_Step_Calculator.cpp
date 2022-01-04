@@ -3,7 +3,7 @@
 CFL::CFL(const double cfl, const Grid& grid)
     :cfl_(cfl)
 {
-    this->cell_index_to_volume_table_ = grid.cell_index_to_volume_table();
+    this->cell_index_to_volume_reciprocal_table_ = grid.cell_index_to_volume_table();
     this->cell_index_to_projected_volumes_table_ = grid.cell_index_to_projected_volumes_table();
 }
 
@@ -27,7 +27,7 @@ double CFL::calculate(const std::vector<Euclidean_Vector>& P0_solutions, const G
             radii += projected_volumes[j] * coordinate_projected_maximum_lambdas[j];
         }
 
-        allowable_local_time_steps[cell_index] = this->cfl_ * this->cell_index_to_volume_table_[cell_index] / radii;
+        allowable_local_time_steps[cell_index] = this->cfl_ * this->cell_index_to_volume_reciprocal_table_[cell_index] / radii;
     }
 
     return *std::min_element(allowable_local_time_steps.begin(), allowable_local_time_steps.end());

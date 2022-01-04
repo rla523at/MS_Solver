@@ -41,6 +41,7 @@ public:
 	std::vector<Geometry> cell_sub_simplex_geometries(const uint cell_index) const;
 	std::vector<double> cell_index_to_volume_table(void) const;
 	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;
+	double cell_volume(const uint cell_index) const { return this->cell_elements_[cell_index].volume(); };
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 
 	size_t num_boundaries(void) const;

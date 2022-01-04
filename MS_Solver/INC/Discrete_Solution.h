@@ -119,7 +119,7 @@ public://Query
 	void calculate_nth_solution_at_infc_ncs_jump_QPs(double* nth_solution_at_infc_ncs_jump_QPs, const uint infc_index, const uint nc_index, const ushort equation_index) const;
 
 	//for discontinuity indicator	
-	void calculate_nth_solution_at_target_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint target_cell_index, const uint my_cell_index, const ushort equation_index) const;
+	void calculate_nth_extrapolated_solution_at_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint face_share_cell_index, const uint target_cell_index, const ushort solution_index) const;
 
 private:	
 	std::vector<double> calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
@@ -176,7 +176,7 @@ private:
 	std::vector<Matrix> set_of_infc_basis_ocs_jump_QPs_m_;	//inner face owner cell side jump quadratue point basis value matrix
 	std::vector<Matrix> set_of_infc_basis_ncs_jump_QPs_m_;	//inner face neighbor cell side jump quadratue point basis value matrix
 
-	std::vector<std::map<uint, Matrix>> set_of_cell_index_to_target_cell_basis_QPs_m_;
+	std::vector<std::map<uint, Matrix>> cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_;
 
 	//optimize construction
 	static constexpr ushort max_num_equation = 5;

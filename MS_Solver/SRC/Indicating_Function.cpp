@@ -4,7 +4,7 @@ MLP_Indicator::MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_so
 	:criterion_equation_index_(criterion_index)
 {
 	this->num_cells_ = grid.num_cells();
-	this->cell_index_to_volume_table_ = grid.cell_index_to_volume_table();
+	this->cell_index_to_volume_reciprocal_table_ = grid.cell_index_to_volume_table();
 	this->cell_index_to_num_vertices_table_ = grid.cell_index_to_num_vertices_table();
 	this->cell_index_to_P1_projected_value_at_vertices_table_.resize(this->num_cells_);
 
@@ -80,7 +80,7 @@ Cell_Type MLP_Indicator::check_cell_type(const uint cell_index, const double* va
 
 bool MLP_Indicator::is_constant(const double value, const double P0_value, const uint cell_index) const
 {
-	const auto constant_criterion = (std::max)(1.0E-3 * std::abs(P0_value), this->cell_index_to_volume_table_[cell_index]);
+	const auto constant_criterion = (std::max)(1.0E-3 * std::abs(P0_value), this->cell_index_to_volume_reciprocal_table_[cell_index]);
 	return std::abs(value - P0_value) <= constant_criterion;
 }
 
@@ -199,79 +199,79 @@ bool Subcell_Oscillation_Indicator::is_typeII_cell(const uint cell_index) const
 	return typeII_threshold_number <= this->set_of_num_troubled_boundaries_[cell_index];
 }
 
-Shock_Indicator::Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name)
-{
-	this->set_criterion_solution_index(grid.space_dimension(), governing_equation_name);
-
-	const auto num_cells = grid.num_cells();
-	this->average_pressures_.resize(num_cells);
-	this->cell_index_to_is_shock_.resize(num_cells, false);
-	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
-}
-
-void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
-{
-	if (this->criterion_solution_index_ < 0)
-	{
-		return; //it means that governing equation is linear advection
-	}
-
-	std::fill(this->cell_index_to_is_shock_.begin(), this->cell_index_to_is_shock_.end(), false);
-
-	const auto P0_solutions = discrete_solution.calculate_P0_solutions();
-
-	const auto num_cells = this->cell_index_to_is_shock_.size();
-	for (uint i = 0; i < num_cells; ++i)
-	{
-		const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[i];
-
-		const auto my_value = P0_solutions[i][this->criterion_solution_index_];
-		for (const auto face_share_cell_index : face_share_cell_indexes)
-		{
-			const auto other_value = P0_solutions[face_share_cell_index][this->criterion_solution_index_];
-
-			if (std::abs(my_value - other_value) >= 0.1 * (std::min)(my_value, other_value))
-			{
-				this->cell_index_to_is_shock_[i] = true;
-				break;
-			}
-		}
-	}
-}
-
-bool Shock_Indicator::is_shock(const uint cell_index) const
-{
-	return this->cell_index_to_is_shock_[cell_index];
-}
-
-void Shock_Indicator::set_criterion_solution_index(const ushort space_dimension, const std::string& governing_equation_name)
-{
-	if (ms::compare_icase(governing_equation_name, "Linear_Advection"))
-	{
-		this->criterion_solution_index_ = -1;
-	}
-	else if (ms::compare_icase(governing_equation_name, "Burgers"))
-	{
-		this->criterion_solution_index_ = 0;
-	}
-	else if (ms::compare_icase(governing_equation_name, "Euler"))
-	{
-		if (space_dimension == 2)
-		{
-			this->criterion_solution_index_ = Euler_2D::pressure_index();
-		}
-		else if (space_dimension == 3)
-		{
-			this->criterion_solution_index_ = Euler_3D::pressure_index();
-		}
-	}
-}
+//Shock_Indicator::Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name)
+//{
+//	this->set_criterion_solution_index(grid.space_dimension(), governing_equation_name);
+//
+//	const auto num_cells = grid.num_cells();
+//	this->average_pressures_.resize(num_cells);
+//	this->cell_index_to_is_shock_.resize(num_cells, false);
+//	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
+//}
+//
+//void Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+//{
+//	if (this->criterion_solution_index_ < 0)
+//	{
+//		return; //it means that governing equation is linear advection
+//	}
+//
+//	std::fill(this->cell_index_to_is_shock_.begin(), this->cell_index_to_is_shock_.end(), false);
+//
+//	const auto P0_solutions = discrete_solution.calculate_P0_solutions();
+//
+//	const auto num_cells = this->cell_index_to_is_shock_.size();
+//	for (uint i = 0; i < num_cells; ++i)
+//	{
+//		const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[i];
+//
+//		const auto my_value = P0_solutions[i][this->criterion_solution_index_];
+//		for (const auto face_share_cell_index : face_share_cell_indexes)
+//		{
+//			const auto other_value = P0_solutions[face_share_cell_index][this->criterion_solution_index_];
+//
+//			if (std::abs(my_value - other_value) >= 0.1 * (std::min)(my_value, other_value))
+//			{
+//				this->cell_index_to_is_shock_[i] = true;
+//				break;
+//			}
+//		}
+//	}
+//}
+//
+//bool Shock_Indicator::is_shock(const uint cell_index) const
+//{
+//	return this->cell_index_to_is_shock_[cell_index];
+//}
+//
+//void Shock_Indicator::set_criterion_solution_index(const ushort space_dimension, const std::string& governing_equation_name)
+//{
+//	if (ms::compare_icase(governing_equation_name, "Linear_Advection"))
+//	{
+//		this->criterion_solution_index_ = -1;
+//	}
+//	else if (ms::compare_icase(governing_equation_name, "Burgers"))
+//	{
+//		this->criterion_solution_index_ = 0;
+//	}
+//	else if (ms::compare_icase(governing_equation_name, "Euler"))
+//	{
+//		if (space_dimension == 2)
+//		{
+//			this->criterion_solution_index_ = Euler_2D::pressure_index();
+//		}
+//		else if (space_dimension == 3)
+//		{
+//			this->criterion_solution_index_ = Euler_3D::pressure_index();
+//		}
+//	}
+//}
 
 Discontinuity_Indicator::Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
 	: criterion_solution_index_(criterion_solution_index)
 {
 	this->cell_index_to_face_share_cell_indexes_table_ = grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry();
-	this->cell_index_to_volume_table_ = grid.cell_index_to_volume_table();
+	this->cell_index_to_volume_reciprocal_table_ = grid.cell_index_to_volume_table();
 
 	this->num_cells_ = grid.num_cells();
 	this->cell_index_to_has_discontinuity_table_.resize(this->num_cells_, false);
@@ -351,7 +351,7 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 	{
 		double discontinuity_indicator_value = 0.0;
 
-		const auto cell_volume = this->cell_index_to_volume_table_[i];
+		const auto cell_volume = this->cell_index_to_volume_reciprocal_table_[i];
 		const auto P0_value = discrete_solution.calculate_P0_nth_solution(i, this->criterion_solution_index_);
 
 		const auto& QWs_v = this->cell_index_to_QW_v_table_[i];
@@ -365,7 +365,7 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 		{
 			const auto my_cell_index = face_share_cell_indexes[j];
 
-			discrete_solution.calculate_nth_solution_at_target_cell_QPs(nth_solution_at_target_cell_QPs.data(), i, my_cell_index, this->criterion_solution_index_);
+			discrete_solution.calculate_nth_extrapolated_solution_at_cell_QPs(nth_solution_at_target_cell_QPs.data(), i, my_cell_index, this->criterion_solution_index_);
 
 			const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_solution_at_target_cell_QPs.data(), QWs_v.data());
 
@@ -376,7 +376,7 @@ void Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_
 
 		//this->discontinuity_factor_[i] /= num_face_share_cells;
 		discontinuity_indicator_value /= num_face_share_cells;
-		const auto characteristic_length = std::sqrt(this->cell_index_to_volume_table_[i]);
+		const auto characteristic_length = std::sqrt(this->cell_index_to_volume_reciprocal_table_[i]);
 
 		this->discontinuity_factor_[i] = std::log(discontinuity_indicator_value) / std::log(characteristic_length);
 	}

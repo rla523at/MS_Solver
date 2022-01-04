@@ -313,16 +313,16 @@ void Discrete_Solution_DG::precalculate_set_of_cell_index_to_target_cell_basis_Q
 	const std::vector<std::pair<uint, uint>>& pbdry_pair_index_to_oc_nc_index_pair_table,
 	const std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>>& pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table)
 {
-	this->set_of_cell_index_to_target_cell_basis_QPs_m_.resize(this->num_cells_);
+	this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_.resize(this->num_cells_);
 
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
-		const auto& QPs = cell_index_to_order_n_QPs_table[cell_index];
+		const auto& my_QPs = cell_index_to_order_n_QPs_table[cell_index];
 		const auto& face_share_cell_indexes = cell_index_to_face_share_cell_indexes_table_ignore_pbdry[cell_index];
 
 		for (const auto face_share_cell_index : face_share_cell_indexes)
 		{
-			this->set_of_cell_index_to_target_cell_basis_QPs_m_[cell_index].emplace(face_share_cell_index, this->calculate_basis_points_m(face_share_cell_index, QPs));
+			this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_[cell_index].emplace(face_share_cell_index, this->calculate_basis_points_m(face_share_cell_index, my_QPs));
 		}
 	}
 
@@ -333,8 +333,8 @@ void Discrete_Solution_DG::precalculate_set_of_cell_index_to_target_cell_basis_Q
 		const auto [oc_index, nc_index] = pbdry_pair_index_to_oc_nc_index_pair_table[i];
 		const auto& [moved_oc_QPs, moved_nc_QPs] = pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table[i];
 
-		this->set_of_cell_index_to_target_cell_basis_QPs_m_[oc_index].emplace(nc_index, this->calculate_basis_points_m(nc_index, moved_oc_QPs));
-		this->set_of_cell_index_to_target_cell_basis_QPs_m_[nc_index].emplace(oc_index, this->calculate_basis_points_m(oc_index, moved_nc_QPs));
+		this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_[oc_index].emplace(nc_index, this->calculate_basis_points_m(nc_index, moved_oc_QPs));
+		this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_[nc_index].emplace(oc_index, this->calculate_basis_points_m(oc_index, moved_nc_QPs));
 	}
 }
 
@@ -618,11 +618,11 @@ void Discrete_Solution_DG::calculate_nth_solution_at_infc_ncs_jump_QPs(double* n
 	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_infc_ncs_jump_QPs, nc_index, equation_index, this->set_of_infc_basis_ncs_jump_QPs_m_[infc_index]);
 }
 
-void Discrete_Solution_DG::calculate_nth_solution_at_target_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint target_cell_index, const uint my_cell_index, const ushort equation_index) const
+void Discrete_Solution_DG::calculate_nth_extrapolated_solution_at_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint face_share_cell_index, const uint target_cell_index, const ushort solution_index) const
 {
-	REQUIRE(!this->set_of_cell_index_to_target_cell_basis_QPs_m_.empty(), "basis value should be precalculated");
-	const auto& basis_points_m = this->set_of_cell_index_to_target_cell_basis_QPs_m_[target_cell_index].at(my_cell_index);
-	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_target_cell_QPs, my_cell_index, equation_index, basis_points_m);
+	REQUIRE(!this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_.empty(), "basis value should be precalculated");
+	const auto& basis_points_m = this->cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_[target_cell_index].at(face_share_cell_index);
+	this->calculate_nth_solution_at_precalulated_points(nth_solution_at_target_cell_QPs, face_share_cell_index, solution_index, basis_points_m);
 }
 
 Matrix Discrete_Solution_DG::calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const

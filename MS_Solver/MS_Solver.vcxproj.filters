@@ -19,23 +19,11 @@
     <Filter Include="소스 파일\Post">
       <UniqueIdentifier>{23194e35-0534-436a-9273-6ed461b70304}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Grid">
-      <UniqueIdentifier>{76170e15-bd82-4fa0-8bb6-e01a47233b06}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Grid">
-      <UniqueIdentifier>{fde4899d-6b51-46ea-b7c5-38f8335a2abd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Solver">
       <UniqueIdentifier>{6de4eb81-0f52-4b0a-8a29-f53242c26f2d}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\Solver">
       <UniqueIdentifier>{6e27faa5-bee1-40a8-9246-6d917e9ee399}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Geometry">
-      <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Geometry">
-      <UniqueIdentifier>{fd516600-3969-42ae-81c2-88a316f07908}</UniqueIdentifier>
     </Filter>
     <Filter Include="헤더 파일\Math">
       <UniqueIdentifier>{2c1dd029-0429-4be3-9be5-ee8c5285a62b}</UniqueIdentifier>
@@ -66,6 +54,18 @@
     </Filter>
     <Filter Include="소스 파일\Solver\Reconstruction\Stability_Criterion">
       <UniqueIdentifier>{67f8c301-ff75-42b8-8063-6ae2086b59a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Grid">
+      <UniqueIdentifier>{fde4899d-6b51-46ea-b7c5-38f8335a2abd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Grid\Geometry">
+      <UniqueIdentifier>{fd516600-3969-42ae-81c2-88a316f07908}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Grid">
+      <UniqueIdentifier>{76170e15-bd82-4fa0-8bb6-e01a47233b06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Grid\Geometry">
+      <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,13 +145,13 @@
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Reference_Geometry_Impl.cpp">
-      <Filter>소스 파일\Geometry</Filter>
+      <Filter>소스 파일\Grid\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Reference_Geometry.cpp">
-      <Filter>소스 파일\Geometry</Filter>
+      <Filter>소스 파일\Grid\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Geometry.cpp">
-      <Filter>소스 파일\Geometry</Filter>
+      <Filter>소스 파일\Grid\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일\Math</Filter>
@@ -197,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="SRC\Limiter_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Limiter</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Indicating_Function_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -282,13 +285,13 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Reference_Geometry.h">
-      <Filter>헤더 파일\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="INC\Geometry.h">
-      <Filter>헤더 파일\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="INC\Reference_Geometry_Impl.h">
-      <Filter>헤더 파일\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="INC\Matrix.h">
       <Filter>헤더 파일\Math</Filter>
@@ -340,6 +343,9 @@
     </ClInclude>
     <ClInclude Include="INC\Solve_Controller_Impl.h">
       <Filter>헤더 파일\Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicating_Function_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

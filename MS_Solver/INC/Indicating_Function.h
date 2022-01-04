@@ -22,7 +22,7 @@ private:
     ushort criterion_equation_index_;
     uint num_cells_;
 
-    std::vector<double> cell_index_to_volume_table_;
+    std::vector<double> cell_index_to_volume_reciprocal_table_;
     std::vector<ushort> cell_index_to_num_vertices_table_;
     std::vector<std::vector<double>> cell_index_to_P1_projected_value_at_vertices_table_;
 
@@ -60,52 +60,26 @@ private:
     mutable std::array<double, num_max_jump_QPs> value_diff_at_jump_QPs_ = { 0 };
 };
 
-class Shock_Indicator //need to know governing equation!
-{
-public:
-    Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name);
-
-public://Command
-    void precalculate(const Discrete_Solution_DG& discrete_solution);
-
-public://Query
-    bool is_shock(const uint cell_index) const;
-
-private:
-    void set_criterion_solution_index(const ushort space_dimension, const std::string& governing_equation_name);
-
-private:
-    short criterion_solution_index_;
-    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
-
-    //construction optimization
-    std::vector<double> average_pressures_;
-    std::vector<bool> cell_index_to_is_shock_;
-};
-
 class Discontinuity_Indicator
 {
 public:
-    Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Discontinuity_Indicator(const Grid& grid, const ushort criterion_solution_index)
+        : criterion_solution_index_(criterion_solution_index)
+        , num_cells_(grid.num_cells())
+        , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
+        , cell_index_to_has_discontinuity_table_(this->num_cells_, false) {};
 
-public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution);
+public://Command
+    virtual void precalculate(const Discrete_Solution_DG& discrete_solution) abstract;
 
-    //test
-    const std::vector<double>& get_discontinuity_factor(void) const { return this->discontinuity_factor_; };
-    //
+public://Query
+    bool has_discontinuity(const uint cell_index) const { return this->cell_index_to_has_discontinuity_table_[cell_index]; };
 
-private:
+protected:
     ushort criterion_solution_index_;
     uint num_cells_;
 
-    std::vector<double> cell_index_to_volume_table_;
     std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
-    std::vector<Euclidean_Vector> cell_index_to_QW_v_table_;
     std::vector<bool> cell_index_to_has_discontinuity_table_;
-
-    //for test
-    std::vector<double> discontinuity_factor_;
-    //
-
 };
+
