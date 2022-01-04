@@ -90,7 +90,8 @@ public:
         }
         else
         {
-            EXCEPTION("not supported discontinuity indicator type");
+            EXCEPTION(type_name + " is not supported discontinuity indicator type");
+            return nullptr;
         }
     }
 
@@ -137,11 +138,13 @@ public:
             else
             {
                 EXCEPTION("not supported space_dimension");
+                return nullptr;
             }
         }    
         else
         {
             EXCEPTION("not supported governing equation");
+            return nullptr;
         }
     }
 

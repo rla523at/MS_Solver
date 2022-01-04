@@ -96,8 +96,15 @@ Extrapolation_Discontinuity_Indicator::Extrapolation_Discontinuity_Indicator(con
     //
 };
 
+
+#include "../INC/Post_Processor.h" //for debug
 void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution) 
 {
+    //for debug
+    std::vector<double> discontinuity_indicator_values(this->num_cells_);
+    std::vector<double> max_diff_discontinuity_indicator_values(this->num_cells_);
+    //
+
     static constexpr ushort max_num_QPs = 100;
     std::array<double, max_num_QPs> nth_extrapolated_solution_at_cell_QPs = { 0 };
 
@@ -133,6 +140,38 @@ void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution
             this->cell_index_to_has_discontinuity_table_[cell_index] = true;
         }
 
-        //this->discontinuity_factor_[cell_index] = std::log(discontinuity_indicator_value) / std::log(characteristic_length);
+        //for debug
+        discontinuity_indicator_values[cell_index] = discontinuity_indicator_value;
+        //
     }
+
+    //for debug
+    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+    {
+        double diff_max = 0.0;
+
+        const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
+        const auto num_face_share_cells = face_share_cell_indexes.size();
+
+        const auto my_discontinuity_indicator_value = discontinuity_indicator_values[cell_index];
+
+        for (ushort j = 0; j < num_face_share_cells; ++j)
+        {
+            const auto face_share_cell_index = face_share_cell_indexes[j];
+            const auto face_neighbor_discontinuity_indicator_value = discontinuity_indicator_values[face_share_cell_index];
+
+            const auto diff = std::abs(my_discontinuity_indicator_value - face_neighbor_discontinuity_indicator_value);
+            diff_max = (std::max)(diff_max, diff);
+        }
+
+        max_diff_discontinuity_indicator_values[cell_index] = diff_max;
+    }
+    //
+
+    //for debug
+    Post_Processor::record_solution();
+    Post_Processor::record_variables("discontinuity_indicator_value", discontinuity_indicator_values);
+    Post_Processor::record_variables("max_diff_discontinuity_indicator_value", max_diff_discontinuity_indicator_values);
+    Post_Processor::post_solution();
+    //
 };

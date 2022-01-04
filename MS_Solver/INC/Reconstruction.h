@@ -23,6 +23,7 @@ public:
 
 public://Query
 	void reconstruct(Discrete_Solution_DG& discrete_solution) const override;
+
 private:
 	std::unique_ptr<MLP_Criterion_Base> stability_criterion_;
     std::unique_ptr<Indicator> indicator_;
