@@ -69,7 +69,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/rft_ref_geo/
+post_base_path				= E:/CodeData/Result/RDD/rft_geo/
 post_file_format			= Binary 					
 							//ASCII, Binary
 

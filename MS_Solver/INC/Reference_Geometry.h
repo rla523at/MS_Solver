@@ -54,6 +54,7 @@ public://Query
 	virtual ushort num_post_nodes(const ushort post_order) const abstract;
 	virtual ushort num_post_elements(const ushort post_order) const abstract;
 	virtual Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
+	virtual Euclidean_Vector random_point(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
 	virtual std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const abstract;

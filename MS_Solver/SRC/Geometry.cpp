@@ -25,10 +25,10 @@ bool Geometry::operator==(const Geometry& other) const
 	return this->points_ == other.points_ && this->reference_geometry_ == other.reference_geometry_;
 }
 
-Euclidean_Vector Geometry::center_point(void) const
-{
-	return this->mapping_vf_(this->reference_geometry_->center_point());
-}
+//Euclidean_Vector Geometry::center_point(void) const
+//{
+//	return this->mapping_vf_(this->reference_geometry_->center_point());
+//}
 
 std::vector<Geometry> Geometry::face_geometries(void) const
 {
@@ -448,23 +448,23 @@ Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order) con
 
 namespace ms
 {
-	double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule)
-	{
-		const auto& QP_set = quadrature_rule.points;
-		const auto& QW_set = quadrature_rule.weights;
+	//double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule)
+	//{
+	//	const auto& QP_set = quadrature_rule.points;
+	//	const auto& QW_set = quadrature_rule.weights;
 
-		double result = 0.0;
-		for (ushort i = 0; i < QP_set.size(); ++i)
-			result += integrand(QP_set[i]) * QW_set[i];
+	//	double result = 0.0;
+	//	for (ushort i = 0; i < QP_set.size(); ++i)
+	//		result += integrand(QP_set[i]) * QW_set[i];
 
-		return result;
-	}
+	//	return result;
+	//}
 
-	double integrate(const Polynomial& integrand, const Geometry& geometry)
-	{
-		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.degree());
-		return ms::integrate(integrand, quadrature_rule);
-	}
+	//double integrate(const Polynomial& integrand, const Geometry& geometry)
+	//{
+	//	const auto quadrature_rule = geometry.get_quadrature_rule(integrand.degree());
+	//	return ms::integrate(integrand, quadrature_rule);
+	//}
 
 	double inner_product(const Polynomial& f1, const Polynomial& f2, const Geometry& geometry)
 	{

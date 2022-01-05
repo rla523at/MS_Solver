@@ -12,7 +12,7 @@ public://Command
 public://Query
 	bool operator==(const Geometry& other) const;
 
-	Euclidean_Vector center_point(void) const;
+	Euclidean_Vector center_point(void) const { return this->mapping_vf_(this->reference_geometry_->center_point()); };
 	std::vector<Geometry> face_geometries(void) const;
 	const Quadrature_Rule& get_quadrature_rule(const ushort integrand_order) const;
 	bool is_line(void) const;
@@ -27,6 +27,7 @@ public://Query
 	std::vector<Euclidean_Vector> post_element_centers(const ushort post_order) const;
 	std::vector<std::vector<int>> post_connectivities(const ushort post_order, const size_t connectivity_start_index) const;
 	std::vector<double> projected_volumes(void) const;
+	Euclidean_Vector random_point(void) const { return this->mapping_vf_(this->reference_geometry_->random_point()); }
 	std::vector<std::vector<Euclidean_Vector>> set_of_face_points(void) const;
 	std::vector<std::vector<Euclidean_Vector>> set_of_sub_simplex_vertices(void) const;
 	std::vector<Geometry> sub_simplex_geometries(void) const;
@@ -53,6 +54,7 @@ protected:
 	mutable std::map<size_t, Quadrature_Rule> degree_to_quadrature_rule_;
 };
 
+#include <concepts>
 namespace ms
 {	
 	template <typename T, typename Container>	std::vector<T> extract_by_index(const std::vector<T>& set, const Container& indexes) 
@@ -67,8 +69,22 @@ namespace ms
 
 		return extracted_values;
 	}
-	double integrate(const Polynomial& integrand, const Quadrature_Rule& quadrature_rule);	
-	double integrate(const Polynomial& integrand, const Geometry& geometry);	
+	template <typename F> double integrate(const F& integrand, const Quadrature_Rule& quadrature_rule)
+	{
+		const auto& QP_set = quadrature_rule.points;
+		const auto& QW_set = quadrature_rule.weights;
+
+		double result = 0.0;
+		for (ushort i = 0; i < QP_set.size(); ++i)
+			result += integrand(QP_set[i]) * QW_set[i];
+
+		return result;
+	}
+	template <typename F> double integrate(const F& integrand, const Geometry& geometry)
+	{
+		const auto quadrature_rule = geometry.get_quadrature_rule(integrand.degree());
+		return ms::integrate(integrand, quadrature_rule);
+	}
 	double inner_product(const Polynomial& f1, const Polynomial& f2, const Geometry& geometry);	
 	double L2_Norm(const Polynomial& function, const Geometry& geometry);
 	Vector_Function<Polynomial> Gram_Schmidt_process(const Vector_Function<Polynomial>& functions, const Geometry& geometry);	
