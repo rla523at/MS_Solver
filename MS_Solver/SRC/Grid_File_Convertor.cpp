@@ -119,7 +119,7 @@ std::vector<Element> Gmsh_Convertor::make_elements(const Text& element_text, con
 		//reference geometry
 		const auto figure = this->figure_type_index_to_element_figure(figure_type_index);
 		const auto figure_order = this->figure_type_index_to_figure_order(figure_type_index);
-		const auto& reference_geometry = Reference_Geometry_Container::get(figure, figure_order);
+		const auto& reference_geometry = Reference_Geometry_Container::get_shared_ptr(figure, figure_order);
 
 		//geometry
 		constexpr auto num_indexes = 5;

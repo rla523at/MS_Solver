@@ -8,7 +8,7 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
@@ -18,7 +18,7 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override;
 	ushort scale_function_order(void) const override;
@@ -38,7 +38,7 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
@@ -48,7 +48,7 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
@@ -68,7 +68,7 @@ public:
 
 public://Query
 	Euclidean_Vector center_point(void) const override;
-	std::vector<const Reference_Geometry*> face_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
@@ -78,7 +78,7 @@ public://Query
 	bool is_line(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
-	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const override;
+	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
 	std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const override;
 	Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
 	ushort scale_function_order(void) const override;
@@ -94,7 +94,7 @@ protected:
 class Reference_Geometry_Container
 {
 public:
-	static const Reference_Geometry& get(const Figure figure, const ushort order);
+	static const std::shared_ptr<const Reference_Geometry>& get_shared_ptr(const Figure figure, const ushort order);
 
 private:
 	static void store_line(const ushort order);
@@ -105,9 +105,9 @@ private:
 	Reference_Geometry_Container(void) = delete;
 
 private:
-	static inline std::map<ushort, Reference_Line> order_to_reference_line_;
-	static inline std::map<ushort, Reference_Triangle> order_to_reference_triangle_;
-	static inline std::map<ushort, Reference_Quadrilateral> order_to_reference_quadrilateral_;
+	static inline std::map<ushort, std::shared_ptr<const Reference_Geometry>> order_to_reference_line_;
+	static inline std::map<ushort, std::shared_ptr<const Reference_Geometry>> order_to_reference_triangle_;
+	static inline std::map<ushort, std::shared_ptr<const Reference_Geometry>> order_to_reference_quadrilateral_;
 };
 
 

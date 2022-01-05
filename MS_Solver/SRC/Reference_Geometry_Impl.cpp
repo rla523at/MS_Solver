@@ -11,7 +11,7 @@ Euclidean_Vector Reference_Line::center_point(void) const
 	return { 0.0 };
 };
 
-std::vector<const Reference_Geometry*> Reference_Line::face_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Line::face_reference_geometries(void) const
 {
 	EXCEPTION("Reference Point class is not supported yet");
 	return {};
@@ -106,7 +106,7 @@ std::vector<std::vector<ushort>> Reference_Line::set_of_face_node_index_sequence
 	return { face0_node_index,face1_node_index };
 };
 
-std::vector<const Reference_Geometry*> Reference_Line::sub_simplex_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Line::sub_simplex_reference_geometries(void) const
 {
 	EXCEPTION("This routine is not supported for Line element");
 	return {};
@@ -203,14 +203,14 @@ Euclidean_Vector Reference_Triangle::center_point(void) const
 	return { -1.0 / 3.0, -1.0 / 3.0 };
 };
 
-std::vector<const Reference_Geometry*> Reference_Triangle::face_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Triangle::face_reference_geometries(void) const
 {
 	constexpr auto num_face = 3;
-	std::vector<const Reference_Geometry*> face_reference_geometries(num_face);
+	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(num_face);
 
 	for (ushort i = 0; i < num_face; ++i)
 	{
-		face_reference_geometries[i] = &Reference_Geometry_Container::get(Figure::line, this->order_);
+		face_reference_geometries[i] = Reference_Geometry_Container::get_shared_ptr(Figure::line, this->order_);
 	}
 
 	return face_reference_geometries;
@@ -324,7 +324,7 @@ std::vector<std::vector<ushort>> Reference_Triangle::set_of_face_node_index_sequ
 	return set_of_face_node_index_orders;
 };
 
-std::vector<const Reference_Geometry*> Reference_Triangle::sub_simplex_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Triangle::sub_simplex_reference_geometries(void) const
 {
 	EXCEPTION("This routine is not supported for Triangle element");
 	return {};
@@ -450,14 +450,14 @@ Euclidean_Vector Reference_Quadrilateral::center_point(void) const
 	return { 0.0, 0.0 };
 };
 
-std::vector<const Reference_Geometry*> Reference_Quadrilateral::face_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Quadrilateral::face_reference_geometries(void) const
 {
 	constexpr auto num_face = 4;
-	std::vector<const Reference_Geometry*> face_reference_geometries(num_face);
+	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(num_face);
 
 	for (ushort i = 0; i < num_face; ++i)
 	{
-		face_reference_geometries[i] = &Reference_Geometry_Container::get(Figure::line, this->order_);
+		face_reference_geometries[i] = Reference_Geometry_Container::get_shared_ptr(Figure::line, this->order_);
 	}
 
 	return face_reference_geometries;
@@ -573,15 +573,15 @@ std::vector<std::vector<ushort>> Reference_Quadrilateral::set_of_face_node_index
 	return set_of_face_node_index_orders;
 };
 
-std::vector<const Reference_Geometry*> Reference_Quadrilateral::sub_simplex_reference_geometries(void) const
+std::vector<std::shared_ptr<const Reference_Geometry>> Reference_Quadrilateral::sub_simplex_reference_geometries(void) const
 {
 	constexpr auto num_sub_simplex = 4;
 
-	std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(num_sub_simplex);
+	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(num_sub_simplex);
 
 	for (ushort i = 0; i < num_sub_simplex; ++i)
 	{
-		sub_simplex_reference_geometries[i] = &Reference_Geometry_Container::get(Figure::triangle, this->order_);
+		sub_simplex_reference_geometries[i] = Reference_Geometry_Container::get_shared_ptr(Figure::triangle, this->order_);
 	}
 
 	return sub_simplex_reference_geometries;
@@ -714,7 +714,7 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_mapping_monomial_vecto
 	return mapping_monomial_vector;	// 1 r rs s r^2 r^2s r^2s^2 rs^2 s^2...
 }
 
-const Reference_Geometry& Reference_Geometry_Container::get(const Figure figure, const ushort order)
+const std::shared_ptr<const Reference_Geometry>& Reference_Geometry_Container::get_shared_ptr(const Figure figure, const ushort order)
 {
 	switch (figure)
 	{
@@ -755,15 +755,15 @@ const Reference_Geometry& Reference_Geometry_Container::get(const Figure figure,
 
 void Reference_Geometry_Container::store_line(const ushort order)
 {
-	Reference_Geometry_Container::order_to_reference_line_.emplace(order, Reference_Line(order));
+	Reference_Geometry_Container::order_to_reference_line_.emplace(order, std::make_shared<Reference_Line>(order));
 }
 
 void Reference_Geometry_Container::store_triangle(const ushort order)
 {
-	Reference_Geometry_Container::order_to_reference_triangle_.emplace(order, Reference_Triangle(order));
+	Reference_Geometry_Container::order_to_reference_triangle_.emplace(order, std::make_shared<Reference_Triangle>(order));
 }
 
 void Reference_Geometry_Container::store_quadrilateral(const ushort order)
 {
-	Reference_Geometry_Container::order_to_reference_quadrilateral_.emplace(order, Reference_Quadrilateral(order));
+	Reference_Geometry_Container::order_to_reference_quadrilateral_.emplace(order, std::make_shared<Reference_Quadrilateral>(order));
 }

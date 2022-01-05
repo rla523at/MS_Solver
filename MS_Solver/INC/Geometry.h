@@ -4,7 +4,7 @@
 class Geometry
 {
 public:
-	Geometry(const Reference_Geometry& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
+	Geometry(const std::shared_ptr<const Reference_Geometry>& reference_goemetry, std::vector<Euclidean_Vector>&& consisting_nodes);
 
 public://Command
 	void change_points(std::vector<Euclidean_Vector>&& nodes);
@@ -45,7 +45,7 @@ protected:
 
 protected:
 	ushort space_dimension_ = 0;
-	const Reference_Geometry& reference_geometry_;
+	std::shared_ptr<const Reference_Geometry> reference_geometry_;
 	std::vector<Euclidean_Vector> points_;
 	Vector_Function<Polynomial> mapping_vf_;
 	Vector_Function<Polynomial> normal_vf_;

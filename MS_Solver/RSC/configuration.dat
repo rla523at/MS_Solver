@@ -32,8 +32,8 @@ grid_file_type				= Gmsh
 
 /////////////////////// Solver Option /////////////////////////////
 
-spatial_discrete_scheme		= DG_P4
-reconstruction_scheme		= Improved_hMLP_BD2
+spatial_discrete_scheme		= DG_P2
+reconstruction_scheme		= hMLP_BD
 							//No, hMLP, hMLP_BD, Improved_hMLP_BD1, Improved_hMLP_BD2
 
 numerical_flux				= LLF
@@ -58,7 +58,7 @@ solve_end_iter				= 100
 solve_post_controller_type	= Time
 							//Time, Iter, NotUse, Initial_Final
 
-solve_post_time_step		= 0.1
+solve_post_time_step		= 0.01
 solve_post_iter_unit		= 10
 
 ///////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/DEV_Improved/avg_diff_discontinuity_indicator_value/
+post_base_path				= E:/CodeData/Result/RDD/rft_ref_geo/
 post_file_format			= Binary 					
 							//ASCII, Binary
 

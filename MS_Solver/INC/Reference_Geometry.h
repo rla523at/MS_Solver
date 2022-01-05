@@ -46,7 +46,7 @@ public://Query
 	std::vector<ushort> vertex_node_index_sequneces(void) const;
 
 	virtual Euclidean_Vector center_point(void) const abstract;
-	virtual std::vector<const Reference_Geometry*> face_reference_geometries(void) const abstract;
+	virtual std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const abstract;
 	virtual Figure figure(void) const abstract;
 	virtual bool is_simplex(void) const abstract;
 	virtual bool is_line(void) const abstract;
@@ -56,7 +56,7 @@ public://Query
 	virtual Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const abstract;
-	virtual std::vector<const Reference_Geometry*> sub_simplex_reference_geometries(void) const abstract;
+	virtual std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const abstract;
 	virtual std::vector<std::vector<ushort>> set_of_sub_simplex_vertex_index_sequences(void) const abstract;
 	virtual Irrational_Function scale_function(const Vector_Function<Polynomial>& mapping_function) const abstract;
 	virtual ushort scale_function_order(void) const abstract;

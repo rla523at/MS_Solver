@@ -140,7 +140,7 @@ std::vector<Euclidean_Vector> Element::outward_normalized_normal_vectors(const E
 
 std::vector<std::vector<uint>> Element::set_of_face_vertex_indexes(void) const
 {
-	const auto set_of_face_vnode_sequences = this->reference_geometry_.set_of_face_vertex_index_sequences();
+	const auto set_of_face_vnode_sequences = this->reference_geometry_->set_of_face_vertex_index_sequences();
 	const auto num_face = set_of_face_vnode_sequences.size();
 
 	std::vector<std::vector<uint>> set_of_face_vnode_indexes(num_face);
@@ -159,7 +159,7 @@ ElementType Element::type(void) const
 
 std::vector<uint> Element::vertex_point_indexes(void) const
 {
-	const auto num_vertices = this->reference_geometry_.num_vertices();
+	const auto num_vertices = this->reference_geometry_->num_vertices();
 
 	return { this->point_indexes_.begin(), this->point_indexes_.begin() + num_vertices };
 }
@@ -216,7 +216,7 @@ bool Element::is_periodic_boundary(void) const
 
 std::vector<std::vector<uint>> Element::set_of_face_node_indexes(void) const 
 {
-	const auto set_of_face_node_index_sequences = this->reference_geometry_.set_of_face_node_index_sequences();
+	const auto set_of_face_node_index_sequences = this->reference_geometry_->set_of_face_node_index_sequences();
 	const auto num_face = set_of_face_node_index_sequences.size();
 
 	std::vector<std::vector<uint>> set_of_face_node_indexes(num_face);

@@ -3,10 +3,25 @@
 #include "../MS_Solver/INC/Geometry.h"
 #include "../MS_Solver/INC/Reference_Geometry_Impl.h"
 
+TEST(Geometry, copy_oerator_1)
+{
+	const Figure fig = Figure::line;
+	const ushort fig_order = 1;
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
+
+	const Euclidean_Vector n1 = { 1,1 };
+	const Euclidean_Vector n2 = { 2,1 };
+	std::vector<Euclidean_Vector> nodes = { n1,n2 };
+
+	Geometry geometry(ref_geometry, std::move(nodes));
+
+	EXPECT_NO_THROW(const auto copy = geometry);
+}
+
 TEST(Geometry, center_1) {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -23,7 +38,7 @@ TEST(Geometry, center_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -40,7 +55,7 @@ TEST(Geometry, center_2)
 TEST(Geometry, center_3) {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -59,7 +74,7 @@ TEST(Geometry, center_4)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1,2 };
 	const Euclidean_Vector n2 = { 2,1,3 };
@@ -77,7 +92,7 @@ TEST(Geometry, change_points_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -102,7 +117,7 @@ TEST(Geometry, change_points_2)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -128,7 +143,7 @@ TEST(Geometry, face_geometries_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -139,7 +154,7 @@ TEST(Geometry, face_geometries_1)
 	const auto result = geometry.face_geometries();
 
 	const Figure f_fig = Figure::line;
-	const auto& ref_face_geometry = Reference_Geometry_Container::get(f_fig, fig_order);
+	const auto& ref_face_geometry = Reference_Geometry_Container::get_shared_ptr(f_fig, fig_order);
 
 	const Euclidean_Vector f1_n1 = { 1,1 };
 	const Euclidean_Vector f1_n2 = { 2,1 };
@@ -165,7 +180,7 @@ TEST(Geometry, normalized_normal_vector_1)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 3,1 };
@@ -193,7 +208,7 @@ TEST(Geometry, normalized_normal_vector_2)
 {
 	const Figure fig = Figure::line;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,2 };
@@ -216,7 +231,7 @@ TEST(Geometry, normalized_normal_vector_2)
 TEST(Geometry, orthonormal_basis_1) {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 3,1 };
@@ -248,7 +263,7 @@ TEST(Geometry, orthonormal_basis_2) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 0,2 };
 	const Euclidean_Vector n2 = { 2,0 };
@@ -281,7 +296,7 @@ TEST(Geometry, orthonormal_basis_3) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 2.4874,1.257 };
@@ -313,7 +328,7 @@ TEST(Geometry, orthonormal_basis_4) {
 
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148 };
 	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218 };
@@ -346,7 +361,7 @@ TEST(Geometry, orthonormal_basis_5) {
 
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148 };
 	const Euclidean_Vector n2 = { 0.3512301560533574, 0.3184608229801218 };
@@ -377,7 +392,7 @@ TEST(Geometry, projected_volume_1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
@@ -395,7 +410,7 @@ TEST(Geometry, projected_volume_2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -413,7 +428,7 @@ TEST(Geometry, projected_volume_2)
 //{
 //	const Figure fig = Figure::triangle;
 //	const ushort fig_order = 1;
-//	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 1,1,2 };
 //	const Euclidean_Vector n2 = { 2,1,2 };
@@ -431,7 +446,7 @@ TEST(Geometry, set_of_face_points1)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
@@ -450,7 +465,7 @@ TEST(Geometry, set_of_face_points2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	Euclidean_Vector n1 = { 1,1 };
 	Euclidean_Vector n2 = { 2,1 };
@@ -469,7 +484,7 @@ TEST(Geometry, volume_1)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 1,2 };
@@ -487,7 +502,7 @@ TEST(Geometry, volume_2)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -505,7 +520,7 @@ TEST(Geometry, volume_3)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -523,7 +538,7 @@ TEST(Geometry, volume_4)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,1 };
 	const Euclidean_Vector n2 = { 2,1 };
@@ -540,7 +555,7 @@ TEST(Geometry, volume_5)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1.524,1 };
 	const Euclidean_Vector n2 = { 2,1.154 };
@@ -559,7 +574,7 @@ TEST(Geometry, volume_6)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.5, 1.257 };
@@ -577,7 +592,7 @@ TEST(Geometry, volume_7)
 {
 	const Figure fig = Figure::quadrilateral;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.0016, 1.257 };
@@ -598,7 +613,7 @@ TEST(Geometry, volume_8)
 {
 	const Figure fig = Figure::triangle;
 	const ushort fig_order = 1;
-	const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+	const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 	
 	const Euclidean_Vector n1 = { 1,2 };
 	const Euclidean_Vector n2 = { 1.5, 1.257 };
@@ -625,7 +640,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::quadrilateral;
 //	const ushort fig_order = 1;
-//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 1,1 };
@@ -662,7 +677,7 @@ TEST(Geometry, volume_8)
 //
 //	const auto fig = Figure::hexahedral;
 //	const ushort fig_order = 1;
-//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 1,1,0 };
@@ -689,7 +704,7 @@ TEST(Geometry, volume_8)
 //{
 //	const Figure fig = Figure::line;
 //	const ushort fig_order = 1;
-//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0,0 };
@@ -709,7 +724,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::triangle;
 //	const ushort fig_order = 1;
-//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 0 };
@@ -732,7 +747,7 @@ TEST(Geometry, volume_8)
 //
 //	const Figure fig = Figure::triangle;
 //	const ushort fig_order = 1;
-//const auto& ref_geometry = Reference_Geometry_Container::get(fig, fig_order);
+//const auto& ref_geometry = Reference_Geometry_Container::get_shared_ptr(fig, fig_order);
 //	auto ref_geo = Reference_Geometry_Factory::make(fig, fig_order);
 //
 //	const Euclidean_Vector n1 = { 0.3635520579711813, 0.2973431147402148, 1 };
