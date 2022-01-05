@@ -55,7 +55,7 @@ solve_end_time				= -1
 
 solve_end_iter				= 100
 
-solve_post_controller_type	= NotUse
+solve_post_controller_type	= Time
 							//Time, Iter, NotUse, Initial_Final
 
 solve_post_time_step		= 0.1
@@ -69,7 +69,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/DEV_Improved/Debug/max_diff_discontinuity_indicator_value/
+post_base_path				= E:/CodeData/Result/RDD/DEV_Improved/avg_diff_discontinuity_indicator_value/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -78,7 +78,7 @@ post_point_location			= Node
 
 post_order					= 1
 
-post_for_debug				= Yes
+post_for_debug				= No
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////

@@ -102,7 +102,7 @@ void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution
 {
     //for debug
     std::vector<double> discontinuity_indicator_values(this->num_cells_);
-    std::vector<double> max_diff_discontinuity_indicator_values(this->num_cells_);
+    std::vector<double> avg_diff_discontinuity_indicator_values(this->num_cells_);
     //
 
     static constexpr ushort max_num_QPs = 100;
@@ -134,11 +134,11 @@ void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution
 
         discontinuity_indicator_value /= num_face_share_cells;
 
-        const auto threshold_value = this->cell_index_to_threshold_value_table_[cell_index];
-        if (threshold_value < discontinuity_indicator_value)
-        {
-            this->cell_index_to_has_discontinuity_table_[cell_index] = true;
-        }
+        //const auto threshold_value = this->cell_index_to_threshold_value_table_[cell_index];
+        //if (threshold_value < discontinuity_indicator_value)
+        //{
+        //    this->cell_index_to_has_discontinuity_table_[cell_index] = true;
+        //}
 
         //for debug
         discontinuity_indicator_values[cell_index] = discontinuity_indicator_value;
@@ -148,7 +148,7 @@ void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution
     //for debug
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
-        double diff_max = 0.0;
+        double diff_sum = 0.0;
 
         const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
         const auto num_face_share_cells = face_share_cell_indexes.size();
@@ -161,17 +161,23 @@ void Extrapolation_Discontinuity_Indicator::precalculate(const Discrete_Solution
             const auto face_neighbor_discontinuity_indicator_value = discontinuity_indicator_values[face_share_cell_index];
 
             const auto diff = std::abs(my_discontinuity_indicator_value - face_neighbor_discontinuity_indicator_value);
-            diff_max = (std::max)(diff_max, diff);
+            diff_sum += diff;
         }
 
-        max_diff_discontinuity_indicator_values[cell_index] = diff_max;
+        avg_diff_discontinuity_indicator_values[cell_index] = diff_sum / num_face_share_cells;
+
+        const auto threshold_value = this->cell_index_to_threshold_value_table_[cell_index];
+        if (threshold_value < avg_diff_discontinuity_indicator_values[cell_index])
+        {
+            this->cell_index_to_has_discontinuity_table_[cell_index] = true;
+        }
     }
     //
 
-    //for debug
-    Post_Processor::record_solution();
-    Post_Processor::record_variables("discontinuity_indicator_value", discontinuity_indicator_values);
-    Post_Processor::record_variables("max_diff_discontinuity_indicator_value", max_diff_discontinuity_indicator_values);
-    Post_Processor::post_solution();
-    //
+    ////for debug
+    //Post_Processor::record_solution();
+    //Post_Processor::record_variables("discontinuity_indicator_value", discontinuity_indicator_values);
+    //Post_Processor::record_variables("avg_diff_discontinuity_indicator_value", avg_diff_discontinuity_indicator_values);
+    //Post_Processor::post_solution();
+    ////
 };

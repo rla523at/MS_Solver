@@ -101,7 +101,6 @@ private:
 	static void store_triangle(const ushort order);
 	static void store_quadrilateral(const ushort order);
 
-
 private:
 	Reference_Geometry_Container(void) = delete;
 
