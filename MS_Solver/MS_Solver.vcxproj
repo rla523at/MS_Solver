@@ -71,6 +71,7 @@
     <ClCompile Include="SRC\main.cpp" />
     <ClCompile Include="SRC\Matrix.cpp" />
     <ClCompile Include="SRC\MBLAS.cpp" />
+    <ClCompile Include="SRC\Measuring_Function_Impl.cpp" />
     <ClCompile Include="SRC\Numerical_Flux_Function.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -162,6 +163,8 @@
     <ClInclude Include="INC\Log.h" />
     <ClInclude Include="INC\Matrix.h" />
     <ClInclude Include="INC\MBLAS.h" />
+    <ClInclude Include="INC\Measuring_Function.h" />
+    <ClInclude Include="INC\Measuring_Function_Impl.h" />
     <ClInclude Include="INC\Numerical_Flux_Function.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

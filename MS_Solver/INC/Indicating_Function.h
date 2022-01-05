@@ -1,10 +1,11 @@
 #pragma once
-#include "Indicator.h"
+#include "Stability_Criterion.h"
+#include "Measuring_Function.h"
 
-class MLP_Indicator
+class MLP_Indicating_Function
 {
 public:
-    MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_index);
+    MLP_Indicating_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_index);
 
 public://Command
     void precalculate(const Discrete_Solution_DG& discrete_solution);
@@ -32,10 +33,10 @@ private:
     mutable std::array<double, num_max_vertices> P1_projected_value_at_vertices_;
 };
 
-class Subcell_Oscillation_Indicator
+class Subcell_Oscillation_Indicating_Function
 {
 public:
-    Subcell_Oscillation_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
+    Subcell_Oscillation_Indicating_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
 
 public://Command
     void precalculate(const Discrete_Solution_DG& discrete_solution);
@@ -60,11 +61,11 @@ private:
     mutable std::array<double, num_max_jump_QPs> value_diff_at_jump_QPs_ = { 0 };
 };
 
-class Discontinuity_Indicator
+class Discontinuity_Indicating_Function
 {
-public://Command
+public:
     virtual void precalculate(const Discrete_Solution_DG& discrete_solution) abstract;
 
-public://Query
+public:
     virtual bool has_discontinuity(const uint cell_index) const abstract;
 };

@@ -1,6 +1,6 @@
 #include "../INC/Indicating_Function.h"
 
-MLP_Indicator::MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_index)
+MLP_Indicating_Function::MLP_Indicating_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_index)
 	:criterion_equation_index_(criterion_index)
 {
 	this->num_cells_ = grid.num_cells();
@@ -19,7 +19,7 @@ MLP_Indicator::MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_so
 	discrete_solution.precalculate_cell_vertices_basis_values(set_of_verticies);
 }
 
-void MLP_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void MLP_Indicating_Function::precalculate(const Discrete_Solution_DG& discrete_solution)
 {
 	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
 	{
@@ -27,7 +27,7 @@ void MLP_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
 	}
 }
 
-Cell_Type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
+Cell_Type MLP_Indicating_Function::indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
 {
 	const auto criterion_equation_index = criterion.get_criterion_equation_index();
 
@@ -36,7 +36,7 @@ Cell_Type MLP_Indicator::indicate(const Discrete_Solution_DG& discrete_solution,
 	return this->check_cell_type(cell_index, this->value_at_vertices_.data(), criterion);
 }
 
-Cell_Type MLP_Indicator::check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const
+Cell_Type MLP_Indicating_Function::check_cell_type(const uint cell_index, const double* value_at_vertices, const MLP_Criterion_Base& criterion) const
 {
 	const auto& P1_projected_value_at_vertices = this->cell_index_to_P1_projected_value_at_vertices_table_[cell_index]; 
 	const auto& P0_value_at_vertices = criterion.get_P0_value_at_vertices(cell_index);
@@ -78,18 +78,18 @@ Cell_Type MLP_Indicator::check_cell_type(const uint cell_index, const double* va
 	}
 }
 
-bool MLP_Indicator::is_constant(const double value, const double P0_value, const uint cell_index) const
+bool MLP_Indicating_Function::is_constant(const double value, const double P0_value, const uint cell_index) const
 {
 	const auto constant_criterion = (std::max)(1.0E-3 * std::abs(P0_value), this->cell_index_to_volume_reciprocal_table_[cell_index]);
 	return std::abs(value - P0_value) <= constant_criterion;
 }
 
-bool MLP_Indicator::is_satisfy_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max) const
+bool MLP_Indicating_Function::is_satisfy_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max) const
 {
 	return allowable_min <= P1_projected_value && P1_projected_value <= allowable_max;
 }
 
-bool MLP_Indicator::is_smooth_extrema(const double value, const double higher_mode_value, const double P1_mode_value, const double allowable_min, const double allowable_max) const
+bool MLP_Indicating_Function::is_smooth_extrema(const double value, const double higher_mode_value, const double P1_mode_value, const double allowable_min, const double allowable_max) const
 {
 	if (P1_mode_value > 0 && higher_mode_value < 0 && value > allowable_min)
 	{
@@ -105,7 +105,7 @@ bool MLP_Indicator::is_smooth_extrema(const double value, const double higher_mo
 	}
 }
 
-Subcell_Oscillation_Indicator::Subcell_Oscillation_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+Subcell_Oscillation_Indicating_Function::Subcell_Oscillation_Indicating_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
 	:criterion_equation_index_(criterion_equation_index)
 {
 	const auto space_dimension = grid.space_dimension();
@@ -150,7 +150,7 @@ Subcell_Oscillation_Indicator::Subcell_Oscillation_Indicator(const Grid& grid, D
 	discrete_solution.precalculate_infs_ncs_jump_QPs_basis_values(nc_indexes, set_of_ncs_QPs);
 }
 
-void Subcell_Oscillation_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Subcell_Oscillation_Indicating_Function::precalculate(const Discrete_Solution_DG& discrete_solution)
 {
 	std::fill(this->set_of_num_troubled_boundaries_.begin(), this->set_of_num_troubled_boundaries_.end(), 0);
 
@@ -187,13 +187,13 @@ void Subcell_Oscillation_Indicator::precalculate(const Discrete_Solution_DG& dis
 	}
 }
 
-bool Subcell_Oscillation_Indicator::is_typeI_cell(const uint cell_index) const
+bool Subcell_Oscillation_Indicating_Function::is_typeI_cell(const uint cell_index) const
 {
 	constexpr ushort typeI_threshold_number = 2;
 	return typeI_threshold_number <= this->set_of_num_troubled_boundaries_[cell_index];
 }
 
-bool Subcell_Oscillation_Indicator::is_typeII_cell(const uint cell_index) const
+bool Subcell_Oscillation_Indicating_Function::is_typeII_cell(const uint cell_index) const
 {
 	constexpr ushort typeII_threshold_number = 1;
 	return typeII_threshold_number <= this->set_of_num_troubled_boundaries_[cell_index];

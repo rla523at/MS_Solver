@@ -57,6 +57,7 @@ public:
 	std::pair<const Quadrature_Rule&, const Quadrature_Rule&> inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const;
 	std::vector<Euclidean_Vector> inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;
 	double inner_face_volume(const uint inner_face_index) const;
+	std::vector<std::pair<uint, uint>> inner_face_index_to_oc_nc_index_pair_table(void) const;
 
 private:		
 	std::vector<uint> find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const;

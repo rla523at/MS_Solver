@@ -579,6 +579,20 @@ double Grid::inner_face_volume(const uint inner_face_index) const
 	}
 }
 
+std::vector<std::pair<uint, uint>> Grid::inner_face_index_to_oc_nc_index_pair_table(void) const
+{
+	const auto num_inner_faces = this->num_inner_faces();
+
+	std::vector<std::pair<uint, uint>> result(num_inner_faces);
+
+	for (uint infc_index = 0; infc_index < num_inner_faces; ++infc_index)
+	{
+		result[infc_index] = this->inner_face_oc_nc_index_pair(infc_index);
+	}
+
+	return result;
+}
+
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const
 {
 	const auto num_vnode = vnode_indexes.size();

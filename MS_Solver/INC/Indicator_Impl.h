@@ -1,4 +1,5 @@
 #pragma once
+#include "Indicator.h"
 #include "Indicating_Function.h"
 
 class hMLP_Indicator : public Indicator
@@ -20,14 +21,14 @@ public://Query
     }
 
 private:    
-    MLP_Indicator MLP_indicator_;
+    MLP_Indicating_Function MLP_indicator_;
 };
 
 class hMLP_BD_Indicator : public Indicator
 {
 public:
     hMLP_BD_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index
-        , std::unique_ptr<Discontinuity_Indicator>&& shock_indicator, std::unique_ptr<Discontinuity_Indicator>&& contact_indicator)
+        , std::unique_ptr<Discontinuity_Indicating_Function>&& shock_indicator, std::unique_ptr<Discontinuity_Indicating_Function>&& contact_indicator)
         : MLP_indicator_(grid, discrete_solution, criterion_equation_index)
         , subcell_oscillation_indicator_(grid, discrete_solution, criterion_equation_index)
         , shock_indicator_(std::move(shock_indicator))
@@ -46,8 +47,8 @@ public://Query
     Cell_Type indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& stability_criterion) const override;
 
 private:
-    MLP_Indicator MLP_indicator_;
-    Subcell_Oscillation_Indicator subcell_oscillation_indicator_;
-    std::unique_ptr<Discontinuity_Indicator> shock_indicator_;
-    std::unique_ptr<Discontinuity_Indicator> contact_indicator_;
+    MLP_Indicating_Function MLP_indicator_;
+    Subcell_Oscillation_Indicating_Function subcell_oscillation_indicator_;
+    std::unique_ptr<Discontinuity_Indicating_Function> shock_indicator_;
+    std::unique_ptr<Discontinuity_Indicating_Function> contact_indicator_;
 };

@@ -201,6 +201,9 @@
     <ClCompile Include="SRC\Indicating_Function_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Measuring_Function_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Exception.h">
@@ -345,6 +348,12 @@
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
     <ClInclude Include="INC\Indicating_Function_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Measuring_Function.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Measuring_Function_Impl.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
   </ItemGroup>
