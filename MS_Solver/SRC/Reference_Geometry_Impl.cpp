@@ -85,6 +85,15 @@ Vector_Function<Polynomial> Reference_Line::make_normal_vector_function(const Ve
 	return normal_vector_function;
 }
 
+Euclidean_Vector Reference_Line::random_point(void) const
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+
+	return { distribution(gen) };
+}
+
 bool Reference_Line::is_line(void) const
 {
 	return true;
@@ -279,6 +288,21 @@ Vector_Function<Polynomial> Reference_Triangle::make_normal_vector_function(cons
 	const auto T_s = mapping_function.get_differentiate(s);
 
 	return T_r.cross_product(T_s);
+}
+
+Euclidean_Vector Reference_Triangle::random_point(void) const
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	std::uniform_real_distribution<double> x_distribution(-1.0, 1.0);
+	const auto x_coordinate = x_distribution(gen);
+
+	std::uniform_real_distribution<double> y_distribution(-1.0, -x_coordinate);
+	const auto y_coordinate = y_distribution(gen);
+
+
+	return { x_coordinate, y_coordinate };
 }
 
 bool Reference_Triangle::is_line(void) const
@@ -493,6 +517,21 @@ Vector_Function<Polynomial> Reference_Quadrilateral::make_normal_vector_function
 	const auto T_s = mapping_function.get_differentiate(s);
 
 	return T_r.cross_product(T_s);
+}
+
+Euclidean_Vector Reference_Quadrilateral::random_point(void) const
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	std::uniform_real_distribution<double> x_distribution(-1.0, 1.0);
+	const auto x_coordinate = x_distribution(gen);
+
+	std::uniform_real_distribution<double> y_distribution(-1.0, 1.0);
+	const auto y_coordinate = y_distribution(gen);
+
+
+	return { x_coordinate, y_coordinate };
 }
 
 Quadrature_Rule Reference_Quadrilateral::make_quadrature_rule(const ushort integrand_order) const

@@ -1,6 +1,8 @@
 #pragma once
 #include "Reference_Geometry.h"
 
+#include <random>
+
 class Reference_Line : public Reference_Geometry
 {
 public:
@@ -10,12 +12,13 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
+	bool is_simplex(void) const override;
+	bool is_line(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override;
-	bool is_simplex(void) const override;
-	bool is_line(void) const override;
+	Euclidean_Vector random_point(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
@@ -40,12 +43,12 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
-	ushort num_vertices(void) const override;
+	bool is_simplex(void) const override;
+	bool is_line(void) const override; ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
-	bool is_simplex(void) const override;
-	bool is_line(void) const override;
+	Euclidean_Vector random_point(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
@@ -70,12 +73,13 @@ public://Query
 	Euclidean_Vector center_point(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> face_reference_geometries(void) const override;
 	Figure figure(void) const override;
+	bool is_simplex(void) const override;
+	bool is_line(void) const override;
 	ushort num_vertices(void) const override;
 	ushort num_post_nodes(const ushort post_order) const override;
 	ushort num_post_elements(const ushort post_order) const override;
 	Vector_Function<Polynomial> make_normal_vector_function(const Vector_Function<Polynomial>& mapping_function) const override; //2D Element 공통
-	bool is_simplex(void) const override;
-	bool is_line(void) const override;
+	Euclidean_Vector random_point(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_vertex_index_sequences(void) const override;
 	std::vector<std::vector<ushort>> set_of_face_node_index_sequences(void) const override;
 	std::vector<std::shared_ptr<const Reference_Geometry>> sub_simplex_reference_geometries(void) const override;
