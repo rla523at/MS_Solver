@@ -75,6 +75,11 @@ public://Command
 		const std::vector<std::pair<uint, uint>>& pbdry_oc_nc_index_pairs,
 		const std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>>& pbdry_set_of_oc_nc_moved_QPs);
 
+	//for divergence velocity measuring function
+	void precalcualte_cell_QPs_ddx_basis_values(const std::vector<std::vector<Euclidean_Vector>>& cell_index_to_QPs);
+	void precalcualte_cell_QPs_ddy_basis_values(const std::vector<std::vector<Euclidean_Vector>>& cell_index_to_QPs);
+
+
 public://Query	
 	std::vector<Euclidean_Vector> calculate_solution_at_post_element_centers(const uint cell_index) const override;
 	std::vector<Euclidean_Vector> calculate_solution_at_post_points(const uint cell_index) const override;
@@ -98,11 +103,12 @@ public://Query
 	std::vector<Euclidean_Vector> calculate_solution_at_infc_ncs_QPs(const uint infs_index, const uint nc_index) const;
 	void calculate_solution_at_bdry_QPs(Euclidean_Vector* solution_at_QPs, const uint bdry_index, const uint oc_index);
 	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index);
+	void calculate_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
 	void calculate_solution_at_infc_ocs_QPs(Euclidean_Vector* solution_at_infc_ocs_QPs, const uint infs_index, const uint oc_index);
 	void calculate_solution_at_infc_ncs_QPs(Euclidean_Vector* solution_at_infc_ncs_QPs, const uint infs_index, const uint nc_index);
 
 	//for MLP criterion
-	double calculate_P0_nth_solution(const uint cell_index, const ushort equation_index) const;
+	double calculate_P0_nth_solution(const uint cell_index, const ushort solution_index) const;
 	std::vector<double> calculate_P1_projected_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	std::vector<double> calculate_nth_solution_at_vertices(const uint cell_index, const ushort equation_index) const;
 	void calculate_P1_projected_nth_solution_at_vertices(double* P1_projected_nth_solution_at_vertices, const uint cell_index, const ushort equation_index) const;
@@ -121,10 +127,19 @@ public://Query
 	//for discontinuity indicator	
 	void calculate_nth_extrapolated_solution_at_cell_QPs(double* nth_solution_at_target_cell_QPs, const uint face_share_cell_index, const uint target_cell_index, const ushort solution_index) const;
 
+	//for divergence velocity measuring function
+	void calculate_ddx_GE_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
+	void calculate_ddy_GE_solution_at_cell_QPs(Euclidean_Vector* solution_at_QPs, const uint cell_index) const;
+
+
+
 private:	
 	std::vector<double> calculate_initial_values(const Grid& grid, const Initial_Condition& initial_condition) const;
 
 	Matrix calculate_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+	Matrix calculate_ddx_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+	Matrix calculate_ddy_basis_points_m(const uint cell_index, const std::vector<Euclidean_Vector>& points) const;
+
 	Vector_Function<Polynomial> calculate_simplex_Pn_projection_basis_vector_function(const uint cell_index, const ushort Pn, const Geometry& sub_simplex_geometry) const;
 	Constant_Matrix_Wrapper Pn_projected_basis_constant_matrix_wrapper(const Constant_Matrix_Wrapper& basis_points_m, const ushort Pn) const;
 	size_t num_total_basis(void) const;
@@ -133,7 +148,9 @@ private:
 	const double* coefficient_pointer(const uint cell_index) const;
 	Matrix_Wrapper coefficient_matrix_wrapper(const uint cell_index);
 	double P0_nth_coefficient(const uint cell_index, const ushort equation_index) const;
-	Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
+	//Euclidean_Vector P0_coefficient_v(const uint cell_index) const;	
+	void calculate_P0_coefficient_v(double* ptr, const uint cell_index) const;
+
 	Constant_Matrix_Wrapper coefficient_constant_matrix_wrapper(const uint cell_index) const;
 	Constant_Matrix_Wrapper nth_coefficient_matrix_contant_wrapper(const uint cell_index, const ushort equation_index) const;
 	Constant_Matrix_Wrapper Pn_projected_mth_coefficient_contant_matrix_wrapper(const uint cell_index, const ushort Pn, const ushort equation_index) const;
@@ -143,6 +160,7 @@ private:
 	std::vector<Euclidean_Vector> calculate_solution_at_precalulated_points(const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	std::vector<double> calculate_nth_solution_at_precalulated_points(const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	std::vector<double> calculate_Pn_projected_mth_solution_at_precalulated_points(const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
+	void calculate_GE_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	//void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m);
 	void calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
@@ -177,12 +195,16 @@ private:
 	std::vector<Matrix> set_of_infc_basis_ncs_jump_QPs_m_;	//inner face neighbor cell side jump quadratue point basis value matrix
 
 	std::vector<std::map<uint, Matrix>> cell_index_to__face_neighbor_cell_index_to_basis_my_QPs_m__table_;
+	std::vector<Matrix> cell_index_to_ddx_basis_QPs_m_;		
+	std::vector<Matrix> cell_index_to_ddy_basis_QPs_m_;		
+
 
 	//optimize construction
 	static constexpr ushort max_num_equation = 5;
 	static constexpr ushort max_num_precalculated_points = 200;
-	mutable Euclidean_Vector GE_soluion_;
-	mutable Euclidean_Vector solution_;
+	mutable Euclidean_Vector P0_coefficient_v_;
+	mutable Euclidean_Vector GE_soluion_v_;
+	mutable Euclidean_Vector solution_v_;
 	mutable std::array<double, max_num_equation * max_num_precalculated_points> solution_at_points_values_ = { 0 };
 };
 

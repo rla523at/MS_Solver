@@ -16,7 +16,6 @@ public://Command
 	void solve(void);
 	std::vector<double> calculate_error_norms(const Grid& grid) const;
 
-
 private:
 	void controll_time_step(const double current_time, double& time_step) const;
 

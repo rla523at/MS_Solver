@@ -5,9 +5,10 @@ space_dimension				= 2
 governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Modified_Sod					
+Initial_condition			= Shu_Osher				
 							//Constant1, Sine_Wave
 							//Modified_Sod
+							//Shu_Osher
 
 //linear advection option
 x_advection_speed			= 1.0
@@ -24,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ200x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -32,9 +33,9 @@ grid_file_type				= Gmsh
 
 /////////////////////// Solver Option /////////////////////////////
 
-spatial_discrete_scheme		= DG_P2
-reconstruction_scheme		= hMLP_BD
-							//No, hMLP, hMLP_BD, Improved_hMLP_BD1, Improved_hMLP_BD2
+spatial_discrete_scheme		= DG_P3
+reconstruction_scheme		= Improved_hMLP_BD4
+							//No, hMLP, hMLP_BD, hMLP_BD_Off_TypeII, Improved_hMLP_BD1, Improved_hMLP_BD2, Improved_hMLP_BD3, Improved_hMLP_BD4
 
 numerical_flux				= LLF
 
@@ -55,7 +56,7 @@ solve_end_time				= -1
 
 solve_end_iter				= 100
 
-solve_post_controller_type	= Time
+solve_post_controller_type	= NotUse
 							//Time, Iter, NotUse, Initial_Final
 
 solve_post_time_step		= 0.01
@@ -69,7 +70,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/rft_geo/
+post_base_path				= E:/CodeData/Result/RDD/DEV/discontinuity_indicator/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -78,7 +79,7 @@ post_point_location			= Node
 
 post_order					= 1
 
-post_for_debug				= No
+post_for_debug				= Yes
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////

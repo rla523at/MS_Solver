@@ -8,6 +8,7 @@ public:
 	Post_Variable_Convertor(const Grid& grid, const ushort post_order, const Discrete_Solution& discrete_solution);
 
 public://Query
+	virtual std::vector<double> cell_index(void) const abstract;
 	virtual std::vector<double> convert_values(const std::vector<double>& cell_index_to_value) const abstract;
 	virtual std::vector<std::vector<double>> calculate_set_of_post_point_solution_values(void) const abstract;
 	virtual std::string variable_location_str(void) const abstract;
@@ -24,6 +25,7 @@ public:
 	Node_Base_Convertor(const Grid& grid, const ushort post_order, Discrete_Solution& discrete_solution);
 
 public:
+	std::vector<double> cell_index(void) const override;
 	std::vector<double> convert_values(const std::vector<double>& cell_index_to_value) const override;
 	std::vector<std::vector<double>> calculate_set_of_post_point_solution_values(void) const override;
 	std::string variable_location_str(void) const override;
@@ -43,6 +45,7 @@ public:
 	Center_Base_Convertor(const Grid& grid, const ushort post_order, Discrete_Solution& discrete_solution);
 
 public:
+	std::vector<double> cell_index(void) const override { return {}; };
 	std::vector<double> convert_values(const std::vector<double>& cell_index_to_value) const override;
 	std::vector<std::vector<double>> calculate_set_of_post_point_solution_values(void) const override;
 	std::string variable_location_str(void) const override;

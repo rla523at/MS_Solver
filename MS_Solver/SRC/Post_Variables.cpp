@@ -57,6 +57,12 @@ void Post_Variables::record_variable(const std::string& name, const std::vector<
 	this->set_of_post_variable_values_.push_back(std::move(post_variable_values));
 }
 
+void Post_Variables::record_cell_index(void)
+{
+	this->post_variable_names_.push_back("cell_index");
+	this->set_of_post_variable_values_.push_back(this->post_variable_convertor_->cell_index());
+}
+
 void Post_Variables::syncronize_solution_time(const double& solution_time) 
 {
 	this->solution_time_ptr_ = &solution_time;

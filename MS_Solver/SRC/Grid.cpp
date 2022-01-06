@@ -282,6 +282,24 @@ std::vector<Euclidean_Vector> Grid::cell_center_nodes(void) const
 	return center_nodes;
 }
 
+double Grid::cell_characteristic_length(const uint cell_index) const
+{
+	return std::pow(this->cell_volume(cell_index), 1.0 / this->space_dimension_);
+}
+
+std::vector<double> Grid::cell_index_to_characteristic_length_table(void) const
+{
+	const auto num_cell = this->cell_elements_.size();
+	std::vector<double> cell_index_to_characteristic_length_table(num_cell);
+
+	for (uint cell_index = 0; cell_index < num_cell; ++cell_index)
+	{
+		cell_index_to_characteristic_length_table[cell_index] = this->cell_characteristic_length(cell_index);
+	}
+
+	return cell_index_to_characteristic_length_table;
+}
+
 std::vector<ushort> Grid::cell_index_to_num_vertices_table(void) const
 {
 	const auto num_cell = this->cell_elements_.size();
@@ -293,7 +311,6 @@ std::vector<ushort> Grid::cell_index_to_num_vertices_table(void) const
 	}
 
 	return cell_index_to_num_vertices_table;
-
 }
 
 std::vector<ushort> Grid::cell_set_of_num_post_points(const ushort post_order) const 

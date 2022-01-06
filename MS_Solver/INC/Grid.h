@@ -28,6 +28,8 @@ public:
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
 	std::vector<Vector_Function<Polynomial>> cell_basis_vector_functions(const std::vector<ushort> solution_degrees) const; //unnecessary
 	std::vector<Euclidean_Vector> cell_center_nodes(void) const;
+	double cell_characteristic_length(const uint cell_index) const;
+	std::vector<double> cell_index_to_characteristic_length_table(void) const;
 	std::vector<ushort> cell_index_to_num_vertices_table(void) const;
 	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
@@ -40,7 +42,7 @@ public:
 	std::vector<std::vector<double>> cell_index_to_projected_volumes_table(void) const;
 	std::vector<Geometry> cell_sub_simplex_geometries(const uint cell_index) const;
 	std::vector<double> cell_index_to_volume_table(void) const;
-	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;
+	std::vector<Euclidean_Vector> cell_vertices(const uint cell_index) const;	
 	double cell_volume(const uint cell_index) const { return this->cell_elements_[cell_index].volume(); };
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 

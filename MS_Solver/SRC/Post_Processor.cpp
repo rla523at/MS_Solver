@@ -48,6 +48,8 @@ void Post_Processor::post_grid(void)
 
 void Post_Processor::post_solution(const std::string_view sv)
 {
+	Post_Processor::record_cell_index();
+
 	if (!This_::do_write_)
 	{
 		return;
@@ -85,6 +87,16 @@ void Post_Processor::record_variables(const std::string& name, const std::vector
 	REQUIRE(This_::is_initialized_, "Post processore should be initialized before record variable");
 
 	This_::post_variables_->record_variable(name, values);
+}
+
+void Post_Processor::record_cell_index(void)
+{
+	if (!This_::do_write_)
+	{
+		return;
+	}
+
+	This_::post_variables_->record_cell_index();
 }
 
 void Post_Processor::set_path(const std::string& path)

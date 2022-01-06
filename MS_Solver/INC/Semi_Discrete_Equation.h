@@ -5,6 +5,7 @@
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
 #include "Reconstruction_Impl.h"
+#include "Initial_Condition_Impl.h"
 
 
 class Semi_Discrete_Equation

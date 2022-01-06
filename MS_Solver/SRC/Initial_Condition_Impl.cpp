@@ -1,4 +1,4 @@
-#include "../INC/Initial_Condition.h"
+#include "../INC/Initial_Condition_Impl.h"
 
 Euclidean_Vector Constant1::calculate_solution(const Euclidean_Vector& space_vector) const
 {

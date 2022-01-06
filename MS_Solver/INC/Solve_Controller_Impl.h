@@ -1,6 +1,5 @@
 #pragma once
-#include "Configuration.h"
-#include "Initial_Condition.h"
+#include "Initial_Condition_Impl.h"
 #include "Solve_Controller.h"
 
 class Solve_End_Controller_By_Time : public Solve_End_Controller

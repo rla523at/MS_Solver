@@ -17,6 +17,7 @@ public://Command
 	void clear_variables(void);
 	void record_solution(void);
 	void record_variable(const std::string& name, const std::vector<double>& values);
+	void record_cell_index(void);
 	void syncronize_solution_time(const double& compute);	
 
 public://Query

@@ -27,6 +27,24 @@ Node_Base_Convertor::Node_Base_Convertor(const Grid& grid, const ushort post_ord
 	this->solution_at_post_points_.fill(Euclidean_Vector(this->discrete_solution_.num_solutions()));
 };
 
+std::vector<double> Node_Base_Convertor::cell_index(void) const
+{
+	std::vector<double> post_variable_values(this->num_post_points_);
+
+	size_t index = 0;
+	for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+	{
+		const auto num_post_elements = this->cell_index_to_num_post_points_table_[cell_index];
+
+		for (ushort j = 0; j < num_post_elements; ++j)
+		{
+			post_variable_values[index++] = cell_index;
+		}
+	}
+
+	return post_variable_values;
+}
+
 std::vector<double> Node_Base_Convertor::convert_values(const std::vector<double>& cell_index_to_value) const
 {
 	REQUIRE(cell_index_to_value.size() == this->num_cells_, "number of copy_values should be same with number of cells");

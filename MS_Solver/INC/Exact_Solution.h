@@ -1,5 +1,7 @@
 #pragma once
+#include "Configuration.h"
 #include "Initial_Condition.h"
+#include "Initial_Condition_Impl.h"
 
 class Exact_Solution
 {
