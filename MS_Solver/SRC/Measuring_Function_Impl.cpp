@@ -196,7 +196,7 @@ Max_Divergence_of_Velocity::Max_Divergence_of_Velocity(const Grid& grid, Discret
     discrete_solution.precalcualte_cell_QPs_ddy_basis_values(cell_index_to_QPs);
 }
 
-#include "../INC/Post_Processor.h"//debug
+//#include "../INC/Post_Processor.h"//debug
 std::vector<double> Max_Divergence_of_Velocity::measure(const Discrete_Solution_DG& discrete_solution) const
 {
     constexpr auto initial_negative_value = -1000;
@@ -232,11 +232,11 @@ std::vector<double> Max_Divergence_of_Velocity::measure(const Discrete_Solution_
         }
     }
 
-    //debug
-    Post_Processor::record_solution();
-    Post_Processor::record_variables("velocity divergence", cell_index_to_max_divergence_table);
-    Post_Processor::post_solution();
-    //
+    ////debug
+    //Post_Processor::record_solution();
+    //Post_Processor::record_variables("velocity divergence", cell_index_to_max_divergence_table);
+    //Post_Processor::post_solution();
+    ////
 
     return cell_index_to_max_divergence_table;
 }

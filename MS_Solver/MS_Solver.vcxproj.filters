@@ -236,16 +236,7 @@
     <ClInclude Include="INC\Profiler.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Initial_Condition.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Time_Step_Calculator.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Governing_Equation.h">
-      <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Discrete_Solution.h">
       <Filter>헤더 파일\Solver</Filter>
     </ClInclude>
     <ClInclude Include="INC\Post_Processor.h">
@@ -308,12 +299,6 @@
     <ClInclude Include="INC\Limiting_Function.h">
       <Filter>헤더 파일\Solver\Reconstruction\Limiter</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Indicator.h">
-      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Indicator_Impl.h">
-      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Indicating_Function.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
@@ -362,8 +347,26 @@
     <ClInclude Include="INC\Semi_Discrete_Equation.h">
       <Filter>헤더 파일\Solver\RHS</Filter>
     </ClInclude>
+    <ClInclude Include="INC\Governing_Equation.h">
+      <Filter>헤더 파일\Solver\RHS</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Initial_Condition.h">
+      <Filter>헤더 파일\Solver\RHS</Filter>
+    </ClInclude>
     <ClInclude Include="INC\Initial_Condition_Impl.h">
-      <Filter>헤더 파일\Solver</Filter>
+      <Filter>헤더 파일\Solver\RHS</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Discrete_Solution.h">
+      <Filter>헤더 파일\Solver\RHS</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Cell_Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Indicator.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Discontinuity_Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

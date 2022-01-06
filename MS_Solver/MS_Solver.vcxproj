@@ -125,6 +125,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Configuration.h" />
+    <ClInclude Include="INC\Discontinuity_Indicator_Impl.h" />
     <ClInclude Include="INC\Discrete_Equation.h" />
     <ClInclude Include="INC\Discrete_Solution.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -148,7 +149,7 @@
     <ClInclude Include="INC\Indicating_Function_Impl.h" />
     <ClInclude Include="INC\Indicator.h" />
     <ClInclude Include="INC\Indicating_Function.h" />
-    <ClInclude Include="INC\Indicator_Impl.h" />
+    <ClInclude Include="INC\Cell_Indicator_Impl.h" />
     <ClInclude Include="INC\Initial_Condition.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
