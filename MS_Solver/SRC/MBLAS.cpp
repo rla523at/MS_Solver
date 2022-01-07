@@ -2,7 +2,15 @@
 
 namespace ms::BLAS
 {
-	double abs_x(const int n, const double* x_ptr)
+	void abs_x(const int n, double* x_ptr)
+	{
+		for (int i = 0; i < n; ++i)
+		{
+			x_ptr[i] = std::abs(x_ptr[i]);
+		}
+	}
+
+	double abs_sum_x(const int n, const double* x_ptr)
 	{
 		double result = 0.0;
 

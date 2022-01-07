@@ -96,7 +96,7 @@ const double* Constant_Euclidean_Vector_Wrapper::end(void) const
 
 double Constant_Euclidean_Vector_Wrapper::L1_norm(void) const
 {
-	return ms::BLAS::abs_x(this->num_values_, this->const_data_ptr_);
+	return ms::BLAS::abs_sum_x(this->num_values_, this->const_data_ptr_);
 }
 
 double Constant_Euclidean_Vector_Wrapper::L2_norm(void) const

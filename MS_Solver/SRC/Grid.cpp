@@ -313,6 +313,23 @@ std::vector<ushort> Grid::cell_index_to_num_vertices_table(void) const
 	return cell_index_to_num_vertices_table;
 }
 
+std::vector<ushort> Grid::cell_index_to_num_inner_faces_table(void) const
+{
+	const auto num_cell = this->cell_elements_.size();
+	std::vector<ushort> result(num_cell);
+
+	const auto num_infcs = this->num_inner_faces();
+	for (uint i = 0; i < num_infcs; ++i)
+	{
+		const auto [oc_index, nc_index] = this->inner_face_oc_nc_index_pair(i);
+
+		result[oc_index]++;
+		result[nc_index]++;
+	}	
+
+	return result;
+}
+
 std::vector<ushort> Grid::cell_set_of_num_post_points(const ushort post_order) const 
 {
 	const auto& cell_elements = this->cell_elements_;
@@ -594,6 +611,20 @@ double Grid::inner_face_volume(const uint inner_face_index) const
 		const auto& [ocs_element, ncs_element] = this->periodic_boundary_element_pairs_[inner_face_index - num_inter_cell_face];
 		return ocs_element.volume();
 	}
+}
+
+std::vector<double> Grid::inner_face_index_to_characteristic_length_table(void) const
+{	
+	const auto num_inner_faces = this->num_inner_faces();
+
+	std::vector<double> result(num_inner_faces);
+
+	for (uint infc_index = 0; infc_index < num_inner_faces; ++infc_index)
+	{
+		result[infc_index] = std::pow(this->inner_face_volume(infc_index),  (1.0 / (this->space_dimension_ - 1.0)));
+	}
+
+	return result;
 }
 
 std::vector<std::pair<uint, uint>> Grid::inner_face_index_to_oc_nc_index_pair_table(void) const

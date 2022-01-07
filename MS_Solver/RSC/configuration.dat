@@ -5,7 +5,7 @@ space_dimension				= 2
 governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Modified_Sod			
+Initial_condition			= Shu_Osher			
 							//Constant1, Sine_Wave
 							//Modified_Sod
 							//Shu_Osher
@@ -25,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ400x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ grid_file_type				= Gmsh
 /////////////////////// Solver Option /////////////////////////////
 
 spatial_discrete_scheme		= DG_P3
-reconstruction_scheme		= Improved_hMLP_BD4
+reconstruction_scheme		= hMLP_BD
 							//No, hMLP, hMLP_BD, hMLP_BD_Off_TypeII, Improved_hMLP_BD1, Improved_hMLP_BD2, Improved_hMLP_BD3, Improved_hMLP_BD4
 
 numerical_flux				= LLF
@@ -70,7 +70,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/RFT/Indicator/
+post_base_path				= E:/CodeData/Result/RDD/DEV/Discontinuity_Indicator/
 post_file_format			= Binary 					
 							//ASCII, Binary
 

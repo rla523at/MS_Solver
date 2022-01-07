@@ -50,6 +50,29 @@ private:
     static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_QPs;
 };
 
+class Average_Solution_Jump_Measuring_Function
+{
+public:
+    Average_Solution_Jump_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+
+public://Command
+    std::vector<double> measure_infc_index_to_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution);
+    
+private:
+    ushort criterion_solution_index_ = 0;
+    uint num_infcs_ = 0;
+
+    std::vector<double> infc_index_to_reciprocal_volume_table_;
+    std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
+    std::vector<Euclidean_Vector> infc_index_to_jump_QWs_v_table_;
+
+    //construction optimization
+    static constexpr ushort num_max_jump_QPs = 30;
+    mutable std::array<double, num_max_jump_QPs> value_at_ocs_jump_QPs_ = { 0 };
+    mutable std::array<double, num_max_jump_QPs> value_at_ncs_jump_QPs_ = { 0 };
+    mutable std::array<double, num_max_jump_QPs> value_diff_at_jump_QPs_ = { 0 };
+};
+
 
 
 

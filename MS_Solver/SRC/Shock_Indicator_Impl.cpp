@@ -26,7 +26,7 @@ void Type1_Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_so
     }
 };
 
-static std::unique_ptr<Shock_Indicator> Shock_Indicator_Factory::make_unique(const std::string& governing_equation_name, const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
+std::unique_ptr<Shock_Indicator> Shock_Indicator_Factory::make_unique(const std::string& governing_equation_name, const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {
     const auto pressure_index = find_pressure_index(governing_equation_name, grid.space_dimension());
 

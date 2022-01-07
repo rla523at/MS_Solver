@@ -31,6 +31,7 @@ public:
 	double cell_characteristic_length(const uint cell_index) const;
 	std::vector<double> cell_index_to_characteristic_length_table(void) const;
 	std::vector<ushort> cell_index_to_num_vertices_table(void) const;
+	std::vector<ushort> cell_index_to_num_inner_faces_table(void) const;
 	std::vector<ushort> cell_set_of_num_post_points(const ushort post_order) const;
 	std::vector<ushort> cell_set_of_num_post_elements(const ushort post_order) const;
 	std::vector<std::vector<Euclidean_Vector>> cell_set_of_post_points(const ushort post_order) const;
@@ -59,6 +60,7 @@ public:
 	std::pair<const Quadrature_Rule&, const Quadrature_Rule&> inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const;
 	std::vector<Euclidean_Vector> inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;
 	double inner_face_volume(const uint inner_face_index) const;
+	std::vector<double> inner_face_index_to_characteristic_length_table(void) const;
 	std::vector<std::pair<uint, uint>> inner_face_index_to_oc_nc_index_pair_table(void) const;
 
 private:		

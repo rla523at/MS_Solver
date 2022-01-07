@@ -72,6 +72,27 @@ public:
     Divergence_Velocity_Measuring_Function measuring_function_;
 };
 
+// h <= AVG INT_{w_j} (q - q_j) / ||w_j|| ==> average of average solution jump가 h 이상이면 discontinuity로 보겠다.
+// h = characteristic length of cell i
+class Type4_Discontinuity_Indicator : public Discontinuity_Indicator
+{
+public:
+    Type4_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+
+public:
+    void precalculate(const Discrete_Solution_DG& discrete_solution) override;
+
+public:
+    static constexpr auto rho_index_ = 0;
+
+    uint num_cells_ = 0;
+    uint num_infcs_ = 0;
+    std::vector<double> cell_index_to_characteristic_length_table_;
+    std::vector<ushort> cell_index_to_num_infc_table_;
+    std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
+    Average_Solution_Jump_Measuring_Function measuring_function_;
+};
+
 class Discontinuity_Indicator_Factory//static class
 {
 public://Query

@@ -12,7 +12,8 @@ namespace ms::BLAS
 	inline constexpr ushort axpy_criteria = 20;
 	inline constexpr ushort dot_criteria = 15;
 
-	double abs_x(const int n, const double* x_ptr);
+	void abs_x(const int n, double* x_ptr);
+	double abs_sum_x(const int n, const double* x_ptr);
 	void copy(const int n, const double* x_ptr, double* result_ptr);
 	void cx(const double c, const int n, double* x_ptr);
 	double x_dot_y(const int n, const double* x_ptr, const double* y_ptr);

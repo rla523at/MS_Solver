@@ -37,6 +37,7 @@ void Discrete_Equation::solve(void)
         this->controll_time_step(this->current_time_, time_step);
 
         this->time_discrete_scheme_->update(*this->semi_discrete_equation_, time_step);
+
         this->current_time_ += time_step;
         current_iter++;
 

@@ -183,9 +183,6 @@
     <ClCompile Include="SRC\Limiter_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Limiter</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Indicating_Function_Impl.cpp">
-      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Measuring_Function.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
@@ -209,6 +206,12 @@
     </ClCompile>
     <ClCompile Include="SRC\Semi_Discrete_Equation.cpp">
       <Filter>소스 파일\Solver\RHS</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Discontinuity_Indicator_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Shock_Indicator_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -299,9 +302,6 @@
     <ClInclude Include="INC\Limiting_Function.h">
       <Filter>헤더 파일\Solver\Reconstruction\Limiter</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Indicating_Function.h">
-      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Stability_Criterion.h">
       <Filter>헤더 파일\Solver\Reconstruction\Stability_Criterion</Filter>
     </ClInclude>
@@ -313,9 +313,6 @@
     </ClInclude>
     <ClInclude Include="INC\Solve_Controller_Impl.h">
       <Filter>헤더 파일\Solver</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Indicating_Function_Impl.h">
-      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
     <ClInclude Include="INC\Measuring_Function.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>

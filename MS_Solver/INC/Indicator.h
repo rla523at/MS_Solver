@@ -1,5 +1,6 @@
 #pragma once
 #include "Stability_Criterion.h"
+#include "Measuring_Function.h"
 
 enum class Cell_Type
 {
@@ -28,23 +29,19 @@ public://Command
     void precalculate(const Discrete_Solution_DG& discrete_solution);
 
 public://Query
-    bool is_typeI_cell(const uint cell_index) const;
-    bool is_typeII_cell(const uint cell_index) const;
+    bool is_typeI_cell(const uint cell_index) const { return typeI_threshold_number_ <= this->cell_index_to_num_troubled_faces_[cell_index]; };
+    bool is_typeII_cell(const uint cell_index) const { return typeII_threshold_number_ <= this->cell_index_to_num_troubled_faces_[cell_index]; };
 
 private:
-    ushort criterion_equation_index_ = 0;
-    std::vector<ushort> set_of_num_troubled_boundaries_;
+    static constexpr auto typeI_threshold_number_ = 2;
+    static constexpr auto typeII_threshold_number_ = 1;
+    uint num_infcs_;
 
-    std::vector<double> inner_face_volumes_;
-    std::vector<std::pair<uint, uint>> inner_face_oc_nc_index_pairs_;
-    std::vector<double> inner_face_characteristic_lengths_;
-    std::vector<Euclidean_Vector> set_of_jump_QWs_v_;
+    std::vector<double> infc_index_to_characteristic_length_table_;
+    std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
 
-    //construction optimization
-    static constexpr ushort num_max_jump_QPs = 30;
-    mutable std::array<double, num_max_jump_QPs> value_at_ocs_jump_QPs_ = { 0 };
-    mutable std::array<double, num_max_jump_QPs> value_at_ncs_jump_QPs_ = { 0 };
-    mutable std::array<double, num_max_jump_QPs> value_diff_at_jump_QPs_ = { 0 };
+    std::vector<uint> cell_index_to_num_troubled_faces_;
+    Average_Solution_Jump_Measuring_Function measuring_function_;
 };
 
 class Discontinuity_Indicator

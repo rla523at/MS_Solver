@@ -21,7 +21,6 @@ std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const 
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
-
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
 		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
