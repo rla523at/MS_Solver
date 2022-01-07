@@ -26,6 +26,6 @@ public://Query
 
 private:
 	std::unique_ptr<MLP_Criterion_Base> stability_criterion_;
-    std::unique_ptr<Cell_Indicator> indicator_;
-    std::unique_ptr<Limiter> limiter_;
+	std::unique_ptr<Cell_Indicator> indicator_;
+	std::unique_ptr<Limiter> limiter_;
 };

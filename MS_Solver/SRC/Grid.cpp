@@ -519,9 +519,9 @@ std::vector<Euclidean_Vector> Grid::boundary_normals(const uint bdry_index, cons
 	return bdry_element.outward_normalized_normal_vectors(oc_element, points);
 }
 
-size_t Grid::num_inner_faces(void) const
+uint Grid::num_inner_faces(void) const
 {
-	return this->inter_cell_face_elements_.size() + this->periodic_boundary_element_pairs_.size();
+	return static_cast<uint>(this->inter_cell_face_elements_.size() + this->periodic_boundary_element_pairs_.size());
 }
 
 std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_index) const

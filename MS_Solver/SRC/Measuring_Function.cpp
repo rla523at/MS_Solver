@@ -1,36 +1,36 @@
-#include "../INC/Measuring_Function_Impl.h"
+#include "../INC/Measuring_Function.h"
 
-Scaled_Difference::Scaled_Difference(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Scaled_Average_Difference_Measuring_Function::Scaled_Average_Difference_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
-    , num_cells_(grid.num_cells())
+    , num_infcs_(grid.num_inner_faces())
     , infc_index_to_oc_nc_index_pair_table_(grid.inner_face_index_to_oc_nc_index_pair_table())
 {
     //for precalculation
     discrete_solution.precalculate_cell_P0_basis_values();
 };
 
-
-std::vector<double> Scaled_Difference::measure(const Discrete_Solution_DG& discrete_solution) const
+std::vector<double> Scaled_Average_Difference_Measuring_Function::measure_infc_index_to_scaled_average_difference_table(const Discrete_Solution_DG& discrete_solution) const
 {
-    std::vector<double> cell_index_to_max_scaled_diff_table(this->num_cells_);
-    for (const auto [oc_index, nc_index] : this->infc_index_to_oc_nc_index_pair_table_)
+    std::vector<double> infc_index_to_scaled_avg_diff_table(this->num_infcs_);
+    for (uint infc_index = 0; infc_index < this->num_infcs_; ++infc_index)
     {
-        const auto oc_value = discrete_solution.calculate_P0_nth_solution(oc_index, this->criterion_solution_index_);
-        const auto nc_value = discrete_solution.calculate_P0_nth_solution(nc_index, this->criterion_solution_index_);
+        const auto [oc_index, nc_index] = this->infc_index_to_oc_nc_index_pair_table_[infc_index];
 
-        const auto diff = std::abs(oc_value - nc_value);
-        const auto min_value = (std::min)(oc_value, nc_value);
-        const auto scaled_diff = diff / min_value;
+        const auto oc_avg_value = discrete_solution.calculate_P0_nth_solution(oc_index, this->criterion_solution_index_);
+        const auto nc_avg_value = discrete_solution.calculate_P0_nth_solution(nc_index, this->criterion_solution_index_);
 
-        cell_index_to_max_scaled_diff_table[oc_index] = (std::max)(cell_index_to_max_scaled_diff_table[oc_index], scaled_diff);
-        cell_index_to_max_scaled_diff_table[nc_index] = (std::max)(cell_index_to_max_scaled_diff_table[nc_index], scaled_diff);
+        const auto avg_diff = std::abs(oc_avg_value - nc_avg_value);
+        const auto min_value = (std::min)(oc_avg_value, nc_avg_value);
+        const auto scaled_diff = avg_diff / min_value;
+
+        infc_index_to_scaled_avg_diff_table[infc_index] = scaled_diff;
     }
 
-    return cell_index_to_max_scaled_diff_table;
+    return infc_index_to_scaled_avg_diff_table;
 }
 
 
-Extrapolation_Difference::Extrapolation_Difference(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Extrapolation_Differences_Measuring_Function::Extrapolation_Differences_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
     , num_cells_(grid.num_cells())
     , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
@@ -100,16 +100,16 @@ Extrapolation_Difference::Extrapolation_Difference(const Grid& grid, Discrete_So
 }
 
 
-std::vector<double> Extrapolation_Difference::measure(const Discrete_Solution_DG& discrete_solution) const
+std::vector<std::vector<double>> Extrapolation_Differences_Measuring_Function::measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const
 {
-    std::vector<double> cell_index_to_measuring_value_table(this->num_cells_);
+    std::vector<std::vector<double>> cell_index_to_extrapolation_differences_table(this->num_cells_);
 
     static constexpr ushort max_num_QPs = 100;
     std::array<double, max_num_QPs> nth_extrapolated_solution_at_cell_QPs = { 0 };
 
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
-        double diff_sum = 0.0;
+        auto& extrapolation_differences_table = cell_index_to_extrapolation_differences_table[cell_index];
 
         const auto one_over_volume = this->cell_index_to_volume_reciprocal_table_[cell_index];
         const auto P0_value = discrete_solution.calculate_P0_nth_solution(cell_index, this->criterion_solution_index_);
@@ -120,6 +120,8 @@ std::vector<double> Extrapolation_Difference::measure(const Discrete_Solution_DG
         const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
         const auto num_face_share_cells = face_share_cell_indexes.size();
 
+        extrapolation_differences_table.resize(num_face_share_cells);
+
         for (ushort j = 0; j < num_face_share_cells; ++j)
         {
             const auto face_share_cell_index = face_share_cell_indexes[j];
@@ -128,48 +130,14 @@ std::vector<double> Extrapolation_Difference::measure(const Discrete_Solution_DG
 
             const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_extrapolated_solution_at_cell_QPs.data(), QWs_v.data());
 
-            diff_sum += std::abs(P0_value_by_extrapolate * one_over_volume - P0_value);
+            extrapolation_differences_table[j] = std::abs(P0_value_by_extrapolate * one_over_volume - P0_value);
         }
-
-        const auto avg_diff = diff_sum / num_face_share_cells;
-        cell_index_to_measuring_value_table[cell_index] = avg_diff;
     }
 
-    return cell_index_to_measuring_value_table;
+    return cell_index_to_extrapolation_differences_table;
 }
 
-
-std::vector<double> Difference_Of_Extrapolatiion_Difference::measure(const Discrete_Solution_DG& discrete_solution) const
-{
-    const auto cell_index_to_extrapolate_diff = this->extrapolate_difference_.measure(discrete_solution);
-
-    std::vector<double> cell_index_to_avg_diff_of_extrapolate_diff(this->num_cells_);
-
-    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
-    {
-        double diff_sum = 0.0;
-
-        const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
-        const auto num_face_share_cells = face_share_cell_indexes.size();
-
-        const auto extrapolate_diff = cell_index_to_extrapolate_diff[cell_index];
-
-        for (ushort j = 0; j < num_face_share_cells; ++j)
-        {
-            const auto face_share_cell_index = face_share_cell_indexes[j];
-            const auto face_neighbor_extrapolate_diff = cell_index_to_extrapolate_diff[face_share_cell_index];
-
-            const auto diff = std::abs(extrapolate_diff - face_neighbor_extrapolate_diff);
-            diff_sum += diff;
-        }
-
-        cell_index_to_avg_diff_of_extrapolate_diff[cell_index] = diff_sum / num_face_share_cells;
-    }
-
-    return cell_index_to_avg_diff_of_extrapolate_diff;
-}
-
-Max_Divergence_of_Velocity::Max_Divergence_of_Velocity(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Divergence_Velocity_Measuring_Function::Divergence_Velocity_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {
     this->num_cells_ = grid.num_cells();
     this->cell_index_to_num_QPs_.resize(this->num_cells_);
@@ -196,19 +164,21 @@ Max_Divergence_of_Velocity::Max_Divergence_of_Velocity(const Grid& grid, Discret
     discrete_solution.precalcualte_cell_QPs_ddy_basis_values(cell_index_to_QPs);
 }
 
-//#include "../INC/Post_Processor.h"//debug
-std::vector<double> Max_Divergence_of_Velocity::measure(const Discrete_Solution_DG& discrete_solution) const
+std::vector<std::vector<double>> Divergence_Velocity_Measuring_Function::measure_cell_index_to_divergence_velocities_table(const Discrete_Solution_DG& discrete_solution) const
 {
-    constexpr auto initial_negative_value = -1000;
-    std::vector<double> cell_index_to_max_divergence_table(this->num_cells_, initial_negative_value);
+    std::vector<std::vector<double>> cell_index_to_divergence_velocities_table(this->num_cells_);
 
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         discrete_solution.calculate_solution_at_cell_QPs(solution_at_cell_QPs.data(), cell_index);
         discrete_solution.calculate_ddx_GE_solution_at_cell_QPs(ddx_GE_solution_at_cell_QPs.data(), cell_index);
         discrete_solution.calculate_ddy_GE_solution_at_cell_QPs(ddy_GE_solution_at_cell_QPs.data(), cell_index);
-
+        
         const auto num_QPs = this->cell_index_to_num_QPs_[cell_index];        
+
+        auto& divergence_velocities = cell_index_to_divergence_velocities_table[cell_index];
+        divergence_velocities.resize(num_QPs);
+
         for (ushort j = 0; j < num_QPs; ++j)
         {
             const auto rho = solution_at_cell_QPs[j][0];
@@ -228,15 +198,40 @@ std::vector<double> Max_Divergence_of_Velocity::measure(const Discrete_Solution_
 
             const auto div_velocity = ddx_u + ddy_v;
 
-            cell_index_to_max_divergence_table[cell_index] = (std::max)(cell_index_to_max_divergence_table[cell_index], div_velocity);
+            divergence_velocities[j] = div_velocity;
         }
     }
 
-    ////debug
-    //Post_Processor::record_solution();
-    //Post_Processor::record_variables("velocity divergence", cell_index_to_max_divergence_table);
-    //Post_Processor::post_solution();
-    ////
-
-    return cell_index_to_max_divergence_table;
+    return cell_index_to_divergence_velocities_table;
 }
+
+//
+//std::vector<double> Difference_Of_Extrapolatiion_Difference::measure_infc_index_to_scaled_average_difference_table(const Discrete_Solution_DG& discrete_solution) const
+//{
+//    const auto cell_index_to_extrapolate_diff = this->extrapolate_difference_.measure_cell_index_to_extrapolation_differences(discrete_solution);
+//
+//    std::vector<double> cell_index_to_avg_diff_of_extrapolate_diff(this->num_cells_);
+//
+//    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+//    {
+//        double diff_sum = 0.0;
+//
+//        const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
+//        const auto num_face_share_cells = face_share_cell_indexes.size();
+//
+//        const auto extrapolate_diff = cell_index_to_extrapolate_diff[cell_index];
+//
+//        for (ushort j = 0; j < num_face_share_cells; ++j)
+//        {
+//            const auto face_share_cell_index = face_share_cell_indexes[j];
+//            const auto face_neighbor_extrapolate_diff = cell_index_to_extrapolate_diff[face_share_cell_index];
+//
+//            const auto diff = std::abs(extrapolate_diff - face_neighbor_extrapolate_diff);
+//            diff_sum += diff;
+//        }
+//
+//        cell_index_to_avg_diff_of_extrapolate_diff[cell_index] = diff_sum / num_face_share_cells;
+//    }
+//
+//    return cell_index_to_avg_diff_of_extrapolate_diff;
+//}

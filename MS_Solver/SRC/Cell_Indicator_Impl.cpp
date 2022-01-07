@@ -133,3 +133,51 @@ Cell_Type hMLP_BD_Indicator::indicate(const Discrete_Solution_DG& discrete_solut
 
     return cell_type;
 }
+
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_hMLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	return std::make_unique<MLP_Indicator>(grid, discrete_solution, criterion_equation_index);
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_hMLP_BD_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_always_true_indicator();
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_hMLP_BD_Off_TypeII_indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_always_false_indicator();
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_Improved_hMLP_BD1_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_unique("Type1", grid, discrete_solution);
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_Improved_hMLP_BD2_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_unique("Type2", grid, discrete_solution);
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_Improved_hMLP_BD3_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_unique("Difference_of_Extrapolation_Difference", grid, discrete_solution);
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}
+
+std::unique_ptr<Cell_Indicator> Cell_Indicator_Factory::make_Improved_hMLP_BD4_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index)
+{
+	auto shock_indicator = Shock_Indicator_Factory::make_unique(governing_equation_name, "Type1", grid, discrete_solution);
+	auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_unique("Type3", grid, discrete_solution);
+	return std::make_unique<hMLP_BD_Indicator>(grid, discrete_solution, criterion_equation_index, std::move(shock_indicator), std::move(discontinuity_indicator));
+}

@@ -54,7 +54,7 @@ public:
 	Quadrature_Rule boundary_quadrature_rule(const uint bdry_index, const ushort polynomial_degree) const;
 	std::vector<Euclidean_Vector> boundary_normals(const uint bdry_index, const uint oc_indexes, const std::vector<Euclidean_Vector>& points) const;
 
-	size_t num_inner_faces(void) const;
+	uint num_inner_faces(void) const;
 	std::pair<uint, uint> inner_face_oc_nc_index_pair(const uint inner_face_index) const;
 	std::pair<const Quadrature_Rule&, const Quadrature_Rule&> inner_face_quadrature_rule(const uint inner_face_index, const ushort polynomial_degree) const;
 	std::vector<Euclidean_Vector> inner_face_normals(const uint inner_face_index, const uint oc_index, const std::vector<Euclidean_Vector>& points) const;

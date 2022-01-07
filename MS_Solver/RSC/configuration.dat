@@ -33,13 +33,13 @@ grid_file_type				= Gmsh
 
 /////////////////////// Solver Option /////////////////////////////
 
-spatial_discrete_scheme		= DG_P2
-reconstruction_scheme		= hMLP
+spatial_discrete_scheme		= DG_P3
+reconstruction_scheme		= Improved_hMLP_BD4
 							//No, hMLP, hMLP_BD, hMLP_BD_Off_TypeII, Improved_hMLP_BD1, Improved_hMLP_BD2, Improved_hMLP_BD3, Improved_hMLP_BD4
 
 numerical_flux				= LLF
 
-Time_Discrete_scheme		= SSPRK33					
+Time_Discrete_scheme		= SSPRK33
 							//SSPRK33, SSPRK54
 
 Time_step_method			= CFL						
@@ -70,7 +70,7 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/RFT/
+post_base_path				= E:/CodeData/Result/RDD/RFT/Indicator/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
@@ -103,7 +103,7 @@ z_periodic_length			= 1.0
 
 //////////////////////////// LOG //////////////////////////////////
 
-write_log_file				= No
+write_log_file				= Yes
 							//Yes, No
 
 ///////////////////////////////////////////////////////////////////
