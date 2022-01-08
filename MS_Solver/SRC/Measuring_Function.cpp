@@ -1,6 +1,6 @@
 #include "../INC/Measuring_Function.h"
 
-Scaled_Average_Difference_Measuring_Function::Scaled_Average_Difference_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Scaled_Average_Difference_Measurer::Scaled_Average_Difference_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
     , num_infcs_(grid.num_inner_faces())
     , infc_index_to_oc_nc_index_pair_table_(grid.inner_face_index_to_oc_nc_index_pair_table())
@@ -9,7 +9,7 @@ Scaled_Average_Difference_Measuring_Function::Scaled_Average_Difference_Measurin
     discrete_solution.precalculate_cell_P0_basis_values();
 };
 
-std::vector<double> Scaled_Average_Difference_Measuring_Function::measure_infc_index_to_scaled_average_difference_table(const Discrete_Solution_DG& discrete_solution) const
+std::vector<double> Scaled_Average_Difference_Measurer::measure_infc_index_to_scaled_average_difference_table(const Discrete_Solution_DG& discrete_solution) const
 {
     std::vector<double> infc_index_to_scaled_avg_diff_table(this->num_infcs_);
     for (uint infc_index = 0; infc_index < this->num_infcs_; ++infc_index)
@@ -30,7 +30,7 @@ std::vector<double> Scaled_Average_Difference_Measuring_Function::measure_infc_i
 }
 
 
-Extrapolation_Differences_Measuring_Function::Extrapolation_Differences_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Extrapolation_Differences_Measurer::Extrapolation_Differences_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
     , num_cells_(grid.num_cells())
     , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
@@ -100,7 +100,7 @@ Extrapolation_Differences_Measuring_Function::Extrapolation_Differences_Measurin
 }
 
 
-std::vector<std::vector<double>> Extrapolation_Differences_Measuring_Function::measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const
+std::vector<std::vector<double>> Extrapolation_Differences_Measurer::measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const
 {
     std::vector<std::vector<double>> cell_index_to_extrapolation_differences_table(this->num_cells_);
 
@@ -137,7 +137,7 @@ std::vector<std::vector<double>> Extrapolation_Differences_Measuring_Function::m
     return cell_index_to_extrapolation_differences_table;
 }
 
-Divergence_Velocity_Measuring_Function::Divergence_Velocity_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+Divergence_Velocity_Measurer::Divergence_Velocity_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution)
 {
     this->num_cells_ = grid.num_cells();
     this->cell_index_to_num_QPs_.resize(this->num_cells_);
@@ -164,7 +164,7 @@ Divergence_Velocity_Measuring_Function::Divergence_Velocity_Measuring_Function(c
     discrete_solution.precalcualte_cell_QPs_ddy_basis_values(cell_index_to_QPs);
 }
 
-std::vector<std::vector<double>> Divergence_Velocity_Measuring_Function::measure_cell_index_to_divergence_velocities_table(const Discrete_Solution_DG& discrete_solution) const
+std::vector<std::vector<double>> Divergence_Velocity_Measurer::measure_cell_index_to_divergence_velocities_table(const Discrete_Solution_DG& discrete_solution) const
 {
     std::vector<std::vector<double>> cell_index_to_divergence_velocities_table(this->num_cells_);
 
@@ -205,7 +205,7 @@ std::vector<std::vector<double>> Divergence_Velocity_Measuring_Function::measure
     return cell_index_to_divergence_velocities_table;
 }
 
-Average_Solution_Jump_Measuring_Function::Average_Solution_Jump_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Average_Solution_Jump_Measurer::Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     :criterion_solution_index_(criterion_solution_index)
 {
     const auto space_dimension = grid.space_dimension();
@@ -245,7 +245,7 @@ Average_Solution_Jump_Measuring_Function::Average_Solution_Jump_Measuring_Functi
     discrete_solution.precalculate_infs_ncs_jump_QPs_basis_values(nc_indexes, infc_index_to_ncs_QPs_table_);
 }
 
-std::vector<double> Average_Solution_Jump_Measuring_Function::measure_infc_index_to_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution)
+std::vector<double> Average_Solution_Jump_Measurer::measure_infc_index_to_scaled_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution)
 {
     std::vector<double> infc_index_to_average_solution_jump_table(this->num_infcs_);
 
@@ -263,9 +263,10 @@ std::vector<double> Average_Solution_Jump_Measuring_Function::measure_infc_index
         const auto jump = ms::BLAS::x_dot_y(num_QPs, this->value_diff_at_jump_QPs_.data(), jump_QWs_v.data());
 
         const auto one_over_volume = this->infc_index_to_reciprocal_volume_table_[infc_index];        
-        const auto average_solution_jump = jump * one_over_volume;
+        const auto avg_sol_jump = jump * one_over_volume;
+        const auto scaled_avg_sol_jump = this->calculate_scail_factor(discrete_solution, infc_index) * avg_sol_jump;
 
-        infc_index_to_average_solution_jump_table[infc_index] = average_solution_jump;
+        infc_index_to_average_solution_jump_table[infc_index] = scaled_avg_sol_jump;
     }
 
     return infc_index_to_average_solution_jump_table;

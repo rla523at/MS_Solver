@@ -8,7 +8,7 @@ Type1_Shock_Indicator::Type1_Shock_Indicator(const Grid& grid, Discrete_Solution
     this->cell_index_to_near_shock_table_.resize(grid.num_cells(), false);
 };
 
-void Type1_Shock_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Type1_Shock_Indicator::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_shock_table_.begin(), this->cell_index_to_near_shock_table_.end(), false);
 

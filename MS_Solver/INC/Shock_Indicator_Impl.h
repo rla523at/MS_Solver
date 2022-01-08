@@ -5,19 +5,19 @@
 class Always_False_Shock_Indicator : public Shock_Indicator
 {
 public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override {};
+    void check(const Discrete_Solution_DG& discrete_solution) override {};
 
 public:
-    bool near_shock(const uint cell_index) const override { return false; };
+    bool is_near_shock(const uint cell_index) const override { return false; };
 };
 
 class Always_True_Shock_Indicator : public Shock_Indicator
 {
 public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override {};
+    void check(const Discrete_Solution_DG& discrete_solution) override {};
 
 public:
-    bool near_shock(const uint cell_index) const override { return true; };
+    bool is_near_shock(const uint cell_index) const override { return true; };
 };
 
 // 0.1 <= max (|p - p_j| / |p|) ==> Max scaled average difference가 0.1 이상이면 shock 으로 보겠다.
@@ -27,14 +27,14 @@ public:
     Type1_Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort pressure_index);
 
 public:
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override;
+    void check(const Discrete_Solution_DG& discrete_solution) override;
 
 private:
     static constexpr auto threshold_number_ = 0.1;
 
     uint num_inner_faces_;
     std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
-    Scaled_Average_Difference_Measuring_Function measuring_function_;
+    Scaled_Average_Difference_Measurer measuring_function_;
 };
 
 class Shock_Indicator_Factory//static class

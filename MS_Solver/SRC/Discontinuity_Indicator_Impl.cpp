@@ -8,7 +8,7 @@ Type1_Discontinuity_Indicator::Type1_Discontinuity_Indicator(const Grid& grid, D
     this->cell_index_to_near_discontinuity_table_.resize(grid.num_cells(), false);
 };
 
-void Type1_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Type1_Discontinuity_Indicator::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
@@ -34,7 +34,7 @@ Type2_Discontinuity_Indicator::Type2_Discontinuity_Indicator(const Grid& grid, D
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 }
 
-void Type2_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Type2_Discontinuity_Indicator::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
@@ -60,7 +60,7 @@ Type3_Discontinuity_Indicator::Type3_Discontinuity_Indicator(const Grid& grid, D
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 }
 
-void Type3_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Type3_Discontinuity_Indicator::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
@@ -77,72 +77,44 @@ void Type3_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& dis
     }
 };
 
-Type4_Discontinuity_Indicator::Type4_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+Type4_Discontinuity_Indicator::Type4_Discontinuity_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, std::unique_ptr<Average_Solution_Jump_Measurer>&& measurer)
     : num_cells_(grid.num_cells())
     , num_infcs_(grid.num_inner_faces())
     , cell_index_to_characteristic_length_table_(grid.cell_index_to_characteristic_length_table())
     , cell_index_to_num_infc_table_(grid.cell_index_to_num_inner_faces_table())
     , infc_index_to_oc_nc_index_pair_table_(grid.inner_face_index_to_oc_nc_index_pair_table())
-    , measuring_function_(grid, discrete_solution, rho_index_)
+    , measurer_(std::move(measurer))
 {
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 };
 
-void Type4_Discontinuity_Indicator::precalculate(const Discrete_Solution_DG& discrete_solution)
+void Type4_Discontinuity_Indicator::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
-    std::vector<double> cell_index_to_sum_of_average_solution_jump_table(this->num_cells_);
+    std::vector<double> cell_index_to_sum_of_scaled_avg_sol_jump_table(this->num_cells_);
 
-    const auto infc_index_to_average_solution_jump_table = measuring_function_.measure_infc_index_to_average_solution_jump_table(discrete_solution);
+    const auto infc_index_to_scaled_avg_sol_jump_table = this->measurer_->measure_infc_index_to_scaled_average_solution_jump_table(discrete_solution);
     for (uint infc_index = 0; infc_index < this->num_infcs_; ++infc_index)
     {
-        const auto average_solution_jump = infc_index_to_average_solution_jump_table[infc_index];
+        const auto scaled_avg_sol_jump = infc_index_to_scaled_avg_sol_jump_table[infc_index];
 
         const auto [oc_index, nc_index] = this->infc_index_to_oc_nc_index_pair_table_[infc_index];
-        cell_index_to_sum_of_average_solution_jump_table[oc_index] += average_solution_jump;
-        cell_index_to_sum_of_average_solution_jump_table[nc_index] += average_solution_jump;
+        cell_index_to_sum_of_scaled_avg_sol_jump_table[oc_index] += scaled_avg_sol_jump;
+        cell_index_to_sum_of_scaled_avg_sol_jump_table[nc_index] += scaled_avg_sol_jump;
     }    
     
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         const auto num_infcs = this->cell_index_to_num_infc_table_[cell_index];
-        const auto sum = cell_index_to_sum_of_average_solution_jump_table[cell_index];
+        const auto sum = cell_index_to_sum_of_scaled_avg_sol_jump_table[cell_index];
         const auto average = sum / static_cast<double>(num_infcs);
 
-        const auto P0_value = discrete_solution.calculate_P0_nth_solution(cell_index, this->rho_index_);
-        const auto threshold_number = this->cell_index_to_characteristic_length_table_[cell_index] * P0_value;
-
-        //const auto threshold_number = this->cell_index_to_characteristic_length_table_[cell_index];
+        const auto threshold_number = this->cell_index_to_characteristic_length_table_[cell_index];
 
         if (threshold_number <= average)
         {
             this->cell_index_to_near_discontinuity_table_[cell_index] = true;
         }
-    }
-}
-
-std::unique_ptr<Discontinuity_Indicator> Discontinuity_Indicator_Factory::make_unique(const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
-{
-    if (ms::compare_icase(type_name, "type1"))
-    {
-        return std::make_unique<Type1_Discontinuity_Indicator>(grid, discrete_solution);
-    }
-    else if (ms::compare_icase(type_name, "type2"))
-    {
-        return std::make_unique<Type2_Discontinuity_Indicator>(grid, discrete_solution);
-    }
-    else if (ms::compare_icase(type_name, "type3"))
-    {
-        return std::make_unique<Type3_Discontinuity_Indicator>(grid, discrete_solution);
-    }
-    else if (ms::compare_icase(type_name, "type4"))
-    {
-        return std::make_unique<Type4_Discontinuity_Indicator>(grid, discrete_solution);
-    }
-    else
-    {
-        EXCEPTION("Not supported discontinuity indicator type");
-        return nullptr;
     }
 }

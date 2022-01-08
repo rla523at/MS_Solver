@@ -12,7 +12,7 @@ MLP_u1::MLP_u1(const Grid& grid)
     }
 }
 
-void MLP_u1::precalculate(const Discrete_Solution_DG& discrete_solution)
+void MLP_u1::check(const Discrete_Solution_DG& discrete_solution)
 {
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {

@@ -177,7 +177,7 @@
     <ClCompile Include="SRC\Reconstruction.cpp">
       <Filter>소스 파일\Solver\Reconstruction</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Reconstruction_Impl.cpp">
+    <ClCompile Include="SRC\Reconstruction_Factory.cpp">
       <Filter>소스 파일\Solver\Reconstruction</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Limiter_Impl.cpp">
@@ -211,6 +211,9 @@
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Shock_Indicator_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Subcell_Oscillation_Indicator_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
   </ItemGroup>
@@ -308,7 +311,7 @@
     <ClInclude Include="INC\Stability_Criterion_Impl.h">
       <Filter>헤더 파일\Solver\Reconstruction\Stability_Criterion</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Reconstruction_Impl.h">
+    <ClInclude Include="INC\Reconstruction_Factory.h">
       <Filter>헤더 파일\Solver\Reconstruction</Filter>
     </ClInclude>
     <ClInclude Include="INC\Solve_Controller_Impl.h">
@@ -363,6 +366,24 @@
       <Filter>헤더 파일\Solver\Reconstruction</Filter>
     </ClInclude>
     <ClInclude Include="INC\Shock_Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Measuring_Function_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Discontinuity_Indicator_Factory.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Cell_Indicator_Factory.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Subcell_Oscillation_Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Subcell_Oscillation_Indicator_Factory.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Trouble_Boundary_Detector_Impl.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
   </ItemGroup>

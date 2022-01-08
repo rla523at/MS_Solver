@@ -1,8 +1,5 @@
 #pragma once
-#include "Discontinuity_Indicator_Impl.h"
 #include "Indicator.h"
-#include "Indicating_Function.h"
-#include "Shock_Indicator_Impl.h"
 
 class MLP_Indicator : public Cell_Indicator
 {
@@ -10,7 +7,7 @@ public:
     MLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_index);
 
 public://Command
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override;
+    void check(const Discrete_Solution_DG& discrete_solution) override;
 
 public://Query
     Cell_Type indicate(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& stability_criterion) const override;
@@ -38,20 +35,16 @@ private:
 class hMLP_BD_Indicator : public Cell_Indicator
 {
 public:
-    hMLP_BD_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index
-        , std::unique_ptr<Shock_Indicator>&& shock_indicator, std::unique_ptr<Discontinuity_Indicator>&& contact_indicator)
+    hMLP_BD_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index,
+        std::unique_ptr<Subcell_Oscillation_Indicator>&& subcell_oscillation_indicator)
         : MLP_indicator_(grid, discrete_solution, criterion_equation_index)
-        , subcell_oscillation_indicator_(grid, discrete_solution, criterion_equation_index)
-        , shock_indicator_(std::move(shock_indicator))
-        , discontinuity_indicator_(std::move(contact_indicator)) {};
+        , subcell_oscillation_indicator_(std::move(subcell_oscillation_indicator)) {};
 
 public://Command
-    void precalculate(const Discrete_Solution_DG& discrete_solution) override
+    void check(const Discrete_Solution_DG& discrete_solution) override
     {
-        this->MLP_indicator_.precalculate(discrete_solution);
-        this->subcell_oscillation_indicator_.precalculate(discrete_solution);
-        this->shock_indicator_->precalculate(discrete_solution);
-        this->discontinuity_indicator_->precalculate(discrete_solution);
+        this->MLP_indicator_.check(discrete_solution);
+        this->subcell_oscillation_indicator_->check(discrete_solution);
     }
 
 public://Query
@@ -59,19 +52,5 @@ public://Query
 
 private:
     MLP_Indicator MLP_indicator_;
-    Subcell_Oscillation_Indicator subcell_oscillation_indicator_;
-    std::unique_ptr<Shock_Indicator> shock_indicator_;
-    std::unique_ptr<Discontinuity_Indicator> discontinuity_indicator_;
-};
-
-class Cell_Indicator_Factory//static class
-{
-public://Query
-    static std::unique_ptr<Cell_Indicator> make_hMLP_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_hMLP_BD_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_hMLP_BD_Off_TypeII_indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_Improved_hMLP_BD1_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_Improved_hMLP_BD2_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_Improved_hMLP_BD3_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
-    static std::unique_ptr<Cell_Indicator> make_Improved_hMLP_BD4_Indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index);
+    std::unique_ptr<Subcell_Oscillation_Indicator> subcell_oscillation_indicator_;
 };

@@ -7,7 +7,7 @@ public:
     MLP_u1(const Grid& gird);
 
 public://Command
-    void precalculate(const Discrete_Solution_DG& discrete_solution);    
+    void check(const Discrete_Solution_DG& discrete_solution);    
     
 public://Query
     double limiter_function(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const;

@@ -1,10 +1,10 @@
 #pragma once
 #include "Discrete_Solution.h"
 
-class Scaled_Average_Difference_Measuring_Function
+class Scaled_Average_Difference_Measurer
 {
 public:
-    Scaled_Average_Difference_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Scaled_Average_Difference_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public:
     std::vector<double> measure_infc_index_to_scaled_average_difference_table(const Discrete_Solution_DG& discrete_solution) const;
@@ -15,10 +15,10 @@ private:
     std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
 };
 
-class Extrapolation_Differences_Measuring_Function
+class Extrapolation_Differences_Measurer
 {
 public:
-    Extrapolation_Differences_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Extrapolation_Differences_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public:
     std::vector<std::vector<double>> measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const;    
@@ -31,10 +31,10 @@ private:
     std::vector<double> cell_index_to_volume_reciprocal_table_;
 };
 
-class Divergence_Velocity_Measuring_Function
+class Divergence_Velocity_Measurer
 {
 public:
-    Divergence_Velocity_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+    Divergence_Velocity_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution);
 
 public:
     std::vector<std::vector<double>> measure_cell_index_to_divergence_velocities_table(const Discrete_Solution_DG& discrete_solution) const;
@@ -50,20 +50,26 @@ private:
     static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_QPs;
 };
 
-class Average_Solution_Jump_Measuring_Function
+class Average_Solution_Jump_Measurer abstract
 {
 public:
-    Average_Solution_Jump_Measuring_Function(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public://Command
-    std::vector<double> measure_infc_index_to_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution);
+    std::vector<double> measure_infc_index_to_scaled_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution);
     
 private:
+    virtual double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint inner_face_index) const abstract;
+
+protected:
     ushort criterion_solution_index_ = 0;
+
+    std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
+
+private:
     uint num_infcs_ = 0;
 
     std::vector<double> infc_index_to_reciprocal_volume_table_;
-    std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
     std::vector<Euclidean_Vector> infc_index_to_jump_QWs_v_table_;
 
     //construction optimization

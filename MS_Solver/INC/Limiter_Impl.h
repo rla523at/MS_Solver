@@ -9,9 +9,9 @@ public:
 		:limiting_function_(grid) {};
 
 public://Command
-	void precalculate(const Discrete_Solution_DG& discrete_solution) override
+	void check(const Discrete_Solution_DG& discrete_solution) override
 	{
-		this->limiting_function_.precalculate(discrete_solution);
+		this->limiting_function_.check(discrete_solution);
 	}
 
 protected:

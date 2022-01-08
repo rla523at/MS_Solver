@@ -6,8 +6,8 @@ void Hierarchical_Limiting_DG::reconstruct(Discrete_Solution_DG& discrete_soluti
 	const auto num_cells = discrete_solution.num_cells();
 
 	this->stability_criterion_->precaclulate(discrete_solution);
-	this->indicator_->precalculate(discrete_solution);
-	this->limiter_->precalculate(discrete_solution);
+	this->indicator_->check(discrete_solution);
+	this->limiter_->check(discrete_solution);
 
 	////debug
 	//std::vector<double> cell_type(num_cells);
