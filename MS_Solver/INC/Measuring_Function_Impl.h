@@ -1,21 +1,23 @@
 #pragma once
 #include "Measuring_Function.h"
 
-class Default_Average_Solution_Jump_Measurer : public Average_Solution_Jump_Measurer
+// INT_{w_j} (q - q_j) / ||w_j|| ==> average solution jump
+class Face_Jump_Measurer_Type1 : public Face_Jump_Measurer
 {
 public:
-	Default_Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
-		:Average_Solution_Jump_Measurer(grid, discrete_solution, criterion_solution_index) {};
+	Face_Jump_Measurer_Type1(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+		:Face_Jump_Measurer(grid, discrete_solution, criterion_solution_index) {};
 
 private:
 	double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint inner_face_index) const override { return 1.0; };
 };
 
-class Scaled_Average_Solution_Jump_Measurer : public Average_Solution_Jump_Measurer
+// INT_{w_j} (q - q_j) / ( 0.5 * (q + q_j) * ||w_j|| ) ==> scaled average solution jump
+class Face_Jump_Measurer_Type2 : public Face_Jump_Measurer
 {
 public:
-	Scaled_Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
-		:Average_Solution_Jump_Measurer(grid, discrete_solution, criterion_solution_index) 
+	Face_Jump_Measurer_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+		:Face_Jump_Measurer(grid, discrete_solution, criterion_solution_index) 
 	{
 		//precalculation
 		discrete_solution.precalculate_cell_P0_basis_values();

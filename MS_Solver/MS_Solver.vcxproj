@@ -100,7 +100,6 @@
     </ClCompile>
     <ClCompile Include="SRC\Stability_Criterion.cpp" />
     <ClCompile Include="SRC\Stability_Criterion_Impl.cpp" />
-    <ClCompile Include="SRC\Subcell_Oscillation_Indicator_Impl.cpp" />
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp" />
     <ClCompile Include="SRC\Text.cpp" />
     <ClCompile Include="SRC\Time_Discrete_Scheme.cpp">
@@ -196,7 +195,6 @@
     <ClInclude Include="INC\Stability_Criterion.h" />
     <ClInclude Include="INC\Stability_Criterion_Impl.h" />
     <ClInclude Include="INC\Subcell_Oscillation_Indicator_Factory.h" />
-    <ClInclude Include="INC\Subcell_Oscillation_Indicator_Impl.h" />
     <ClInclude Include="INC\Tecplot_File_Writer.h" />
     <ClInclude Include="INC\Text.h" />
     <ClInclude Include="INC\Time_Discrete_Scheme.h" />
@@ -204,7 +202,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="INC\Trouble_Boundary_Detector_Impl.h" />
+    <ClInclude Include="INC\Trouble_Boundary_Indicator_Factory.h" />
+    <ClInclude Include="INC\Trouble_Boundary_Indicator_Impl.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RSC\configuration.dat" />

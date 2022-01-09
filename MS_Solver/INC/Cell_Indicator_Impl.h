@@ -35,9 +35,13 @@ private:
 class hMLP_BD_Indicator : public Cell_Indicator
 {
 public:
-    hMLP_BD_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index,
-        std::unique_ptr<Subcell_Oscillation_Indicator>&& subcell_oscillation_indicator)
-        : MLP_indicator_(grid, discrete_solution, criterion_equation_index)
+    //hMLP_BD_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_equation_index,
+    //    std::unique_ptr<Subcell_Oscillation_Indicator>&& subcell_oscillation_indicator)
+    //    : MLP_indicator_(grid, discrete_solution, criterion_equation_index)
+    //    , subcell_oscillation_indicator_(std::move(subcell_oscillation_indicator)) {};
+
+    hMLP_BD_Indicator(MLP_Indicator&& MLP_indicator, std::unique_ptr<Subcell_Oscillation_Indicator>&& subcell_oscillation_indicator)
+        : MLP_indicator_(std::move(MLP_indicator))
         , subcell_oscillation_indicator_(std::move(subcell_oscillation_indicator)) {};
 
 public://Command

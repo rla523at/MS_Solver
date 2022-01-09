@@ -21,10 +21,10 @@ public:
 };
 
 // 0.1 <= max (|p - p_j| / |p|) ==> Max scaled average difference가 0.1 이상이면 shock 으로 보겠다.
-class Type1_Shock_Indicator : public Shock_Indicator
+class Shock_Indicator_Type1 : public Shock_Indicator
 {
 public:
-    Type1_Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort pressure_index);
+    Shock_Indicator_Type1(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort pressure_index);
 
 public:
     void check(const Discrete_Solution_DG& discrete_solution) override;
@@ -45,13 +45,14 @@ public://Query
     {
         return std::make_unique<Always_False_Shock_Indicator>();
     }
-    static short find_pressure_index(const std::string& governing_equation_name, const ushort space_dimension)
+    static std::unique_ptr<Shock_Indicator> make_type1_indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name)
     {
-        if (ms::compare_icase(governing_equation_name, "Linear_Advection"))
-        {
-            return -1;
-        }
-        else if (ms::compare_icase(governing_equation_name, "Burgers"))
+        const auto criterion_solution_index = find_pressure_index(governing_equation_name, grid.space_dimension());
+        return std::make_unique<Shock_Indicator_Type1>(grid, discrete_solution, criterion_solution_index);
+    }
+    static ushort find_pressure_index(const std::string& governing_equation_name, const ushort space_dimension)
+    {
+        if (ms::compare_icase(governing_equation_name, "Burgers"))
         {
             return 0;
         }

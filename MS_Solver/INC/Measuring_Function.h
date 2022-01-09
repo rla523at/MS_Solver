@@ -50,13 +50,13 @@ private:
     static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_QPs;
 };
 
-class Average_Solution_Jump_Measurer abstract
+class Face_Jump_Measurer abstract
 {
 public:
-    Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Face_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public://Command
-    std::vector<double> measure_infc_index_to_scaled_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution);
+    std::vector<double> measure_inner_face_index_to_solution_jump_table(const Discrete_Solution_DG& discrete_solution);
     
 private:
     virtual double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint inner_face_index) const abstract;

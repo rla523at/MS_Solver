@@ -213,9 +213,6 @@
     <ClCompile Include="SRC\Shock_Indicator_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Subcell_Oscillation_Indicator_Impl.cpp">
-      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Exception.h">
@@ -377,13 +374,13 @@
     <ClInclude Include="INC\Cell_Indicator_Factory.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Subcell_Oscillation_Indicator_Impl.h">
-      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Subcell_Oscillation_Indicator_Factory.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Trouble_Boundary_Detector_Impl.h">
+    <ClInclude Include="INC\Trouble_Boundary_Indicator_Impl.h">
+      <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Trouble_Boundary_Indicator_Factory.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
   </ItemGroup>

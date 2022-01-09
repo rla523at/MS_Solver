@@ -1,6 +1,6 @@
 #include "../INC/Shock_Indicator_Impl.h"
 
-Type1_Shock_Indicator::Type1_Shock_Indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort pressure_index)
+Shock_Indicator_Type1::Shock_Indicator_Type1(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort pressure_index)
     : measuring_function_(grid, discrete_solution, pressure_index)
     , num_inner_faces_(grid.num_inner_faces())
     , infc_index_to_oc_nc_index_pair_table_(grid.inner_face_index_to_oc_nc_index_pair_table())
@@ -8,7 +8,7 @@ Type1_Shock_Indicator::Type1_Shock_Indicator(const Grid& grid, Discrete_Solution
     this->cell_index_to_near_shock_table_.resize(grid.num_cells(), false);
 };
 
-void Type1_Shock_Indicator::check(const Discrete_Solution_DG& discrete_solution)
+void Shock_Indicator_Type1::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_shock_table_.begin(), this->cell_index_to_near_shock_table_.end(), false);
 
@@ -37,7 +37,7 @@ std::unique_ptr<Shock_Indicator> Shock_Indicator_Factory::make_unique(const std:
 
     if (ms::compare_icase(type_name, "type1"))
     {
-        return std::make_unique<Type1_Shock_Indicator>(grid, discrete_solution, pressure_index);
+        return std::make_unique<Shock_Indicator_Type1>(grid, discrete_solution, pressure_index);
     }
     else
     {

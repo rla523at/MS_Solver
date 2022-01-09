@@ -205,7 +205,7 @@ std::vector<std::vector<double>> Divergence_Velocity_Measurer::measure_cell_inde
     return cell_index_to_divergence_velocities_table;
 }
 
-Average_Solution_Jump_Measurer::Average_Solution_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Face_Jump_Measurer::Face_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     :criterion_solution_index_(criterion_solution_index)
 {
     const auto space_dimension = grid.space_dimension();
@@ -245,7 +245,7 @@ Average_Solution_Jump_Measurer::Average_Solution_Jump_Measurer(const Grid& grid,
     discrete_solution.precalculate_infs_ncs_jump_QPs_basis_values(nc_indexes, infc_index_to_ncs_QPs_table_);
 }
 
-std::vector<double> Average_Solution_Jump_Measurer::measure_infc_index_to_scaled_average_solution_jump_table(const Discrete_Solution_DG& discrete_solution)
+std::vector<double> Face_Jump_Measurer::measure_inner_face_index_to_solution_jump_table(const Discrete_Solution_DG& discrete_solution)
 {
     std::vector<double> infc_index_to_average_solution_jump_table(this->num_infcs_);
 
