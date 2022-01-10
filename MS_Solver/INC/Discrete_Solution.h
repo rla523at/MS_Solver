@@ -47,7 +47,6 @@ public://Command
 
 	void limit_slope(const uint cell_index, const double limiting_value);
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
-	void scailing(const uint cell_index, const double scail_factor);
 
 	//for time step calculation
 	void precalculate_cell_P0_basis_values(void);
@@ -165,6 +164,9 @@ private:
 	//void calculate_solution_at_precalulated_points(Euclidean_Vector* solution_v_at_points, const uint cell_index, const Constant_Matrix_Wrapper& basis_points_m);
 	void calculate_nth_solution_at_precalulated_points(double* nth_solution_at_points, const uint cell_index, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
 	void calculate_Pn_projected_mth_solution_at_precalulated_points(double* Pn_projected_mth_solution_at_points, const uint cell_index, const ushort Pn, const ushort equation_index, const Constant_Matrix_Wrapper& basis_points_m) const;
+
+	void scailing(const uint cell_index, const double scail_factor);
+
 
 private:
 	std::vector<ushort> set_of_num_values_;

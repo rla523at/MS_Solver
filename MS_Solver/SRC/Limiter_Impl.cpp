@@ -45,12 +45,14 @@ void hMLP_BD_Limiter::limit(const ushort cell_index, const Cell_Type Cell_Type, 
 	switch (Cell_Type)
 	{
 	case Cell_Type::normal:
+		[[fallthrough]];
 	case Cell_Type::smooth_extrema:
 	{
 		this->is_end_ = true;
 		break;
 	}
 	case Cell_Type::trouble:
+		[[fallthrough]];
 	case Cell_Type::typeII:
 	{
 		if (projection_degree <= 2)

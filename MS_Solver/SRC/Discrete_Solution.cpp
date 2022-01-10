@@ -373,7 +373,9 @@ void Discrete_Solution_DG::project_to_Pn_space(const uint cell_index, const usho
 
 void Discrete_Solution_DG::scailing(const uint cell_index, const double scaling_factor)
 {
-	LOG << "Scailing " << cell_index << " cell by factor " << scaling_factor << "\n" << Log::print_;
+	//LOG << "Scailing " << cell_index << " cell by factor " << scaling_factor << "\n" << Log::print_;
+	LOG << "Scailing " << cell_index << " cell by factor " << scaling_factor << "\n";
+
 
 	constexpr auto P0 = 0;
 	const auto num_P0_basis = this->degree_to_num_basis_table[P0];

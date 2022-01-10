@@ -174,12 +174,14 @@ class Left_Half_Blast_Wave_2D : public Initial_Condition, Euler_Shocktube_2D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.012; };
 };
 
 class Left_Half_Blast_Wave_3D : public Initial_Condition, Euler_Shocktube_3D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.012; };
 };
 
 class Double_Strong_Shock_2D : public Initial_Condition, Euler_Shocktube_2D

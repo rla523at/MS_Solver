@@ -7,7 +7,7 @@ governing_equation			= Euler
 
 Initial_condition			= Slowly_Moving_Contact			
 							//Constant1, Sine_Wave
-							//Modified_Sod, Double_Strong_Shock, Slowly_Moving_Contact
+							//Modified_Sod, Left_Half_Blast_Wave, Double_Strong_Shock, Slowly_Moving_Contact
 							//Shu_Osher
 
 //linear advection option
@@ -25,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RT100x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ grid_file_type				= Gmsh
 /////////////////////// Solver Option /////////////////////////////
 
 spatial_discrete_scheme		= DG_P3
-reconstruction_scheme		= hMLP_BD
+reconstruction_scheme		= hMLP_BD_II_11_1_42
 							//No, hMLP, hMLP_BD
 							//hMLP_BD_II_11_1_F, hMLP_BD_II_11_1_1, hMLP_BD_II_11_1_2, hMLP_BD_II_11_1_3, hMLP_BD_II_11_1_41, hMLP_BD_II_11_1_42
 							//hMLP_BD_II_12_1_T, hMLP_BD_II_22_1_T
