@@ -186,24 +186,28 @@ class Double_Strong_Shock_2D : public Initial_Condition, Euler_Shocktube_2D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.035; };
 };
 
 class Double_Strong_Shock_3D : public Initial_Condition, Euler_Shocktube_3D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.035; };
 };
 
 class Slowly_Moving_Contact_2D : public Initial_Condition, Euler_Shocktube_2D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.012; };
 };
 
 class Slowly_Moving_Contact_3D : public Initial_Condition, Euler_Shocktube_3D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.012; };
 };
 
 class Harten_Lax_2D : public Initial_Condition, Euler_Shocktube_2D

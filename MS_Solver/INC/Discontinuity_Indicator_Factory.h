@@ -2,6 +2,9 @@
 #include "Discontinuity_Indicator_Impl.h"
 #include "Measuring_Function_Impl.h"
 
+//D(F)
+//D : Discontinuity Indicator Type
+//(F) : Face Jump Measurer Type 
 class Discontinuity_Indicator_Factory//static class
 {
 public://Query

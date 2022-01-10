@@ -1,6 +1,7 @@
 #pragma once
 #include "Discrete_Solution.h"
 
+// |q+ - q-| / |min(q+, q-)|
 class Scaled_Average_Difference_Measurer
 {
 public:
@@ -15,13 +16,14 @@ private:
     std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
 };
 
-class Extrapolation_Differences_Measurer
+// INT_{Omega} (q - q_j) / ||Omega||
+class Extrapolation_Jump_Measurer
 {
 public:
-    Extrapolation_Differences_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
+    Extrapolation_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public:
-    std::vector<std::vector<double>> measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const;    
+    std::vector<std::vector<double>> measure_cell_index_to_extrapolation_jumps(const Discrete_Solution_DG& discrete_solution) const;    
 
 private:
     ushort criterion_solution_index_;
@@ -50,6 +52,7 @@ private:
     static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_QPs;
 };
 
+// INT_{w} |q+ - q-| / ||w||
 class Face_Jump_Measurer abstract
 {
 public:
@@ -64,12 +67,12 @@ private:
 protected:
     ushort criterion_solution_index_ = 0;
 
+    std::vector<double> infc_index_to_reciprocal_volume_table_;
     std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
 
 private:
     uint num_infcs_ = 0;
 
-    std::vector<double> infc_index_to_reciprocal_volume_table_;
     std::vector<Euclidean_Vector> infc_index_to_jump_QWs_v_table_;
 
     //construction optimization

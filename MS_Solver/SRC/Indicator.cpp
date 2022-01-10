@@ -5,6 +5,8 @@ Subcell_Oscillation_Indicator::Subcell_Oscillation_Indicator(const Grid& grid,
 	std::unique_ptr<Shock_Indicator>&& shock_indicator,
 	std::unique_ptr<Discontinuity_Indicator>&& discontinuity_indicator)
 	: num_cells_(grid.num_cells())
+	, cell_index_to_has_typeI_oscillation_table_(this->num_cells_)
+	, cell_index_to_has_typeII_oscillation_table_(this->num_cells_)
 	, trouble_boundary_indicator_(std::move(troubled_boundary_indicator))
 	, shock_indicator_(std::move(shock_indicator))
 	, discontinuity_indicator_(std::move(discontinuity_indicator)) {};

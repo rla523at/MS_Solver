@@ -5,9 +5,9 @@ space_dimension				= 2
 governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Shu_Osher			
+Initial_condition			= Slowly_Moving_Contact			
 							//Constant1, Sine_Wave
-							//Modified_Sod
+							//Modified_Sod, Double_Strong_Shock, Slowly_Moving_Contact
 							//Shu_Osher
 
 //linear advection option
@@ -25,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RQ400x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ100x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -35,7 +35,9 @@ grid_file_type				= Gmsh
 
 spatial_discrete_scheme		= DG_P3
 reconstruction_scheme		= hMLP_BD
-							//No, hMLP, hMLP_BD, hMLP_BD_Off_TypeII, Improved_hMLP_BD1, Improved_hMLP_BD2, Improved_hMLP_BD3, Improved_hMLP_BD4
+							//No, hMLP, hMLP_BD
+							//hMLP_BD_II_11_1_F, hMLP_BD_II_11_1_1, hMLP_BD_II_11_1_2, hMLP_BD_II_11_1_3, hMLP_BD_II_11_1_41, hMLP_BD_II_11_1_42
+							//hMLP_BD_II_12_1_T, hMLP_BD_II_22_1_T
 
 numerical_flux				= LLF
 
@@ -77,7 +79,7 @@ post_file_format			= Binary
 post_point_location			= Node						
 							//Center, Node
 
-post_order					= 1
+post_order					= 5
 
 post_for_debug				= No
 							//Yes, No

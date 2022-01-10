@@ -53,7 +53,7 @@ public:
 
     uint num_cells_;
     std::vector<double> cell_index_to_characteristic_length_;
-    Extrapolation_Differences_Measurer measuring_function_;
+    Extrapolation_Jump_Measurer measuring_function_;
 };
 
 // Max(div(u)) <= 0 ==> Max div(u)가 0보다 작으면 discontinuity로 보겠다.

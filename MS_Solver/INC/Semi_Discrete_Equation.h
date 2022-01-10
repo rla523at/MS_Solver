@@ -4,7 +4,7 @@
 #include "Error.h"
 #include "Inner_Faces.h"
 #include "Post_Processor.h"
-#include "Reconstruction_Impl.h"
+#include "Reconstruction_Factory.h"
 #include "Initial_Condition_Impl.h"
 
 

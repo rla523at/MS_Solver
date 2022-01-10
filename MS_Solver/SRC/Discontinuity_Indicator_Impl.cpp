@@ -38,7 +38,7 @@ void Discontinuity_Indicator_Type2::check(const Discrete_Solution_DG& discrete_s
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
-    const auto cell_index_to_extrapolation_differences = measuring_function_.measure_cell_index_to_extrapolation_differences(discrete_solution);
+    const auto cell_index_to_extrapolation_differences = measuring_function_.measure_cell_index_to_extrapolation_jumps(discrete_solution);
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         const auto threshold_number = this->cell_index_to_characteristic_length_[cell_index];

@@ -67,8 +67,8 @@ public://Command
     void check(const Discrete_Solution_DG& discrete_solution);
 
 public://Query
-    bool is_typeI_cell(const uint cell_index) const { cell_index_to_has_typeI_oscillation_table_[cell_index]; };
-    bool is_typeII_cell(const uint cell_index) const { cell_index_to_has_typeII_oscillation_table_[cell_index]; };
+    bool is_typeI_cell(const uint cell_index) const { return cell_index_to_has_typeI_oscillation_table_[cell_index]; };
+    bool is_typeII_cell(const uint cell_index) const { return cell_index_to_has_typeII_oscillation_table_[cell_index]; };
 
 private:
     static constexpr auto typeI_threshold_number_ = 2;
@@ -81,5 +81,4 @@ private:
     std::unique_ptr<Trouble_Boundary_Indicator> trouble_boundary_indicator_;
     std::unique_ptr<Shock_Indicator> shock_indicator_;
     std::unique_ptr<Discontinuity_Indicator> discontinuity_indicator_;
-
 };

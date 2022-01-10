@@ -27,71 +27,93 @@ std::unique_ptr<Reconstruction_DG> Reconstruction_DG_Factory::make_unique(const 
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_Off_TypeII"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_F"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD_11_1_F_indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_F_indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "Improved_hMLP_BD1"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_1"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD_11_1_1_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_1_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "Improved_hMLP_BD2"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_2"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD2_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_2_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "Improved_hMLP_BD3"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_3"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD3_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_3_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "Improved_hMLP_BD4_1"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_41"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD4_1_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_41_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
-	else if (ms::compare_icase(reconstruction_scheme, "Improved_hMLP_BD4_2"))
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_11_1_42"))
 	{
 		const auto criterion_equation_index = 0;
 		const auto& governing_equation_name = configuration.get_governing_equation();
 
 		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
-		auto indicator = Cell_Indicator_Factory::make_Improved_hMLP_BD4_2_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_11_1_42_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
 		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
 
 		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
+	}
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_12_1_T"))
+	{
+		const auto criterion_equation_index = 0;
+		const auto& governing_equation_name = configuration.get_governing_equation();
+
+		auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
+		auto indicator = Cell_Indicator_Factory::make_hMLP_BD_12_1_T_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+		auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
+
+		return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
+	}
+	else if (ms::compare_icase(reconstruction_scheme, "hMLP_BD_II_22_1_T"))
+	{
+	const auto criterion_equation_index = 0;
+	const auto& governing_equation_name = configuration.get_governing_equation();
+
+	auto stability_criterion = std::make_unique<Simplex_Decomposed_MLP_Criterion>(grid, discrete_solution, criterion_equation_index);
+	auto indicator = Cell_Indicator_Factory::make_hMLP_BD_22_1_T_Indicator(governing_equation_name, grid, discrete_solution, criterion_equation_index);
+	auto limiter = std::make_unique <hMLP_BD_Limiter>(grid);
+
+	return std::make_unique<Hierarchical_Limiting_DG>(std::move(stability_criterion), std::move(indicator), std::move(limiter));
 	}
 	else
 	{

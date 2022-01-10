@@ -20,7 +20,7 @@ public:
     bool is_near_shock(const uint cell_index) const override { return true; };
 };
 
-// 0.1 <= max (|p - p_j| / |p|) ==> Max scaled average difference가 0.1 이상이면 shock 으로 보겠다.
+// 0.1 <= max (|p - p_j| / min(|p|,|p_j|)) ==> Max scaled average difference가 0.1 이상이면 shock 으로 보겠다.
 class Shock_Indicator_Type1 : public Shock_Indicator
 {
 public:

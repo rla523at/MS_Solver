@@ -30,7 +30,7 @@ std::vector<double> Scaled_Average_Difference_Measurer::measure_infc_index_to_sc
 }
 
 
-Extrapolation_Differences_Measurer::Extrapolation_Differences_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+Extrapolation_Jump_Measurer::Extrapolation_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
     , num_cells_(grid.num_cells())
     , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
@@ -100,7 +100,7 @@ Extrapolation_Differences_Measurer::Extrapolation_Differences_Measurer(const Gri
 }
 
 
-std::vector<std::vector<double>> Extrapolation_Differences_Measurer::measure_cell_index_to_extrapolation_differences(const Discrete_Solution_DG& discrete_solution) const
+std::vector<std::vector<double>> Extrapolation_Jump_Measurer::measure_cell_index_to_extrapolation_jumps(const Discrete_Solution_DG& discrete_solution) const
 {
     std::vector<std::vector<double>> cell_index_to_extrapolation_differences_table(this->num_cells_);
 
@@ -262,11 +262,8 @@ std::vector<double> Face_Jump_Measurer::measure_inner_face_index_to_solution_jum
         ms::BLAS::abs_x(num_QPs, this->value_diff_at_jump_QPs_.data());
         const auto jump = ms::BLAS::x_dot_y(num_QPs, this->value_diff_at_jump_QPs_.data(), jump_QWs_v.data());
 
-        const auto one_over_volume = this->infc_index_to_reciprocal_volume_table_[infc_index];        
-        const auto avg_sol_jump = jump * one_over_volume;
-        const auto scaled_avg_sol_jump = this->calculate_scail_factor(discrete_solution, infc_index) * avg_sol_jump;
-
-        infc_index_to_average_solution_jump_table[infc_index] = scaled_avg_sol_jump;
+        const auto scaled_jump = jump * this->calculate_scail_factor(discrete_solution, infc_index);
+        infc_index_to_average_solution_jump_table[infc_index] = scaled_jump;
     }
 
     return infc_index_to_average_solution_jump_table;
