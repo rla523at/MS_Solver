@@ -26,10 +26,10 @@ void Discontinuity_Indicator_Type1::check(const Discrete_Solution_DG& discrete_s
     }
 };
 
-Discontinuity_Indicator_Type2::Discontinuity_Indicator_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution)
+Discontinuity_Indicator_Type2::Discontinuity_Indicator_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution, std::unique_ptr<Extrapolation_Jump_Measurer>&& extrapolation_jump_measurer)
     : num_cells_(grid.num_cells())
     , cell_index_to_characteristic_length_(grid.cell_index_to_characteristic_length_table())
-    , measuring_function_(grid, discrete_solution, rho_index)
+    , extrapolation_jump_measurer_(std::move(extrapolation_jump_measurer))
 {
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 }
@@ -38,15 +38,22 @@ void Discontinuity_Indicator_Type2::check(const Discrete_Solution_DG& discrete_s
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
-    const auto cell_index_to_extrapolation_differences = measuring_function_.measure_cell_index_to_extrapolation_jumps(discrete_solution);
+    const auto cell_index_to_extrapolation_jumps = extrapolation_jump_measurer_->measure_cell_index_to_extrapolation_jumps(discrete_solution);
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         const auto threshold_number = this->cell_index_to_characteristic_length_[cell_index];
 
-        const auto& extrapolation_differences = cell_index_to_extrapolation_differences[cell_index];
-        const auto max_extrapolation_diff = *std::max_element(extrapolation_differences.begin(), extrapolation_differences.end());
+        const auto& extrapolation_jumps = cell_index_to_extrapolation_jumps[cell_index];
+        const auto num_face_share_cell = extrapolation_jumps.size();
 
-        if (threshold_number <= max_extrapolation_diff)
+        double sum = 0.0;
+        for (ushort j = 0; j < num_face_share_cell; ++j)
+        {
+            sum += extrapolation_jumps[j];
+        }
+        const auto avg = sum / static_cast<double>(num_face_share_cell);
+
+        if (threshold_number <= avg)
         {
             this->cell_index_to_near_discontinuity_table_[cell_index] = true;
         }

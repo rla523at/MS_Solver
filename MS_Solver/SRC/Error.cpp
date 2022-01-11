@@ -37,7 +37,7 @@ double Global_Error::calculate_global_error_L1_norm(const Grid& grid, const Disc
 		const auto num_QPs = QPs.size();
 
 		const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 		auto local_integral_value = 0.0;
 		auto local_volume = 0.0;
@@ -77,7 +77,7 @@ double Global_Error::calculate_global_error_L2_norm(const Grid& grid, const Disc
 		const auto num_QPs = QPs.size();
 
 		const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 		auto local_integral_value = 0.0;
 		auto local_volume = 0.0;
@@ -112,7 +112,7 @@ double Global_Error::calculate_global_error_Linf_norm(const Grid& grid, const Di
 		const auto num_QPs = QPs.size();
 
 		const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+		const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 		for (ushort q = 0; q < num_QPs; ++q)
 		{
@@ -162,7 +162,7 @@ double Local_Average_Error::calculate_local_error_L1_norm(const uint cell_index,
 	const auto num_QPs = QPs.size();
 
 	const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 	double volume = 0.0;
 	double integral_result = 0.0;
@@ -187,7 +187,7 @@ double Local_Average_Error::calculate_local_error_L2_norm(const uint cell_index,
 	const auto num_QPs = QPs.size();
 
 	const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 	double volume = 0.0;
 	double integral_result = 0.0;
@@ -212,7 +212,7 @@ double Local_Average_Error::calculate_local_error_Linf_norm(const uint cell_inde
 	const auto num_QPs = QPs.size();
 
 	const auto exact_solution_v_at_QPs = this->exact_solution_->calculate_exact_solution_vectors(QPs, end_time);
-	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_QPs(cell_index);
+	const auto computed_solution_v_at_QPs = discrete_solution.calculate_solution_at_cell_RHS_QPs(cell_index);
 
 	double max_error = 0.0;
 	for (ushort q = 0; q < num_QPs; ++q)

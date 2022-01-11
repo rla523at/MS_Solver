@@ -63,7 +63,7 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
     }
 
     //for precalculation
-    discrete_solution.precalculate_basis_bdry_QPs_basis_values(this->oc_indexes_, quadrature_rules);
+    discrete_solution.precalculate_bdry_RHS_QPs_basis_values(this->oc_indexes_, quadrature_rules);
     //
 
     LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
@@ -74,7 +74,7 @@ void Boundaries_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& disc
     for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
         const auto oc_index = this->oc_indexes_[bdry_index];
-        discrete_solution.calculate_solution_at_bdry_QPs(this->solution_v_at_QPs_.data(), bdry_index, oc_index);
+        discrete_solution.calculate_solution_at_bdry_RHS_QPs(this->solution_v_at_QPs_.data(), bdry_index, oc_index);
         
         auto& boundary_flux_function = *this->boundary_flux_functions_[bdry_index];
         const auto& normals = this->set_of_normals_[bdry_index];

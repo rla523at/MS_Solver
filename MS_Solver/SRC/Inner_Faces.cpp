@@ -72,8 +72,8 @@ Inner_Faces_DG::Inner_Faces_DG(const Grid& grid, Discrete_Solution_DG& discrete_
 	}
 
 	//for precaclulation
-	discrete_solution.precalculate_infs_ocs_QPs_basis_values(oc_indexes, set_of_ocs_QPs);
-	discrete_solution.precalculate_infs_ncs_QPs_basis_values(nc_indexes, set_of_ncs_QPs);
+	discrete_solution.precalculate_infs_ocs_RHS_QPs_basis_values(oc_indexes, set_of_ocs_QPs);
+	discrete_solution.precalculate_infs_ncs_RHS_QPs_basis_values(nc_indexes, set_of_ncs_QPs);
 
 	LOG << std::left << std::setw(50) << "@ Inner faces DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;
 }
@@ -83,8 +83,8 @@ void Inner_Faces_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& dis
 	for (uint infc_index = 0; infc_index < this->num_inner_faces_; ++infc_index)
 	{
 		const auto [oc_index, nc_index] = this->oc_nc_index_pairs_[infc_index];
-		discrete_solution.calculate_solution_at_infc_ocs_QPs(this->ocs_solution_v_at_QPs_.data(), infc_index, oc_index);
-		discrete_solution.calculate_solution_at_infc_ncs_QPs(this->ncs_solution_v_at_QPs_.data(), infc_index, nc_index);
+		discrete_solution.calculate_solution_at_infc_ocs_RHS_QPs(this->ocs_solution_v_at_QPs_.data(), infc_index, oc_index);
+		discrete_solution.calculate_solution_at_infc_ncs_RHS_QPs(this->ncs_solution_v_at_QPs_.data(), infc_index, nc_index);
 
 		const auto& normals = this->set_of_normals_[infc_index];
 		const auto num_QPs = normals.size();

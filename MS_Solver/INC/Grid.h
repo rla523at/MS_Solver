@@ -13,16 +13,11 @@ public:
 	Grid(const ushort space_dimension, std::vector<Element>&& elements);
 
 public:
-	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(void) const;
-	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
-	std::vector<std::pair<uint, uint>> pbdry_pair_index_to_oc_nc_index_pair_table(void) const;
 	std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_consider_pbdry(void) const;
 	std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_ignore_pbdry(void) const;
 	ushort space_dimension(void) const;
 	double total_volume(void) const;
 	std::unordered_map<uint, std::set<uint>> vertex_index_to_peridoic_matched_vertex_index_set(void) const;
-
-
 
 	uint num_cells(void) const;
 	Vector_Function<Polynomial> cell_basis_vector_function(const uint cell_index, const ushort solution_degree) const;
@@ -63,6 +58,13 @@ public:
 	std::vector<double> inner_face_index_to_characteristic_length_table(void) const;
 	std::vector<std::pair<uint, uint>> inner_face_index_to_oc_nc_index_pair_table(void) const;
 
+	std::vector<Euclidean_Vector> pbdry_pair_index_to_ocs_to_ncs_v_table(void) const;
+	const std::unordered_map<uint, std::set<uint>>& get_vnode_index_to_share_cell_index_set_consider_pbdry(void) const;
+	std::vector<std::pair<uint, uint>> pbdry_pair_index_to_oc_nc_index_pair_table(void) const;
+
+	size_t num_inter_cell_faces(void) const { return this->inter_cell_face_elements_.size(); };
+	std::vector<std::pair<uint, uint>> inter_cell_face_index_to_oc_nc_index_pair_table(void) const;
+
 private:		
 	std::vector<uint> find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const;
 	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const;
@@ -71,6 +73,8 @@ private:
 	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
 	std::vector<Element> make_inter_cell_face_elements(void) const;
 	std::pair<uint, uint> pbdry_oc_nc_index_pair(const uint pbdry_pair_index) const;
+	std::pair<uint, uint> inter_cell_face_oc_nc_index_pair(const uint inter_cell_face_index) const;
+
 
 private:
 	ushort space_dimension_;

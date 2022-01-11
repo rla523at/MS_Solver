@@ -162,12 +162,14 @@ class Supersonic_Expansion_2D : public Initial_Condition
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.15; };
 };
 
 class Supersonic_Expansion_3D : public Initial_Condition
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.15; };
 };
 
 class Left_Half_Blast_Wave_2D : public Initial_Condition, Euler_Shocktube_2D

@@ -33,7 +33,6 @@ std::vector<double> Scaled_Average_Difference_Measurer::measure_infc_index_to_sc
 Extrapolation_Jump_Measurer::Extrapolation_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     : criterion_solution_index_(criterion_solution_index)
     , num_cells_(grid.num_cells())
-    , cell_index_to_face_share_cell_indexes_table_(grid.cell_index_to_face_share_cell_indexes_table_consider_pbdry())
 {
     this->cell_index_to_volume_reciprocal_table_.resize(this->num_cells_);
 
@@ -43,98 +42,69 @@ Extrapolation_Jump_Measurer::Extrapolation_Jump_Measurer(const Grid& grid, Discr
         this->cell_index_to_volume_reciprocal_table_[i] = 1.0 / cell_volume;
     }
 
-    this->cell_index_to_QW_v_table_.resize(this->num_cells_);
+    this->cell_index_to__face_share_cell_index_to_QWs_v__table_.resize(this->num_cells_);
 
-    const auto cell_index_to_face_share_cell_indexes_table_ignore_pbdry = grid.cell_index_to_face_share_cell_indexes_table_ignore_pbdry();
-
-    std::vector<std::vector<Euclidean_Vector>> cell_index_to_order_n_QPs_table(this->num_cells_);
-
-    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+    const auto num_inner_face = grid.num_inner_faces();
+    for (uint i = 0; i < num_inner_face; ++i)
     {
-        const auto solution_degree = discrete_solution.solution_degree(cell_index);
-        const auto& quadrature_rule = grid.get_cell_quadrature_rule(cell_index, solution_degree);
-
-        cell_index_to_order_n_QPs_table[cell_index] = quadrature_rule.points;
-        this->cell_index_to_QW_v_table_[cell_index] = quadrature_rule.weights;
-    }
-
-    //for precalculation
-    const auto pbdry_pair_index_to_oc_nc_index_pair_table = grid.pbdry_pair_index_to_oc_nc_index_pair_table();
-    const auto pbdry_pair_index_to_ocs_to_ncs_v_table = grid.pbdry_pair_index_to_ocs_to_ncs_v_table();
-    const auto num_pbdry_pair = pbdry_pair_index_to_oc_nc_index_pair_table.size();
-
-    std::vector<std::pair<std::vector<Euclidean_Vector>, std::vector<Euclidean_Vector>>> pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table(num_pbdry_pair);
-
-    for (uint pbdry_pair_index = 0; pbdry_pair_index < num_pbdry_pair; ++pbdry_pair_index)
-    {
-        const auto [oc_index, nc_index] = pbdry_pair_index_to_oc_nc_index_pair_table[pbdry_pair_index];
-        const auto& ocs_to_ncs_v = pbdry_pair_index_to_ocs_to_ncs_v_table.at(pbdry_pair_index);
+        const auto [oc_index, nc_index] = grid.inner_face_oc_nc_index_pair(i);
 
         const auto oc_solution_degree = discrete_solution.solution_degree(oc_index);
         const auto nc_solution_degree = discrete_solution.solution_degree(nc_index);
+        const auto max_degree = (std::max)(oc_solution_degree, nc_solution_degree);
 
-        const auto& oc_quadrature_rule = grid.get_cell_quadrature_rule(oc_index, oc_solution_degree);
-        const auto& nc_quadrature_rule = grid.get_cell_quadrature_rule(nc_index, nc_solution_degree);
+        const auto& oc_quadrature_rule = grid.get_cell_quadrature_rule(oc_index, max_degree);
+        const auto& nc_quadrature_rule = grid.get_cell_quadrature_rule(nc_index, max_degree);
 
-        auto translated_oc_QPs = oc_quadrature_rule.points;
-        for (auto& QP : translated_oc_QPs)
-        {
-            QP += ocs_to_ncs_v;
-        }
+        auto& oc_face_share_cell_index_to_QWs_v_table = this->cell_index_to__face_share_cell_index_to_QWs_v__table_[oc_index];
+        oc_face_share_cell_index_to_QWs_v_table[nc_index] = oc_quadrature_rule.weights;
 
-        auto translated_nc_QPs = nc_quadrature_rule.points;
-        for (auto& QP : translated_nc_QPs)
-        {
-            QP -= ocs_to_ncs_v;
-        }
+        auto& nc_face_share_cell_index_to_QWs_v_table = this->cell_index_to__face_share_cell_index_to_QWs_v__table_[nc_index];
+        nc_face_share_cell_index_to_QWs_v_table[oc_index] = nc_quadrature_rule.weights;
+    }       
 
-        pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table[pbdry_pair_index] = { std::move(translated_oc_QPs),std::move(translated_nc_QPs) };
-    }
-
-    discrete_solution.precalculate_set_of_cell_index_to_target_cell_basis_QPs_m_(
-        cell_index_to_order_n_QPs_table,
-        cell_index_to_face_share_cell_indexes_table_ignore_pbdry,
-        pbdry_pair_index_to_oc_nc_index_pair_table,
-        pbdry_pair_index_to_translated_oc_nc_order_n_QPs_pair_table);
-    //
+    //precalculation
+    discrete_solution.precalculate_cell_jump_QPS_basis_values(grid);
+    discrete_solution.precalculate_cell_jump_QPs_face_neighbor_cell_basis_values(grid);
 }
 
 
 std::vector<std::vector<double>> Extrapolation_Jump_Measurer::measure_cell_index_to_extrapolation_jumps(const Discrete_Solution_DG& discrete_solution) const
 {
-    std::vector<std::vector<double>> cell_index_to_extrapolation_differences_table(this->num_cells_);
-
+    //construction optimization
     static constexpr ushort max_num_QPs = 100;
+    std::array<double, max_num_QPs> nth_solution_at_cell_QPs = { 0 };
     std::array<double, max_num_QPs> nth_extrapolated_solution_at_cell_QPs = { 0 };
+    std::array<double, max_num_QPs> diff_at_cell_jump_QPs = { 0 };
+
+    std::vector<std::vector<double>> cell_index_to_extrapolation_jumps_table(this->num_cells_);
 
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
-        auto& extrapolation_differences_table = cell_index_to_extrapolation_differences_table[cell_index];
+        const auto& face_share_cell_index_to_QWs_v = this->cell_index_to__face_share_cell_index_to_QWs_v__table_[cell_index];
+        const auto num_faces = face_share_cell_index_to_QWs_v.size();
 
-        const auto one_over_volume = this->cell_index_to_volume_reciprocal_table_[cell_index];
-        const auto P0_value = discrete_solution.calculate_P0_nth_solution(cell_index, this->criterion_solution_index_);
+        auto& extrapolation_jumps = cell_index_to_extrapolation_jumps_table[cell_index];
+        extrapolation_jumps.reserve(num_faces);
 
-        const auto& QWs_v = this->cell_index_to_QW_v_table_[cell_index];
-        const auto num_QPs = static_cast<int>(QWs_v.size());
+        discrete_solution.calculate_nth_solution_at_cell_jump_QPs(nth_solution_at_cell_QPs.data(), cell_index, this->criterion_solution_index_);
 
-        const auto& face_share_cell_indexes = this->cell_index_to_face_share_cell_indexes_table_[cell_index];
-        const auto num_face_share_cells = face_share_cell_indexes.size();
-
-        extrapolation_differences_table.resize(num_face_share_cells);
-
-        for (ushort j = 0; j < num_face_share_cells; ++j)
+        for (const auto& [face_share_cell_index, QWs_v] : face_share_cell_index_to_QWs_v)
         {
-            const auto face_share_cell_index = face_share_cell_indexes[j];
+            const auto num_QPs = static_cast<int>(QWs_v.size());
+            
+            discrete_solution.calculate_nth_extrapolated_solution_at_cell_jump_QPs(nth_extrapolated_solution_at_cell_QPs.data(), face_share_cell_index, cell_index, this->criterion_solution_index_);
 
-            discrete_solution.calculate_nth_extrapolated_solution_at_cell_QPs(nth_extrapolated_solution_at_cell_QPs.data(), face_share_cell_index, cell_index, this->criterion_solution_index_);
+            ms::BLAS::x_minus_y(num_QPs, nth_solution_at_cell_QPs.data(), nth_extrapolated_solution_at_cell_QPs.data(), diff_at_cell_jump_QPs.data());
+            ms::BLAS::abs_x(num_QPs, diff_at_cell_jump_QPs.data());
+            const auto jump = ms::BLAS::x_dot_y(num_QPs, diff_at_cell_jump_QPs.data(), QWs_v.data());
+            const auto scaled_jump = jump * this->calculate_scail_factor(discrete_solution, cell_index);
 
-            const auto P0_value_by_extrapolate = ms::BLAS::x_dot_y(num_QPs, nth_extrapolated_solution_at_cell_QPs.data(), QWs_v.data());
-
-            extrapolation_differences_table[j] = std::abs(P0_value_by_extrapolate * one_over_volume - P0_value);
+            extrapolation_jumps.push_back(scaled_jump);
         }
     }
 
-    return cell_index_to_extrapolation_differences_table;
+    return cell_index_to_extrapolation_jumps_table;
 }
 
 Divergence_Velocity_Measurer::Divergence_Velocity_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution)
@@ -143,9 +113,9 @@ Divergence_Velocity_Measurer::Divergence_Velocity_Measurer(const Grid& grid, Dis
     this->cell_index_to_num_QPs_.resize(this->num_cells_);
 
     //construction optimization
-    solution_at_cell_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
-    ddx_GE_solution_at_cell_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
-    ddy_GE_solution_at_cell_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
+    solution_at_cell_RHS_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
+    ddx_GE_solution_at_cell_RHS_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
+    ddy_GE_solution_at_cell_RHS_QPs.fill(Euclidean_Vector(discrete_solution.num_solutions()));
 
     //for precalculation
     std::vector<std::vector<Euclidean_Vector>> cell_index_to_QPs(this->num_cells_);
@@ -160,8 +130,8 @@ Divergence_Velocity_Measurer::Divergence_Velocity_Measurer(const Grid& grid, Dis
         this->cell_index_to_num_QPs_[cell_index] = static_cast<ushort>(quadrature_rule.points.size());
     }    
 
-    discrete_solution.precalcualte_cell_QPs_ddx_basis_values(cell_index_to_QPs);
-    discrete_solution.precalcualte_cell_QPs_ddy_basis_values(cell_index_to_QPs);
+    discrete_solution.precalculate_cell_RHS_QPs_ddx_basis_values(cell_index_to_QPs);
+    discrete_solution.precalculate_cell_RHS_QPs_ddy_basis_values(cell_index_to_QPs);
 }
 
 std::vector<std::vector<double>> Divergence_Velocity_Measurer::measure_cell_index_to_divergence_velocities_table(const Discrete_Solution_DG& discrete_solution) const
@@ -170,9 +140,9 @@ std::vector<std::vector<double>> Divergence_Velocity_Measurer::measure_cell_inde
 
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
-        discrete_solution.calculate_solution_at_cell_QPs(solution_at_cell_QPs.data(), cell_index);
-        discrete_solution.calculate_ddx_GE_solution_at_cell_QPs(ddx_GE_solution_at_cell_QPs.data(), cell_index);
-        discrete_solution.calculate_ddy_GE_solution_at_cell_QPs(ddy_GE_solution_at_cell_QPs.data(), cell_index);
+        discrete_solution.calculate_solution_at_cell_RHS_QPs(solution_at_cell_RHS_QPs.data(), cell_index);
+        discrete_solution.calculate_ddx_GE_solution_at_cell_RHS_QPs(ddx_GE_solution_at_cell_RHS_QPs.data(), cell_index);
+        discrete_solution.calculate_ddy_GE_solution_at_cell_RHS_QPs(ddy_GE_solution_at_cell_RHS_QPs.data(), cell_index);
         
         const auto num_QPs = this->cell_index_to_num_QPs_[cell_index];        
 
@@ -181,15 +151,19 @@ std::vector<std::vector<double>> Divergence_Velocity_Measurer::measure_cell_inde
 
         for (ushort j = 0; j < num_QPs; ++j)
         {
-            const auto rho = solution_at_cell_QPs[j][0];
-            const auto u = solution_at_cell_QPs[j][4];
-            const auto v = solution_at_cell_QPs[j][5];
+            const auto& solution = solution_at_cell_RHS_QPs[j];
+            const auto& ddx_solution = ddx_GE_solution_at_cell_RHS_QPs[j];
+            const auto& ddy_solution = ddy_GE_solution_at_cell_RHS_QPs[j];
 
-            const auto ddx_rho = ddx_GE_solution_at_cell_QPs[j][0];
-            const auto ddx_rhou = ddx_GE_solution_at_cell_QPs[j][1];
+            const auto rho = solution[0];
+            const auto u = solution[4];
+            const auto v = solution[5];
 
-            const auto ddy_rho = ddy_GE_solution_at_cell_QPs[j][0];
-            const auto ddy_rhov = ddy_GE_solution_at_cell_QPs[j][2];
+            const auto ddx_rho = ddx_solution[0];
+            const auto ddx_rhou = ddx_solution[1];
+
+            const auto ddy_rho = ddy_solution[0];
+            const auto ddy_rhov = ddy_solution[2];
 
             const auto one_over_rho = 1.0 / rho;
 

@@ -38,22 +38,22 @@ private:
     Scaled_Average_Difference_Measurer measuring_function_;    
 };
 
-// h <= max INT_{Omega} (q - q_j) / ||Omega|| ==> Max extrapolation differences가 h 이상이면 discontinuity로 보겠다.
+// h <= AVG extrapolation jump 
 // h = characteristic length of cell i
 class Discontinuity_Indicator_Type2 : public Discontinuity_Indicator
 {
 public:
-    Discontinuity_Indicator_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution);
+    Discontinuity_Indicator_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution, std::unique_ptr<Extrapolation_Jump_Measurer>&& extrapolation_jump_measurer);
 
 public:
     void check(const Discrete_Solution_DG& discrete_solution) override;
 
-public:
+private:
     static constexpr auto rho_index = 0;    
 
     uint num_cells_;
     std::vector<double> cell_index_to_characteristic_length_;
-    Extrapolation_Jump_Measurer measuring_function_;
+    std::unique_ptr<Extrapolation_Jump_Measurer> extrapolation_jump_measurer_;
 };
 
 // Max(div(u)) <= 0 ==> Max div(u)가 0보다 작으면 discontinuity로 보겠다.
@@ -65,7 +65,7 @@ public:
 public:
     void check(const Discrete_Solution_DG& discrete_solution) override;
 
-public:
+private:
     static constexpr auto threshold_number_ = 0.0;
 
     uint num_cells_;
@@ -82,7 +82,7 @@ public:
 public:
     void check(const Discrete_Solution_DG& discrete_solution) override;
 
-public:
+private:
     static constexpr auto rho_index_ = 0;
 
     uint num_cells_ = 0;

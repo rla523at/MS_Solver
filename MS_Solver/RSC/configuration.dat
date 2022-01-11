@@ -5,9 +5,9 @@ space_dimension				= 2
 governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Slowly_Moving_Contact			
+Initial_condition			= Shu_Osher		
 							//Constant1, Sine_Wave
-							//Modified_Sod, Left_Half_Blast_Wave, Double_Strong_Shock, Slowly_Moving_Contact
+							//Modified_Sod, Supersonic_Expansion, Left_Half_Blast_Wave, Double_Strong_Shock, Slowly_Moving_Contact
 							//Shu_Osher
 
 //linear advection option
@@ -25,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RT100x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ400x4.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////
@@ -34,9 +34,9 @@ grid_file_type				= Gmsh
 /////////////////////// Solver Option /////////////////////////////
 
 spatial_discrete_scheme		= DG_P3
-reconstruction_scheme		= hMLP_BD_II_11_1_42
+reconstruction_scheme		= hMLP_BD_II_11_1_F
 							//No, hMLP, hMLP_BD
-							//hMLP_BD_II_11_1_F, hMLP_BD_II_11_1_1, hMLP_BD_II_11_1_2, hMLP_BD_II_11_1_3, hMLP_BD_II_11_1_41, hMLP_BD_II_11_1_42
+							//hMLP_BD_II_11_1_F, hMLP_BD_II_11_1_1, hMLP_BD_II_11_1_21 , hMLP_BD_II_11_1_22, hMLP_BD_II_11_1_3, hMLP_BD_II_11_1_41, hMLP_BD_II_11_1_42
 							//hMLP_BD_II_12_1_T, hMLP_BD_II_22_1_T
 
 numerical_flux				= LLF
@@ -56,7 +56,7 @@ solve_end_controller_type	= Time
 solve_end_time				= -1
 							//negative value ==> problem dependent end time
 
-solve_end_iter				= 100
+solve_end_iter				= 1000
 
 solve_post_controller_type	= Initial_Final
 							//Time, Iter, NotUse, Initial_Final
@@ -72,14 +72,14 @@ solve_post_iter_unit		= 10
 write_post_file				= Yes
 							//Yes, No
 
-post_base_path				= E:/CodeData/Result/RDD/DEV/Discontinuity_Indicator/
+post_base_path				= E:/CodeData/Result/RDD/DEV/discontinuity_indicator/
 post_file_format			= Binary 					
 							//ASCII, Binary
 
 post_point_location			= Node						
 							//Center, Node
 
-post_order					= 5
+post_order					= 1
 
 post_for_debug				= No
 							//Yes, No

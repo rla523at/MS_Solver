@@ -29,14 +29,14 @@ TEST(Discrete_Solution_DG, calculate_solution_at_cell_QPs_1)
 			cell_quadrature_rules[cell_index] = grid.get_cell_quadrature_rule(cell_index, solution_degree);
 		}
 
-		discrete_solution_DG->precalcualte_cell_QPs_basis_values(cell_quadrature_rules);
+		discrete_solution_DG->precalculate_cell_RHS_QPs_basis_values(cell_quadrature_rules);
 
 
 		for (int cell_index = 0; cell_index < num_cells; ++cell_index)
 		{
-			const auto solution_at_cell_QPs = discrete_solution_DG->calculate_solution_at_cell_QPs(cell_index);
+			const auto solution_at_cell_RHS_QPs = discrete_solution_DG->calculate_solution_at_cell_RHS_QPs(cell_index);
 
-			for (const auto& solution : solution_at_cell_QPs)
+			for (const auto& solution : solution_at_cell_RHS_QPs)
 			{
 				constexpr auto ref_solution = 1.0;
 				constexpr auto epsilon = 9.0E-12;
@@ -94,8 +94,8 @@ TEST(Discrete_Solution_DG, calculate_solution_at_infc_QPs_1)
 		{
 			const auto [oc_index, nc_index] = grid.inner_face_oc_nc_index_pair(infc_index);
 
-			const auto solution_at_ocs_infc_QPs = discrete_solution_DG->calculate_solution_at_infc_ocs_QPs(infc_index, oc_index);
-			const auto solution_at_ncs_infc_QPs = discrete_solution_DG->calculate_solution_at_infc_ncs_QPs(infc_index, nc_index);
+			const auto solution_at_ocs_infc_QPs = discrete_solution_DG->calculate_solution_at_infc_ocs_RHS_QPs(infc_index, oc_index);
+			const auto solution_at_ncs_infc_QPs = discrete_solution_DG->calculate_solution_at_infc_ncs_RHS_QPs(infc_index, nc_index);
 			
 			for (const auto& solution : solution_at_ocs_infc_QPs)
 			{

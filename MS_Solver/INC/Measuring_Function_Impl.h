@@ -1,6 +1,45 @@
 #pragma once
 #include "Measuring_Function.h"
 
+// INT_{Omega} |q - q_j| * ( 1 / ||Omega|| )
+class Extrapolation_Jump_Measurer_Type1 : public Extrapolation_Jump_Measurer
+{
+public:
+	Extrapolation_Jump_Measurer_Type1(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+		: Extrapolation_Jump_Measurer(grid, discrete_solution, criterion_solution_index) 
+	{
+		//precalculation
+		discrete_solution.precalculate_cell_P0_basis_values();
+	};
+
+private:
+	double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint cell_index) const override
+	{
+		return this->cell_index_to_volume_reciprocal_table_[cell_index];
+	};
+};
+
+// INT_{Omega} |q - q_j| * ( 1 / ||Omega|| ) * ( 1 / ||q|| )
+class Extrapolation_Jump_Measurer_Type2 : public Extrapolation_Jump_Measurer
+{
+public:
+	Extrapolation_Jump_Measurer_Type2(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+		: Extrapolation_Jump_Measurer(grid, discrete_solution, criterion_solution_index) {};
+
+private:
+	double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint cell_index) const override
+	{
+		const auto one_over_volume = this->cell_index_to_volume_reciprocal_table_[cell_index];
+				
+		const auto avg_sol = discrete_solution.calculate_P0_nth_solution(cell_index, this->criterion_solution_index_);
+		const auto one_over_avg = 1.0 / avg_sol;
+
+		return one_over_avg * one_over_volume;
+	};
+};
+
+
+
 // INT_{w_j} (q - q_j) / ||w_j|| ==> average solution jump
 class Face_Jump_Measurer_Type1 : public Face_Jump_Measurer
 {

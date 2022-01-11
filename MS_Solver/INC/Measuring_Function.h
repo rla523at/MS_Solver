@@ -16,21 +16,27 @@ private:
     std::vector<std::pair<uint, uint>> infc_index_to_oc_nc_index_pair_table_;
 };
 
-// INT_{Omega} (q - q_j) / ||Omega||
-class Extrapolation_Jump_Measurer
+// INT_{Omega} |q - q_j| * Scale Factor
+class Extrapolation_Jump_Measurer abstract
 {
 public:
     Extrapolation_Jump_Measurer(const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index);
 
 public:
-    std::vector<std::vector<double>> measure_cell_index_to_extrapolation_jumps(const Discrete_Solution_DG& discrete_solution) const;    
+    std::vector<std::vector<double>> measure_cell_index_to_extrapolation_jumps(const Discrete_Solution_DG& discrete_solution) const;   
 
 private:
+    virtual double calculate_scail_factor(const Discrete_Solution_DG& discrete_solution, const uint cell_index) const abstract;
+
+protected:
     ushort criterion_solution_index_;
-    uint num_cells_;
-    std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_;
-    std::vector<Euclidean_Vector> cell_index_to_QW_v_table_;
+
     std::vector<double> cell_index_to_volume_reciprocal_table_;
+
+private:
+    uint num_cells_;
+
+    std::vector<std::map<uint, Euclidean_Vector>> cell_index_to__face_share_cell_index_to_QWs_v__table_;
 };
 
 class Divergence_Velocity_Measurer
@@ -47,12 +53,12 @@ private:
 
     //construction optimization
     static constexpr int max_QPs = 100;
-    static inline std::array<Euclidean_Vector, max_QPs> solution_at_cell_QPs;
-    static inline std::array<Euclidean_Vector, max_QPs> ddx_GE_solution_at_cell_QPs;
-    static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_QPs;
+    static inline std::array<Euclidean_Vector, max_QPs> solution_at_cell_RHS_QPs;
+    static inline std::array<Euclidean_Vector, max_QPs> ddx_GE_solution_at_cell_RHS_QPs;
+    static inline std::array<Euclidean_Vector, max_QPs> ddy_GE_solution_at_cell_RHS_QPs;
 };
 
-// INT_{w} |q+ - q-| / ||w||
+// INT_{w} |q+ - q-| * Scale Factor
 class Face_Jump_Measurer abstract
 {
 public:

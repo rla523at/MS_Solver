@@ -21,7 +21,7 @@ Node_Base_Convertor::Node_Base_Convertor(const Grid& grid, const ushort post_ord
 		this->num_post_points_ += this->cell_index_to_num_post_points_table_[i];
 	}
 
-	discrete_solution.precalculate_post_points(grid.cell_set_of_post_points(post_order));
+	discrete_solution.precalculate_cell_post_point_basis_values(grid.cell_set_of_post_points(post_order));
 
 	//construction optimization
 	this->solution_at_post_points_.fill(Euclidean_Vector(this->discrete_solution_.num_solutions()));
@@ -109,7 +109,7 @@ Center_Base_Convertor::Center_Base_Convertor(const Grid& grid, const ushort post
 		this->num_post_elements_ += this->set_of_num_post_elements_[i];
 	}
 
-	discrete_solution.precalculate_post_elements(grid.cell_set_of_post_element_centers(post_order));
+	discrete_solution.precalculate_cell_post_element_center_points_basis_values(grid.cell_set_of_post_element_centers(post_order));
 };
 
 std::vector<double> Center_Base_Convertor::convert_values(const std::vector<double>& values) const

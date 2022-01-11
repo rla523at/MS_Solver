@@ -110,6 +110,19 @@ std::vector<std::pair<uint, uint>> Grid::pbdry_pair_index_to_oc_nc_index_pair_ta
 	return pbdry_pair_index_to_oc_nc_index_pair_table;
 }
 
+std::vector<std::pair<uint, uint>> Grid::inter_cell_face_index_to_oc_nc_index_pair_table(void) const
+{
+	const auto num_inter_cell_faces = this->inter_cell_face_elements_.size();
+	std::vector<std::pair<uint, uint>> inter_cell_face_index_to_oc_nc_index_pair_table(num_inter_cell_faces);
+
+	for (uint inter_cell_face_index = 0; inter_cell_face_index < num_inter_cell_faces; ++inter_cell_face_index)
+	{
+		inter_cell_face_index_to_oc_nc_index_pair_table[inter_cell_face_index] = this->inter_cell_face_oc_nc_index_pair(inter_cell_face_index);
+	}
+
+	return inter_cell_face_index_to_oc_nc_index_pair_table;
+}
+
 std::vector<std::vector<uint>> Grid::cell_index_to_face_share_cell_indexes_table_consider_pbdry(void) const
 {
 	const auto num_cells = this->cell_elements_.size();
@@ -547,13 +560,8 @@ std::pair<uint, uint> Grid::inner_face_oc_nc_index_pair(const uint inner_face_in
 
 	if (inner_face_index < num_inter_cell_face)
 	{
-		const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inter_cell_face_elements_[inner_face_index].vertex_point_indexes());
-		REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
-
-		//set first index as oc index
-		const auto oc_index = cell_indexes[0];
-		const auto nc_index = cell_indexes[1];
-		return { oc_index,nc_index };
+		const auto inter_cell_face = inner_face_index;
+		return this->inter_cell_face_oc_nc_index_pair(inter_cell_face);
 	}
 	else
 	{
@@ -764,6 +772,17 @@ std::pair<uint, uint> Grid::pbdry_oc_nc_index_pair(const uint pbdry_pair_index) 
 
 	const auto oc_index = oc_indexes.front();
 	const auto nc_index = nc_indexes.front();
+	return { oc_index,nc_index };
+}
+
+std::pair<uint, uint> Grid::inter_cell_face_oc_nc_index_pair(const uint inter_cell_face_index) const
+{
+	const auto cell_indexes = this->find_cell_indexes_have_these_vnodes_ignore_pbdry(this->inter_cell_face_elements_[inter_cell_face_index].vertex_point_indexes());
+	REQUIRE(cell_indexes.size() == 2, "inner face should have an unique owner neighbor cell pair");
+
+	//set first index as oc index
+	const auto oc_index = cell_indexes[0];
+	const auto nc_index = cell_indexes[1];
 	return { oc_index,nc_index };
 }
 

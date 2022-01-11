@@ -34,11 +34,19 @@ public:
 
         return std::make_unique<Subcell_Oscillation_Indicator>(grid, std::move(trouble_boundary_indicator), std::move(shock_indicator), std::move(discontinuity_indicator));
     }
-    static std::unique_ptr<Subcell_Oscillation_Indicator> make_11_1_2_indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+    static std::unique_ptr<Subcell_Oscillation_Indicator> make_11_1_21_indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
     {
         auto trouble_boundary_indicator = Trouble_Boundary_Indicator_Factory::make_11_indicator(grid, discrete_solution, criterion_solution_index);
         auto shock_indicator = Shock_Indicator_Factory::make_type1_indicator(grid, discrete_solution, governing_equation_name);
-        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_type2_indicator(grid,discrete_solution);
+        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_21_indicator(grid,discrete_solution);
+
+        return std::make_unique<Subcell_Oscillation_Indicator>(grid, std::move(trouble_boundary_indicator), std::move(shock_indicator), std::move(discontinuity_indicator));
+    }
+    static std::unique_ptr<Subcell_Oscillation_Indicator> make_11_1_22_indicator(const std::string& governing_equation_name, const Grid& grid, Discrete_Solution_DG& discrete_solution, const ushort criterion_solution_index)
+    {
+        auto trouble_boundary_indicator = Trouble_Boundary_Indicator_Factory::make_11_indicator(grid, discrete_solution, criterion_solution_index);
+        auto shock_indicator = Shock_Indicator_Factory::make_type1_indicator(grid, discrete_solution, governing_equation_name);
+        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_22_indicator(grid, discrete_solution);
 
         return std::make_unique<Subcell_Oscillation_Indicator>(grid, std::move(trouble_boundary_indicator), std::move(shock_indicator), std::move(discontinuity_indicator));
     }
@@ -54,7 +62,7 @@ public:
     {
         auto trouble_boundary_indicator = Trouble_Boundary_Indicator_Factory::make_11_indicator(grid, discrete_solution, criterion_solution_index);
         auto shock_indicator = Shock_Indicator_Factory::make_type1_indicator(grid, discrete_solution, governing_equation_name);
-        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_type4_1_indicator(grid, discrete_solution);
+        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_41_indicator(grid, discrete_solution);
 
         return std::make_unique<Subcell_Oscillation_Indicator>(grid, std::move(trouble_boundary_indicator), std::move(shock_indicator), std::move(discontinuity_indicator));
     }
@@ -62,7 +70,7 @@ public:
     {
         auto trouble_boundary_indicator = Trouble_Boundary_Indicator_Factory::make_11_indicator(grid, discrete_solution, criterion_solution_index);
         auto shock_indicator = Shock_Indicator_Factory::make_type1_indicator(grid, discrete_solution, governing_equation_name);
-        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_type4_2_indicator(grid, discrete_solution);
+        auto discontinuity_indicator = Discontinuity_Indicator_Factory::make_42_indicator(grid, discrete_solution);
 
         return std::make_unique<Subcell_Oscillation_Indicator>(grid, std::move(trouble_boundary_indicator), std::move(shock_indicator), std::move(discontinuity_indicator));
     }
