@@ -12,9 +12,6 @@ public://Query
     void calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_soltuion) const;
 
 private:
-    void reset_residual_values(const uint oc_index) const;
-
-private:
     uint num_boundaries_;
     std::vector<uint> oc_indexes_;
     std::vector<std::unique_ptr<Boundary_Flux_Function>> boundary_flux_functions_;

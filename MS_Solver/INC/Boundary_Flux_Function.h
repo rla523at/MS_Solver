@@ -31,6 +31,30 @@ private:
 	std::shared_ptr<Numerical_Flux_Function> numerical_flux_function_;
 };
 
+class Slip_Wall_BC : public Boundary_Flux_Function
+{
+public:
+	Slip_Wall_BC(const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function)
+		:numerical_flux_function_(numerical_flux_function) {};
+
+public:
+	void calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override
+	{
+		const auto p = oc_solution[this->pressure_index_];
+
+		for (ushort i = 0; i < this->space_dimension_; ++i)
+		{
+			bdry_flux_ptr[1 + i] = p * normal[i];
+		}
+	}
+
+private:
+	ushort pressure_index_ = 6;
+	ushort space_dimension_ = 2;
+	std::shared_ptr<Numerical_Flux_Function> numerical_flux_function_;
+
+};
+
 
 class Boundary_Flux_Function_Factory//static class
 {

@@ -5,10 +5,10 @@ space_dimension				= 2
 governing_equation			= Euler	
 							//Linear_Advection, Burgers, Euler
 
-Initial_condition			= Shu_Osher		
+Initial_condition			= Blast_Wave		
 							//Constant1, Sine_Wave
 							//Modified_Sod, Supersonic_Expansion, Left_Half_Blast_Wave, Double_Strong_Shock, Slowly_Moving_Contact
-							//Shu_Osher
+							//Shu_Osher, Blast_Wave
 
 //linear advection option
 x_advection_speed			= 1.0
@@ -25,7 +25,7 @@ z_wave_length				= 1.0
 
 /////////////////////// Grid Option ///////////////////////////////
 
-grid_file_paths				= RSC/Grid/2D/ShockTube_RQ400x4.msh
+grid_file_paths				= RSC/Grid/2D/ShockTube_RQ400x4_wall.msh
 grid_file_type				= Gmsh
 
 ///////////////////////////////////////////////////////////////////

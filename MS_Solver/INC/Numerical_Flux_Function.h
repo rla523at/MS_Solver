@@ -7,7 +7,6 @@ class Numerical_Flux_Function abstract
 public:
 	virtual Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const abstract;
     virtual void calculate(double* numerical_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const abstract;
-
 };
 
 class LLF : public Numerical_Flux_Function

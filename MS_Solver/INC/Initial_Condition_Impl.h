@@ -244,12 +244,14 @@ class Blast_Wave_2D : public Initial_Condition, Euler_Shocktube_2D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.038; };
 };
 
 class Blast_Wave_3D : public Initial_Condition, Euler_Shocktube_3D
 {
 public:
 	Euclidean_Vector calculate_solution(const Euclidean_Vector& space_vector) const override;
+	constexpr double target_end_time(void) const override { return 0.038; };
 };
 
 class Explosion_2D : public Initial_Condition, Euler_Shocktube_2D

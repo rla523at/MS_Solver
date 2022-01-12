@@ -76,25 +76,19 @@ void Boundaries_DG::calculate_RHS(Residual& residual, Discrete_Solution_DG& disc
         const auto oc_index = this->oc_indexes_[bdry_index];
         discrete_solution.calculate_solution_at_bdry_RHS_QPs(this->solution_v_at_QPs_.data(), bdry_index, oc_index);
         
-        auto& boundary_flux_function = *this->boundary_flux_functions_[bdry_index];
+        auto& boundary_flux_function = this->boundary_flux_functions_[bdry_index];
         const auto& normals = this->set_of_normals_[bdry_index];
         const auto num_QPs = normals.size();
 
         auto& bdry_flux_QPs_m = this->set_of_boundary_flux_QPs_m_[bdry_index];
         for (ushort q = 0; q < num_QPs; ++q)
         {
-            boundary_flux_function.calculate(this->boundary_flux_.data(), this->solution_v_at_QPs_[q], normals[q]);
+            boundary_flux_function->calculate(this->boundary_flux_.data(), this->solution_v_at_QPs_[q], normals[q]);
             bdry_flux_QPs_m.change_column(q, this->boundary_flux_);
         }
-
 
         std::fill(this->residual_values_.begin(), this->residual_values_.begin() + discrete_solution.num_values(oc_index), 0.0);
         ms::gemm(bdry_flux_QPs_m, this->set_of_oc_side_QWs_basis_m_[bdry_index], this->residual_values_.data());
         residual.update_rhs(oc_index, this->residual_values_.data());
     }
-}
-
-void Boundaries_DG::reset_residual_values(const uint num_values) const
-{
-    //std::fill(this->residual_values_.begin(), this->residual_values_.begin() + num_values, 0.0);
 }
