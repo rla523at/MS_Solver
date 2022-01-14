@@ -21,8 +21,16 @@ public:
 		:contents_(str) {};
 	
 public://command	
+	template <typename T> Sentence& operator<<(const T value) 
+	{ 
+		this->contents_ += std::to_string(value);
+		return *this;
+	}
+	template <> Sentence& operator<<(const double value);
+	template <> Sentence& operator<<(const char* char_ptr);
 	Sentence& operator<<(const std::string& str);
 	
+	void clear(void) { this->contents_.clear(); };
 	template<typename T>	Sentence& insert_with_space(const std::vector<T>& values)
 	{
 		for (const auto value : values)
@@ -48,6 +56,7 @@ public://Query
 	bool operator<(const Sentence& other) const;
 	bool operator==(const Sentence& other) const;
 
+	bool contain(const std::string_view target) const;
 	bool contain_icase(const char* target) const;
 	template <typename... Args>		bool contain_icase(const Args... args) const;
 	size_t find_position(const std::string_view target) const;
@@ -65,7 +74,8 @@ class Text
 {
 public:
 	Text(void) = default;
-	Text(std::initializer_list<Sentence> list);
+	Text(std::initializer_list<Sentence> list) : senteces_(list) {};
+	template <typename Iter>	Text(Iter start, Iter end) : senteces_(start, end) {};
 
 public://command
 	Sentence& operator[](const size_t index);
@@ -82,10 +92,14 @@ public://command
 	void read(std::ifstream& file, const size_t num_read_line);
 
 public://Query
-	bool operator==(const Text& other) const;	
+	const Sentence& operator[](const size_t index) const;
+	bool operator==(const Text& other) const;
+
 	void add_write(const std::string_view write_file_path) const;
 	std::vector<Sentence>::const_iterator begin(void) const;
 	std::vector<Sentence>::const_iterator end(void) const;
+	Text extract(const size_t start_line_index, const size_t end_line_index) const;
+	int find_line_index_has_keyword(const std::string_view keyword) const;
 	void write(const std::string_view write_file_path) const;
 	std::string to_string(void) const;
 	size_t size(void) const;
@@ -126,6 +140,8 @@ std::ostream& operator<<(std::ostream& ostream, const Text& text);
 
 namespace ms
 {
+	bool contain(const std::string& str, const char c);
+	bool contain(const std::string& str, const std::string_view sv);
 	bool contains_icase(const std::string& str, const char* target);
 	bool contains_icase(const std::string& str, const std::string& target);
 	template <typename... Args>		bool contains_icase(const std::string& str, const Args... args)
@@ -193,6 +209,7 @@ template <typename... Args>		bool Sentence::contain_icase(const Args... args) co
 {
 	return ms::contains_icase(this->contents_, args...);
 };
+
 template <typename T>	T Sentence::to_value(void) const
 {
 	return ms::string_to_value<T>(contents_);

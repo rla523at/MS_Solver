@@ -1,31 +1,32 @@
 #include "../INC/Grid.h"
 
-Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
-	:space_dimension_(space_dimension)
+Grid::Grid(const std::vector<Euclidean_Vector>& node_datas, std::vector<Element_Data>&& element_datas)
 {
-	//this->space_dimension_ = grid_file_convertor.get_space_dimension();
-	//auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
-
 	Profiler::set_time_point();
+
+	this->space_dimension_ = static_cast<ushort>(node_datas.back().size()); // temporary
 
 	std::vector<Element> periodic_boundary_elements;
 
-	for (auto& element : elements)
+	for (auto&& data : element_datas)
 	{
-		switch (element.type())
+		const auto reference_geometry = Reference_Geometry_Container::get_shared_ptr(data.figure, data.figure_order);
+		Geometry geometry(reference_geometry, ms::extract_by_index(node_datas, data.node_indexes));
+
+		switch (data.element_type)
 		{
 		case ElementType::cell:
-			this->cell_elements_.push_back(std::move(element));
+			this->cell_elements_.push_back({ data.element_type, std::move(data.node_indexes), std::move(geometry) });
 			break;
 		case ElementType::periodic:
-			periodic_boundary_elements.push_back(std::move(element));
+			periodic_boundary_elements.push_back({ data.element_type, std::move(data.node_indexes), std::move(geometry) });
 			break;
 		default:
-			this->boundary_elements_.push_back(std::move(element));
+			this->boundary_elements_.push_back({ data.element_type, std::move(data.node_indexes), std::move(geometry) });
 			break;
 		}
 	}
-		
+
 	this->periodic_boundary_element_pairs_ = this->make_periodic_boundary_element_pairs(std::move(periodic_boundary_elements));
 	this->inter_cell_face_elements_ = this->make_inter_cell_face_elements();
 
@@ -41,10 +42,10 @@ Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
 	//calculate vnode_index_to_share_cell_index_set_ignore_pbdry_
 	const auto num_cell = this->cell_elements_.size();
 
-	for (uint i = 0; i < num_cell; ++i) 
+	for (uint i = 0; i < num_cell; ++i)
 	{
 		const auto vnode_indexes = this->cell_elements_[i].vertex_point_indexes();
-		for (const auto vnode_index : vnode_indexes) 
+		for (const auto vnode_index : vnode_indexes)
 		{
 			if (!this->vnode_index_to_share_cell_index_set_ignore_pbdry_.contains(vnode_index))
 			{
@@ -57,12 +58,12 @@ Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
 
 	//calculate vnode_index_to_share_cell_index_set_consider_pbdry_
 	this->vnode_index_to_share_cell_index_set_consider_pbdry_ = this->vnode_index_to_share_cell_index_set_ignore_pbdry_;
-	
+
 	const auto vnode_index_to_periodic_matched_node_index_set = this->vertex_index_to_peridoic_matched_vertex_index_set();
 
 	for (const auto& [vnode_index, periodic_matched_node_index_set] : vnode_index_to_periodic_matched_node_index_set)
 	{
-		for (const auto matched_vnode_index : periodic_matched_node_index_set) 
+		for (const auto matched_vnode_index : periodic_matched_node_index_set)
 		{
 			auto& i_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_index);
 			const auto& j_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(matched_vnode_index);
@@ -73,8 +74,86 @@ Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
 		}
 	}
 
-	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;	
+	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 }
+
+
+//
+//Grid::Grid(const ushort space_dimension, std::vector<Element>&& elements)
+//	:space_dimension_(space_dimension)
+//{
+//	//this->space_dimension_ = grid_file_convertor.get_space_dimension();
+//	//auto elements = grid_file_convertor.convert_to_elements(grid_file_path);
+//
+//	Profiler::set_time_point();
+//
+//	std::vector<Element> periodic_boundary_elements;
+//
+//	for (auto& element : elements)
+//	{
+//		switch (element.type())
+//		{
+//		case ElementType::cell:
+//			this->cell_elements_.push_back(std::move(element));
+//			break;
+//		case ElementType::periodic:
+//			periodic_boundary_elements.push_back(std::move(element));
+//			break;
+//		default:
+//			this->boundary_elements_.push_back(std::move(element));
+//			break;
+//		}
+//	}
+//		
+//	this->periodic_boundary_element_pairs_ = this->make_periodic_boundary_element_pairs(std::move(periodic_boundary_elements));
+//	this->inter_cell_face_elements_ = this->make_inter_cell_face_elements();
+//
+//	LOG << std::left << std::setw(50) << "@ Make Grid Element" << " ----------- " << Profiler::get_time_duration() << "s\n\n";
+//	LOG << "  " << std::setw(8) << this->cell_elements_.size() << " cell \n";
+//	LOG << "  " << std::setw(8) << this->boundary_elements_.size() << " boundary\n";
+//	LOG << "  " << std::setw(8) << this->periodic_boundary_element_pairs_.size() << " periodic boundary pair\n";
+//	LOG << "  " << std::setw(8) << this->inter_cell_face_elements_.size() << " inner face\n\n" << Log::print_;
+//
+//
+//	Profiler::set_time_point();
+//
+//	//calculate vnode_index_to_share_cell_index_set_ignore_pbdry_
+//	const auto num_cell = this->cell_elements_.size();
+//
+//	for (uint i = 0; i < num_cell; ++i) 
+//	{
+//		const auto vnode_indexes = this->cell_elements_[i].vertex_point_indexes();
+//		for (const auto vnode_index : vnode_indexes) 
+//		{
+//			if (!this->vnode_index_to_share_cell_index_set_ignore_pbdry_.contains(vnode_index))
+//			{
+//				this->vnode_index_to_share_cell_index_set_ignore_pbdry_.emplace(vnode_index, std::set<uint>());
+//			}
+//
+//			this->vnode_index_to_share_cell_index_set_ignore_pbdry_.at(vnode_index).insert(i);
+//		}
+//	}
+//
+//	//calculate vnode_index_to_share_cell_index_set_consider_pbdry_
+//	this->vnode_index_to_share_cell_index_set_consider_pbdry_ = this->vnode_index_to_share_cell_index_set_ignore_pbdry_;
+//	
+//	const auto vnode_index_to_periodic_matched_node_index_set = this->vertex_index_to_peridoic_matched_vertex_index_set();
+//
+//	for (const auto& [vnode_index, periodic_matched_node_index_set] : vnode_index_to_periodic_matched_node_index_set)
+//	{
+//		for (const auto matched_vnode_index : periodic_matched_node_index_set) 
+//		{
+//			auto& i_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(vnode_index);
+//			const auto& j_set = this->vnode_index_to_share_cell_index_set_consider_pbdry_.at(matched_vnode_index);
+//
+//			const auto difference = ms::set_difference(j_set, i_set);
+//
+//			i_set.insert(difference.begin(), difference.end());
+//		}
+//	}
+//
+//	LOG << std::left << std::setw(50) << "@ Make grid connecitivy " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;	
+//}
 
 std::vector<Euclidean_Vector> Grid::pbdry_pair_index_to_ocs_to_ncs_v_table(void) const
 {
@@ -491,12 +570,6 @@ std::vector<Euclidean_Vector> Grid::cell_vertices(const uint cell_index) const
 	return this->cell_elements_[cell_index].vertices();
 }
 
-
-size_t Grid::num_boundaries(void) const
-{
-	return this->boundary_elements_.size();
-}
-
 uint Grid::boundary_owner_cell_index(const uint bdry_index) const
 {
 	const auto vnode_indexes = this->boundary_elements_[bdry_index].vertex_point_indexes();
@@ -647,6 +720,21 @@ std::vector<std::pair<uint, uint>> Grid::inner_face_index_to_oc_nc_index_pair_ta
 	}
 
 	return result;
+}
+
+std::vector<uint> Grid::find_cell_indexes_except_near_bdry(void) const
+{
+	const auto num_cells = this->num_cells();
+	
+	std::vector<uint> cell_indexes(num_cells);
+	for (uint i = 0; i < num_cells; ++i)
+	{
+		cell_indexes[i] = i;
+	}
+
+	const auto bdry_owner_cell_indexes = this->boundary_owner_cell_indexes();
+
+	return ms::set_difference(cell_indexes, bdry_owner_cell_indexes);
 }
 
 std::vector<uint> Grid::find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const

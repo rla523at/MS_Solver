@@ -18,6 +18,18 @@ Sentence& Sentence::operator<<(const std::string& str)
 	return *this;
 }
 
+template <> Sentence& Sentence::operator<<(const double value)
+{
+	this->contents_ += ms::double_to_string(value);
+	return *this;
+}
+
+template <> Sentence& Sentence::operator<<(const char* char_ptr)
+{
+	this->contents_ += char_ptr;
+	return *this;
+}
+
 template<>
 Sentence& Sentence::insert_with_space(const double value) 
 {
@@ -63,6 +75,12 @@ bool Sentence::operator==(const Sentence& other) const
 	return this->contents_ == other.contents_;
 }
 
+bool Sentence::contain(const std::string_view target) const
+{ 
+	return ms::contain(contents_, target); 
+};
+
+
 bool Sentence::contain_icase(const char* target) const
 {
 	return ms::contains_icase(this->contents_, target);
@@ -104,13 +122,13 @@ Sentence Sentence::get_upper_case(void) const
 	return ms::get_upper_case(this->contents_);
 }
 
-Text::Text(std::initializer_list<Sentence> list)
-{
-	this->senteces_.reserve(list.size());
-
-	for (const auto& str : list)
-		this->senteces_.push_back(str);
-}
+//Text::Text(std::initializer_list<Sentence> list)
+//{
+//	this->senteces_.reserve(list.size());
+//
+//	for (const auto& str : list)
+//		this->senteces_.push_back(str);
+//}
 
 Sentence& Text::operator[](const size_t index) 
 {
@@ -187,6 +205,12 @@ void Text::remove_empty_line(void)
 	this->senteces_.erase(std::remove(this->senteces_.begin(), this->senteces_.end(), ""), this->senteces_.end());
 }
 
+const Sentence& Text::operator[](const size_t index) const
+{
+	REQUIRE(index < this->size(), "index can not exceed given range");
+	return this->senteces_[index];
+}
+
 bool Text::operator==(const Text& other) const 
 {
 	return this->senteces_ == other.senteces_;
@@ -213,6 +237,32 @@ std::vector<Sentence>::const_iterator Text::end(void) const
 {
 	return this->senteces_.end();
 }
+
+Text Text::extract(const size_t start_line_index, const size_t end_line_index) const
+{
+	REQUIRE(start_line_index < end_line_index, "start index can not exceed end index");
+	REQUIRE(end_line_index < this->size(), "end index can not exceed given range");
+
+	return { this->begin() + start_line_index, this->begin() + end_line_index };
+}
+
+int Text::find_line_index_has_keyword(const std::string_view keyword) const
+{
+	const auto num_senteces = this->senteces_.size();
+
+	for (size_t i = 0; i < num_senteces; ++i)
+	{
+		const auto& sentence = this->senteces_[i];
+
+		if (sentence.contain(keyword))
+		{
+			return static_cast<int>(i);
+		}
+	}
+
+	return -1;
+}
+
 void Text::write(const std::string_view file_path) const 
 {
 	ms::make_path(file_path);
@@ -285,6 +335,16 @@ namespace ms
 		auto c2_u = ms::get_upper_case(c2);
 		return c1_u == c2_u;
 	}
+
+	bool contain(const std::string& str, const char c) 
+	{
+		return str.find(c) != std::string::npos;
+	};
+
+	bool contain(const std::string& str, const std::string_view sv) 
+	{
+		return str.find(sv) != std::string::npos; 
+	};
 
 	bool contains_icase(const std::string& str, const char* target) 
 	{

@@ -34,8 +34,14 @@ Discontinuity_Indicator_Type2::Discontinuity_Indicator_Type2(const Grid& grid, D
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 }
 
+
+//#include "../INC/Post_Processor.h"
 void Discontinuity_Indicator_Type2::check(const Discrete_Solution_DG& discrete_solution)
 {
+    ////debug
+    //std::vector<double> avgs(this->num_cells_);
+    ////
+
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
     const auto cell_index_to_extrapolation_jumps = extrapolation_jump_measurer_->measure_cell_index_to_extrapolation_jumps(discrete_solution);
@@ -53,11 +59,21 @@ void Discontinuity_Indicator_Type2::check(const Discrete_Solution_DG& discrete_s
         }
         const auto avg = sum / static_cast<double>(num_face_share_cell);
 
+        ////debug
+        //avgs[cell_index] = avg;
+        ////
+
         if (threshold_number <= avg)
         {
             this->cell_index_to_near_discontinuity_table_[cell_index] = true;
         }
     }
+
+    ////debug
+    //Post_Processor::record_solution();
+    //Post_Processor::record_variables("avgs", avgs);
+    //Post_Processor::post_solution();
+    ////
 };
 
 Discontinuity_Indicator_Type3::Discontinuity_Indicator_Type3(const Grid& grid, Discrete_Solution_DG& discrete_solution)

@@ -25,11 +25,6 @@ bool Geometry::operator==(const Geometry& other) const
 	return this->points_ == other.points_ && this->reference_geometry_ == other.reference_geometry_;
 }
 
-//Euclidean_Vector Geometry::center_point(void) const
-//{
-//	return this->mapping_vf_(this->reference_geometry_->center_point());
-//}
-
 std::vector<Geometry> Geometry::face_geometries(void) const
 {
 	auto set_of_face_points = this->set_of_face_points();

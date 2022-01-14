@@ -6,6 +6,8 @@
 #include "Post_Processor.h"
 #include "Reconstruction_Factory.h"
 #include "Initial_Condition_Impl.h"
+#include "Governing_Equation_Impl.h"
+#include "Boundary_Flux_Function_Factory.h"
 
 
 class Semi_Discrete_Equation

@@ -1,5 +1,8 @@
 #pragma once
 #include "Element.h"
+#include "Grid_Data.h"
+
+#include "Reference_Geometry_Impl.h"
 
 #include "Log.h"
 #include "Profiler.h"
@@ -10,7 +13,10 @@
 class Grid 
 {
 public:
-	Grid(const ushort space_dimension, std::vector<Element>&& elements);
+	Grid(const std::vector<Euclidean_Vector>& node_datas, std::vector<Element_Data>&& element_datas);
+
+
+	//Grid(const ushort space_dimension, std::vector<Element>&& elements);
 
 public:
 	std::vector<std::vector<uint>> cell_index_to_face_share_cell_indexes_table_consider_pbdry(void) const;
@@ -42,7 +48,7 @@ public:
 	double cell_volume(const uint cell_index) const { return this->cell_elements_[cell_index].volume(); };
 	const Quadrature_Rule& get_cell_quadrature_rule(const uint cell_index, const ushort solution_degree) const;
 
-	size_t num_boundaries(void) const;
+	uint num_boundaries(void) const { return static_cast<uint>(this->boundary_elements_.size()); };
 	uint boundary_owner_cell_index(const uint bdry_index) const;
 	std::vector<uint> boundary_owner_cell_indexes(void) const;//unnecessary
 	ElementType boundary_type(const uint bdry_index) const;
@@ -65,11 +71,12 @@ public:
 	size_t num_inter_cell_faces(void) const { return this->inter_cell_face_elements_.size(); };
 	std::vector<std::pair<uint, uint>> inter_cell_face_index_to_oc_nc_index_pair_table(void) const;
 
-private:		
+private:
+	std::vector<uint> find_cell_indexes_except_near_bdry(void) const;
 	std::vector<uint> find_cell_indexes_have_these_vnodes_consider_pbdry(const std::vector<uint>& vnode_indexes) const;
 	std::vector<uint> find_cell_indexes_have_these_vnodes_ignore_pbdry(const std::vector<uint>& vnode_indexes) const;
 	int find_face_share_cell_index_consider_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
-	int find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;
+	int find_face_share_cell_index_ignore_pbdry(const uint my_cell_index, const std::vector<uint>& my_face_vertex_indexes) const;	
 	std::vector<std::pair<Element, Element>> make_periodic_boundary_element_pairs(std::vector<Element>&& periodic_boundary_elements) const;
 	std::vector<Element> make_inter_cell_face_elements(void) const;
 	std::pair<uint, uint> pbdry_oc_nc_index_pair(const uint pbdry_pair_index) const;

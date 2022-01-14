@@ -79,9 +79,13 @@ Cell_Type MLP_Indicator::check_cell_type(const uint cell_index, const double* va
 }
 
 bool MLP_Indicator::is_constant(const double value, const double P0_value, const uint cell_index) const
-{
-	const auto constant_criterion = (std::max)(1.0E-3 * std::abs(P0_value), this->cell_index_to_volume_table_[cell_index]);
-	return std::abs(value - P0_value) <= constant_criterion;
+{	
+	//const auto constant_criterion = (std::max)(1.0E-3 * std::abs(P0_value), this->cell_index_to_volume_table_[cell_index]);
+	//return std::abs(value - P0_value) <= constant_criterion;
+
+	//test
+	return false;
+	//
 }
 
 bool MLP_Indicator::is_satisfy_MLP_condition(const double P1_projected_value, const double allowable_min, const double allowable_max) const

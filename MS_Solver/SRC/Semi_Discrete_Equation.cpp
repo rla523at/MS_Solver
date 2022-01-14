@@ -11,13 +11,15 @@ Semi_Discrete_Equation_DG::Semi_Discrete_Equation_DG(const Configuration& config
 	auto time_step_calculator = Time_Step_Calculator_Factory::make_unique(configuration, grid);
 	this->cells_ = std::make_unique<Cells_DG>(governing_equation, std::move(time_step_calculator), grid, *this->discrete_solution_);
 
-	const auto numerical_flux_function = Numerical_Flux_Function_Factory::make_shared(configuration, governing_equation);
-	this->boundaries_ = std::make_unique<Boundaries_DG>(grid, *this->discrete_solution_, numerical_flux_function);
+	const auto numerical_flux_function = Numerical_Flux_Function_Factory::make_shared(configuration, governing_equation);	
 	this->inner_faces_ = std::make_unique<Inner_Faces_DG>(grid, *this->discrete_solution_, numerical_flux_function);
 
-	this->RHS_ = std::make_unique<Residual>(this->discrete_solution_->num_total_values(), this->discrete_solution_->get_coefficient_start_indexes());
+	auto boundary_flux_functions = Boundary_Flux_Function_Factory::make_bdry_flux_functions(grid, governing_equation, numerical_flux_function);
+	this->boundaries_ = std::make_unique<Boundaries_DG>(grid, *this->discrete_solution_, std::move(boundary_flux_functions));
 
-	this->reconstruction_ = Reconstruction_DG_Factory::make_unique(configuration, grid, *this->discrete_solution_);
+	this->RHS_ = std::make_unique<Residual>(this->discrete_solution_->num_total_values(), this->discrete_solution_->get_coefficient_start_indexes());
+		
+	this->reconstruction_ = Reconstruction_DG_Factory::make_unique(configuration, grid, *this->discrete_solution_, governing_equation);
 	this->error_ = Error_Factory::make_unqiue(configuration);
 
 	Post_Processor::initialize(configuration, grid, *this->discrete_solution_);

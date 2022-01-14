@@ -47,7 +47,7 @@ public://Command
 	void project_to_Pn_space(const uint cell_index, const ushort Pn);
 
 	//for boundary
-	void precalculate_bdry_RHS_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<Quadrature_Rule>& quadrature_rules);
+	void precalculate_bdry_RHS_QPs_basis_values(const Grid& grid);
 
 	//for cell
 	void precalculate_cell_post_element_center_points_basis_values(const std::vector<std::vector<Euclidean_Vector>>& cell_index_to_post_element_center_points) override;

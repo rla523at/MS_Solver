@@ -1,21 +1,16 @@
 #pragma once
 #include "Euclidean_Vector.h"
+#include "Figure.h"
 #include "Matrix.h"
 #include "Polynomial.h"
+
 
 #include <array>
 #include <map>
 
 using uint = unsigned int;
 
-enum class Figure
-{
-	point = 0,
-	line = 1,
-	triangle = 2, quadrilateral = 3,
-	tetrahedral = 4, hexahedral = 5, prism = 6, pyramid = 7,
-	num_figures = 8
-};
+
 
 struct Quadrature_Rule
 {
@@ -32,7 +27,7 @@ struct Quadrature_Rule
 	}
 };
 
-class Reference_Geometry
+class Reference_Geometry abstract
 {
 public://Query
 	bool operator==(const Reference_Geometry& other) const;

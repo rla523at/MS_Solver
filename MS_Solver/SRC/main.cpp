@@ -1,6 +1,7 @@
 #include "../INC/Configuration.h"
 #include "../INC/Discrete_Equation.h"
-#include "../INC/Grid_File_Convertor.h"
+#include "../INC/Grid_File_Reader.h"
+#include "../INC/Grid_File_Editor.h"
 #include "../INC/Solve_Controller_Impl.h"
 
 int main(void) 
@@ -25,15 +26,28 @@ int main(void)
 
 			LOG << "================================================================================\n";
 			LOG << "\t\t\t\t Start Pre-Processing \n";
-			LOG << "================================================================================\n" << Log::print_;
+			LOG << "================================================================================\n" << LOG.print_;
 
 			Profiler::set_time_point();
 
-			const auto grid_file_convertor = Grid_File_Convertor_Factory::make_unique(configuration);
-			auto elements = grid_file_convertor->convert_to_elements(grid_file_path);
+
+			Profiler::set_time_point();			
+
+			Text grid_text;
+			grid_text.read(grid_file_path);
 
 			const auto space_dimension = configuration.space_dimension();
-			Grid grid(space_dimension, std::move(elements));
+			Gmsh_Text_Editor test(space_dimension);
+			//test.perturb(grid_text, 0.01, 40);
+			
+			Gmsh_File_Reader grid_file_reader(space_dimension);
+
+			auto node_data = grid_file_reader.read_node_datas(grid_text);
+			auto element_data = grid_file_reader.read_element_datas(grid_text);
+
+			LOG << std::left << std::setw(50) << "@ Read Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+
+			Grid grid(node_data, std::move(element_data));
 
 			auto semi_discrete_equation = Semi_Discrete_Equation_Factory::make_unique(configuration, grid);
 			auto time_discrete_scheme = Time_Discrete_Scheme_Factory::make_unique(configuration);

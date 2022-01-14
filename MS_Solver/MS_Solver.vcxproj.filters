@@ -64,14 +64,29 @@
     <Filter Include="헤더 파일\Grid">
       <UniqueIdentifier>{76170e15-bd82-4fa0-8bb6-e01a47233b06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Grid\Geometry">
-      <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Solver\RHS">
       <UniqueIdentifier>{6a2ec873-19a0-46b8-95f2-7d1a9c7f5c33}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\Solver\RHS">
       <UniqueIdentifier>{39d0ec63-edc6-45ed-928f-04836b7bdc1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Solver\RHS\Governing_Equation">
+      <UniqueIdentifier>{cbfe5f2e-5756-48bf-80f4-1746566da198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Solver\RHS\Boundary">
+      <UniqueIdentifier>{a4eb9dbb-5c57-4e8e-8d11-0c7bd81c320c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\RHS\Governing_Equation">
+      <UniqueIdentifier>{268056b8-9807-4b22-b747-267750bae75d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Solver\RHS\Boundary">
+      <UniqueIdentifier>{52ddbc22-11a8-4035-8549-8d9eb56b131d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Grid\Grid_Covertor">
+      <UniqueIdentifier>{725dfa69-e7c2-4d10-8e19-b1b03fd0a53c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Grid\Element">
+      <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,19 +105,13 @@
     <ClCompile Include="SRC\Grid.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Grid_File_Convertor.cpp">
+    <ClCompile Include="SRC\Grid_File_Convertor_Impl.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Profiler.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Initial_Condition_Impl.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Governing_Equation.cpp">
-      <Filter>소스 파일\Solver</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Discrete_Solution.cpp">
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Time_Step_Calculator.cpp">
@@ -177,20 +186,11 @@
     <ClCompile Include="SRC\Reconstruction.cpp">
       <Filter>소스 파일\Solver\Reconstruction</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Reconstruction_Factory.cpp">
-      <Filter>소스 파일\Solver\Reconstruction</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Limiter_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Limiter</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Measuring_Function.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Boundaries.cpp">
-      <Filter>소스 파일\Solver\RHS</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Boundary_Flux_Function.cpp">
-      <Filter>소스 파일\Solver\RHS</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Cells.cpp">
       <Filter>소스 파일\Solver\RHS</Filter>
@@ -213,6 +213,21 @@
     <ClCompile Include="SRC\Shock_Indicator_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
     </ClCompile>
+    <ClCompile Include="SRC\Governing_Equation_Impl.cpp">
+      <Filter>소스 파일\Solver\RHS\Governing_Equation</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Boundaries.cpp">
+      <Filter>소스 파일\Solver\RHS\Boundary</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Boundary_Flux_Function_Impl.cpp">
+      <Filter>소스 파일\Solver\RHS\Boundary</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Discrete_Solution.cpp">
+      <Filter>소스 파일\Solver\RHS</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Trouble_Boundary_Indicator_Impl.cpp">
+      <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INC\Exception.h">
@@ -224,13 +239,7 @@
     <ClInclude Include="INC\Tecplot_File_Writer.h">
       <Filter>헤더 파일\Post</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Element.h">
-      <Filter>헤더 파일\Grid</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Grid.h">
-      <Filter>헤더 파일\Grid</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Convertor.h">
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
     <ClInclude Include="INC\Log.h">
@@ -267,13 +276,13 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="INC\Reference_Geometry.h">
-      <Filter>헤더 파일\Grid\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Element</Filter>
     </ClInclude>
     <ClInclude Include="INC\Geometry.h">
-      <Filter>헤더 파일\Grid\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Element</Filter>
     </ClInclude>
     <ClInclude Include="INC\Reference_Geometry_Impl.h">
-      <Filter>헤더 파일\Grid\Geometry</Filter>
+      <Filter>헤더 파일\Grid\Element</Filter>
     </ClInclude>
     <ClInclude Include="INC\Matrix.h">
       <Filter>헤더 파일\Math</Filter>
@@ -317,12 +326,6 @@
     <ClInclude Include="INC\Measuring_Function.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Boundaries.h">
-      <Filter>헤더 파일\Solver\RHS</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Boundary_Flux_Function.h">
-      <Filter>헤더 파일\Solver\RHS</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Cells.h">
       <Filter>헤더 파일\Solver\RHS</Filter>
     </ClInclude>
@@ -336,9 +339,6 @@
       <Filter>헤더 파일\Solver\RHS</Filter>
     </ClInclude>
     <ClInclude Include="INC\Semi_Discrete_Equation.h">
-      <Filter>헤더 파일\Solver\RHS</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Governing_Equation.h">
       <Filter>헤더 파일\Solver\RHS</Filter>
     </ClInclude>
     <ClInclude Include="INC\Initial_Condition.h">
@@ -382,6 +382,51 @@
     </ClInclude>
     <ClInclude Include="INC\Trouble_Boundary_Indicator_Factory.h">
       <Filter>헤더 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Governing_Equation.h">
+      <Filter>헤더 파일\Solver\RHS\Governing_Equation</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Governing_Equation_Impl.h">
+      <Filter>헤더 파일\Solver\RHS\Governing_Equation</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundaries.h">
+      <Filter>헤더 파일\Solver\RHS\Boundary</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundary_Flux_Function.h">
+      <Filter>헤더 파일\Solver\RHS\Boundary</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundary_Flux_Function_Impl.h">
+      <Filter>헤더 파일\Solver\RHS\Boundary</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Boundary_Flux_Function_Factory.h">
+      <Filter>헤더 파일\Solver\RHS\Boundary</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Convertor.h">
+      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Convertor_Impl.h">
+      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Reader.h">
+      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Editor.h">
+      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File_Type.h">
+      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Figure.h">
+      <Filter>헤더 파일\Grid\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Element.h">
+      <Filter>헤더 파일\Grid\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Element_Type.h">
+      <Filter>헤더 파일\Grid\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_Data.h">
+      <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -40,44 +40,31 @@ private:
 class Shock_Indicator_Factory//static class
 {
 public://Query
-    static std::unique_ptr<Shock_Indicator> make_unique(const std::string& governing_equation_name, const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution);
     static std::unique_ptr<Shock_Indicator> make_always_false_indicator(void)
     {
         return std::make_unique<Always_False_Shock_Indicator>();
     }
-    static std::unique_ptr<Shock_Indicator> make_type1_indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::string& governing_equation_name)
+    static std::unique_ptr<Shock_Indicator> make_type1_indicator(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Governing_Equation>& governing_equation)
     {
-        const auto criterion_solution_index = find_pressure_index(governing_equation_name, grid.space_dimension());
+        const auto criterion_solution_index = find_criterion_index(governing_equation);
         return std::make_unique<Shock_Indicator_Type1>(grid, discrete_solution, criterion_solution_index);
     }
-    static ushort find_pressure_index(const std::string& governing_equation_name, const ushort space_dimension)
+    static ushort find_criterion_index(const std::shared_ptr<Governing_Equation>& governing_equation)
     {
-        if (ms::compare_icase(governing_equation_name, "Burgers"))
+        const auto gov_eq_type = governing_equation->type();
+
+        switch (gov_eq_type)
         {
+        case Governing_Equation_Type::Burgers:
             return 0;
-        }
-        else if (ms::compare_icase(governing_equation_name, "Euler"))
-        {
-            if (space_dimension == 2)
-            {
-                return Euler_2D::pressure_index();
-            }
-            else if (space_dimension == 3)
-            {
-                return Euler_3D::pressure_index();
-            }
-            else
-            {
-                EXCEPTION("not supported dimension");
-                return -1;
-            }
-        }
-        else
-        {
-            EXCEPTION("not supported governing equation");
-            return -1;
+        case Governing_Equation_Type::Euler:
+            return governing_equation->pressure_index();
+        default:
+            EXCEPTION("Wrong governing equation");
+            return NULL;
         }
     }
+
 
 private:
     Shock_Indicator_Factory(void) = delete;

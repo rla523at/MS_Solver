@@ -635,6 +635,32 @@ Euclidean_Vector Blast_Wave_3D::calculate_solution(const Euclidean_Vector& space
 	}
 }
 
+Euclidean_Vector Leblanc_2D::calculate_solution(const Euclidean_Vector& space_vector) const
+{
+	constexpr auto discontinuity_location1 = 3;
+
+	const auto x_coordinate = space_vector.at(0);
+
+	if (x_coordinate < discontinuity_location1)
+	{
+		constexpr auto rho = 1.0;
+		constexpr auto rhou = 0.0;
+		constexpr auto rhov = 0.0;
+		constexpr auto rhoE = 0.1;
+
+		return { rho, rhou, rhov, rhoE };
+	}
+	else
+	{
+		constexpr auto rho = 1.0e-3;
+		constexpr auto rhou = 0.0;
+		constexpr auto rhov = 0.0;
+		constexpr auto rhoE = 1.0e-9;
+
+		return { rho, rhou, rhov, rhoE };
+	}
+}
+
 Euclidean_Vector Explosion_2D::calculate_solution(const Euclidean_Vector& space_vector) const
 {
 	constexpr auto discontinuity_radius = 0.4;
@@ -907,6 +933,18 @@ std::unique_ptr<Initial_Condition> Initial_Condition_Factory::make_unique(const 
 			EXCEPTION("not supproted space dimension");
 			return nullptr;
 		}
+	}
+	else if (ms::compare_icase(name, "Leblanc"))
+	{
+	if (space_dimension == 2)
+	{
+		return std::make_unique<Leblanc_2D>();
+	}
+	else
+	{
+		EXCEPTION("not supproted space dimension");
+		return nullptr;
+	}
 	}
 	else if (ms::compare_icase(name, "Explosion"))
 	{

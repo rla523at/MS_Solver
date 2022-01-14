@@ -1,24 +1,4 @@
-#include "../INC/Governing_Equation.h"
-
-const std::vector<std::string>& Governing_Equation::get_solution_names(void) const 
-{
-	return solution_names_;
-}
-
-ushort Governing_Equation::num_equations(void) const 
-{
-	return this->num_equations_;
-}
-
-ushort Governing_Equation::num_solutions(void) const
-{
-	return this->num_solutions_;
-}
-
-ushort Governing_Equation::space_dimension(void) const 
-{
-	return this->space_dimension_;
-}
+#include "../INC/Governing_Equation_Impl.h"
 
 Scalar_Equation::Scalar_Equation(void)
 {
@@ -44,23 +24,6 @@ std::vector<std::vector<double>> Linear_Advection::calculate_cell_index_to_coord
 double Linear_Advection::calculate_inner_face_maximum_lambda(const Euclidean_Vector& oc_solution, const Euclidean_Vector& nc_solution, const Euclidean_Vector& normal_vector) const
 {
 	return std::abs(this->advection_speeds_.inner_product(normal_vector));
-}
-
-//Matrix Linear_Advection::calculate_physical_flux(const Euclidean_Vector& solution) const
-//{
-//	std::vector<double> values(this->space_dimension_);
-//
-//	for (int i = 0; i < this->space_dimension_; ++i)
-//	{
-//		values[i] = this->advection_speeds_[i] * solution[0];
-//	}
-//
-//	return { this->num_equations_, this->space_dimension_, std::move(values) };
-//}
-
-const Euclidean_Vector& Linear_Advection::get_advection_speed_vector(void) const
-{
-	return this->advection_speeds_;
 }
 
 Linear_Advection_2D::Linear_Advection_2D(const double x_advection_speed, const double y_advection_speed)
@@ -149,17 +112,6 @@ void Burgers::calculate_physical_flux(Matrix& physical_flux, const Euclidean_Vec
 	{
 		physical_flux.at(0, i) = flux_value;
 	}
-}
-
-
-Burgers_2D::Burgers_2D(void)
-{
-	this->space_dimension_ = 2;
-}
-
-Burgers_3D::Burgers_3D(void)
-{
-	this->space_dimension_ = 3;
 }
 
 Euler_2D::Euler_2D(void) 

@@ -1,6 +1,7 @@
 #include "../INC/Boundaries.h"
 
-Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux)
+Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, std::vector<std::unique_ptr<Boundary_Flux_Function>>&& boundary_flux_functions)
+    :boundary_flux_functions_(std::move(boundary_flux_functions))
 {
     Profiler::set_time_point();
 
@@ -20,17 +21,10 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
     this->solution_v_at_QPs_.resize(this->max_num_QPs, Euclidean_Vector(num_solutions));
     //
 
-    //for precalculation
-    std::vector<Quadrature_Rule> quadrature_rules(this->num_boundaries_);
-    //
-
     for (uint bdry_index = 0; bdry_index < this->num_boundaries_; ++bdry_index)
     {
         const auto oc_index = grid.boundary_owner_cell_index(bdry_index);
         this->oc_indexes_[bdry_index] = oc_index;
-
-        const auto boundary_type = grid.boundary_type(bdry_index);
-        this->boundary_flux_functions_[bdry_index] = std::move(Boundary_Flux_Function_Factory::make_unique(boundary_type, numerical_flux));
 
         const auto oc_solution_degree = discrete_solution.solution_degree(oc_index);
         const auto integrand_degree = 2 * oc_solution_degree + 1;
@@ -57,13 +51,10 @@ Boundaries_DG::Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_so
         this->set_of_boundary_flux_QPs_m_[bdry_index] = Matrix(num_equations, num_QPs);
         //
 
-        //for precalculation
-        quadrature_rules[bdry_index] = std::move(quadrature_rule);
-        //
     }
 
     //for precalculation
-    discrete_solution.precalculate_bdry_RHS_QPs_basis_values(this->oc_indexes_, quadrature_rules);
+    discrete_solution.precalculate_bdry_RHS_QPs_basis_values(grid);
     //
 
     LOG << std::left << std::setw(50) << "@ Boundaries DG precalculation" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << LOG.print_;

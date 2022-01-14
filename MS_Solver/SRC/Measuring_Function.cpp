@@ -98,6 +98,12 @@ std::vector<std::vector<double>> Extrapolation_Jump_Measurer::measure_cell_index
             ms::BLAS::x_minus_y(num_QPs, nth_solution_at_cell_QPs.data(), nth_extrapolated_solution_at_cell_QPs.data(), diff_at_cell_jump_QPs.data());
             ms::BLAS::abs_x(num_QPs, diff_at_cell_jump_QPs.data());
             const auto jump = ms::BLAS::x_dot_y(num_QPs, diff_at_cell_jump_QPs.data(), QWs_v.data());
+
+            ////test
+            //ms::BLAS::x_minus_y(num_QPs, nth_solution_at_cell_QPs.data(), nth_extrapolated_solution_at_cell_QPs.data(), diff_at_cell_jump_QPs.data());
+            //const auto jump = std::abs(ms::BLAS::x_dot_y(num_QPs, diff_at_cell_jump_QPs.data(), QWs_v.data()));
+            ////test
+
             const auto scaled_jump = jump * this->calculate_scail_factor(discrete_solution, cell_index);
 
             extrapolation_jumps.push_back(scaled_jump);

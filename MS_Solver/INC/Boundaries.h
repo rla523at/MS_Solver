@@ -6,7 +6,7 @@
 class Boundaries_DG
 {
 public:
-    Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux);
+    Boundaries_DG(const Grid& grid, Discrete_Solution_DG& discrete_solution, std::vector<std::unique_ptr<Boundary_Flux_Function>>&& boundary_flux_functions);
 
 public://Query
     void calculate_RHS(Residual& residual, Discrete_Solution_DG& discrete_soltuion) const;

@@ -155,15 +155,21 @@ void Discrete_Solution_DG::precalculate_cell_post_point_basis_values(const std::
 	}
 }
 
-void Discrete_Solution_DG::precalculate_bdry_RHS_QPs_basis_values(const std::vector<uint>& oc_indexes, const std::vector<Quadrature_Rule>& quadrature_rules)
+void Discrete_Solution_DG::precalculate_bdry_RHS_QPs_basis_values(const Grid& grid)
 {
-	const auto num_bdrys = oc_indexes.size();
-	this->boundary_index_to_basis_RHS_QPs_m_.reserve(num_bdrys);
+	const auto num_bdrys = grid.num_boundaries();
+	this->boundary_index_to_basis_RHS_QPs_m_.resize(num_bdrys);
 
 	for (uint bdry_index = 0; bdry_index < num_bdrys; ++bdry_index)
 	{
-		const auto& QPs = quadrature_rules[bdry_index].points;
-		this->boundary_index_to_basis_RHS_QPs_m_.push_back(this->calculate_basis_points_m(oc_indexes[bdry_index], QPs));
+		const auto oc_index = grid.boundary_owner_cell_index(bdry_index);
+		const auto oc_solution_degree = this->cell_index_to_solution_degree_table_[oc_index];
+		const auto integrand_degree = 2 * oc_solution_degree + 1;
+
+		const auto quadrature_rule = grid.boundary_quadrature_rule(bdry_index, integrand_degree);
+
+		const auto& QPs = quadrature_rule.points;
+		this->boundary_index_to_basis_RHS_QPs_m_[bdry_index] = this->calculate_basis_points_m(oc_index, QPs);
 	}
 }
 

@@ -25,23 +25,3 @@ void Shock_Indicator_Type1::check(const Discrete_Solution_DG& discrete_solution)
         }
     }
 };
-
-std::unique_ptr<Shock_Indicator> Shock_Indicator_Factory::make_unique(const std::string& governing_equation_name, const std::string& type_name, const Grid& grid, Discrete_Solution_DG& discrete_solution)
-{
-    const auto pressure_index = find_pressure_index(governing_equation_name, grid.space_dimension());
-
-    if (pressure_index < 0)
-    {
-        return make_always_false_indicator();
-    }
-
-    if (ms::compare_icase(type_name, "type1"))
-    {
-        return std::make_unique<Shock_Indicator_Type1>(grid, discrete_solution, pressure_index);
-    }
-    else
-    {
-        EXCEPTION("not supported type");
-        return nullptr;
-    }
-};

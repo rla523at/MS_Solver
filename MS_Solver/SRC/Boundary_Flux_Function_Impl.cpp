@@ -1,4 +1,4 @@
-#include "../INC/Boundary_Flux_Function.h"
+#include "../INC/Boundary_Flux_Function_Impl.h"
 
 Euclidean_Vector Initial_Constant_BC::calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal)
 {
@@ -20,19 +20,3 @@ void Initial_Constant_BC::calculate_neighbor_solution(const Euclidean_Vector& oc
 		this->is_initialized_ = true;
 	}
 }
-
-std::unique_ptr<Boundary_Flux_Function> Boundary_Flux_Function_Factory::make_unique(const ElementType boundary_type, const std::shared_ptr<Numerical_Flux_Function>& numerical_flux_function)
-{
-	switch (boundary_type)
-	{
-	case ElementType::initial_constant_BC:
-	{
-		return std::make_unique<Initial_Constant_BC>(numerical_flux_function);
-	}
-	default:
-	{
-		EXCEPTION("not supported boundary type");
-		return nullptr;
-	}
-	}
-};
