@@ -1,6 +1,6 @@
 #pragma once
 #include "Boundary_Flux_Function.h"
-
+#include "Numerical_Flux_Function.h"
 
 class Initial_Constant_BC : public Boundary_Flux_Function
 {
@@ -31,29 +31,8 @@ public:
 		, numerical_flux_function_(numerical_flux_function) {};
 
 public://Query
-	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override
-	{
-		Euclidean_Vector sol(oc_solution.size());
-
-		const auto p = oc_solution[this->pressure_index_];
-
-		for (ushort i = 0; i < this->space_dimension_; ++i)
-		{
-			sol[1 + i] = p * normal[i];
-		}
-
-		return sol;
-	}
-
-	void calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override
-	{
-		const auto p = oc_solution[this->pressure_index_];
-
-		for (ushort i = 0; i < this->space_dimension_; ++i)
-		{
-			bdry_flux_ptr[1 + i] = p * normal[i];
-		}
-	}
+	Euclidean_Vector calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override;
+	void calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal) override;
 
 private:
 	ushort pressure_index_ = 0;

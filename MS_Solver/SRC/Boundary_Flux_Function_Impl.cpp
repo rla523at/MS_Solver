@@ -20,3 +20,28 @@ void Initial_Constant_BC::calculate_neighbor_solution(const Euclidean_Vector& oc
 		this->is_initialized_ = true;
 	}
 }
+
+Euclidean_Vector Slip_Wall_BC::calculate(const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal)
+{
+	Euclidean_Vector sol(oc_solution.size());
+
+	const auto p = oc_solution[this->pressure_index_];
+
+	for (ushort i = 0; i < this->space_dimension_; ++i)
+	{
+		const auto soution_index = 1 + i;
+		sol[soution_index] = p * normal[i];
+	}
+
+	return sol;
+}
+
+void Slip_Wall_BC::calculate(double* bdry_flux_ptr, const Euclidean_Vector& oc_solution, const Euclidean_Vector& normal)
+{
+	const auto p = oc_solution[this->pressure_index_];
+
+	for (ushort i = 0; i < this->space_dimension_; ++i)
+	{
+		bdry_flux_ptr[1 + i] = p * normal[i];
+	}
+}
