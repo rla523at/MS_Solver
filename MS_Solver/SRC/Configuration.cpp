@@ -235,8 +235,8 @@ std::string Configuration::governing_equation_str(void) const
 
 std::string Configuration::grid_file_name(const std::string& grid_file_path) const
 {
-	const auto parsed_strs = ms::parse(grid_file_path, '/');
-	return ms::parse(parsed_strs.back(), '.').front();
+	const auto parsed_strs = ms::parse_by(grid_file_path, '/');
+	return ms::parse_by(parsed_strs.back(), '.').front();
 }
 
 std::string Configuration::initial_condition_str(void) const
@@ -267,7 +267,7 @@ ushort Configuration::find_solution_degree(void) const
 
 	if (ms::contains_icase(this->spatial_discrete_scheme_, "DG"))
 	{
-		auto parsed_str = ms::parse(this->spatial_discrete_scheme_, '_');
+		auto parsed_str = ms::parse_by(this->spatial_discrete_scheme_, '_');
 		REQUIRE(parsed_str.size() == 2, "spatial discrete scheme in configuration file shoul have DG_Pn form");
 
 		auto& degree_str = parsed_str.back();
@@ -314,7 +314,7 @@ void Configuration::set_value(const Text& config_text)
 
 	for (const auto& sentence : config_text)
 	{
-		auto parsed_sentences = sentence.parse('=');
+		auto parsed_sentences = sentence.parse_by('=');
 
 		REQUIRE(parsed_sentences.size() == 2, "configuration file has wrong format");
 
@@ -329,7 +329,7 @@ void Configuration::set_value(const Text& config_text)
 	this->initial_condition_ = this->get<std::string>(name_to_value, "initial_condition");
 
 	auto grid_file_paths = this->get<std::string>(name_to_value, "grid_file_paths");
-	this->grid_file_paths_ = ms::parse(grid_file_paths, ',');
+	this->grid_file_paths_ = ms::parse_by(grid_file_paths, ',');
 
 	this->grid_file_type_ = this->get<std::string>(name_to_value, "grid_file_type");
 

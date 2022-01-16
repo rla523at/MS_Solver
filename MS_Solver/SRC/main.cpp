@@ -1,7 +1,6 @@
 #include "../INC/Configuration.h"
 #include "../INC/Discrete_Equation.h"
-#include "../INC/Grid_File_Reader.h"
-#include "../INC/Grid_File_Editor.h"
+#include "../INC/Grid_File.h"
 #include "../INC/Solve_Controller_Impl.h"
 
 int main(void) 
@@ -30,22 +29,11 @@ int main(void)
 
 			Profiler::set_time_point();
 
-
-			Profiler::set_time_point();			
-
-			Text grid_text;
-			grid_text.read(grid_file_path);
-
 			const auto space_dimension = configuration.space_dimension();
-			Gmsh_Text_Editor test(space_dimension);
-			//test.perturb(grid_text, 0.01, 40);
+			Gmsh_Grid_File grid_file(space_dimension, grid_file_path);
 			
-			Gmsh_File_Reader grid_file_reader(space_dimension);
-
-			auto node_data = grid_file_reader.read_node_datas(grid_text);
-			auto element_data = grid_file_reader.read_element_datas(grid_text);
-
-			LOG << std::left << std::setw(50) << "@ Read Grid File" << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+			auto node_data = grid_file.extract_node_datas();
+			auto element_data = grid_file.extract_element_datas();
 
 			Grid grid(node_data, std::move(element_data));
 
@@ -60,6 +48,7 @@ int main(void)
 			LOG << "\t\t\t End Pre-Processing(" << Profiler::get_time_duration() << "s)\n";
 			LOG << "================================================================================\n\n" << LOG.print_;
 
+
 			LOG << "================================================================================\n";
 			LOG << "\t\t\t\t Start Solving\n";
 			LOG << "================================================================================\n" << LOG.print_;
@@ -71,6 +60,7 @@ int main(void)
 			LOG << "\n================================================================================\n";
 			LOG << "\t\t\t End Solving(" << Profiler::get_time_duration() << "s)\n";
 			LOG << "================================================================================\n\n" << LOG.print_;
+
 
 			LOG << "================================================================================\n";
 			LOG << "\t\t\t\t Start Error Analysis\n";
@@ -95,6 +85,7 @@ int main(void)
 			LOG << "\n================================================================================\n";
 			LOG << "\t\t\t End Error Analysis(" << Profiler::get_time_duration() << "s)\n";
 			LOG << "================================================================================\n\n" << LOG.print_;
+
 
 			LOG.write();
 			LOG.clear();

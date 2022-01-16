@@ -5,7 +5,7 @@
 
 #include <vector>
 
-using ushort = unsigned short;
+using uint = unsigned int;
 
 struct Element_Data
 {

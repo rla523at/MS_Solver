@@ -58,9 +58,6 @@
     <Filter Include="소스 파일\Grid">
       <UniqueIdentifier>{fde4899d-6b51-46ea-b7c5-38f8335a2abd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Grid\Geometry">
-      <UniqueIdentifier>{fd516600-3969-42ae-81c2-88a316f07908}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Grid">
       <UniqueIdentifier>{76170e15-bd82-4fa0-8bb6-e01a47233b06}</UniqueIdentifier>
     </Filter>
@@ -82,11 +79,11 @@
     <Filter Include="소스 파일\Solver\RHS\Boundary">
       <UniqueIdentifier>{52ddbc22-11a8-4035-8549-8d9eb56b131d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Grid\Grid_Covertor">
-      <UniqueIdentifier>{725dfa69-e7c2-4d10-8e19-b1b03fd0a53c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Grid\Element">
       <UniqueIdentifier>{545b5a2d-80a9-4281-9124-e3d9eac65a90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Grid\Element">
+      <UniqueIdentifier>{fd516600-3969-42ae-81c2-88a316f07908}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -99,13 +96,7 @@
     <ClCompile Include="SRC\Tecplot_File_Writer.cpp">
       <Filter>소스 파일\Post</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\Elements.cpp">
-      <Filter>소스 파일\Grid</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\Grid.cpp">
-      <Filter>소스 파일\Grid</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\Grid_File_Convertor_Impl.cpp">
       <Filter>소스 파일\Grid</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Profiler.cpp">
@@ -139,13 +130,13 @@
       <Filter>소스 파일\Solver</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Reference_Geometry_Impl.cpp">
-      <Filter>소스 파일\Grid\Geometry</Filter>
+      <Filter>소스 파일\Grid\Element</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Reference_Geometry.cpp">
-      <Filter>소스 파일\Grid\Geometry</Filter>
+      <Filter>소스 파일\Grid\Element</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Geometry.cpp">
-      <Filter>소스 파일\Grid\Geometry</Filter>
+      <Filter>소스 파일\Grid\Element</Filter>
     </ClCompile>
     <ClCompile Include="SRC\Euclidean_Vector.cpp">
       <Filter>소스 파일\Math</Filter>
@@ -227,6 +218,12 @@
     </ClCompile>
     <ClCompile Include="SRC\Trouble_Boundary_Indicator_Impl.cpp">
       <Filter>소스 파일\Solver\Reconstruction\Indicator</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Elements.cpp">
+      <Filter>소스 파일\Grid\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\Grid_File.cpp">
+      <Filter>소스 파일\Grid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -401,21 +398,6 @@
     <ClInclude Include="INC\Boundary_Flux_Function_Factory.h">
       <Filter>헤더 파일\Solver\RHS\Boundary</Filter>
     </ClInclude>
-    <ClInclude Include="INC\Grid_File_Convertor.h">
-      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Convertor_Impl.h">
-      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Reader.h">
-      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Editor.h">
-      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Type.h">
-      <Filter>헤더 파일\Grid\Grid_Covertor</Filter>
-    </ClInclude>
     <ClInclude Include="INC\Figure.h">
       <Filter>헤더 파일\Grid\Element</Filter>
     </ClInclude>
@@ -426,6 +408,9 @@
       <Filter>헤더 파일\Grid\Element</Filter>
     </ClInclude>
     <ClInclude Include="INC\Grid_Data.h">
+      <Filter>헤더 파일\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="INC\Grid_File.h">
       <Filter>헤더 파일\Grid</Filter>
     </ClInclude>
   </ItemGroup>

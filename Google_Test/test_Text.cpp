@@ -159,7 +159,7 @@ TEST(ms, replace_5) {
 }
 TEST(ms, parse_1) {
 	std::string str = "abc_qwer,wer__,,";
-	const auto result = ms::parse(str, { ',', '_' });
+	const auto result = ms::parse_by(str, { ',', '_' });
 
 	std::vector<std::string> ref = { "abc","qwer","wer" };
 	EXPECT_EQ(result, ref);

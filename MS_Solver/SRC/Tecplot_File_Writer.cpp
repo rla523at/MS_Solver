@@ -147,7 +147,7 @@ void Tecplot_Binary_File_Writer::set_grid_header_variable(const Post_Variables& 
 	this->file_type_ = 1;
 	this->title_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
 	this->num_variable_ = static_cast<int>(post_variables.num_grid_variable());
-	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse(post_variables.grid_variable_str(), ','));
+	this->variable_names_tecplot_binary_format_ = this->to_tecplot_binary_format(ms::parse_by(post_variables.grid_variable_str(), ','));
 	this->zone_name_tecplot_binary_format_ = this->to_tecplot_binary_format("Grid");
 	this->specify_variable_location_ = 0;
 }

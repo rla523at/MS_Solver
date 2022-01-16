@@ -1,7 +1,6 @@
 #pragma once
 #include "Element.h"
 #include "Grid_Data.h"
-
 #include "Reference_Geometry_Impl.h"
 
 #include "Log.h"

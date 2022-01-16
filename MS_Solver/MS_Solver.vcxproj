@@ -51,10 +51,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SRC\Grid.cpp" />
-    <ClCompile Include="SRC\Grid_File_Convertor_Impl.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="SRC\Grid_File.cpp" />
     <ClCompile Include="SRC\Cell_Indicator_Impl.cpp" />
     <ClCompile Include="SRC\Indicator.cpp" />
     <ClCompile Include="SRC\Initial_Condition_Impl.cpp">
@@ -144,21 +141,13 @@
     <ClInclude Include="INC\Exception.h" />
     <ClInclude Include="INC\Figure.h" />
     <ClInclude Include="INC\Geometry.h" />
-    <ClInclude Include="INC\Grid_File_Editor.h" />
-    <ClInclude Include="INC\Grid_File_Type.h" />
+    <ClInclude Include="INC\Grid_File.h" />
     <ClInclude Include="INC\Governing_Equation.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="INC\Governing_Equation_Impl.h" />
     <ClInclude Include="INC\Grid.h" />
-    <ClInclude Include="INC\Grid_File_Convertor.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="INC\Grid_File_Convertor_Impl.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="INC\Indicator.h" />
     <ClInclude Include="INC\Cell_Indicator_Impl.h" />
     <ClInclude Include="INC\Initial_Condition.h">
@@ -214,7 +203,6 @@
     </ClInclude>
     <ClInclude Include="INC\Trouble_Boundary_Indicator_Factory.h" />
     <ClInclude Include="INC\Trouble_Boundary_Indicator_Impl.h" />
-    <ClInclude Include="INC\Grid_File_Reader.h" />
     <ClInclude Include="INC\Grid_Data.h" />
   </ItemGroup>
   <ItemGroup>

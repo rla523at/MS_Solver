@@ -99,9 +99,9 @@ Sentence Sentence::get_remove(const std::string_view target) const
 }
 
 
-std::vector<Sentence> Sentence::parse(const char delimiter) const 
+std::vector<Sentence> Sentence::parse_by(const char delimiter) const 
 {
-	auto parsed_strs =ms::parse(this->contents_, delimiter);
+	auto parsed_strs = ms::parse_by(this->contents_, delimiter);
 	
 	std::vector<Sentence> parsed_senteces;
 	parsed_senteces.reserve(parsed_strs.size());
@@ -505,7 +505,7 @@ namespace ms
 			std::filesystem::create_directories(p);
 	}
 
-	std::vector<std::string> parse(const std::string& str, const char delimiter) 
+	std::vector<std::string> parse_by(const std::string& str, const char delimiter) 
 	{
 		if (str.empty())
 			return std::vector<std::string>();
@@ -525,7 +525,7 @@ namespace ms
 		}
 	};
 
-	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters) 
+	std::vector<std::string> parse_by(const std::string& str, const std::vector<char>& delimiters) 
 	{
 		if (delimiters.empty())
 		{
@@ -542,7 +542,7 @@ namespace ms
 			ms::replace(temp_str, delimiters[i], reference_delimiter);
 		}
 
-		return ms::parse(temp_str, reference_delimiter);
+		return ms::parse_by(temp_str, reference_delimiter);
 	}
 
 	void replace(std::string& str, const char target, const char replacement) 

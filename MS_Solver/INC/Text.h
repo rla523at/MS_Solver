@@ -61,7 +61,7 @@ public://Query
 	template <typename... Args>		bool contain_icase(const Args... args) const;
 	size_t find_position(const std::string_view target) const;
 	Sentence get_remove(const std::string_view target) const;
-	std::vector<Sentence> parse(const char delimiter) const;
+	std::vector<Sentence> parse_by(const char delimiter) const;
 	std::string to_string(void) const;
 	template <typename T>	T to_value(void) const;
 	Sentence get_upper_case(void) const;
@@ -164,8 +164,8 @@ namespace ms
 	std::string get_upper_case(const std::string& str);
 	bool is_digit(const std::string& str);
 	void make_path(std::string_view file_path);
-	std::vector<std::string> parse(const std::string& str, const char delimiter);
-	std::vector<std::string> parse(const std::string& str, const std::vector<char>& delimiters);
+	std::vector<std::string> parse_by(const std::string& str, const char delimiter);
+	std::vector<std::string> parse_by(const std::string& str, const std::vector<char>& delimiters);
 	void replace(std::string& str, const char target, const char replacement);
 	void replace(std::string& str, const std::string_view target, const std::string_view replacement);
 	void remove(std::string& str, const char target);
