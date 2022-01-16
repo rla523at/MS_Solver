@@ -322,7 +322,7 @@ Binary_Writer& Binary_Writer::operator<<(const std::string& str)
 
 namespace ms 
 {
-	bool compare_icase(const std::string& str1, const std::string& str2)
+	bool compare_icase(const std::string_view str1, const std::string_view str2)
 	{
 		auto str1_u = ms::get_upper_case(str1);
 		auto str2_u = ms::get_upper_case(str2);
@@ -346,12 +346,22 @@ namespace ms
 		return str.find(sv) != std::string::npos; 
 	};
 
-	bool contains_icase(const std::string& str, const char* target) 
+	bool contains_icase(const std::string_view str, const char target)
 	{
 		return ms::find_icase(str, target) != std::string::npos;
 	}
 
-	bool contains_icase(const std::string& str, const std::string& target)
+	bool contains_icase(const std::string_view str, const char* target)
+	{
+		return ms::find_icase(str, target) != std::string::npos;
+	}
+
+	bool contains_icase(const std::string_view str, const std::string_view target)
+	{
+		return ms::find_icase(str, target) != std::string::npos;
+	}
+
+	bool contains_icase(const std::string_view str, const std::string& target)
 	{
 		return ms::find_icase(str, target) != std::string::npos;
 	}
@@ -433,7 +443,15 @@ namespace ms
 		return file_name_text;
 	}
 
-	size_t find_icase(const std::string& str, const std::string& target) 
+	size_t find_icase(const std::string_view str, const char target)
+	{
+		auto u_str = ms::get_upper_case(str);
+		auto u_target = ms::get_upper_case(target);
+
+		return u_str.find(u_target);
+	}
+
+	size_t find_icase(const std::string_view str, const std::string_view target)
 	{
 		auto u_str = ms::get_upper_case(str);
 		auto u_target = ms::get_upper_case(target);
@@ -470,9 +488,9 @@ namespace ms
 		return result;
 	}
 
-	std::string get_upper_case(const std::string& str) 
+	std::string get_upper_case(const std::string_view str)
 	{
-		auto result = str;
+		std::string result(str.data());
 		ms::upper_case(result);
 		return result;
 	}

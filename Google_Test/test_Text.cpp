@@ -116,11 +116,23 @@ TEST(ms, compare_icase_3)
 	std::string str = "Pn";
 	EXPECT_FALSE(ms::compare_icase(str.front(), 'w'));
 }
+TEST(ms, compare_icase_4)
+{
+	EXPECT_TRUE(ms::compare_icase("qwer", "QweR"));
+}
 TEST(ms, contain_icase_1) 
 {
 	std::string str = "abc_qwer,wer__,,";
 	std::string target_str = "abc";
 	EXPECT_TRUE(ms::contains_icase(str, target_str));
+}
+TEST(ms, contain_icase_2)
+{
+	EXPECT_TRUE(ms::contains_icase("abc_qwer,wer__,,", 'a',"wer","__"));
+}
+TEST(ms, contain_icase_3)
+{
+	EXPECT_TRUE(ms::contains_icase("abc_qwer,wer__,,", ','));
 }
 TEST(ms, replace_1) {
 	std::string str = "abc_qwer,wer__,,";
@@ -190,6 +202,12 @@ TEST(ms, get_upper_case_4) {
 	std::string_view ref = "ABC";
 	EXPECT_EQ(result, ref);
 }
+TEST(ms, get_uper_cast_5)
+{
+	const auto result = ms::get_upper_case("abc123");
+	const auto ref = "ABC123";
+	EXPECT_EQ(result, ref);
+}
 TEST(ms, find_icase_1) {
 	std::string str = "abc_123q";
 	const auto result = ms::find_icase(str, "BC_");
@@ -202,6 +220,18 @@ TEST(ms, find_icase_2) {
 	const auto result = ms::find_icase(str, "C_12");
 
 	const auto ref = 2;
+	EXPECT_EQ(result, ref);
+}
+TEST(ms, find_icase_3)
+{
+	const auto result = ms::find_icase("qwer", 'e');
+	const auto ref = 2;
+	EXPECT_EQ(result, ref);
+}
+TEST(ms, find_icase_4)
+{
+	const auto result = ms::find_icase("qwer", "We");
+	const auto ref = 1;
 	EXPECT_EQ(result, ref);
 }
 TEST(ms, is_there_icase_1) {

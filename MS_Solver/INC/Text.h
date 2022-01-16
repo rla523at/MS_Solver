@@ -142,26 +142,28 @@ namespace ms
 {
 	bool contain(const std::string& str, const char c);
 	bool contain(const std::string& str, const std::string_view sv);
-	bool contains_icase(const std::string& str, const char* target);
-	bool contains_icase(const std::string& str, const std::string& target);
-	template <typename... Args>		bool contains_icase(const std::string& str, const Args... args)
+	bool contains_icase(const std::string_view str, const char target);
+	bool contains_icase(const std::string_view str, const char* target); //형변환이 필요하면 template이 우선순위가 있기때문에 필요
+	bool contains_icase(const std::string_view str, const std::string_view target);
+	bool contains_icase(const std::string_view str, const std::string& target); //형변환이 필요하면 template이 우선순위가 있기때문에 필요
+	template <typename... Args>		bool contains_icase(const std::string_view str, const Args... args)
 	{
-		//static_assert((... && std::is_same_v<Args, const char*>), "every arguments should be array of char");
 		return (ms::contains_icase(str, args) && ...);
 	};
-	bool compare_icase(const std::string& str1, const std::string& str2);
 	bool compare_icase(const char str1, const char str2);
+	bool compare_icase(const std::string_view str1, const std::string_view str2);
 	std::string double_to_string(const double val);
 	std::string double_to_str_sp(const double value); //double to string with show point
 	std::vector<std::string> file_names_in_folder(const std::string_view folder_path);
 	std::vector<std::string> folder_names_in_folder(const std::string_view folder_path);
 	std::vector<std::string> file_paths_in_path(const std::string& path);
-	size_t find_icase(const std::string& str, const std::string& target);
+	size_t find_icase(const std::string_view str, const char target);
+	size_t find_icase(const std::string_view str, const std::string_view target);
 	std::string get_replace(const std::string& str, const std::string_view target, const std::string_view replacement);
 	std::string get_remove(const std::string& str, const char target);
 	std::string get_remove(const std::string& str, const std::string_view target);
 	char get_upper_case(const char c);
-	std::string get_upper_case(const std::string& str);
+	std::string get_upper_case(const std::string_view str);
 	bool is_digit(const std::string& str);
 	void make_path(std::string_view file_path);
 	std::vector<std::string> parse_by(const std::string& str, const char delimiter);
