@@ -31,9 +31,15 @@ void Subcell_Oscillation_Indicator::check(const Discrete_Solution_DG& discrete_s
 			this->cell_index_to_has_typeI_oscillation_table_[cell_index] = true;
 		}
 
-		if (this->typeII_threshold_number_ <= num_troubled_bdrys && near_discontinuity)
+		if (this->typeII_threshold_number_ <= num_troubled_bdrys)
 		{
 			this->cell_index_to_has_typeII_oscillation_table_[cell_index] = true;
 		}
+
+
+		//if (this->typeII_threshold_number_ <= num_troubled_bdrys && near_discontinuity)
+		//{
+		//	this->cell_index_to_has_typeII_oscillation_table_[cell_index] = true;
+		//}
 	}
 }

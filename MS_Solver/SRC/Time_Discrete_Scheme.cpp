@@ -35,6 +35,8 @@ void SSPRK33::update(Semi_Discrete_Equation& semi_discrete_equation, const doubl
     ms::BLAS::x_plus_assign_cy(n, solution_vw.data(), c1_3 * 2 * time_step, RHS_cvw.data());
 
     semi_discrete_equation.reconstruct();
+
+    std::exit(523);
 }
 
 void SSPRK54::update(Semi_Discrete_Equation& semi_discrete_equation, const double time_step) const

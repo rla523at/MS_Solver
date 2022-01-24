@@ -5,7 +5,7 @@ void hMLP_Type_Limiter::apply_MLP_u1(const ushort cell_index, Discrete_Solution_
 	const auto projection_degree = 1;
 	discrete_solution.project_to_Pn_space(cell_index, projection_degree);
 
-	const auto limiting_value = this->limiting_function_.limiter_function(discrete_solution, cell_index, stability_criterion);
+	const auto limiting_value = this->MLP_u1.calculate_limiting_value(discrete_solution, cell_index, stability_criterion);
 	discrete_solution.limit_slope(cell_index, limiting_value);
 }
 

@@ -6,19 +6,19 @@ class hMLP_Type_Limiter : public Limiter
 {
 public:
 	hMLP_Type_Limiter(const Grid& grid)
-		:limiting_function_(grid) {};
+		:MLP_u1(grid) {};
 
 public://Command
 	void check(const Discrete_Solution_DG& discrete_solution) override
 	{
-		this->limiting_function_.check(discrete_solution);
+		this->MLP_u1.check(discrete_solution);
 	}
 
 protected:
 	void apply_MLP_u1(const ushort cell_index, Discrete_Solution_DG& discrete_solution, const MLP_Criterion_Base& stability_criterion) const;
 
 protected:
-	MLP_u1 limiting_function_;
+	MLP_u1 MLP_u1;
 };
 
 class hMLP_Limiter : public hMLP_Type_Limiter

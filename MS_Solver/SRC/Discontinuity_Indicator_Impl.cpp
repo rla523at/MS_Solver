@@ -111,11 +111,13 @@ Discontinuity_Indicator_Type4::Discontinuity_Indicator_Type4(const Grid& grid, D
     this->cell_index_to_near_discontinuity_table_.resize(this->num_cells_, false);
 };
 
+
+#include "../INC/Post_Processor.h" // debug
 void Discontinuity_Indicator_Type4::check(const Discrete_Solution_DG& discrete_solution)
 {
     std::fill(this->cell_index_to_near_discontinuity_table_.begin(), this->cell_index_to_near_discontinuity_table_.end(), false);
 
-    std::vector<double> cell_index_to_sum_of_scaled_avg_sol_jump_table(this->num_cells_);
+    std::vector<double> cell_index_to_sum_of_face_jump_table(this->num_cells_);
 
     const auto infc_index_to_scaled_avg_sol_jump_table = this->face_jump_measurer_->measure_inner_face_index_to_solution_jump_table(discrete_solution);
     for (uint infc_index = 0; infc_index < this->num_infcs_; ++infc_index)
@@ -123,14 +125,25 @@ void Discontinuity_Indicator_Type4::check(const Discrete_Solution_DG& discrete_s
         const auto scaled_avg_sol_jump = infc_index_to_scaled_avg_sol_jump_table[infc_index];
 
         const auto [oc_index, nc_index] = this->infc_index_to_oc_nc_index_pair_table_[infc_index];
-        cell_index_to_sum_of_scaled_avg_sol_jump_table[oc_index] += scaled_avg_sol_jump;
-        cell_index_to_sum_of_scaled_avg_sol_jump_table[nc_index] += scaled_avg_sol_jump;
+        cell_index_to_sum_of_face_jump_table[oc_index] += scaled_avg_sol_jump;
+        cell_index_to_sum_of_face_jump_table[nc_index] += scaled_avg_sol_jump;
     }    
     
+    //debug
+    std::vector<double> AVG_jump(this->num_cells_);
     for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
     {
         const auto num_infcs = this->cell_index_to_num_infc_table_[cell_index];
-        const auto sum = cell_index_to_sum_of_scaled_avg_sol_jump_table[cell_index];
+        const auto sum = cell_index_to_sum_of_face_jump_table[cell_index];
+        AVG_jump[cell_index] = sum / static_cast<double>(num_infcs);
+    }
+    Post_Processor::record_variables("AVG_jump", AVG_jump);
+    //
+
+    for (uint cell_index = 0; cell_index < this->num_cells_; ++cell_index)
+    {
+        const auto num_infcs = this->cell_index_to_num_infc_table_[cell_index];
+        const auto sum = cell_index_to_sum_of_face_jump_table[cell_index];
         const auto average = sum / static_cast<double>(num_infcs);
 
         const auto threshold_number = this->cell_index_to_characteristic_length_table_[cell_index];

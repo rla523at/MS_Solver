@@ -91,7 +91,7 @@ std::vector<Euclidean_Vector> Gmsh_Grid_File::extract_node_datas(void) const
 		}
 	}
 
-	LOG << std::left << std::setw(50) << "@ Extract " << num_node_datas <<  " Node Data " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+	LOG << std::left << std::setw(50) << "@ Extract " + std::to_string(num_node_datas) +  " Node Data " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
 	return node_datas;
 }
@@ -134,7 +134,7 @@ std::vector<Element_Data> Gmsh_Grid_File::extract_element_datas(void) const
 		data.node_indexes.insert(data.node_indexes.end(), indexes.begin(), indexes.end());
 	}
 
-	LOG << std::left << std::setw(50) << "@ Extract " << num_elements << " Element Data " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
+	LOG << std::left << std::setw(50) << "@ Extract " + std::to_string(num_elements) + " Element Data " << " ----------- " << Profiler::get_time_duration() << "s\n\n" << Log::print_;
 
 	return element_datas;
 }

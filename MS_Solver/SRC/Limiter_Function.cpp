@@ -32,7 +32,7 @@ void MLP_u1::check(const Discrete_Solution_DG& discrete_solution)
 //    return this->calculate_limiting_value(P0_value_at_vertices, allowable_min_maxs);
 //};
 
-double MLP_u1::limiter_function(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
+double MLP_u1::calculate_limiting_value(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const
 {
     const auto& P0_value_at_vertices = criterion.get_P0_value_at_vertices(cell_index);
     const auto& allowable_min_maxs = criterion.get_allowable_min_max_value_at_vertices(cell_index);

@@ -10,7 +10,7 @@ public://Command
     void check(const Discrete_Solution_DG& discrete_solution);    
     
 public://Query
-    double limiter_function(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const;
+    double calculate_limiting_value(const Discrete_Solution_DG& discrete_solution, const uint cell_index, const MLP_Criterion_Base& criterion) const;
 
 private:
     double calculate_limiting_value(const uint cell_index, const std::vector<double>& P0_value_at_vertices, const std::vector<std::pair<double, double>>& criterion_values) const;
