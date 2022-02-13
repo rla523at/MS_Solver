@@ -4,7 +4,7 @@
 외부 라이브러리는 intel MKL을 사용하고 있습니다.
 
 
-## branch별 설명
+## Branch 설명
 ### master
 초기 파일들만 저장되어있습니다.
 
